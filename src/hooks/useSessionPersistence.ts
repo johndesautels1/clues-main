@@ -106,13 +106,14 @@ interface UsePersistenceOptions {
 }
 
 export function useSessionPersistence({ session, onSessionLoaded }: UsePersistenceOptions) {
-  const isHydrated = useRef(false);
+  const hydrationStarted = useRef(false);
+  const hydrationDone = useRef(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Hydrate on mount: Supabase → localStorage → fresh state ──
   useEffect(() => {
-    if (isHydrated.current) return;
-    isHydrated.current = true;
+    if (hydrationStarted.current) return;
+    hydrationStarted.current = true;
 
     async function hydrate() {
       // Try localStorage first (fastest)
@@ -146,6 +147,9 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
           tier: localSession.currentTier,
         });
       }
+
+      // Mark hydration as complete — saves can now proceed
+      hydrationDone.current = true;
     }
 
     hydrate();
@@ -158,17 +162,14 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
     }
 
     saveTimerRef.current = setTimeout(() => {
-      // Always save to localStorage (instant, offline-safe)
       saveToLocalStorage(data);
-
-      // Also save to Supabase (async, may fail gracefully)
       saveToSupabase(data);
     }, SAVE_DEBOUNCE_MS);
   }, []);
 
-  // Trigger save whenever session changes (skip initial hydration render)
+  // Trigger save whenever session changes — only after hydration is done
   useEffect(() => {
-    if (!isHydrated.current) return;
+    if (!hydrationDone.current) return;
     save(session);
   }, [session, save]);
 
@@ -178,6 +179,4 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
   }, []);
-
-  return { isHydrated: isHydrated.current };
 }

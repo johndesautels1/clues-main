@@ -394,13 +394,21 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Globe zoom depth indicator (3 pips + level label), reset button, region badge
 - ✅ Post-zoom prompt: "Now click on the Paragraphical below and tell us about: You"
 - ✅ Globe passes lat/lng/zoomLevel to state for Supabase persistence
-- ✅ Centralized UserContext (useReducer, 15 action types, debounced auto-save)
+- ✅ Centralized UserContext (useReducer, 15 action types, isLoading state)
 - ✅ Supabase client (graceful local-only fallback when env vars not set)
 - ✅ Core TypeScript types in src/types/index.ts (full pipeline shapes)
 - ✅ Directory structure: src/lib/, src/hooks/, src/context/, src/types/
+- ✅ 3-layer session persistence (Supabase → localStorage → memory)
+- ✅ Supabase schema with denormalized globe columns for LLM token savings
+- ✅ Globe position restored on return (auto-zoom to saved lat/lng)
+- ✅ cost_tracking table ready for mandatory per-call logging
+- ✅ React Router (`/` dashboard, `/paragraphical` essay flow)
+- ✅ Paragraphical 24-paragraph stepped input UI with sidebar navigation
+- ✅ 24 paragraph definitions with prompts, placeholders, section groupings
+- ✅ Auto-save paragraphs to context (→ Supabase) on navigation
+- ✅ Dashboard loading state during session hydration
 
 ### What's NOT Built Yet
-- ❌ Paragraphical 24-paragraph input flow
 - ❌ Gemini extraction endpoint (`/api/paragraphical`)
 - ❌ Main Module questionnaire UI (Demographics, DNW, MH, General)
 - ❌ 5 LLM evaluation endpoints
@@ -408,13 +416,12 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ❌ Tavily research/search integration
 - ❌ Progressive tier calculator
 - ❌ Report generation pipeline
-- ❌ Supabase auth (client ready, auth flow not built)
+- ❌ Supabase auth (client + schema ready, auth flow not built)
 - ❌ Stripe subscription flow
 - ❌ Two-row header (needs LifeScore-style city comparison row)
 - ❌ Individual module deep-dive UIs
 - ❌ Results/Reports/Settings pages
 - ❌ Chat functionality for Olivia/Emilia bubbles
-- ❌ React Router setup (currently single-page)
 
 ---
 

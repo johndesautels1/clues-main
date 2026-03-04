@@ -13,6 +13,7 @@ import {
   useContext,
   useReducer,
   useState,
+  useEffect,
   useCallback,
   type ReactNode,
   type Dispatch,
@@ -209,11 +210,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     onSessionLoaded: handleSessionLoaded,
   });
 
-  // If no saved session found, stop loading after a brief window
-  // (the persistence hook will call onSessionLoaded if it finds data)
-  useState(() => {
-    setTimeout(() => setIsLoading(false), 800);
-  });
+  // If no saved session found after 800ms, stop loading anyway
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <UserContext.Provider value={{ session, dispatch, isLoading }}>
