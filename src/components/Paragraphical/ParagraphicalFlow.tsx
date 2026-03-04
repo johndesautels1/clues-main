@@ -7,8 +7,11 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { PARAGRAPH_DEFS, PARAGRAPH_SECTIONS } from '../../data/paragraphs';
+import { extractParagraphical } from '../../lib/api';
+import { recalculateTier } from '../../lib/tierEngine';
 import { Header } from '../Shared/Header';
 import './ParagraphicalFlow.css';
 
@@ -84,12 +87,82 @@ export function ParagraphicalFlow() {
     }
   }, [activeId, saveCurrent, getSavedContent]);
 
-  // Submit all paragraphs
-  const handleSubmit = useCallback(() => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Submit all paragraphs → call Gemini extraction → update tier
+  const handleSubmit = useCallback(async () => {
     saveCurrent();
+
+    // Mark as completed immediately (optimistic)
     dispatch({ type: 'SET_PARAGRAPHICAL_STATUS', payload: 'completed' });
-    navigate('/');
-  }, [saveCurrent, dispatch, navigate]);
+
+    // Build the paragraphs array from current state + unsaved draft
+    const allParagraphs = [...session.paragraphical.paragraphs];
+    if (draft.trim()) {
+      const idx = allParagraphs.findIndex(p => p.id === activeId);
+      const entry = {
+        id: activeId,
+        heading: activeDef.heading,
+        content: draft.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (idx >= 0) {
+        allParagraphs[idx] = entry;
+      } else {
+        allParagraphs.push(entry);
+      }
+    }
+
+    const filledParagraphs = allParagraphs.filter(p => p.content.trim().length > 0);
+
+    if (filledParagraphs.length === 0) {
+      toast.error('Please write at least one paragraph before submitting.');
+      dispatch({ type: 'SET_PARAGRAPHICAL_STATUS', payload: 'in_progress' });
+      return;
+    }
+
+    const globeRegion = session.globe?.region ?? 'Global';
+
+    // Call Gemini extraction
+    setIsSubmitting(true);
+    try {
+      const result = await extractParagraphical({
+        paragraphs: filledParagraphs,
+        globeRegion,
+        sessionId: session.id,
+      });
+
+      // Store extraction in context
+      dispatch({ type: 'SET_EXTRACTION', payload: result.extraction });
+
+      // Recalculate tier now that we have paragraphical data
+      const updatedSession = {
+        ...session,
+        paragraphical: {
+          ...session.paragraphical,
+          status: 'completed' as const,
+          extraction: result.extraction,
+        },
+      };
+      const { tier, confidence } = recalculateTier(updatedSession);
+      dispatch({ type: 'SET_TIER', payload: { tier, confidence } });
+
+      toast.success(
+        `Paragraphical complete! ${filledParagraphs.length} paragraphs analyzed. ` +
+        `Confidence: ${confidence}%`
+      );
+      navigate('/');
+    } catch (err) {
+      // Extraction failed — still mark paragraphs as completed (data is saved)
+      // but don't set extraction. User can retry from dashboard.
+      const message = err instanceof Error ? err.message : 'Extraction failed';
+      console.error('[Paragraphical] Gemini extraction failed:', message);
+      toast.error(`Paragraphs saved, but AI analysis failed: ${message}. You can retry from the dashboard.`);
+      navigate('/');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [saveCurrent, dispatch, session, draft, activeId, activeDef.heading, navigate]);
 
   // Back to dashboard
   const handleBack = useCallback(() => {
@@ -204,9 +277,10 @@ export function ParagraphicalFlow() {
               <button
                 className="para-flow__btn para-flow__btn--submit"
                 onClick={handleSubmit}
+                disabled={isSubmitting}
                 type="button"
               >
-                Submit Paragraphical
+                {isSubmitting ? 'Analyzing with AI...' : 'Submit Paragraphical'}
               </button>
             )}
           </div>
