@@ -20,7 +20,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { UserProvider } from './context/UserContext';
 import { Dashboard } from './components/Dashboard/Dashboard';
-import { ParagraphicalFlow } from './components/Paragraphical/ParagraphicalFlow';
+import { DiscoveryFlow } from './components/Discovery';
 import { LoginPage } from './components/Auth/LoginPage';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 
@@ -43,12 +43,12 @@ function App() {
               }
             />
 
-            {/* Paragraphical — accessible without login */}
+            {/* Discovery Questionnaire — 24-section Olivia-enhanced flow */}
             <Route
               path="/paragraphical"
               element={
                 <ProtectedRoute allowAnonymous>
-                  <ParagraphicalFlow />
+                  <DiscoveryFlow />
                 </ProtectedRoute>
               }
             />

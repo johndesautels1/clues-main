@@ -1,0 +1,199 @@
+/**
+ * Discovery Questionnaire — Styles
+ * WCAG 2.1 AA Compliant (Dark Mode)
+ *
+ * All text meets 4.5:1 contrast against #0a0e1a.
+ * All font sizes >= 11px (0.6875rem).
+ * Disabled states use opacity >= 0.6 + desaturation.
+ * Focus outlines on all interactive elements.
+ */
+
+/* ─── Fonts (Cormorant + Crimson Pro + Outfit) ─── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@200;300;400;500&display=swap');
+
+/* ─── Keyframes ─── */
+@keyframes discovery-float {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(18px, -12px) scale(1.015); }
+  66%  { transform: translate(-12px, 8px) scale(0.985); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes discovery-fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes discovery-overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes discovery-slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes discovery-modalSlideUp {
+  from { transform: translateY(28px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes discovery-soundBar {
+  0%   { transform: scaleY(0.35); opacity: 0.6; }
+  100% { transform: scaleY(1.4); opacity: 1; }
+}
+
+@keyframes discovery-dotsBounceLazy {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50%      { transform: translateY(-6px); opacity: 1; }
+}
+
+@keyframes discovery-oliviaRingOut {
+  0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+@keyframes discovery-micGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 168, 122, 0.0); }
+  50%      { box-shadow: 0 0 0 8px rgba(196, 168, 122, 0.15); }
+}
+
+/* ─── Universe container ─── */
+.discovery-universe {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg-primary, #0a0e1a);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.discovery-fadeInUp {
+  animation: discovery-fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ─── Glass panel ─── */
+.discovery-glass {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.035) 0%,
+    rgba(255, 255, 255, 0.012) 50%,
+    rgba(255, 255, 255, 0.005) 100%
+  );
+  backdrop-filter: blur(36px);
+  -webkit-backdrop-filter: blur(36px);
+  border: 1px solid #1f2937;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Grain overlay ─── */
+.discovery-grain {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Ambient orb ─── */
+.discovery-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(70px);
+  animation: discovery-float 14s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Top bar ─── */
+.discovery-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  background: linear-gradient(180deg, rgba(10, 14, 26, 0.92) 0%, rgba(10, 14, 26, 0) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100;
+}
+
+/* ─── Textarea ─── */
+.discovery-textarea {
+  width: 100%;
+  min-height: 210px;
+  background: #0d1222;
+  border: 1.5px solid #374151;
+  border-radius: 14px;
+  padding: 20px 18px 38px;
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.85;
+  color: #f9fafb;
+  resize: vertical;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.discovery-textarea:focus {
+  outline: 2px solid #C4A87A;
+  outline-offset: -1px;
+  border-color: #C4A87A;
+}
+
+.discovery-textarea::placeholder {
+  color: #8b95a5;
+  font-style: italic;
+}
+
+/* ─── Button base ─── */
+.discovery-btn {
+  cursor: pointer;
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.discovery-btn:focus-visible {
+  outline: 2px solid #C4A87A;
+  outline-offset: 2px;
+}
+
+.discovery-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.discovery-btn:disabled {
+  opacity: 0.6;
+  filter: grayscale(40%);
+  cursor: not-allowed;
+}
+
+/* ─── Scrollbar ─── */
+.discovery-universe ::-webkit-scrollbar { width: 6px; }
+.discovery-universe ::-webkit-scrollbar-track { background: transparent; }
+.discovery-universe ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+.discovery-universe ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .discovery-universe *,
+  .discovery-universe *::before,
+  .discovery-universe *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Timeline hidden on mobile ─── */
+@media (max-width: 768px) {
+  .discovery-timeline { display: none !important; }
+}
