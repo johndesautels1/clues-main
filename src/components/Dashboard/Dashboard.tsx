@@ -23,7 +23,7 @@ export type { SubSection };
 export type SubSectionStatus = Record<SubSection, ModuleStatus>;
 
 export function Dashboard() {
-  const { session, dispatch } = useUser();
+  const { session, dispatch, isLoading } = useUser();
 
   const { globe, paragraphical, mainModule } = session;
 
@@ -61,6 +61,20 @@ export function Dashboard() {
   };
 
   const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="dashboard">
+        <Header />
+        <main className="dashboard__content container" id="main-content">
+          <div className="dashboard__loading">
+            <div className="dashboard__loading-spinner" />
+            <p>Restoring your session...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">

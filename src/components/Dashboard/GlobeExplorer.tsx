@@ -98,19 +98,40 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
   }, []);
 
   // Set initial globe appearance — allow deep zoom
+  // If user has a saved globe selection, restore their position
+  const hasRestored = useRef(false);
+
   useEffect(() => {
-    if (globeRef.current) {
-      const controls = globeRef.current.controls();
+    if (!globeRef.current) return;
+
+    const controls = globeRef.current.controls();
+    if (controls) {
+      controls.enableZoom = true;
+      controls.minDistance = 101;  // city/street level
+      controls.maxDistance = 500;  // full globe pullback
+    }
+
+    // Restore saved globe position on return
+    if (globeSelection && !hasRestored.current) {
+      hasRestored.current = true;
+      // Stop auto-rotate since user already picked a region
+      if (controls) controls.autoRotate = false;
+      // Zoom to their saved position
+      const altitude = ZOOM_LEVELS[Math.min(globeSelection.zoomLevel - 1, 2)]?.altitude ?? 0.8;
+      globeRef.current.pointOfView(
+        { lat: globeSelection.lat, lng: globeSelection.lng, altitude },
+        1500
+      );
+      setZoomDepth(globeSelection.zoomLevel);
+      setZoomLabel(getZoomLabel(altitude));
+    } else if (!globeSelection) {
+      // Fresh session — auto-rotate
       if (controls) {
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.5;
-        controls.enableZoom = true;
-        // Allow zoom from full globe all the way down to near-surface
-        controls.minDistance = 101; // very close — city/street level
-        controls.maxDistance = 500; // full globe pullback
       }
     }
-  }, []);
+  }, [globeSelection]);
 
   const handleGlobeClick = useCallback(({ lat, lng }: { lat: number; lng: number }) => {
     if (!globeRef.current || isZooming) return;

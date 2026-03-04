@@ -2,19 +2,22 @@
  * User Context
  * Centralized state management for the entire CLUES session.
  * Uses useReducer for predictable state transitions.
- * Auto-saves to Supabase on meaningful changes.
+ * Persists to Supabase (primary) + localStorage (fallback) via useSessionPersistence.
+ *
+ * Globe selection is denormalized in Supabase so the evaluation pipeline can
+ * query by region without parsing JSONB — dramatically reducing LLM token usage.
  */
 
 import {
   createContext,
   useContext,
   useReducer,
-  useEffect,
+  useState,
   useCallback,
   type ReactNode,
   type Dispatch,
 } from 'react';
-import { supabase } from '../lib/supabase';
+import { useSessionPersistence } from '../hooks/useSessionPersistence';
 import type {
   UserSession,
   GlobeSelection,
@@ -184,6 +187,7 @@ function sessionReducer(state: UserSession, action: Action): UserSession {
 interface UserContextValue {
   session: UserSession;
   dispatch: Dispatch<Action>;
+  isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
@@ -191,31 +195,28 @@ const UserContext = createContext<UserContextValue | null>(null);
 // ─── Provider ────────────────────────────────────────────────────
 export function UserProvider({ children }: { children: ReactNode }) {
   const [session, dispatch] = useReducer(sessionReducer, INITIAL_STATE);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Auto-save to Supabase on meaningful changes (debounced)
-  const saveToSupabase = useCallback(async (data: UserSession) => {
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    if (!url) return; // local-only mode
-
-    try {
-      await supabase.from('sessions').upsert({
-        id: data.id,
-        data: JSON.stringify(data),
-        updated_at: data.updatedAt,
-      });
-    } catch (err) {
-      console.error('[CLUES] Supabase save failed:', err);
-    }
+  // Callback when a saved session is loaded from Supabase or localStorage
+  const handleSessionLoaded = useCallback((loadedSession: UserSession) => {
+    dispatch({ type: 'LOAD_SESSION', payload: loadedSession });
+    setIsLoading(false);
   }, []);
 
-  // Debounced auto-save on state changes
-  useEffect(() => {
-    const timer = setTimeout(() => saveToSupabase(session), 2000);
-    return () => clearTimeout(timer);
-  }, [session, saveToSupabase]);
+  // Three-layer persistence: Supabase → localStorage → memory
+  useSessionPersistence({
+    session,
+    onSessionLoaded: handleSessionLoaded,
+  });
+
+  // If no saved session found, stop loading after a brief window
+  // (the persistence hook will call onSessionLoaded if it finds data)
+  useState(() => {
+    setTimeout(() => setIsLoading(false), 800);
+  });
 
   return (
-    <UserContext.Provider value={{ session, dispatch }}>
+    <UserContext.Provider value={{ session, dispatch, isLoading }}>
       {children}
     </UserContext.Provider>
   );
