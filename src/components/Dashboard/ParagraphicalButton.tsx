@@ -4,6 +4,7 @@
  * Large, centered, gradient blue/orange with glassmorphic treatment.
  */
 
+import { useNavigate } from 'react-router-dom';
 import type { ModuleStatus } from '../../data/modules';
 import './ParagraphicalButton.css';
 
@@ -13,12 +14,20 @@ interface Props {
 }
 
 export function ParagraphicalButton({ status, onClick }: Props) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    onClick();
+    if (status !== 'locked') {
+      navigate('/paragraphical');
+    }
+  };
   const statusClass = `paragraphical--${status.replace('_', '-')}`;
 
   return (
     <button
       className={`paragraphical glass-heavy ${statusClass}`}
-      onClick={onClick}
+      onClick={handleClick}
       aria-label="Start your biographical essay - Tell us your story"
     >
       {/* Background gradient overlay */}
