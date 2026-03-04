@@ -377,7 +377,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 
 ---
 
-## 11. CURRENT PROJECT STATE (Phase 1 Complete)
+## 11. CURRENT PROJECT STATE (Phase 2 In Progress)
 
 ### What's Built
 - ✅ Dashboard layout with Paragraphical button, Main Module expander, Module Grid
@@ -389,10 +389,18 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Toast notification system
 - ✅ Vercel deployment configured (SPA rewrite)
 - ✅ GitHub repo connected
+- ✅ Hero heading: "Stop Guessing — Start Living: Your New Life is a Click Away"
+- ✅ Interactive 3D globe (react-globe.gl) with progressive zoom (region → country → city)
+- ✅ Globe zoom depth indicator (3 pips + level label), reset button, region badge
+- ✅ Post-zoom prompt: "Now click on the Paragraphical below and tell us about: You"
+- ✅ Globe passes lat/lng/zoomLevel to state for Supabase persistence
+- ✅ Centralized UserContext (useReducer, 15 action types, debounced auto-save)
+- ✅ Supabase client (graceful local-only fallback when env vars not set)
+- ✅ Core TypeScript types in src/types/index.ts (full pipeline shapes)
+- ✅ Directory structure: src/lib/, src/hooks/, src/context/, src/types/
 
 ### What's NOT Built Yet
 - ❌ Paragraphical 24-paragraph input flow
-- ❌ Globe zoom/region selector
 - ❌ Gemini extraction endpoint (`/api/paragraphical`)
 - ❌ Main Module questionnaire UI (Demographics, DNW, MH, General)
 - ❌ 5 LLM evaluation endpoints
@@ -400,12 +408,13 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ❌ Tavily research/search integration
 - ❌ Progressive tier calculator
 - ❌ Report generation pipeline
-- ❌ Supabase integration (auth, data persistence)
+- ❌ Supabase auth (client ready, auth flow not built)
 - ❌ Stripe subscription flow
 - ❌ Two-row header (needs LifeScore-style city comparison row)
 - ❌ Individual module deep-dive UIs
 - ❌ Results/Reports/Settings pages
 - ❌ Chat functionality for Olivia/Emilia bubbles
+- ❌ React Router setup (currently single-page)
 
 ---
 
@@ -414,7 +423,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 ```
 clues-main/
 ├── index.html                          # Entry HTML, Montserrat font, meta
-├── package.json                        # React 19, Vite 7, Supabase, react-hot-toast
+├── package.json                        # React 19, Vite 7, Supabase, react-globe.gl
 ├── vercel.json                         # SPA rewrite only (no function config yet)
 ├── vite.config.ts                      # Standard Vite + React plugin
 ├── tsconfig.json                       # References app + node configs
@@ -424,16 +433,30 @@ clues-main/
 │
 └── src/
     ├── main.tsx                        # Entry: StrictMode, Toaster config
-    ├── App.tsx                         # Root: renders Dashboard
+    ├── App.tsx                         # Root: UserProvider → Dashboard
+    │
+    ├── types/
+    │   └── index.ts                    # All shared TypeScript types
+    │
+    ├── lib/
+    │   └── supabase.ts                 # Supabase client (env-gated)
+    │
+    ├── context/
+    │   └── UserContext.tsx              # useReducer + auto-save, 15 actions
+    │
+    ├── hooks/                          # (empty — ready for custom hooks)
     │
     ├── components/
     │   ├── Dashboard/
-    │   │   ├── Dashboard.tsx           # Layout orchestrator, state management
+    │   │   ├── Dashboard.tsx           # Layout orchestrator, reads UserContext
+    │   │   ├── HeroHeading.tsx         # "Stop Guessing — Start Living"
+    │   │   ├── GlobeExplorer.tsx       # 3D globe, progressive zoom, lat/lng
     │   │   ├── ParagraphicalButton.tsx # Hero CTA, 4 states, gradient
     │   │   ├── MainModuleExpander.tsx  # Collapsible panel, 2x2 sub-sections
     │   │   ├── ModuleGrid.tsx          # 5-col responsive grid, staggered
     │   │   ├── ModuleButton.tsx        # Individual module card, 5 states
-    │   │   └── StatusBadge.tsx         # Reusable badge (md/sm sizes)
+    │   │   ├── StatusBadge.tsx         # Reusable badge (md/sm sizes)
+    │   │   └── *.css                   # Component-scoped styles
     │   │
     │   └── Shared/
     │       ├── Header.tsx              # Sticky glassmorphic header
