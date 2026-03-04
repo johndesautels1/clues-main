@@ -1,12 +1,14 @@
 /**
  * Globe Explorer
- * Interactive 3D world globe with zoom-to-region functionality.
- * User zooms into their dream region, then proceeds to the Paragraphical.
+ * Interactive 3D world globe with progressive zoom-to-region/country/city.
+ * Each click zooms deeper. User can scroll-wheel zoom freely too.
  *
- * Layout:
- * - 3D globe (WebGL via react-globe.gl)
- * - "Zoom in to Your Dream Region" button overlay
- * - After zoom: "Now click on the Paragraphical below and tell us about: You"
+ * Zoom levels:
+ *  - Start: altitude ~2.5 (full globe view)
+ *  - Click 1: altitude ~0.8 (region/continent)
+ *  - Click 2: altitude ~0.25 (country)
+ *  - Click 3+: altitude ~0.07 (city level)
+ *  - Scroll wheel: free zoom all the way down to street-level distance
  */
 
 import { useRef, useState, useCallback, useEffect } from 'react';
@@ -35,6 +37,13 @@ const REGIONS = [
   { name: 'New Zealand', lat: -42, lng: 174, radius: 8 },
 ];
 
+/** Progressive zoom altitude levels — each click goes deeper */
+const ZOOM_LEVELS = [
+  { altitude: 0.8,  label: 'Region',  icon: '🌍' },
+  { altitude: 0.25, label: 'Country', icon: '🏳️' },
+  { altitude: 0.07, label: 'City',    icon: '🏙️' },
+];
+
 function getClosestRegion(lat: number, lng: number): string {
   let closest = REGIONS[0].name;
   let minDist = Infinity;
@@ -50,6 +59,13 @@ function getClosestRegion(lat: number, lng: number): string {
   return closest;
 }
 
+/** Estimate zoom depth label from current altitude */
+function getZoomLabel(altitude: number): { label: string; icon: string } {
+  if (altitude > 0.5) return { label: 'Region', icon: '🌍' };
+  if (altitude > 0.15) return { label: 'Country', icon: '🏳️' };
+  return { label: 'City', icon: '🏙️' };
+}
+
 interface Props {
   onRegionSelected: (region: string) => void;
   hasZoomed: boolean;
@@ -60,6 +76,8 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isZooming, setIsZooming] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [zoomDepth, setZoomDepth] = useState(0); // 0 = not zoomed, 1-3 = progressive
+  const [zoomLabel, setZoomLabel] = useState<{ label: string; icon: string } | null>(null);
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
 
   // Responsive sizing
@@ -76,7 +94,7 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Set initial globe appearance
+  // Set initial globe appearance — allow deep zoom
   useEffect(() => {
     if (globeRef.current) {
       const controls = globeRef.current.controls();
@@ -84,37 +102,90 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.5;
         controls.enableZoom = true;
-        controls.minDistance = 150;
-        controls.maxDistance = 500;
+        // Allow zoom from full globe all the way down to near-surface
+        controls.minDistance = 101; // very close — city/street level
+        controls.maxDistance = 500; // full globe pullback
       }
     }
   }, []);
 
   const handleGlobeClick = useCallback(({ lat, lng }: { lat: number; lng: number }) => {
-    if (!globeRef.current) return;
+    if (!globeRef.current || isZooming) return;
 
     setIsZooming(true);
 
-    // Stop auto-rotate
+    // Stop auto-rotate on first interaction
     const controls = globeRef.current.controls();
     if (controls) {
       controls.autoRotate = false;
     }
 
-    // Zoom to clicked point
+    // Get current altitude to determine next zoom step
+    const currentPov = globeRef.current.pointOfView();
+    const currentAltitude = currentPov?.altitude ?? 2.5;
+
+    // Determine next zoom level based on current altitude
+    let nextAltitude: number;
+    let nextDepth: number;
+
+    if (currentAltitude > 1.0) {
+      // First zoom: region level
+      nextAltitude = ZOOM_LEVELS[0].altitude;
+      nextDepth = 1;
+    } else if (currentAltitude > 0.4) {
+      // Second zoom: country level
+      nextAltitude = ZOOM_LEVELS[1].altitude;
+      nextDepth = 2;
+    } else if (currentAltitude > 0.12) {
+      // Third zoom: city level
+      nextAltitude = ZOOM_LEVELS[2].altitude;
+      nextDepth = 3;
+    } else {
+      // Already at city level — re-center on new click point, stay at same depth
+      nextAltitude = ZOOM_LEVELS[2].altitude;
+      nextDepth = 3;
+    }
+
+    // Animate to clicked point at the new altitude
     globeRef.current.pointOfView(
-      { lat, lng, altitude: 1.2 },
-      1500 // animation duration ms
+      { lat, lng, altitude: nextAltitude },
+      1200
     );
 
     const region = getClosestRegion(lat, lng);
     setSelectedRegion(region);
+    setZoomDepth(nextDepth);
+    setZoomLabel(getZoomLabel(nextAltitude));
 
     setTimeout(() => {
       setIsZooming(false);
       onRegionSelected(region);
-    }, 1600);
-  }, [onRegionSelected]);
+    }, 1300);
+  }, [onRegionSelected, isZooming]);
+
+  // Reset zoom — pull back to full globe view
+  const handleResetZoom = useCallback(() => {
+    if (!globeRef.current || isZooming) return;
+
+    setIsZooming(true);
+
+    globeRef.current.pointOfView(
+      { lat: 20, lng: 0, altitude: 2.5 },
+      1200
+    );
+
+    const controls = globeRef.current.controls();
+    if (controls) {
+      controls.autoRotate = true;
+    }
+
+    setTimeout(() => {
+      setIsZooming(false);
+      setZoomDepth(0);
+      setZoomLabel(null);
+      setSelectedRegion(null);
+    }, 1300);
+  }, [isZooming]);
 
   return (
     <div className="globe-explorer" ref={containerRef}>
@@ -131,9 +202,25 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
           onGlobeClick={handleGlobeClick}
           animateIn={true}
         />
+
+        {/* Zoom depth indicator — bottom-left of globe */}
+        {zoomDepth > 0 && !isZooming && (
+          <div className="globe-explorer__zoom-depth">
+            {ZOOM_LEVELS.map((level, i) => (
+              <span
+                key={level.label}
+                className={`globe-explorer__zoom-pip ${i < zoomDepth ? 'globe-explorer__zoom-pip--active' : ''}`}
+                title={level.label}
+              />
+            ))}
+            <span className="globe-explorer__zoom-depth-label">
+              {zoomLabel?.icon} {zoomLabel?.label} level
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Zoom prompt overlay */}
+      {/* Zoom prompt overlay — before first click */}
       {!hasZoomed && !isZooming && (
         <div className="globe-explorer__prompt">
           <div className="globe-explorer__prompt-icon">🔍</div>
@@ -141,8 +228,22 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
             Zoom in to Your Dream Region
           </p>
           <p className="globe-explorer__prompt-hint">
-            Click anywhere on the globe to select your region
+            Click anywhere on the globe — keep clicking to zoom deeper
           </p>
+        </div>
+      )}
+
+      {/* Keep-zooming hint — after first click but not at city level */}
+      {hasZoomed && zoomDepth > 0 && zoomDepth < 3 && !isZooming && (
+        <div className="globe-explorer__deeper-hint">
+          Click again to zoom to {zoomDepth === 1 ? 'country' : 'city'} level
+        </div>
+      )}
+
+      {/* At city level — done message */}
+      {hasZoomed && zoomDepth >= 3 && !isZooming && (
+        <div className="globe-explorer__deeper-hint globe-explorer__deeper-hint--done">
+          You can scroll to zoom even closer, or click to re-center
         </div>
       )}
 
@@ -154,11 +255,20 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
         </div>
       )}
 
-      {/* Region selected badge */}
-      {hasZoomed && selectedRegion && (
-        <div className="globe-explorer__region-badge">
-          <span className="globe-explorer__region-icon">📍</span>
-          <span className="globe-explorer__region-name">{selectedRegion}</span>
+      {/* Region badge + reset button */}
+      {hasZoomed && selectedRegion && !isZooming && (
+        <div className="globe-explorer__region-bar">
+          <div className="globe-explorer__region-badge">
+            <span className="globe-explorer__region-icon">📍</span>
+            <span className="globe-explorer__region-name">{selectedRegion}</span>
+          </div>
+          <button
+            className="globe-explorer__reset-btn"
+            onClick={handleResetZoom}
+            type="button"
+          >
+            ↩ Reset
+          </button>
         </div>
       )}
     </div>
