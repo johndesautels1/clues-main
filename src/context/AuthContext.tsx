@@ -36,6 +36,7 @@ interface AuthContextValue {
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signInWithGoogle: () => Promise<{ error?: string }>;
+  signInWithGitHub: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error?: string }>;
 }
@@ -148,6 +149,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   }, []);
 
+  // ── GitHub OAuth ──
+  const signInWithGitHub = useCallback(async (): Promise<{ error?: string }> => {
+    if (!isSupabaseConfigured) return { error: 'Supabase not configured' };
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+
+    if (error) return { error: error.message };
+    return {};
+  }, []);
+
   // ── Sign Out ──
   const signOut = useCallback(async () => {
     if (!isSupabaseConfigured) return;
@@ -176,6 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signInWithGoogle,
+        signInWithGitHub,
         signOut,
         resetPassword,
       }}
