@@ -135,6 +135,71 @@ export interface EvaluationResult {
   dataCompleteness: Record<string, boolean>;
 }
 
+// ─── Cost Tracking ──────────────────────────────────────────
+export type CostProvider =
+  | 'claude-sonnet-4-6'
+  | 'gpt-4o'
+  | 'gemini-2.5-pro'
+  | 'grok-4'
+  | 'perplexity-sonar'
+  | 'claude-opus-4-6'
+  | 'tavily'
+  | 'gamma'
+  | 'olivia'
+  | 'tts-elevenlabs'
+  | 'tts-openai'
+  | 'avatar-heygen'
+  | 'avatar-d-id'
+  | 'avatar-simli'
+  | 'avatar-replicate'
+  | 'kling-ai';
+
+export interface CostEntry {
+  id: string;
+  session_id: string;
+  model: CostProvider;
+  endpoint: string;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+  duration_ms: number | null;
+  created_at: string;
+  tier?: CompletionTier;
+}
+
+export interface ProviderCostSummary {
+  provider: CostProvider;
+  label: string;
+  icon: string;
+  total_cost: number;
+  percentage: number;
+  call_count: number;
+}
+
+export interface CostSummary {
+  grand_total: number;
+  total_sessions: number;
+  total_calls: number;
+  avg_cost_per_session: number;
+  by_provider: ProviderCostSummary[];
+  by_tier: Record<CompletionTier, number>;
+  profitability: {
+    avg_cost_per_session: number;
+    breakeven_20_margin: number;
+    suggested_50_margin: number;
+    suggested_100_margin: number;
+  };
+}
+
+export interface SessionCostRow {
+  session_id: string;
+  tier: CompletionTier;
+  total_cost: number;
+  call_count: number;
+  created_at: string;
+  description: string;
+}
+
 // ─── User Session State ──────────────────────────────────────────
 export interface UserSession {
   id: string;

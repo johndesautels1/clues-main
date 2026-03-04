@@ -1,0 +1,87 @@
+/* ============================================================================
+   Emilia Help Panel — WCAG 2.1 AA compliant (dark mode)
+   All text meets 4.5:1 contrast. Min font 0.6875rem. Focus on all interactive.
+   ============================================================================ */
+
+.emilia-panel {
+  position: fixed;
+  bottom: calc(var(--space-6) + 64px);
+  left: var(--space-6);
+  width: 320px;
+  max-height: 480px;
+  overflow-y: auto;
+  z-index: var(--z-chat-bubble);
+  padding: var(--space-5);
+  animation: fade-up 0.2s ease-out;
+}
+
+.emilia-panel__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.emilia-panel__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.emilia-panel__categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.emilia-panel__category {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  text-align: left;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.emilia-panel__category:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glass-hover);
+}
+
+.emilia-panel__category-icon {
+  font-size: var(--text-lg);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.emilia-panel__category-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.emilia-panel__category-desc {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .emilia-panel {
+    left: var(--space-4);
+    bottom: calc(var(--space-4) + 56px);
+    width: calc(100vw - var(--space-8));
+    max-width: 320px;
+  }
+}
