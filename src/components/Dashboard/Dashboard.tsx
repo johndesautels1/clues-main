@@ -1,6 +1,7 @@
 /**
  * CLUES Main Dashboard
  * Layout: Hero Heading → Globe → Paragraphical → Main Module → 20 Module Grid
+ * Reads/writes from UserContext (centralized state with Supabase auto-save).
  */
 
 import { useState } from 'react';
@@ -12,52 +13,54 @@ import { ModuleGrid } from './ModuleGrid';
 import { Header } from '../Shared/Header';
 import { OliviaBubble } from '../Shared/OliviaBubble';
 import { EmiliaBubble } from '../Shared/EmiliaBubble';
+import { useUser } from '../../context/UserContext';
 import { MODULES } from '../../data/modules';
-import type { ModuleStatus } from '../../data/modules';
+import type { ModuleStatus } from '../../types';
+import type { SubSection } from '../../types';
 import './Dashboard.css';
 
-export type SubSection = 'demographics' | 'dnw' | 'mh' | 'general';
+export type { SubSection };
 export type SubSectionStatus = Record<SubSection, ModuleStatus>;
 
 export function Dashboard() {
-  const [paragraphicalStatus, setParagraphicalStatus] = useState<ModuleStatus>('not_started');
-  const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
-  const [globeRegion, setGlobeRegion] = useState<string | null>(null);
-  const [subSectionStatus, setSubSectionStatus] = useState<SubSectionStatus>({
-    demographics: 'not_started',
-    dnw: 'locked',
-    mh: 'locked',
-    general: 'locked',
-  });
+  const { session, dispatch } = useUser();
+
+  const { globe, paragraphical, mainModule } = session;
 
   // Globe region selected
-  const handleRegionSelected = (region: string) => {
-    setGlobeRegion(region);
+  const handleRegionSelected = (region: string, lat: number, lng: number, zoomLevel: number) => {
+    dispatch({ type: 'SET_GLOBE', payload: { region, lat, lng, zoomLevel } });
   };
 
-  // Simulate clicking paragraphical
+  // Reset globe
+  const handleGlobeReset = () => {
+    dispatch({ type: 'CLEAR_GLOBE' });
+  };
+
+  // Paragraphical click
   const handleParagraphicalClick = () => {
-    if (paragraphicalStatus === 'not_started') {
-      setParagraphicalStatus('in_progress');
+    if (paragraphical.status === 'not_started') {
+      dispatch({ type: 'SET_PARAGRAPHICAL_STATUS', payload: 'in_progress' });
     }
   };
 
-  // Simulate sub-section click
+  // Sub-section click
   const handleSubSectionClick = (section: SubSection) => {
-    if (subSectionStatus[section] === 'locked') return;
-    setSubSectionStatus(prev => ({
-      ...prev,
-      [section]: prev[section] === 'not_started' ? 'in_progress' : prev[section],
-    }));
+    if (mainModule.subSectionStatus[section] === 'locked') return;
+    if (mainModule.subSectionStatus[section] === 'not_started') {
+      dispatch({ type: 'SET_SUBSECTION_STATUS', payload: { section, status: 'in_progress' } });
+    }
   };
 
-  // Get main module overall status
+  // Main module overall status
   const getMainModuleStatus = (): ModuleStatus => {
-    const statuses = Object.values(subSectionStatus);
+    const statuses = Object.values(mainModule.subSectionStatus);
     if (statuses.every(s => s === 'completed')) return 'completed';
     if (statuses.some(s => s === 'in_progress')) return 'in_progress';
     return 'not_started';
   };
+
+  const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
 
   return (
     <div className="dashboard">
@@ -79,12 +82,13 @@ export function Dashboard() {
         >
           <GlobeExplorer
             onRegionSelected={handleRegionSelected}
-            hasZoomed={!!globeRegion}
+            onReset={handleGlobeReset}
+            globeSelection={globe}
           />
         </section>
 
         {/* Post-zoom prompt text */}
-        {globeRegion && (
+        {globe && (
           <section
             className="dashboard__section"
             style={{ animationDelay: '0ms' }}
@@ -101,7 +105,7 @@ export function Dashboard() {
           style={{ animationDelay: '250ms' }}
         >
           <ParagraphicalButton
-            status={paragraphicalStatus}
+            status={paragraphical.status}
             onClick={handleParagraphicalClick}
           />
         </section>
@@ -115,7 +119,7 @@ export function Dashboard() {
             status={getMainModuleStatus()}
             expanded={mainModuleExpanded}
             onToggle={() => setMainModuleExpanded(!mainModuleExpanded)}
-            subSectionStatus={subSectionStatus}
+            subSectionStatus={mainModule.subSectionStatus}
             onSubSectionClick={handleSubSectionClick}
           />
         </section>

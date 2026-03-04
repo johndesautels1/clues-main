@@ -1,0 +1,229 @@
+/**
+ * User Context
+ * Centralized state management for the entire CLUES session.
+ * Uses useReducer for predictable state transitions.
+ * Auto-saves to Supabase on meaningful changes.
+ */
+
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useCallback,
+  type ReactNode,
+  type Dispatch,
+} from 'react';
+import { supabase } from '../lib/supabase';
+import type {
+  UserSession,
+  GlobeSelection,
+  ParagraphEntry,
+  ModuleStatus,
+  SubSectionStatus,
+  CompletionTier,
+  GeminiExtraction,
+  DemographicAnswers,
+  DNWAnswers,
+  MHAnswers,
+  GeneralAnswers,
+  EvaluationResult,
+} from '../types';
+
+// ─── Actions ─────────────────────────────────────────────────────
+type Action =
+  | { type: 'SET_GLOBE'; payload: GlobeSelection }
+  | { type: 'CLEAR_GLOBE' }
+  | { type: 'SET_PARAGRAPHICAL_STATUS'; payload: ModuleStatus }
+  | { type: 'UPDATE_PARAGRAPH'; payload: ParagraphEntry }
+  | { type: 'SET_EXTRACTION'; payload: GeminiExtraction }
+  | { type: 'SET_SUBSECTION_STATUS'; payload: { section: keyof SubSectionStatus; status: ModuleStatus } }
+  | { type: 'SET_DEMOGRAPHICS'; payload: DemographicAnswers }
+  | { type: 'SET_DNW'; payload: DNWAnswers }
+  | { type: 'SET_MH'; payload: MHAnswers }
+  | { type: 'SET_GENERAL_ANSWERS'; payload: GeneralAnswers }
+  | { type: 'COMPLETE_MODULE'; payload: string }
+  | { type: 'SET_EVALUATION'; payload: EvaluationResult }
+  | { type: 'SET_TIER'; payload: { tier: CompletionTier; confidence: number } }
+  | { type: 'LOAD_SESSION'; payload: UserSession }
+  | { type: 'RESET' };
+
+// ─── Initial State ───────────────────────────────────────────────
+const INITIAL_STATE: UserSession = {
+  id: crypto.randomUUID(),
+  globe: null,
+  paragraphical: {
+    status: 'not_started',
+    paragraphs: [],
+  },
+  mainModule: {
+    subSectionStatus: {
+      demographics: 'not_started',
+      dnw: 'locked',
+      mh: 'locked',
+      general: 'locked',
+    },
+  },
+  completedModules: [],
+  currentTier: 'discovery',
+  confidence: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+// ─── Reducer ─────────────────────────────────────────────────────
+function sessionReducer(state: UserSession, action: Action): UserSession {
+  const now = new Date().toISOString();
+
+  switch (action.type) {
+    case 'SET_GLOBE':
+      return { ...state, globe: action.payload, updatedAt: now };
+
+    case 'CLEAR_GLOBE':
+      return { ...state, globe: null, updatedAt: now };
+
+    case 'SET_PARAGRAPHICAL_STATUS':
+      return {
+        ...state,
+        paragraphical: { ...state.paragraphical, status: action.payload },
+        updatedAt: now,
+      };
+
+    case 'UPDATE_PARAGRAPH': {
+      const existing = state.paragraphical.paragraphs;
+      const idx = existing.findIndex(p => p.id === action.payload.id);
+      const updated = idx >= 0
+        ? existing.map((p, i) => i === idx ? action.payload : p)
+        : [...existing, action.payload];
+      return {
+        ...state,
+        paragraphical: { ...state.paragraphical, paragraphs: updated },
+        updatedAt: now,
+      };
+    }
+
+    case 'SET_EXTRACTION':
+      return {
+        ...state,
+        paragraphical: { ...state.paragraphical, extraction: action.payload },
+        updatedAt: now,
+      };
+
+    case 'SET_SUBSECTION_STATUS':
+      return {
+        ...state,
+        mainModule: {
+          ...state.mainModule,
+          subSectionStatus: {
+            ...state.mainModule.subSectionStatus,
+            [action.payload.section]: action.payload.status,
+          },
+        },
+        updatedAt: now,
+      };
+
+    case 'SET_DEMOGRAPHICS':
+      return {
+        ...state,
+        mainModule: { ...state.mainModule, demographics: action.payload },
+        updatedAt: now,
+      };
+
+    case 'SET_DNW':
+      return {
+        ...state,
+        mainModule: { ...state.mainModule, dnw: action.payload },
+        updatedAt: now,
+      };
+
+    case 'SET_MH':
+      return {
+        ...state,
+        mainModule: { ...state.mainModule, mh: action.payload },
+        updatedAt: now,
+      };
+
+    case 'SET_GENERAL_ANSWERS':
+      return {
+        ...state,
+        mainModule: { ...state.mainModule, generalAnswers: action.payload },
+        updatedAt: now,
+      };
+
+    case 'COMPLETE_MODULE':
+      if (state.completedModules.includes(action.payload)) return state;
+      return {
+        ...state,
+        completedModules: [...state.completedModules, action.payload],
+        updatedAt: now,
+      };
+
+    case 'SET_EVALUATION':
+      return { ...state, evaluation: action.payload, updatedAt: now };
+
+    case 'SET_TIER':
+      return {
+        ...state,
+        currentTier: action.payload.tier,
+        confidence: action.payload.confidence,
+        updatedAt: now,
+      };
+
+    case 'LOAD_SESSION':
+      return action.payload;
+
+    case 'RESET':
+      return { ...INITIAL_STATE, id: crypto.randomUUID(), createdAt: now, updatedAt: now };
+
+    default:
+      return state;
+  }
+}
+
+// ─── Context ─────────────────────────────────────────────────────
+interface UserContextValue {
+  session: UserSession;
+  dispatch: Dispatch<Action>;
+}
+
+const UserContext = createContext<UserContextValue | null>(null);
+
+// ─── Provider ────────────────────────────────────────────────────
+export function UserProvider({ children }: { children: ReactNode }) {
+  const [session, dispatch] = useReducer(sessionReducer, INITIAL_STATE);
+
+  // Auto-save to Supabase on meaningful changes (debounced)
+  const saveToSupabase = useCallback(async (data: UserSession) => {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    if (!url) return; // local-only mode
+
+    try {
+      await supabase.from('sessions').upsert({
+        id: data.id,
+        data: JSON.stringify(data),
+        updated_at: data.updatedAt,
+      });
+    } catch (err) {
+      console.error('[CLUES] Supabase save failed:', err);
+    }
+  }, []);
+
+  // Debounced auto-save on state changes
+  useEffect(() => {
+    const timer = setTimeout(() => saveToSupabase(session), 2000);
+    return () => clearTimeout(timer);
+  }, [session, saveToSupabase]);
+
+  return (
+    <UserContext.Provider value={{ session, dispatch }}>
+      {children}
+    </UserContext.Provider>
+  );
+}
+
+// ─── Hook ────────────────────────────────────────────────────────
+export function useUser(): UserContextValue {
+  const ctx = useContext(UserContext);
+  if (!ctx) throw new Error('useUser must be used within <UserProvider>');
+  return ctx;
+}

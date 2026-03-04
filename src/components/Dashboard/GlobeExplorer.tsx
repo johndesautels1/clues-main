@@ -67,18 +67,21 @@ function getZoomLabel(altitude: number): { label: string; icon: string } {
 }
 
 interface Props {
-  onRegionSelected: (region: string) => void;
-  hasZoomed: boolean;
+  onRegionSelected: (region: string, lat: number, lng: number, zoomLevel: number) => void;
+  onReset: () => void;
+  globeSelection: { region: string; lat: number; lng: number; zoomLevel: number } | null;
 }
 
-export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
+export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Props) {
   const globeRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isZooming, setIsZooming] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [zoomDepth, setZoomDepth] = useState(0); // 0 = not zoomed, 1-3 = progressive
-  const [zoomLabel, setZoomLabel] = useState<{ label: string; icon: string } | null>(null);
+  const [zoomDepth, setZoomDepth] = useState(globeSelection?.zoomLevel ?? 0);
+  const [zoomLabel, setZoomLabel] = useState<{ label: string; icon: string } | null>(
+    globeSelection ? getZoomLabel(ZOOM_LEVELS[Math.min(globeSelection.zoomLevel - 1, 2)]?.altitude ?? 2.5) : null
+  );
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
+  const hasZoomed = !!globeSelection;
 
   // Responsive sizing
   useEffect(() => {
@@ -153,13 +156,12 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
     );
 
     const region = getClosestRegion(lat, lng);
-    setSelectedRegion(region);
     setZoomDepth(nextDepth);
     setZoomLabel(getZoomLabel(nextAltitude));
 
     setTimeout(() => {
       setIsZooming(false);
-      onRegionSelected(region);
+      onRegionSelected(region, lat, lng, nextDepth);
     }, 1300);
   }, [onRegionSelected, isZooming]);
 
@@ -183,9 +185,9 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
       setIsZooming(false);
       setZoomDepth(0);
       setZoomLabel(null);
-      setSelectedRegion(null);
+      onReset();
     }, 1300);
-  }, [isZooming]);
+  }, [isZooming, onReset]);
 
   return (
     <div className="globe-explorer" ref={containerRef}>
@@ -256,11 +258,11 @@ export function GlobeExplorer({ onRegionSelected, hasZoomed }: Props) {
       )}
 
       {/* Region badge + reset button */}
-      {hasZoomed && selectedRegion && !isZooming && (
+      {hasZoomed && globeSelection && !isZooming && (
         <div className="globe-explorer__region-bar">
           <div className="globe-explorer__region-badge">
             <span className="globe-explorer__region-icon">📍</span>
-            <span className="globe-explorer__region-name">{selectedRegion}</span>
+            <span className="globe-explorer__region-name">{globeSelection.region}</span>
           </div>
           <button
             className="globe-explorer__reset-btn"

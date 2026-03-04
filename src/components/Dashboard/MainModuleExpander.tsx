@@ -4,8 +4,8 @@
  * Demographics, Do Not Wants, Must Haves, General Questions
  */
 
-import type { ModuleStatus } from '../../data/modules';
-import type { SubSection, SubSectionStatus } from './Dashboard';
+import type { ModuleStatus, SubSection } from '../../types';
+import type { SubSectionStatus } from './Dashboard';
 import { StatusBadge } from './StatusBadge';
 import './MainModuleExpander.css';
 
