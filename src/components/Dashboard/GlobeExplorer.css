@@ -1,0 +1,129 @@
+/* Globe Explorer - Interactive 3D world map */
+
+.globe-explorer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  animation: fade-up 0.6s ease-out both;
+}
+
+.globe-explorer__wrapper {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  cursor: grab;
+  line-height: 0;
+}
+
+.globe-explorer__wrapper:active {
+  cursor: grabbing;
+}
+
+/* Zoom prompt overlay */
+.globe-explorer__prompt {
+  position: absolute;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  padding: var(--space-4) var(--space-6);
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(var(--blur-standard));
+  border: 1px solid var(--border-glass-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glow-sapphire);
+  animation: fade-up 0.5s ease-out 0.8s both;
+  white-space: nowrap;
+}
+
+.globe-explorer__prompt-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-2);
+}
+
+.globe-explorer__prompt-text {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.globe-explorer__prompt-hint {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+/* Zooming state */
+.globe-explorer__zooming {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.globe-explorer__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-glass);
+  border-top-color: var(--clues-sapphire);
+  border-radius: 50%;
+  margin: 0 auto var(--space-3);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Region badge after selection */
+.globe-explorer__region-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-2) var(--space-5);
+  background: rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: var(--radius-full);
+  animation: fade-up 0.4s ease-out both;
+}
+
+.globe-explorer__region-icon {
+  font-size: 1rem;
+}
+
+.globe-explorer__region-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-accent);
+  letter-spacing: 0.02em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .globe-explorer__prompt {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .globe-explorer__prompt-text {
+    font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 480px) {
+  .globe-explorer__prompt {
+    white-space: normal;
+    min-width: 200px;
+  }
+}

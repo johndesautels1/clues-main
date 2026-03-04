@@ -1,10 +1,11 @@
 /**
  * CLUES Main Dashboard
- * Primary layout: Paragraphical → Main Module → 20 Module Grid
+ * Layout: Hero Heading → Globe → Paragraphical → Main Module → 20 Module Grid
  */
 
 import { useState } from 'react';
 import { HeroHeading } from './HeroHeading';
+import { GlobeExplorer } from './GlobeExplorer';
 import { ParagraphicalButton } from './ParagraphicalButton';
 import { MainModuleExpander } from './MainModuleExpander';
 import { ModuleGrid } from './ModuleGrid';
@@ -21,12 +22,18 @@ export type SubSectionStatus = Record<SubSection, ModuleStatus>;
 export function Dashboard() {
   const [paragraphicalStatus, setParagraphicalStatus] = useState<ModuleStatus>('not_started');
   const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
+  const [globeRegion, setGlobeRegion] = useState<string | null>(null);
   const [subSectionStatus, setSubSectionStatus] = useState<SubSectionStatus>({
     demographics: 'not_started',
     dnw: 'locked',
     mh: 'locked',
     general: 'locked',
   });
+
+  // Globe region selected
+  const handleRegionSelected = (region: string) => {
+    setGlobeRegion(region);
+  };
 
   // Simulate clicking paragraphical
   const handleParagraphicalClick = () => {
@@ -57,7 +64,7 @@ export function Dashboard() {
       <Header />
 
       <main className="dashboard__content container" id="main-content">
-        {/* Hero Heading */}
+        {/* Hero Heading: "Stop Guessing - Start Living" */}
         <section
           className="dashboard__section"
           style={{ animationDelay: '50ms' }}
@@ -65,10 +72,33 @@ export function Dashboard() {
           <HeroHeading />
         </section>
 
-        {/* Paragraphical Button - Hero */}
+        {/* Interactive 4D Globe */}
         <section
           className="dashboard__section dashboard__section--hero"
-          style={{ animationDelay: '200ms' }}
+          style={{ animationDelay: '150ms' }}
+        >
+          <GlobeExplorer
+            onRegionSelected={handleRegionSelected}
+            hasZoomed={!!globeRegion}
+          />
+        </section>
+
+        {/* Post-zoom prompt text */}
+        {globeRegion && (
+          <section
+            className="dashboard__section"
+            style={{ animationDelay: '0ms' }}
+          >
+            <p className="dashboard__zoom-prompt">
+              Now click on the Paragraphical below and tell us about: <strong>You</strong>
+            </p>
+          </section>
+        )}
+
+        {/* Paragraphical Button */}
+        <section
+          className="dashboard__section dashboard__section--hero"
+          style={{ animationDelay: '250ms' }}
         >
           <ParagraphicalButton
             status={paragraphicalStatus}
@@ -79,7 +109,7 @@ export function Dashboard() {
         {/* Main Module Expander */}
         <section
           className="dashboard__section"
-          style={{ animationDelay: '250ms' }}
+          style={{ animationDelay: '350ms' }}
         >
           <MainModuleExpander
             status={getMainModuleStatus()}
@@ -93,7 +123,7 @@ export function Dashboard() {
         {/* 20 Module Grid */}
         <section
           className="dashboard__section"
-          style={{ animationDelay: '400ms' }}
+          style={{ animationDelay: '450ms' }}
         >
           <h2 className="dashboard__section-title">Exploration Modules</h2>
           <p className="dashboard__section-subtitle">
