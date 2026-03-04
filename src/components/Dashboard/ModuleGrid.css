@@ -1,0 +1,32 @@
+/* Module Grid - 5 column responsive layout */
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+}
+
+.module-grid__item {
+  animation: fade-up 0.4s ease-out both;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .module-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .module-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .module-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}

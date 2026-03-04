@@ -1,0 +1,112 @@
+/* Floating Chat Bubbles */
+
+.chat-bubble {
+  position: fixed;
+  bottom: var(--space-6);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-chat-bubble);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-base);
+  animation: fade-up 0.5s ease-out both;
+  animation-delay: 800ms;
+}
+
+.chat-bubble:hover {
+  transform: scale(1.1);
+}
+
+.chat-bubble:active {
+  transform: scale(0.95);
+}
+
+/* Olivia - Bottom Right */
+.chat-bubble--olivia {
+  right: var(--space-6);
+  background: linear-gradient(135deg, var(--clues-sapphire), var(--clues-sapphire-dark));
+  box-shadow:
+    0 4px 16px rgba(37, 99, 235, 0.3),
+    0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.chat-bubble--olivia:hover {
+  box-shadow:
+    0 6px 24px rgba(37, 99, 235, 0.4),
+    0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* Emilia - Bottom Left */
+.chat-bubble--emilia {
+  left: var(--space-6);
+  background: linear-gradient(135deg, var(--gray-700), var(--gray-800));
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(255, 255, 255, 0.06);
+}
+
+.chat-bubble--emilia:hover {
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+/* Avatar circle */
+.chat-bubble__avatar {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+}
+
+/* Icon */
+.chat-bubble__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* Pulse ring */
+.chat-bubble__pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(37, 99, 235, 0.3);
+  animation: bubble-pulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.chat-bubble--emilia .chat-bubble__pulse {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes bubble-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chat-bubble {
+    width: 48px;
+    height: 48px;
+    bottom: var(--space-4);
+  }
+
+  .chat-bubble--olivia {
+    right: var(--space-4);
+  }
+
+  .chat-bubble--emilia {
+    left: var(--space-4);
+  }
+}

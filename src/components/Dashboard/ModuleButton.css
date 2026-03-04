@@ -1,0 +1,197 @@
+/* Module Button - Individual module card with illumination */
+
+.module-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-3);
+  min-height: 140px;
+  text-align: center;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
+}
+
+.module-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+
+.module-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.module-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Status indicator dot */
+.module-btn__indicator {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-600);
+  transition: background var(--transition-base), box-shadow var(--transition-base);
+}
+
+/* Icon */
+.module-btn__icon {
+  font-size: 2rem;
+  line-height: 1;
+  transition: filter var(--transition-base);
+}
+
+/* Name */
+.module-btn__name {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+/* Question count */
+.module-btn__questions {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Score meter */
+.module-btn__meter {
+  width: 60%;
+  height: 4px;
+  background: var(--gray-700);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.module-btn__meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--score-green), var(--clues-sapphire-light));
+  border-radius: var(--radius-full);
+  animation: meter-fill 1.5s ease-out;
+}
+
+/* Badges */
+.module-btn__badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+/* ============================================================================
+   ILLUMINATION STATES
+   ============================================================================ */
+
+/* Not Started - Gray, muted */
+.module-btn--not-started {
+  border-color: var(--border-glass);
+}
+
+.module-btn--not-started .module-btn__indicator {
+  background: var(--gray-600);
+}
+
+.module-btn--not-started .module-btn__icon {
+  filter: saturate(0.6) brightness(0.8);
+}
+
+/* In Progress - Pulsing sapphire glow */
+.module-btn--in-progress {
+  border-color: rgba(37, 99, 235, 0.4);
+  animation: pulse-sapphire 2.5s ease-in-out infinite;
+}
+
+.module-btn--in-progress .module-btn__indicator {
+  background: var(--clues-sapphire);
+  box-shadow: 0 0 6px var(--clues-sapphire);
+}
+
+.module-btn--in-progress .module-btn__icon {
+  filter: none;
+}
+
+/* Completed - Green glow + checkmark */
+.module-btn--completed {
+  border-color: rgba(34, 197, 94, 0.3);
+  animation: glow-green 3s ease-in-out infinite;
+}
+
+.module-btn--completed .module-btn__indicator {
+  background: var(--score-green);
+  box-shadow: 0 0 6px var(--score-green);
+}
+
+.module-btn--completed .module-btn__icon {
+  filter: none;
+}
+
+/* Recommended - Gold border + star */
+.module-btn--recommended {
+  border-color: rgba(245, 158, 11, 0.4);
+  animation: shimmer-gold 3s ease-in-out infinite;
+}
+
+.module-btn--recommended .module-btn__indicator {
+  background: var(--clues-gold);
+  box-shadow: 0 0 6px var(--clues-gold);
+}
+
+.module-btn--recommended .module-btn__icon {
+  filter: none;
+}
+
+.module-btn--recommended .module-btn__name {
+  color: var(--clues-gold);
+}
+
+/* Locked - Grayed out + lock */
+.module-btn--locked {
+  opacity: 0.35;
+  filter: grayscale(0.7);
+  border-color: rgba(107, 114, 128, 0.15);
+}
+
+.module-btn--locked .module-btn__indicator {
+  background: var(--gray-700);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .module-btn {
+    min-height: 120px;
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .module-btn__icon {
+    font-size: 1.75rem;
+  }
+
+  .module-btn__name {
+    font-size: var(--text-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .module-btn {
+    min-height: 110px;
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .module-btn__icon {
+    font-size: 1.5rem;
+  }
+}
