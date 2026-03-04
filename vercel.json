@@ -1,20 +1,5 @@
 {
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
-  ],
-  "functions": {
-    "api/evaluate.ts": { "maxDuration": 300 },
-    "api/judge.ts": { "maxDuration": 300 },
-    "api/paragraphical.ts": { "maxDuration": 120 },
-    "api/eliminate.ts": { "maxDuration": 60 },
-    "api/score-mh.ts": { "maxDuration": 60 }
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
-      ]
-    }
   ]
 }
