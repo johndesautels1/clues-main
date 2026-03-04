@@ -111,7 +111,7 @@
 }
 
 .globe-explorer__deeper-hint--done {
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 /* Zooming state */

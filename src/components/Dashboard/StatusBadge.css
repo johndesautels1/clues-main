@@ -19,7 +19,7 @@
 
 .status-badge--sm {
   padding: 2px var(--space-2);
-  font-size: 0.5625rem; /* 9px */
+  font-size: var(--text-xs); /* 11px — WCAG minimum */
 }
 
 /* Status colors */
