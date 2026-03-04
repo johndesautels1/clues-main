@@ -38,7 +38,7 @@ export function DiscoveryFlow() {
   const [transitioning, setTransitioning] = useState(false);
   const [contentVisible, setContentVisible] = useState(true);
   const [showNav, setShowNav] = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
+  // savedFlash removed — replaced by saveStatus indicator
   const [direction, setDirection] = useState(1);
   const [shareFlash, setShareFlash] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -47,6 +47,7 @@ export function DiscoveryFlow() {
   const [oliviaChatOpen, setOliviaChatOpen] = useState(false);
   const [oliviaVideoOpen, setOliviaVideoOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -89,8 +90,12 @@ export function DiscoveryFlow() {
 
     if (hasData) {
       setAnswers(loaded);
-      // If they have data, skip welcome
       setPhase('active');
+      // Welcome back toast
+      const filledCount = Object.values(loaded).filter((v) => v?.trim()).length;
+      setTimeout(() => {
+        toast.success(`Welcome back! You have ${filledCount}/24 sections saved. Pick up where you left off.`, { duration: 4000 });
+      }, 600);
     }
   }, []); // Run once on mount only
 
@@ -105,6 +110,7 @@ export function DiscoveryFlow() {
   // ─── Sync to UserContext on answer change (debounced) ───────────
   useEffect(() => {
     if (Object.keys(answers).length === 0) return;
+    setSaveStatus('saving');
     const timer = setTimeout(() => {
       Object.entries(answers).forEach(([key, val]) => {
         const id = Number(key);
@@ -125,6 +131,9 @@ export function DiscoveryFlow() {
       if (session.paragraphical.status === 'not_started') {
         dispatch({ type: 'SET_PARAGRAPHICAL_STATUS', payload: 'in_progress' });
       }
+      setSaveStatus('saved');
+      // Reset back to idle after 2s so the indicator fades
+      setTimeout(() => setSaveStatus('idle'), 2000);
     }, 1500);
     return () => clearTimeout(timer);
   }, [answers, dispatch, session.paragraphical.status]);
@@ -185,15 +194,7 @@ export function DiscoveryFlow() {
     }
   }, [current, contentVisible, phase]);
 
-  // ─── Save flash ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (!currentAnswer) return;
-    const t = setTimeout(() => {
-      setSavedFlash(true);
-      setTimeout(() => setSavedFlash(false), 1100);
-    }, 1200);
-    return () => clearTimeout(t);
-  }, [currentAnswer]);
+  // savedFlash effect removed — saveStatus handles auto-save feedback
 
   // ─── Stop voice on section change ──────────────────────────────
   useEffect(() => {
@@ -528,8 +529,31 @@ export function DiscoveryFlow() {
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => navigate('/')} className="discovery-btn" aria-label="Back to Dashboard" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.divider}`, borderRadius: 10, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.textSecondary, fontSize: 14 }}>
-            &larr;
+          {/* Auto-save indicator */}
+          <span aria-live="polite" style={{
+            fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.08em',
+            color: saveStatus === 'saving' ? '#f59e0b' : saveStatus === 'saved' ? '#22c55e' : 'transparent',
+            transition: 'color 0.35s ease', display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            {saveStatus === 'saving' && <>{'\u25CF'} Saving&hellip;</>}
+            {saveStatus === 'saved' && <>{'\u2713'} Saved</>}
+          </span>
+          {/* Save & Continue Later */}
+          <button
+            onClick={() => {
+              toast.success(`Progress saved! ${completed}/24 sections complete. You can return anytime to continue.`, { duration: 3500 });
+              setTimeout(() => navigate('/'), 800);
+            }}
+            className="discovery-btn" aria-label="Save and continue later"
+            style={{
+              background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.divider}`,
+              borderRadius: 10, padding: '7px 14px',
+              display: 'flex', alignItems: 'center', gap: 6,
+              fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textSecondary,
+              letterSpacing: '0.04em',
+            }}
+          >
+            <span style={{ fontSize: 13 }}>{'\u{1F4BE}'}</span> Save &amp; Exit
           </button>
           <button onClick={() => downloadAnswers('txt')} aria-label="Download TXT" className="discovery-btn" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.divider}`, borderRadius: 10, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.textSecondary, fontSize: 14 }}>
             {'\u2B07'}
@@ -537,9 +561,6 @@ export function DiscoveryFlow() {
           <button onClick={shareAnswers} title={shareFlash ? 'Copied!' : 'Copy'} className="discovery-btn" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${shareFlash ? accent + '55' : C.divider}`, borderRadius: 10, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', color: shareFlash ? accent : C.textSecondary, fontSize: 14 }}>
             {shareFlash ? '\u2713' : '\u2398'}
           </button>
-          <span aria-live="polite" style={{ fontFamily: "'Outfit',sans-serif", fontSize: 12, color: savedFlash ? accent : 'transparent', transition: 'color 0.35s ease' }}>
-            {savedFlash ? 'saved' : ''}
-          </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.divider}`, borderRadius: 18, padding: '7px 16px 7px 10px' }}>
             <svg width="28" height="28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
               <circle cx="14" cy="14" r="11" fill="none" stroke={C.divider} strokeWidth="2.5" />
@@ -552,8 +573,34 @@ export function DiscoveryFlow() {
               <span style={{ color: accent, fontWeight: 500 }}>{completed}</span>/24
             </span>
           </div>
+          {/* Close (X) button */}
+          <button
+            onClick={() => navigate('/')} className="discovery-btn" aria-label="Close and return to dashboard"
+            style={{
+              background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: 10, width: 42, height: 42,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#f87171', fontSize: 18, fontWeight: 300,
+            }}
+          >&times;</button>
         </div>
       </header>
+
+      {/* Progress bar */}
+      <div role="progressbar" aria-valuenow={completed} aria-valuemin={0} aria-valuemax={24} aria-label={`${completed} of 24 sections completed`}
+        style={{
+          position: 'fixed', top: 58, left: 0, right: 0, zIndex: 99,
+          height: 3, background: 'rgba(255,255,255,0.04)',
+        }}
+      >
+        <div style={{
+          height: '100%', borderRadius: '0 2px 2px 0',
+          background: `linear-gradient(90deg, ${accent}, ${accent}cc)`,
+          width: `${(completed / 24) * 100}%`,
+          transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)',
+          boxShadow: `0 0 8px ${accent}44`,
+        }} />
+      </div>
 
       <Timeline current={current} answers={answers} onNavigate={navigateTo} />
       <NavOverlay visible={showNav} onClose={() => setShowNav(false)} current={current} answers={answers} onNavigate={navigateTo} />
