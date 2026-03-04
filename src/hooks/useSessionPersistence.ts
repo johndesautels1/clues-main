@@ -16,11 +16,6 @@ import type { UserSession } from '../types';
 const STORAGE_KEY = 'clues_session';
 const SAVE_DEBOUNCE_MS = 1500;
 
-/** Check if Supabase is configured */
-function isSupabaseReady(): boolean {
-  return !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
-}
-
 // ─── localStorage helpers ────────────────────────────────────
 function saveToLocalStorage(session: UserSession): void {
   try {
@@ -42,7 +37,7 @@ function loadFromLocalStorage(): UserSession | null {
 
 // ─── Supabase helpers ────────────────────────────────────────
 async function saveToSupabase(session: UserSession): Promise<boolean> {
-  if (!isSupabaseReady()) return false;
+  if (!supabase) return false;
 
   const completedParagraphs = session.paragraphical.paragraphs
     .filter(p => p.content.trim().length > 0).length;
@@ -82,7 +77,7 @@ async function saveToSupabase(session: UserSession): Promise<boolean> {
 }
 
 async function loadFromSupabase(sessionId: string): Promise<UserSession | null> {
-  if (!isSupabaseReady()) return null;
+  if (!supabase) return null;
 
   try {
     const { data, error } = await supabase
@@ -120,7 +115,7 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
       const localSession = loadFromLocalStorage();
       const sessionId = localSession?.id;
 
-      if (sessionId && isSupabaseReady()) {
+      if (sessionId && supabase) {
         // Try to load from Supabase (authoritative)
         const supabaseSession = await loadFromSupabase(sessionId);
         if (supabaseSession) {
