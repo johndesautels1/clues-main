@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { HeroHeading } from './HeroHeading';
 import { ParagraphicalButton } from './ParagraphicalButton';
 import { MainModuleExpander } from './MainModuleExpander';
 import { ModuleGrid } from './ModuleGrid';
@@ -56,10 +57,18 @@ export function Dashboard() {
       <Header />
 
       <main className="dashboard__content container" id="main-content">
+        {/* Hero Heading */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '50ms' }}
+        >
+          <HeroHeading />
+        </section>
+
         {/* Paragraphical Button - Hero */}
         <section
           className="dashboard__section dashboard__section--hero"
-          style={{ animationDelay: '100ms' }}
+          style={{ animationDelay: '200ms' }}
         >
           <ParagraphicalButton
             status={paragraphicalStatus}
