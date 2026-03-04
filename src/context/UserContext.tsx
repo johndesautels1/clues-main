@@ -18,6 +18,7 @@ import {
   type ReactNode,
   type Dispatch,
 } from 'react';
+import { useAuth } from './AuthContext';
 import { useSessionPersistence } from '../hooks/useSessionPersistence';
 import type {
   UserSession,
@@ -49,6 +50,7 @@ type Action =
   | { type: 'COMPLETE_MODULE'; payload: string }
   | { type: 'SET_EVALUATION'; payload: EvaluationResult }
   | { type: 'SET_TIER'; payload: { tier: CompletionTier; confidence: number } }
+  | { type: 'SET_USER'; payload: { userId: string; email: string } }
   | { type: 'LOAD_SESSION'; payload: UserSession }
   | { type: 'RESET' };
 
@@ -173,6 +175,14 @@ function sessionReducer(state: UserSession, action: Action): UserSession {
         updatedAt: now,
       };
 
+    case 'SET_USER':
+      return {
+        ...state,
+        userId: action.payload.userId,
+        email: action.payload.email,
+        updatedAt: now,
+      };
+
     case 'LOAD_SESSION':
       return action.payload;
 
@@ -209,6 +219,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     session,
     onSessionLoaded: handleSessionLoaded,
   });
+
+  // Stamp auth user onto session when they log in
+  const { user: authUser } = useAuth();
+  useEffect(() => {
+    if (authUser && authUser.id !== session.userId) {
+      dispatch({
+        type: 'SET_USER',
+        payload: { userId: authUser.id, email: authUser.email },
+      });
+    }
+  }, [authUser, session.userId]);
 
   // If no saved session found after 800ms, stop loading anyway
   useEffect(() => {

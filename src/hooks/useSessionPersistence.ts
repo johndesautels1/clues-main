@@ -46,6 +46,10 @@ async function saveToSupabase(session: UserSession): Promise<boolean> {
     const { error } = await supabase.from('sessions').upsert({
       id: session.id,
 
+      // Auth user link — ties anonymous session to a Supabase auth account
+      user_id: session.userId ?? null,
+      email: session.email ?? null,
+
       // Denormalized globe data — queryable without parsing JSON
       // This is what saves massive LLM tokens: the evaluation pipeline
       // can filter to region-specific cities before sending to 5 LLMs

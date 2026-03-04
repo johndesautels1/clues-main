@@ -1,9 +1,12 @@
 /**
  * Dashboard Header
- * Brand logo + navigation shell + admin cost tracking toggle
+ * Brand logo + navigation shell + auth state + admin cost tracking toggle
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 import { CostTrackingModal } from './CostTrackingModal';
 import './Header.css';
 
@@ -20,8 +23,16 @@ function isAdminMode(): boolean {
 }
 
 export function Header() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [showCosts, setShowCosts] = useState(false);
   const isAdmin = isAdminMode();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Signed out');
+    navigate('/login');
+  };
 
   return (
     <>
@@ -56,6 +67,30 @@ export function Header() {
             <button className="header__nav-btn header__nav-btn--icon" aria-label="Settings">
               {'\u2699\uFE0F'}
             </button>
+
+            {/* Auth state */}
+            {isAuthenticated ? (
+              <div className="header__auth">
+                <span className="header__user-email" title={user?.email}>
+                  {user?.displayName || user?.email?.split('@')[0] || 'User'}
+                </span>
+                <button
+                  className="header__nav-btn header__nav-btn--signout"
+                  onClick={handleSignOut}
+                  type="button"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                className="header__nav-btn header__nav-btn--signin"
+                onClick={() => navigate('/login')}
+                type="button"
+              >
+                Sign In
+              </button>
+            )}
           </nav>
         </div>
       </header>

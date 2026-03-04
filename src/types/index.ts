@@ -200,9 +200,20 @@ export interface SessionCostRow {
   description: string;
 }
 
+// ─── Auth ────────────────────────────────────────────────────────
+export interface AuthUser {
+  id: string;           // Supabase auth.users UUID
+  email: string;
+  displayName?: string;
+  avatarUrl?: string;
+  provider: 'email' | 'google' | 'github' | 'anonymous';
+  createdAt: string;
+}
+
 // ─── User Session State ──────────────────────────────────────────
 export interface UserSession {
   id: string;
+  userId?: string;       // Supabase auth.users UUID — links session to account
   email?: string;
   globe: GlobeSelection | null;
   paragraphical: {
