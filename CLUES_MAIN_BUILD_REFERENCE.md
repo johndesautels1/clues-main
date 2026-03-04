@@ -23,8 +23,8 @@
 | Frontend | React 19 + TypeScript + Vite 7 | Dark glassmorphic UI, Montserrat font |
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
-| LLM Evaluators | Claude Sonnet 4.5, GPT-4o, Gemini 3.1 Pro, Grok 4, Perplexity Sonar Pro | 5 parallel evaluators |
-| Judge | Claude Opus 4.5 | Consensus builder, reviews stdDev > 15 disagreements |
+| LLM Evaluators | Claude Sonnet 4.6, GPT-4o, Gemini 2.5 Pro, Grok 4, Perplexity Sonar | 5 parallel evaluators |
+| Judge | Claude Opus 4.6 | Consensus builder, reviews stdDev > 15 disagreements |
 | Narrative Engine | Gemini | Paragraphical extraction ONLY (not sole evaluator) |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
 | Payments | Stripe | Tiered subscriptions |
@@ -402,6 +402,9 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Supabase schema with denormalized globe columns for LLM token savings
 - ✅ Globe position restored on return (auto-zoom to saved lat/lng)
 - ✅ cost_tracking table ready for mandatory per-call logging
+- ✅ Cost tracking service (`src/lib/costTracking.ts`) with provider rate table, logCost(), aggregation
+- ✅ Cost tracking dashboard modal (admin-only) with provider breakdown, tier breakdown, profitability analysis
+- ✅ Emilia help panel with categorized help topics (admin sees Cost Tracking + System Status)
 - ✅ React Router (`/` dashboard, `/paragraphical` essay flow)
 - ✅ Paragraphical 24-paragraph stepped input UI with sidebar navigation
 - ✅ 24 paragraph definitions with prompts, placeholders, section groupings
@@ -446,7 +449,8 @@ clues-main/
     │   └── index.ts                    # All shared TypeScript types
     │
     ├── lib/
-    │   └── supabase.ts                 # Supabase client (env-gated)
+    │   ├── supabase.ts                 # Supabase client (env-gated)
+    │   └── costTracking.ts             # Cost tracking service, rate table, aggregation
     │
     ├── context/
     │   └── UserContext.tsx              # useReducer + auto-save, 15 actions
@@ -466,9 +470,12 @@ clues-main/
     │   │   └── *.css                   # Component-scoped styles
     │   │
     │   └── Shared/
-    │       ├── Header.tsx              # Sticky glassmorphic header
+    │       ├── Header.tsx              # Sticky glassmorphic header + admin cost toggle
     │       ├── OliviaBubble.tsx        # Bottom-right AI assistant (blue)
-    │       └── EmiliaBubble.tsx        # Bottom-left help bubble (gray)
+    │       ├── EmiliaBubble.tsx        # Bottom-left help panel with categories
+    │       ├── EmiliaPanel.css         # Help panel styles
+    │       ├── CostTrackingModal.tsx   # Admin cost dashboard modal
+    │       └── CostTrackingModal.css   # Cost dashboard styles
     │
     ├── data/
     │   └── modules.ts                  # 20 module definitions, types, map
@@ -583,19 +590,279 @@ interface GeminiExtraction {
 
 ---
 
-## 16. NEXT STEPS (Phase 2 Planning)
+## 16. SMART SCALING RULES (Cost vs. Depth)
+
+The system scales AI spend proportionally to data completeness. A busy executive pays less and gets a Discovery report in 30 seconds. A thorough user pays more and gets a Precision report. Both get the same output format.
+
+```
+┌─────────────────────┬─────────────────────┬────────────┬─────────────────┬───────┐
+│  What's Available   │     LLMs Fired      │ Opus Judge │ Tavily Searches │ Cost  │
+├─────────────────────┼─────────────────────┼────────────┼─────────────────┼───────┤
+│ Paragraphical only  │ 1 (Gemini)          │ No         │ 5 basic         │ $     │
+├─────────────────────┼─────────────────────┼────────────┼─────────────────┼───────┤
+│ + Demographics      │ 2 (Gemini + Claude) │ No         │ 10              │ $$    │
+├─────────────────────┼─────────────────────┼────────────┼─────────────────┼───────┤
+│ + DNWs              │ 3                   │ No         │ 15              │ $$$   │
+├─────────────────────┼─────────────────────┼────────────┼─────────────────┼───────┤
+│ + MHs               │ 4                   │ No         │ 20              │ $$$$  │
+├─────────────────────┼─────────────────────┼────────────┼─────────────────┼───────┤
+│ + General Questions │ 5 + Opus Judge      │ Yes        │ Full (200+)     │ $$$$$ │
+├─────────────────────┼─────────────────────┼────────────┼─────────────────┼───────┤
+│ + Each Mini Module  │ Same 5 + Judge      │ Yes        │ +20 per module  │ $$$$$ │
+└─────────────────────┴─────────────────────┴────────────┴─────────────────┴───────┘
+```
+
+### LLM Firing Order by Tier
+
+| Tier | Which LLMs | Why |
+|------|-----------|-----|
+| Discovery (1) | Gemini only | It already did the extraction — reuse that context for a quick-scan recommendation |
+| Exploratory (2) | Gemini + Claude Sonnet | Sonnet adds structured reasoning on top of Gemini's narrative context |
+| Filtered (3) | + GPT-4o | GPT-4o excels at elimination/classification tasks (DNW hard walls) |
+| Evaluated (4) | + Grok | Grok adds real-time web context for MH scoring (transit, internet, etc.) |
+| Validated (5+Judge) | + Perplexity Sonar + Opus Judge | Full panel. Perplexity adds research-backed citations. Opus arbitrates. |
+| Precision (5+Judge) | Same panel, deeper prompts | Each completed mini module adds domain-specific scoring context |
+
+---
+
+## 17. NEXT STEPS RECOMMENDATION ENGINE
+
+Every report ends with a "Next Steps" block that nudges users down the funnel without forcing them. The confidence gain values drive urgency ordering.
+
+```
+YOUR REPORT: DISCOVERY (35% confidence)
+
+To improve your results:
+┌──────────────────────────────────────────────────┐
+│ ★ Complete "Do Not Wants" → +25% confidence      │
+│   Eliminates cities that are deal breakers        │
+│   ~10 minutes · 33 questions                      │
+├──────────────────────────────────────────────────┤
+│   Complete "Must Haves" → +15% confidence         │
+│   Boosts cities that match what you want          │
+│   ~10 minutes · 33 questions                      │
+├──────────────────────────────────────────────────┤
+│   Complete "Demographics" → +10% confidence       │
+│   Helps us understand your household needs        │
+│   ~5 minutes · 34 questions                       │
+└──────────────────────────────────────────────────┘
+```
+
+### Confidence Gain Table
+
+| Action | Confidence Gain | Time Estimate |
+|--------|----------------|---------------|
+| Complete Paragraphical | Base 35% | 30-60 min |
+| Complete Demographics | +10% | 5 min |
+| Complete DNWs | +15% | 10 min |
+| Complete MHs | +10% | 10 min |
+| Complete General Questions | +20% | 30 min |
+| Each Mini Module (20 total) | +0.5% each | 5-10 min each |
+| All Mini Modules | +10% total | 2-3 hours |
+
+The star (★) goes on the highest-gain incomplete item. Items are ordered by gain descending, not by pipeline sequence. A user might skip Demographics but the DNW gain is higher, so DNW shows first.
+
+---
+
+## 18. COST TRACKING SYSTEM (Built)
+
+### Architecture
+- **Types**: `CostProvider` (16 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
+- **Service**: `src/lib/costTracking.ts` — rate table, `logCost()`, `fetchAllCosts()`, `buildCostSummary()`, CSV export
+- **UI**: `src/components/Shared/CostTrackingModal.tsx` — admin-only modal
+- **Access**: Header toolbar (money bag icon) + Emilia help panel → "Cost Tracking" category
+- **Admin gate**: `?admin=true` URL param or `localStorage.setItem('clues_admin', 'true')`
+
+### Provider Rate Table (per 1M tokens, March 2026)
+```
+claude-sonnet-4-6     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
+gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
+gemini-2.5-pro        Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
+grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)
+perplexity-sonar      Input: $1.00    Output: $1.00    (LLM Evaluator #5)
+claude-opus-4-6       Input: $15.00   Output: $75.00   (Opus Judge)
+tavily                Flat rate per search              (Research + Search)
+gamma                 Flat rate per report              (Report generation)
+olivia                Same as Sonnet rates              (Chat Assistant)
+tts-elevenlabs        Per character                     (Voice narration)
+tts-openai            Per character                     (Voice narration)
+avatar-heygen         Per minute                        (Video avatar)
+avatar-d-id           Per minute                        (Video avatar)
+kling-ai              Per image                         (Image generation)
+```
+
+### Dashboard Sections (mirrors LifeScore pattern)
+1. **Cost Summary** — Grand total, total sessions, total API calls, avg cost per session
+2. **Cost by Provider** — Each provider with $ amount, % of total, visual bar
+3. **Cost by Completion Tier** — How much was spent at each tier level
+4. **Profitability Analysis** — Avg cost/session, break-even (20%), suggested (50%), suggested (100%)
+5. **Recent Sessions** — Table with session ID, tier, calls, date, cost, optional margin column
+6. **Actions** — Save to DB, Export CSV, Delete All
+
+### Persistence
+- Dual write: every `logCost()` call saves to both localStorage AND Supabase
+- Fetch prefers Supabase (authoritative), falls back to localStorage if Supabase unavailable
+- Same 3-layer pattern as session persistence
+
+---
+
+## 19. THE CORE RULE
+
+**Every entry point produces: best countries → best cities → best towns → best neighborhoods. Always. No exceptions.**
+
+The only things that change across tiers:
+- **How many** — 3 countries at Discovery, 1 country at Precision
+- **How confident** — 35% at Discovery, 100% at Precision
+- **How much AI power** — 1 LLM at Discovery, 5 LLMs + Judge at Validated+
+
+A user who completes only the Paragraphical gets a Discovery report with 3 countries and 9 cities. A user who completes everything gets a Precision report with 1 country, 1 city, 1 town, 1 neighborhood. The report format is identical — only the confidence badge and depth changes.
+
+Reports must label what was NOT completed:
+- "No dealbreakers applied — results may include locations you'd reject"
+- "No must-haves scored — results are based on elimination only"
+- "Partial evaluation — 2 of 5 AI models used"
+
+---
+
+## 20. EVALUATION PIPELINE IMPLEMENTATION PLAN
+
+### One Function, Adaptive Depth
+
+```typescript
+// api/evaluate.ts — THE evaluation endpoint
+// Receives EvaluationContext, determines tier, fires appropriate LLMs
+async function evaluate(context: EvaluationContext): Promise<EvaluationResult> {
+  // 1. Determine tier from available data
+  const tier = calculateTier(context);
+  const confidence = calculateConfidence(context);
+
+  // 2. Get metro candidates (globe region narrows from 1000+ to ~80-120)
+  const candidates = await getCandidateMetros(context.globeRegion);
+
+  // 3. Apply DNW elimination (if available)
+  const afterDNW = context.dnw
+    ? eliminateByDNW(candidates, context.dnw)
+    : candidates;
+
+  // 4. Fire LLMs based on tier (see firing order table)
+  const llmResults = await fireLLMs(tier, context, afterDNW);
+
+  // 5. Apply MH scoring (if available)
+  const scored = context.mh
+    ? applyMHScoring(llmResults, context.mh)
+    : llmResults;
+
+  // 6. Opus Judge consensus (only at validated+ tier)
+  const final = tier === 'validated' || tier === 'precision'
+    ? await opusJudge(scored, context)
+    : scored;
+
+  // 7. Build recommendations at appropriate depth
+  const result = buildRecommendations(final, tier);
+
+  // 8. Calculate next steps
+  result.nextSteps = calculateNextSteps(context);
+
+  // 9. Log costs
+  // (each LLM call already logged via logCost() — summary attached to result)
+
+  return result;
+}
+```
+
+### Tier Calculator
+
+```typescript
+function calculateTier(context: EvaluationContext): CompletionTier {
+  if (context.completedModules?.length) return 'precision';
+  if (context.generalQuestions) return 'validated';
+  if (context.mh) return 'evaluated';
+  if (context.dnw) return 'filtered';
+  if (context.demographics) return 'exploratory';
+  return 'discovery';
+}
+
+function calculateConfidence(context: EvaluationContext): number {
+  let confidence = 0;
+  if (context.paragraphical) confidence += 35;
+  if (context.demographics) confidence += 10;
+  if (context.dnw) confidence += 15;
+  if (context.mh) confidence += 10;
+  if (context.generalQuestions) confidence += 20;
+  const moduleBonus = (context.completedModules?.length ?? 0) * 0.5;
+  confidence += Math.min(moduleBonus, 10); // Cap at 10%
+  return Math.min(confidence, 100);
+}
+```
+
+### Key Implementation Notes
+
+1. **Globe region is a pre-filter, not a hard wall.** If user zooms to Southern Europe but their DNWs eliminate all of Southern Europe, the system expands search. Globe selection is a starting preference, not a cage.
+
+2. **Gemini extraction at Discovery tier doubles as the first LLM evaluation.** Since Gemini already analyzed the narrative, its extraction output IS the first-pass recommendation data. We don't call Gemini twice.
+
+3. **DNW elimination is binary at severity 5.** Severity 1-4 reduces scores progressively. Only severity 5 is a hard wall that removes a city from consideration entirely.
+
+4. **MH scoring is additive, not eliminative.** Must-Haves boost matching cities but never remove cities. The combination of DNW elimination + MH boosting creates the funnel.
+
+5. **Tavily searches scale with tier.** Discovery gets 5 basic searches (top candidate regions). Validated gets 200+ searches (every metric for every candidate city). This is the biggest cost driver — more expensive than the LLMs at higher tiers.
+
+6. **Partial success is acceptable.** If GPT-4o times out but 4 other LLMs return, the evaluation proceeds with 4 results. The confidence score adjusts slightly downward but the user still gets their report.
+
+7. **Mini modules narrow, never expand.** Each completed mini module can only move the recommendation from 3→2→1 city, never introduce new candidates. The narrowing is monotonic.
+
+---
+
+## 21. NEXT STEPS (Updated Phase 2 Priority)
 
 Priority order for development:
-1. **Paragraphical UI** - 24-paragraph input flow with globe region selector
-2. **Gemini extraction endpoint** - `/api/paragraphical`
-3. **Main Module questionnaire UI** - Demographics → DNW → MH → General flow
-4. **Progressive tier calculator** - Determine tier from available data
-5. **Evaluation pipeline** - 5 LLMs + Opus Judge, adapting to tier
-6. **Results page** - Country → City → Town → Neighborhood display
-7. **Report generation** - LLM raw report following summer playbook
-8. **Supabase integration** - Auth, data persistence, cost tracking
-9. **Stripe integration** - Subscription tiers
-10. **Deliverables pipeline** - Gamma, Cristiano, Olivia, InVideo
+
+1. ~~Paragraphical UI~~ ✅ DONE — 24-paragraph stepped input
+2. ~~Cost Tracking~~ ✅ DONE — Service, modal, admin access, dual persistence
+3. **Gemini extraction endpoint** — `/api/paragraphical` (Vercel serverless function)
+4. **Tier calculator + confidence engine** — `calculateTier()` + `calculateConfidence()`
+5. **Discovery evaluation** — Gemini-only quick scan → first report at 35%
+6. **Main Module questionnaire UI** — Demographics → DNW → MH → General flow
+7. **Progressive evaluation endpoints** — Add LLMs as tier increases
+8. **DNW elimination engine** — Binary walls (severity 5) + progressive penalties (1-4)
+9. **MH scoring engine** — Additive boosting based on importance levels
+10. **Opus Judge endpoint** — Consensus builder for validated+ tier
+11. **Next Steps engine** — Dynamic "what to do next" recommendations
+12. **Results page** — Country → City → Town → Neighborhood display with confidence badge
+13. **Report generation** — LLM raw report following summer playbook
+14. **Supabase auth flow** — Login/signup, session ownership
+15. **Stripe subscription** — Free/Navigator/Sovereign tiers
+16. **Deliverables pipeline** — Gamma, Cristiano, Olivia, InVideo
+
+---
+
+## 22. WHAT WE KEEP FROM PRIOR DESIGN DISCUSSIONS
+
+### KEEP (locked in, no debate)
+- **Gemini as extractor, not evaluator** — Narrative-to-data only
+- **Progressive Confidence Architecture** — Every tier produces results
+- **Paragraph-to-metric linking** — P3, P10, P14 references in recommendations
+- **TypeScript interfaces** — `EvaluationContext`, `EvaluationResult`, `GeminiExtraction` as defined
+- **Nested location hierarchy** — Country → City → Town → Neighborhood, always
+- **5 LLMs + Opus Judge** — Full panel at validated tier
+- **Smart scaling** — LLMs fire incrementally, not all-or-nothing
+- **Cost tracking per call** — Every LLM/API call logged with tokens and cost
+- **Next Steps nudges** — Every report shows what to do next for more confidence
+- **DNW severity 5 = instant elimination** — Hard wall, no exceptions
+- **Globe region as preference, not cage** — System can expand if needed
+
+### DON'T KEEP (rejected from Gemini's original proposal)
+- ~~Gemini as sole evaluator~~ — It proposed doing everything; we use it for extraction only
+- ~~"1 best country" output~~ — We evaluate 1,000+ metros; Gemini alone can't do that
+- ~~Gemini scoring cities~~ — That's the 5-LLM pipeline's job
+- ~~Skipping DNW/MH structured questionnaire~~ — Narrative misses things (blood thinners, pharmacy access)
+- ~~Claude Opus 4.6 (Gemini hallucinated this model name)~~ — We use actual current model IDs
+
+### ADAPTED (good idea, modified execution)
+- **Gemini's TypeScript interfaces** → Kept as starting point, extended with `CompletionTier`, `SessionCostRow`, etc.
+- **Paragraph-to-metric linking** → Expanded from Gemini's proposal to work across ALL tiers, not just Gemini's output
+- **Budget extraction** → Gemini extracts budget range from narrative; user confirms in Demographics
+- **Module relevance scoring** → Gemini suggests which modules matter most; used to order the "Recommended" badges on dashboard
 
 ---
 
