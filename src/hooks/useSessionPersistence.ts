@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { UserSession } from '../types';
 
 const STORAGE_KEY = 'clues_session';
@@ -37,7 +37,7 @@ function loadFromLocalStorage(): UserSession | null {
 
 // ─── Supabase helpers ────────────────────────────────────────
 async function saveToSupabase(session: UserSession): Promise<boolean> {
-  if (!supabase) return false;
+  if (!isSupabaseConfigured) return false;
 
   const completedParagraphs = session.paragraphical.paragraphs
     .filter(p => p.content.trim().length > 0).length;
@@ -77,7 +77,7 @@ async function saveToSupabase(session: UserSession): Promise<boolean> {
 }
 
 async function loadFromSupabase(sessionId: string): Promise<UserSession | null> {
-  if (!supabase) return null;
+  if (!isSupabaseConfigured) return null;
 
   try {
     const { data, error } = await supabase
@@ -115,7 +115,7 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
       const localSession = loadFromLocalStorage();
       const sessionId = localSession?.id;
 
-      if (sessionId && supabase) {
+      if (sessionId && isSupabaseConfigured) {
         // Try to load from Supabase (authoritative)
         const supabaseSession = await loadFromSupabase(sessionId);
         if (supabaseSession) {
