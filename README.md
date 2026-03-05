@@ -15,7 +15,7 @@ This is **not** a law-based app (unlike LifeScore, which focuses on legal freedo
 - **AI:** Google Gemini (Paragraphical pipeline), Cristiano Judge system (Opus)
 - **Research:** Tavily (search + research APIs)
 - **Reports:** Gamma (100-page visual report), HeyGen (video), InVideo (cinematic)
-- **Styling:** Dark-mode-first, WCAG 2.1 AA compliant (see CLAUDE.md)
+- **Styling:** Dark-mode-first, WCAG 2.1 AA compliant in both dark and light mode (see CLAUDE.md)
 
 ---
 
@@ -1075,14 +1075,14 @@ This is the **single source of truth** for which AI model powers each function i
 | **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
 | **Olivia Tutor (Paragraphical)** | Gemini 2.0 Flash | Google | Lightweight coverage-gap detection during writing. ~$0.001/call. Only fires when keyword detection isn't confident enough. |
 | **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 24 paragraphs, outputs structured GeminiExtraction. |
-| **LLM Evaluator #1** | Claude Sonnet 4.6 | Anthropic | Structured reasoning, category scoring |
+| **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
 | **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
 | **LLM Evaluator #3** | Gemini 3.1 Pro (Preview) | Google | Reuses extraction context for scoring |
 | **LLM Evaluator #4** | Grok 4 | xAI | Real-time web context for MH scoring |
 | **LLM Evaluator #5** | Perplexity Sonar | Perplexity | Research-backed citations |
-| **Cristiano Judge** | Claude Opus 4.6 | Anthropic | Consensus builder, reviews stdDev > 15 disagreements |
+| **Cristiano Judge** | Claude Opus 4.5 | Anthropic | Consensus builder, reviews stdDev > 15 disagreements |
 | **Emilia (Help Panel)** | N/A (static content) | — | Pre-written help topics, no LLM calls |
-| **Report Narrative** | Claude Sonnet 4.6 | Anthropic | Long-form report writing from scored data |
+| **Report Narrative** | Claude Sonnet 4.5 | Anthropic | Long-form report writing from scored data |
 | **HeyGen Avatar** | HeyGen API | HeyGen | Olivia video presentation |
 | **InVideo Movie** | InVideo API | InVideo | Cinematic "Before and After" movie |
 | **Voice Narration** | ElevenLabs / OpenAI TTS | — | Cristiano Judge narration for films |

@@ -23,8 +23,8 @@
 | Frontend | React 19 + TypeScript + Vite 7 | Dark glassmorphic UI, Montserrat font |
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
-| LLM Evaluators | Claude Sonnet 4.6, GPT-4o, Gemini 3.1 Pro (Preview), Grok 4, Perplexity Sonar | 5 parallel evaluators |
-| Judge | Claude Opus 4.6 | Consensus builder, reviews stdDev > 15 disagreements |
+| LLM Evaluators | Claude Sonnet 4.5, GPT-4o, Gemini 3.1 Pro (Preview), Grok 4, Perplexity Sonar | 5 parallel evaluators |
+| Judge | Claude Opus 4.5 | Consensus builder, reviews stdDev > 15 disagreements |
 | Narrative Engine | Gemini | Paragraphical extraction ONLY (not sole evaluator) |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
 | Payments | Stripe | Tiered subscriptions |
@@ -350,7 +350,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 ## 10. UI/UX SPECIFICATION
 
 ### Design Language
-- **Theme**: Dark mode ONLY, glassmorphic (frosted glass with backdrop blur)
+- **Theme**: Dark mode default, glassmorphic (frosted glass with backdrop blur). WCAG 2.1 AA compliance required for BOTH dark and light mode.
 - **Font**: Montserrat (400, 500, 600, 700, 800) + JetBrains Mono
 - **Primary Color**: Sapphire blue `#2563eb`
 - **Accent**: Orange `#f97316`, Gold `#f59e0b`
@@ -494,7 +494,7 @@ clues-main/
 
 3. **5 LLMs + Opus Judge** is the full evaluation pipeline. Never shortcut to fewer models for cost savings without user consent.
 
-4. **Dark mode only.** No light mode toggle. The glassmorphic aesthetic IS the brand.
+4. **WCAG 2.1 AA in both dark AND light mode.** Dark mode is the default brand aesthetic (glassmorphic), but all UI and reports must also meet WCAG contrast and accessibility requirements in light mode.
 
 5. **LifeScore is the reference implementation.** Follow its patterns for API routes, LLM integration, batch splitting, error handling, and cost tracking.
 
@@ -675,12 +675,12 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 
 ### Provider Rate Table (per 1M tokens, March 2026)
 ```
-claude-sonnet-4-6     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
+claude-sonnet-4-5     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
 gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
 gemini-3.1-pro        Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
 grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)
 perplexity-sonar      Input: $1.00    Output: $1.00    (LLM Evaluator #5)
-claude-opus-4-6       Input: $15.00   Output: $75.00   (Opus Judge)
+claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
 olivia (gpt-4o)       Input: $2.50    Output: $10.00   (Chat Assistant — GPT-4o company-wide)
@@ -857,7 +857,7 @@ Priority order for development:
 - ~~"1 best country" output~~ — We evaluate 1,000+ metros; Gemini alone can't do that
 - ~~Gemini scoring cities~~ — That's the 5-LLM pipeline's job
 - ~~Skipping DNW/MH structured questionnaire~~ — Narrative misses things (blood thinners, pharmacy access)
-- ~~Claude Opus 4.6 (Gemini hallucinated this model name)~~ — We use actual current model IDs
+- ~~Claude Opus 4.5 (Gemini hallucinated this model name)~~ — We use actual current model IDs
 
 ### ADAPTED (good idea, modified execution)
 - **Gemini's TypeScript interfaces** → Kept as starting point, extended with `CompletionTier`, `SessionCostRow`, etc.

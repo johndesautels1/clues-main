@@ -103,7 +103,7 @@ create policy "Anon users can manage anonymous sessions"
 create table if not exists public.cost_tracking (
   id            uuid primary key default gen_random_uuid(),
   session_id    uuid references public.sessions(id) on delete cascade,
-  model         text not null,         -- "claude-sonnet-4-6", "gpt-4o", etc.
+  model         text not null,         -- "claude-sonnet-4-5", "gpt-4o", etc.
   endpoint      text not null,         -- "/api/evaluate", "/api/paragraphical"
   input_tokens  integer not null default 0,
   output_tokens integer not null default 0,

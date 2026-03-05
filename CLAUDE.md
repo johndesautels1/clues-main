@@ -1,21 +1,22 @@
 # CLUES Intelligence — Development Rules
 
-## WCAG 2.1 AA Compliance (MANDATORY — Dark Mode)
+## WCAG 2.1 AA Compliance (MANDATORY — Dark Mode AND Light Mode)
 
-These rules are **non-negotiable**. Every developer and every AI session must follow them at all times. No exceptions.
+These rules are **non-negotiable**. Every developer and every AI session must follow them at all times. No exceptions. **All UI must meet WCAG 2.1 AA in BOTH dark mode and light mode.**
 
-### Contrast Ratios (against `--bg-primary: #0a0e1a`)
+### Contrast Ratios
 - **Normal text (< 18.66px bold or < 24px regular):** minimum **4.5:1** contrast ratio
 - **Large text (≥ 18.66px bold or ≥ 24px regular):** minimum **3:1** contrast ratio
 - **UI components and graphical objects:** minimum **3:1** contrast ratio against adjacent colors
 - **Focus indicators:** minimum **3:1** contrast ratio against the background
+- **These ratios apply in BOTH dark and light mode** — verify against the actual rendered background in each mode
 
 ### Minimum Font Sizes
 - **Body text:** never below `0.75rem` (12px)
 - **UI labels, badges, captions:** never below `0.6875rem` (11px)
 - **Nothing in the app** may ever be set below `0.6875rem`
 
-### Approved Dark-Mode Text Colors (pre-verified)
+### Approved Dark-Mode Text Colors (pre-verified against `--bg-primary: #0a0e1a`)
 | Token                  | Hex       | Ratio vs #0a0e1a | Use for                        |
 |------------------------|-----------|-------------------|--------------------------------|
 | `--text-primary`       | `#f9fafb` | 18.3:1            | Headings, primary body text    |
@@ -26,6 +27,13 @@ These rules are **non-negotiable**. Every developer and every AI session must fo
 | `--clues-orange`       | `#f97316` | 7.0:1             | Accent, badges                 |
 | `--clues-gold`         | `#f59e0b` | 7.9:1             | Accent, badges                 |
 | `--score-green`        | `#22c55e` | 6.4:1             | Success indicators             |
+
+### Light-Mode Compliance
+- Light mode background: `#ffffff` (or near-white)
+- All text colors used in light mode must meet the same 4.5:1 / 3:1 ratios against the light background
+- Dark-mode-only colors (e.g., `#f9fafb` text) will NOT pass on white — use CSS custom properties that swap per `prefers-color-scheme` or a theme class
+- Glassmorphic overlays in light mode must ensure text on glass cards still meets contrast minimums
+- The 100-page report (PDF/print) must also meet WCAG contrast ratios for light backgrounds
 
 ### Disabled / Locked State Rules
 - **Never** use `opacity` below `0.6` on any element containing text
@@ -46,10 +54,11 @@ These rules are **non-negotiable**. Every developer and every AI session must fo
 - Status badges already use text labels — maintain this pattern
 
 ### Before Submitting ANY CSS
-1. Verify every text color against its actual rendered background (not just `--bg-primary` — check overlays, cards, badges)
+1. Verify every text color against its actual rendered background in **both dark and light mode** (not just `--bg-primary` — check overlays, cards, badges)
 2. Verify font sizes meet minimums above
-3. Verify disabled states maintain 3:1
+3. Verify disabled states maintain 3:1 in both modes
 4. Verify focus outlines exist on all interactive elements
+5. If adding new colors, verify contrast ratios against both `#0a0e1a` (dark) and `#ffffff` (light)
 
 ---
 

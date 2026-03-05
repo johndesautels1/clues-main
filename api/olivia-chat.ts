@@ -127,7 +127,7 @@ export default async function handler(
     if (body.sessionId) {
       trackCost({
         sessionId: body.sessionId,
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-5',
         endpoint: '/api/olivia-chat',
         inputTokens,
         outputTokens,

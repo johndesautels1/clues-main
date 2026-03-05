@@ -223,7 +223,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
       return {
         tier,
         llmCount: 2,
-        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-6'],
+        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-5'],
         useJudge: false,
         tavilySearches: 10,
       };
@@ -231,7 +231,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
       return {
         tier,
         llmCount: 3,
-        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-6', 'gpt-4o'],
+        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-5', 'gpt-4o'],
         useJudge: false,
         tavilySearches: 15,
       };
@@ -239,7 +239,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
       return {
         tier,
         llmCount: 4,
-        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-6', 'gpt-4o', 'grok-4'],
+        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-5', 'gpt-4o', 'grok-4'],
         useJudge: false,
         tavilySearches: 20,
       };
@@ -247,7 +247,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
       return {
         tier,
         llmCount: 5,
-        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-6', 'gpt-4o', 'grok-4', 'perplexity-sonar'],
+        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-5', 'gpt-4o', 'grok-4', 'perplexity-sonar'],
         useJudge: true,
         tavilySearches: 200,
       };
@@ -255,7 +255,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
       return {
         tier,
         llmCount: 5,
-        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-6', 'gpt-4o', 'grok-4', 'perplexity-sonar'],
+        llmModels: ['gemini-3.1-pro', 'claude-sonnet-4-5', 'gpt-4o', 'grok-4', 'perplexity-sonar'],
         useJudge: true,
         tavilySearches: 200, // +20 per completed module, handled by evaluation endpoint
       };
