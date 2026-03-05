@@ -59,7 +59,7 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
           <section className="privacy-modal__section">
             <h3>1. Introduction</h3>
             <p>
-              Clues Intelligence LTD (&ldquo;CLUES,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our CLUES Intelligence platform, including the Paragraphical Discovery Questionnaire, AI-powered relocation reports, LIFE SCORE evaluations, SMART city assessments, and all related services.
+              Clues Intelligence LTD (&ldquo;CLUES,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our CLUES Intelligence platform, including the Paragraphical Discovery Questionnaire, AI-powered relocation reports, Clues Intelligence evaluations, SMART city assessments, and all related services.
             </p>
           </section>
 

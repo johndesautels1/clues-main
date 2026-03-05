@@ -88,8 +88,8 @@ export function Footer() {
                 <span className="footer__tech-desc">Strategic Market Assessment &amp; Rating Technology</span>
               </div>
               <div className="footer__tech-item">
-                <span className="footer__tech-name">LIFE SCORE</span>
-                <span className="footer__tech-desc">Legal Independence &amp; Freedom Evaluation</span>
+                <span className="footer__tech-name">Clues Intelligence</span>
+                <span className="footer__tech-desc">AI-Powered Global Relocation Intelligence</span>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@ export function Footer() {
             </nav>
 
             <p className="footer__trademark">
-              CLUES, SMART, and LIFE SCORE are trademarks of Clues Intelligence LTD
+              CLUES, SMART, and Clues Intelligence are trademarks of Clues Intelligence LTD
             </p>
             <p className="footer__sub-tagline">
               AI-Powered Global Relocation Intelligence Platform
