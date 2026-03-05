@@ -10,11 +10,6 @@ import 'leaflet/dist/leaflet.css';
 import './MapOverlay.css';
 
 const TILE_LAYERS = {
-  dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    label: 'Dark',
-  },
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri, Maxar, Earthstar Geographics',
@@ -24,6 +19,11 @@ const TILE_LAYERS = {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
     label: 'Street',
+  },
+  light: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    label: 'Light',
   },
 } as const;
 
@@ -52,7 +52,7 @@ interface Props {
 }
 
 export function MapOverlay({ lat, lng, visible, onBackToGlobe }: Props) {
-  const [layer, setLayer] = useState<LayerKey>('dark');
+  const [layer, setLayer] = useState<LayerKey>('satellite');
   const tile = TILE_LAYERS[layer];
 
   if (!visible) return null;
@@ -66,7 +66,7 @@ export function MapOverlay({ lat, lng, visible, onBackToGlobe }: Props) {
         zoomControl={false}
         attributionControl={true}
       >
-        <TileLayer url={tile.url} attribution={tile.attribution} maxZoom={19} />
+        <TileLayer key={layer} url={tile.url} attribution={tile.attribution} maxZoom={19} />
         <MapSync lat={lat} lng={lng} />
       </MapContainer>
 

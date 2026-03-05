@@ -103,25 +103,6 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Keep refs to latest values for the unmount cleanup (avoids stale closures)
-  const zoomDepthRef = useRef(zoomDepth);
-  zoomDepthRef.current = zoomDepth;
-  const onRegionSelectedRef = useRef(onRegionSelected);
-  onRegionSelectedRef.current = onRegionSelected;
-
-  // Save the globe's live POV when the user navigates away, so scroll/drag
-  // exploration is preserved — not just click-based selections.
-  useEffect(() => {
-    return () => {
-      if (!globeRef.current || zoomDepthRef.current === 0) return;
-      const pov = globeRef.current.pointOfView();
-      if (pov?.lat != null && pov?.lng != null) {
-        const region = getClosestRegion(pov.lat, pov.lng);
-        onRegionSelectedRef.current(region, pov.lat, pov.lng, zoomDepthRef.current);
-      }
-    };
-  }, []);
-
   // Set initial globe appearance — allow deep zoom
   // If user has a saved globe selection, restore their position
   const hasRestored = useRef(false);

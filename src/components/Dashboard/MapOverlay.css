@@ -77,7 +77,7 @@
   font-size: var(--text-sm, 0.875rem);
   font-weight: 600;
   color: var(--text-primary, #f9fafb);
-  background: rgba(10, 14, 26, 0.85);
+  background: rgba(10, 14, 26, 0.92);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-glass-accent, rgba(37,99,235,0.3));
   border-radius: var(--radius-full, 9999px);
@@ -107,7 +107,7 @@
 .map-overlay__layer-toggle {
   display: flex;
   gap: 2px;
-  background: rgba(10, 14, 26, 0.85);
+  background: rgba(10, 14, 26, 0.92);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-glass, rgba(255,255,255,0.08));
   border-radius: var(--radius-full, 9999px);
