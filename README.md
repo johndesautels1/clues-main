@@ -597,27 +597,31 @@ IF user is too vague:
 
 ### Interjection Examples by Paragraph
 
-**P3 — "Your Ideal Climate"**
+**P3 — "Your Dealbreakers"**
+User mentioned safety concerns but nothing about climate or visa:
+> "Great that you know your safety limits! Have you thought about climate dealbreakers too? Some cities that feel safe have extreme humidity or heat that makes daily life miserable. And is there a visa pathway that MUST exist, or would lack of one be a hard wall?"
+
+**P6 — "Climate & Weather"**
 User wrote about temperature but not humidity:
 > "Love the detail about temperature! Quick thought — how do you feel about humidity? Some places hit your perfect temperature but the humidity makes it feel 10 degrees hotter. Worth mentioning if it matters to you."
 
-**P5 — "Your Health & Wellness"**
+**P8 — "Healthcare & Medical"**
 User mentioned being healthy but didn't discuss medication or specialists:
 > "Great that you're in good health! Just in case — do you take any regular medications or see any specialists? Pharmacy access varies wildly between countries, and some medications that are over-the-counter at home need prescriptions abroad."
 
-**P8 — "Your Financial Picture"**
+**P11 — "Financial & Banking"**
 User mentioned income but not taxes:
 > "Good picture of your income! One thing that can make or break a relocation budget: taxes. Some countries won't tax your foreign income at all, others take 30%+. Any thoughts on your tax tolerance?"
 
-**P12 — "Getting Around"**
+**P15 — "Transportation & Mobility"**
 User described a car-free lifestyle but didn't mention airports:
 > "Love the walkable vision! How often do you travel internationally? Airport proximity matters a lot for some people — a beautiful walkable city that's 3 hours from an airport changes the equation."
 
-**P16 — "Your Animals"**
+**P25 — "Pets & Animals"**
 User mentioned a dog but not the breed:
 > "A fellow dog person! What breed? It matters more than you'd think — some countries ban specific breeds, and size affects housing options and airline transport rules."
 
-**P24 — "Anything Else"**
+**P27 — "Anything Else"**
 User wrote very little:
 > "This is your safety net — anything you've been thinking about that didn't fit neatly into the other sections? Dealbreakers you forgot to mention? Things your partner cares about that are different from your priorities? Even small things can matter."
 
