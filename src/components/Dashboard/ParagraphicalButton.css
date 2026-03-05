@@ -139,9 +139,9 @@
 }
 
 .paragraphical--locked {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-  filter: grayscale(0.6);
+  filter: grayscale(0.5);
 }
 
 /* Responsive */

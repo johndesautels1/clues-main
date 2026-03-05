@@ -1,0 +1,66 @@
+/* Hero Heading - Main catchphrase above globe + Paragraphical */
+
+.hero-heading {
+  text-align: center;
+  padding: var(--space-6) 0 var(--space-2);
+  animation: fade-up 0.5s ease-out both;
+}
+
+.hero-heading__title {
+  font-size: var(--text-4xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.hero-heading__emphasis {
+  background: linear-gradient(
+    135deg,
+    var(--clues-sapphire-light) 0%,
+    var(--clues-orange) 50%,
+    var(--clues-gold) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-heading__separator {
+  color: var(--text-muted);
+  -webkit-text-fill-color: var(--text-muted);
+  font-weight: 400;
+}
+
+.hero-heading__subtitle {
+  font-size: var(--text-xl);
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-heading__title {
+    font-size: var(--text-3xl);
+  }
+
+  .hero-heading__subtitle {
+    font-size: var(--text-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-heading {
+    padding: var(--space-4) 0 var(--space-1);
+  }
+
+  .hero-heading__title {
+    font-size: var(--text-2xl);
+  }
+
+  .hero-heading__subtitle {
+    font-size: var(--text-md);
+  }
+}
