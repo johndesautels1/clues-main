@@ -1066,6 +1066,131 @@ The 100-page blueprint above is the **Validated/Precision tier** (full data). Fo
 
 ---
 
+## LLM Model Registry (Canonical)
+
+This is the **single source of truth** for which AI model powers each function in the CLUES ecosystem. Every developer and every AI session must reference this table. Do not guess models — check here.
+
+| Role | Model | Provider | Why |
+|------|-------|----------|-----|
+| **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
+| **Olivia Tutor (Paragraphical)** | Gemini 2.0 Flash | Google | Lightweight coverage-gap detection during writing. ~$0.001/call. Only fires when keyword detection isn't confident enough. |
+| **Paragraphical Extraction** | Gemini 2.5 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 24 paragraphs, outputs structured GeminiExtraction. |
+| **LLM Evaluator #1** | Claude Sonnet 4.6 | Anthropic | Structured reasoning, category scoring |
+| **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
+| **LLM Evaluator #3** | Gemini 2.5 Pro (Preview) | Google | Reuses extraction context for scoring |
+| **LLM Evaluator #4** | Grok 4 | xAI | Real-time web context for MH scoring |
+| **LLM Evaluator #5** | Perplexity Sonar | Perplexity | Research-backed citations |
+| **Cristiano Judge** | Claude Opus 4.6 | Anthropic | Consensus builder, reviews stdDev > 15 disagreements |
+| **Emilia (Help Panel)** | N/A (static content) | — | Pre-written help topics, no LLM calls |
+| **Report Narrative** | Claude Sonnet 4.6 | Anthropic | Long-form report writing from scored data |
+| **HeyGen Avatar** | HeyGen API | HeyGen | Olivia video presentation |
+| **InVideo Movie** | InVideo API | InVideo | Cinematic "Before and After" movie |
+| **Voice Narration** | ElevenLabs / OpenAI TTS | — | Cristiano Judge narration for films |
+
+### Key Rules
+1. **Olivia = GPT-4o everywhere** — chat bubble, help modal, all products. This is a company architecture decision, not per-feature.
+2. **Gemini 2.5 Pro (Preview) for heavy extraction** — the Paragraphical pipeline's main brain.
+3. **Gemini 2.0 Flash for lightweight tasks** — Olivia's tutor interjections during writing, cost validation checks, quick classification.
+4. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
+5. **Cost tracking must match these models.** The `costTracking.ts` rate table must align with this registry.
+
+---
+
+## Olivia Tutor Architecture (Paragraphical Writing Flow)
+
+Olivia guides users while they write each of the 24 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
+
+### Layer 1: Coverage Target Data (Code — Zero Cost)
+**What:** A TypeScript data file defining what each paragraph needs.
+**File:** `src/data/paragraphTargets.ts`
+
+```typescript
+// Per-paragraph: coverage targets, keyword groups, template interjections
+{
+  paragraphId: 3,
+  heading: "Your Ideal Climate",
+  coverageTargets: [
+    { id: "temperature", label: "Temperature preference", keywords: ["hot", "cold", "warm", "cool", "degrees", "celsius", "fahrenheit"] },
+    { id: "humidity", label: "Humidity tolerance", keywords: ["humid", "humidity", "dry", "moisture", "sticky", "arid", "tropical"] },
+    { id: "seasons", label: "Seasonal preference", keywords: ["seasons", "winter", "summer", "spring", "autumn", "fall", "year-round"] },
+    { id: "disasters", label: "Natural disaster tolerance", keywords: ["earthquake", "hurricane", "tornado", "flood", "typhoon", "wildfire"] },
+    { id: "sunshine", label: "Sunshine importance", keywords: ["sun", "sunny", "sunshine", "overcast", "gray", "cloudy", "rain"] },
+    { id: "air_quality", label: "Air quality", keywords: ["air quality", "pollution", "smog", "clean air", "asthma", "allergies"] },
+  ],
+  templateInterjections: {
+    humidity: "Love how specific you are about temperature! Quick thought — are you more of a dry-heat person or do you handle humidity okay? That single factor eliminates about 40% of cities.",
+    disasters: "Great detail on the climate vibe! Have you thought about natural disaster risk? Some dream-weather cities sit in earthquake or hurricane zones.",
+  }
+}
+```
+
+### Layer 2: Keyword Detection Engine (Code — Zero Cost)
+**What:** A React hook that monitors paragraph text in real-time and triggers interjections using local keyword matching.
+**File:** `src/hooks/useOliviaTutor.ts`
+
+- Debounces after 3-second pause or 150 words written
+- Minimum 80 words before first trigger (let them get going)
+- Maximum 2 interjections per paragraph
+- Checks each coverage target's keyword group against user text
+- If keywords found → target marked as covered
+- If missing after threshold → fires template interjection
+- Tracks dismissed interjections (don't repeat)
+- **This alone handles ~70% of tutoring with zero API spend**
+
+### Layer 3: Gemini Flash Escalation (API — ~$0.024/user total)
+**What:** When keyword detection confidence is low, fire a lightweight Gemini 2.0 Flash call.
+**File:** `src/lib/oliviaTutor.ts`
+
+Triggers when:
+- User wrote 150+ words but keyword detection only found 1-2 of 5+ targets
+- User's language is indirect/metaphorical (keyword matching fails)
+- Cross-paragraph conflict detected (e.g., P3 says "love the beach" but P6 says "hate tourists")
+
+The Gemini Flash prompt:
+```
+You are Olivia, analyzing paragraph text for coverage gaps.
+Paragraph {N}: "{heading}" — Coverage targets: {list}
+User wrote: "{text}"
+
+Return JSON:
+{
+  "covered": ["target1", "target2"],
+  "missing": ["target3"],
+  "most_important_missing": "target3",
+  "interjection": "string or null",
+  "confidence": 0.0-1.0
+}
+
+Only return interjection if confidence > 0.7 that target is genuinely missing.
+Reference something they wrote positively first. Ask about ONE missing target.
+Max 2 sentences. Never say "you forgot" — say "have you thought about".
+```
+
+Cost: ~$0.001 per call x 24 paragraphs = $0.024 max per user (most paragraphs handled by Layer 2).
+
+### Layer 4: Cross-Paragraph Intelligence (API — Future)
+**What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
+
+- Fires after paragraphs 6, 12, 18, and 24 (section boundaries)
+- Checks for contradictions (P3 vs P6, P8 vs P10)
+- Identifies completely unaddressed categories
+- Suggests which remaining paragraphs to focus on
+- Uses conversation history to avoid repetition
+
+### Build Order
+1. Layer 1 (data file) → Layer 2 (keyword hook) → Ship as MVP
+2. Layer 3 (Gemini Flash) → Add when keyword detection proves insufficient
+3. Layer 4 (cross-paragraph) → Add after Paragraphical extraction endpoint is built
+
+### UI Integration
+- Interjections appear in the existing `OliviaBubble.tsx` chat bubble
+- Bubble pulses gently when Olivia has something to say (not intrusive)
+- User can dismiss ("Got it") or expand ("Tell me more")
+- "Tell me more" escalates to GPT-4o (Olivia's full brain) for a detailed explanation
+- Interjection count badge on bubble: "Olivia has 1 suggestion"
+
+---
+
 ## Development
 
 See `CLAUDE.md` for WCAG 2.1 AA compliance rules, build rules, and development guidelines.
