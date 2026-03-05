@@ -2,7 +2,7 @@
  * /api/paragraphical — Gemini Extraction Endpoint
  *
  * Receives the user's 24 paragraphs + globe region.
- * Sends to Gemini 2.5 Pro for structured narrative extraction.
+ * Sends to Gemini 3.1 Pro for structured narrative extraction.
  * Returns GeminiExtraction that feeds into the evaluation pipeline.
  *
  * This is Gemini's ONLY role: extract structured data from narrative.
@@ -237,7 +237,7 @@ export default async function handler(
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3.1-pro',
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 4096,
@@ -283,7 +283,7 @@ export default async function handler(
     // Track cost (non-blocking — don't fail the request if cost tracking fails)
     trackCost({
       sessionId: body.sessionId,
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3.1-pro',
       endpoint: '/api/paragraphical',
       inputTokens,
       outputTokens,
@@ -295,7 +295,7 @@ export default async function handler(
     res.status(200).json({
       extraction,
       metadata: {
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.1-pro',
         inputTokens,
         outputTokens,
         costUsd: Number(costUsd.toFixed(6)),
