@@ -121,52 +121,64 @@ Each module has **10 general questions** (200 total across 20 modules).
 
 ---
 
-## 5. THE 24-PARAGRAPH PARAGRAPHICAL
+## 5. THE 27-PARAGRAPH PARAGRAPHICAL
 
-Free-form narrative input mapped to the Human Existence Flow. Gemini extracts structured data from all 24 paragraphs.
+Free-form narrative input following the CLUES decision pipeline. Gemini extracts structured data from all 27 paragraphs.
 
 ### Paragraph Map
 ```
-OPENING (Your Story)
-  P1:  "Who You Are"             — Name, age, identity, origins
-  P2:  "Your Life Right Now"     — Current situation, what works/doesn't
+PHASE 1: YOUR PROFILE (Demographics)
+  P1:  "Who You Are"                   — Age, gender, nationality, citizenship, household, languages, employment
+  P2:  "Your Life Right Now"           — Current location, income, currency, push factors, timeline
 
-SURVIVAL & FOUNDATION
-  P3:  "Your Ideal Climate"      — Weather, seasons, environment
-  P4:  "Safety & Peace of Mind"  — What makes you feel secure
-  P5:  "Your Health & Wellness"  — Medical needs, health priorities
-  P6:  "Your Dream Home"         — Housing type, neighborhood, space
+PHASE 2: DO NOT WANTS (Dealbreakers)
+  P3:  "Your Dealbreakers"             — Hard walls that eliminate cities before scoring begins
 
-LEGAL & FINANCIAL
-  P7:  "Your Legal Reality"      — Citizenship, visa situation
-  P8:  "Your Financial Picture"  — Budget, income, cost tolerance
-  P9:  "Freedom & Autonomy"      — What freedoms matter most
+PHASE 3: MUST HAVES (Non-Negotiables)
+  P4:  "Your Non-Negotiables"          — Requirements a city MUST meet to stay in the running
 
-LIVELIHOOD & GROWTH
-  P10: "Your Work & Career"      — Job, remote/local, ambitions
-  P11: "Staying Connected"       — Internet, tech, digital life
-  P12: "Getting Around"          — Car/transit/walk preferences
-  P13: "Learning & Growth"       — Education goals (you or kids)
+PHASE 4: TRADE-OFFS (Priority Weighting)
+  P5:  "Your Trade-offs"               — What user would sacrifice — reveals how to weight competing metrics
 
-PEOPLE & RELATIONSHIPS
-  P14: "Your Family"             — Who comes, family dynamics
-  P15: "Your Social World"       — Friends, dating, community
-  P16: "Your Animals"            — Pets, animal needs
+PHASE 5: MODULE DEEP DIVES (20 paragraphs, 1:1 with modules in Human Existence Flow order)
+  SURVIVAL
+    P6:  "Climate & Weather"           — moduleId: climate_weather
+    P7:  "Safety & Security"           — moduleId: safety_security
+    P8:  "Healthcare & Medical"        — moduleId: healthcare
+    P9:  "Housing & Real Estate"       — moduleId: housing
+  FOUNDATION
+    P10: "Legal & Immigration"         — moduleId: legal_immigration
+    P11: "Financial & Banking"         — moduleId: financial
+    P12: "Legal Independence & Freedom"— moduleId: lifescore
+  GROWTH
+    P13: "Business & Entrepreneurship" — moduleId: business
+    P14: "Technology & Connectivity"   — moduleId: technology
+    P15: "Transportation & Mobility"   — moduleId: transportation
+    P16: "Education & Learning"        — moduleId: education
+  CONNECTION
+    P17: "Family & Children"           — moduleId: family
+    P18: "Dating & Social Life"        — moduleId: dating_social
+  NOURISHMENT
+    P19: "Food & Cuisine"              — moduleId: food_cuisine
+    P20: "Sports & Fitness"            — moduleId: sports_fitness
+    P21: "Outdoor & Nature"            — moduleId: outdoor_nature
+  SOUL
+    P22: "Arts & Culture"              — moduleId: arts_culture
+    P23: "Entertainment & Nightlife"   — moduleId: entertainment
+    P24: "Spiritual & Religious"       — moduleId: spiritual
+    P25: "Pets & Animals"              — moduleId: pets
 
-NOURISHMENT & LIFESTYLE
-  P17: "Food & Dining"           — Dietary needs, cuisines, food culture
-  P18: "Fitness & Activity"      — Exercise, sports, staying active
-  P19: "Nature & Outdoors"       — Mountains/beaches, parks
-
-SOUL & MEANING
-  P20: "Arts & Culture"          — Museums, music, theater
-  P21: "Fun & Entertainment"     — Nightlife, events, hobbies
-  P22: "Faith & Spirituality"    — Religious needs, spiritual community
-
-CLOSING (Your Vision)
-  P23: "Your Dream Day"          — Perfect day in your new city
-  P24: "Anything Else"           — Dealbreakers, wild cards
+PHASE 6: YOUR VISION
+  P26: "Your Dream Day"               — Perfect ordinary Tuesday in your new city
+  P27: "Anything Else"                 — Wildcard: missed dealbreakers, past experiences, future plans
 ```
+
+### Key changes vs. the old 24-paragraph structure:
+- **Added P3 (Dealbreakers)** — DNW hard walls the old structure lacked
+- **Added P4 (Non-Negotiables)** — Must Haves the old structure lacked
+- **Added P5 (Trade-offs)** — Priority weighting signals the old structure lacked
+- **Module-mapped paragraphs** — Each P6-P25 has a `moduleId` property linking it to the exact module it mirrors
+- **Enriched prompts** — Every prompt asks for specific, scorable data (numbers, thresholds, concrete preferences)
 
 ### Gemini's Extraction Output
 ```typescript
@@ -406,8 +418,8 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Cost tracking dashboard modal (admin-only) with provider breakdown, tier breakdown, profitability analysis
 - ✅ Emilia help panel with categorized help topics (admin sees Cost Tracking + System Status)
 - ✅ React Router (`/` dashboard, `/paragraphical` essay flow)
-- ✅ Paragraphical 24-paragraph stepped input UI with sidebar navigation
-- ✅ 24 paragraph definitions with prompts, placeholders, section groupings
+- ✅ Paragraphical 27-paragraph stepped input UI with sidebar navigation
+- ✅ 27 paragraph definitions with prompts, placeholders, section groupings, moduleId mapping
 - ✅ Auto-save paragraphs to context (→ Supabase) on navigation
 - ✅ Dashboard loading state during session hydration
 
@@ -488,7 +500,7 @@ clues-main/
 
 ## 13. CRITICAL RULES (DO NOT VIOLATE)
 
-1. **Gemini is an EXTRACTOR, not an evaluator.** It reads the 24 paragraphs and outputs structured data. It does NOT score cities or make final recommendations.
+1. **Gemini extracts AND recommends at Discovery tier.** It reads the 27 paragraphs, converts narrative to 100-250 numbered metrics, recommends countries/cities/towns/neighborhoods, and scores them with sourced data. Opus/Cristiano always judges Gemini's output. See PARAGRAPHICAL_ARCHITECTURE.md for details.
 
 2. **Every completion tier produces results.** Always output: countries → cities → towns → neighborhoods. The only difference is quantity, confidence, and AI depth.
 
@@ -539,9 +551,10 @@ clues-main/
 ```typescript
 interface ParagraphicalInput {
   paragraphs: {
-    id: number;           // 1-24
+    id: number;           // 1-27
     heading: string;      // "Who You Are"
     content: string;      // User's free-form text
+    moduleId?: string;    // P6-P25 only: links to the module this paragraph mirrors
   }[];
   globeRegion: string;    // "Southern Europe / Mediterranean"
   metadata: {
@@ -818,7 +831,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 Priority order for development:
 
-1. ~~Paragraphical UI~~ ✅ DONE — 24-paragraph stepped input
+1. ~~Paragraphical UI~~ ✅ DONE — 27-paragraph stepped input (P3=Dealbreakers, P4=Must Haves, P5=Trade-offs, P6-P25=Module Deep Dives, P26-P27=Vision)
 2. ~~Cost Tracking~~ ✅ DONE — Service, modal, admin access, dual persistence
 3. **Gemini extraction endpoint** — `/api/paragraphical` (Vercel serverless function)
 4. **Tier calculator + confidence engine** — `calculateTier()` + `calculateConfidence()`
