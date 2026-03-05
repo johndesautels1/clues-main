@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { CostTrackingModal } from './CostTrackingModal';
@@ -41,7 +41,6 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
 
 export function Header() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, isAuthenticated, signOut } = useAuth();
   const [showCosts, setShowCosts] = useState(false);
   const [activeTab, setActiveTab] = useState('compare');
@@ -60,8 +59,6 @@ export function Header() {
     setActiveTab(id);
     // Future: navigate to sub-routes or open modals per tab
   };
-
-  const isDashboard = location.pathname === '/' || location.pathname === '/dashboard';
 
   return (
     <>
