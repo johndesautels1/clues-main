@@ -841,7 +841,7 @@ SECTION 3: THE CITY SHOWDOWN (Pages 17-46) — THE CORE
 
   Pages 40-42: WINNING CITY PORTRAIT
            - Why [City] wins: narrative summary
-           - "Your paragraph said [quote from P23] — here's how [City] delivers"
+           - "Your paragraph said [quote from P26] — here's how [City] delivers"
            - Day-in-the-life narrative (morning to night in winning city)
            - Local neighborhood character descriptions
            - VISUAL: Photo collage + pull quotes from user's own paragraphs
@@ -1042,10 +1042,19 @@ SECTION 8: ACTION PLAN (Pages 79-86)
 SECTION 9: METHODOLOGY & EVIDENCE (Pages 87-96)
 ────────────────────────────────────────────────
   Page 87: HOW CLUES WORKS
-           - Plain-language explanation of the system
-           - 24 paragraphs → metric extraction → 5-LLM scoring → Opus Judge → Report
+           - Plain-language explanation of the 6-phase pipeline:
+             Phase 1: Your Profile (P1-P2) → demographics, income, timeline
+             Phase 2: Dealbreakers (P3) → hard elimination walls
+             Phase 3: Must Haves (P4) → non-negotiable requirements
+             Phase 4: Trade-offs (P5) → priority weighting signals
+             Phase 5: Module Deep Dives (P6-P25) → 20 categories scored
+             Phase 6: Vision (P26-P27) → validation + wildcard
+           - 27 paragraphs → 100-250 numbered metrics → Tavily research →
+             5-LLM scoring → Opus/Cristiano Judge → 100-page report
+           - DNW elimination explained: severity-5 = instant city removal
+           - MH boosting explained: additive scoring, not eliminative
            - Why this is better than Googling / reading blogs
-           - VISUAL: Pipeline flowchart (simple, clean)
+           - VISUAL: Pipeline flowchart showing 6 phases + downstream modules
 
   Page 88: YOUR METRICS EXPLAINED
            - How paragraphs became metrics
