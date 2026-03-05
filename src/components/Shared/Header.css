@@ -1,4 +1,4 @@
-/* Dashboard Header */
+/* Dashboard Header + Toolbar */
 
 .header {
   position: sticky;
@@ -15,12 +15,23 @@
   align-items: center;
   justify-content: space-between;
   height: 64px;
+  gap: var(--space-4);
 }
+
+/* ─── Brand ─────────────────────────────────────────── */
 
 .header__brand {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.header__brand:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .header__logo-icon {
@@ -45,17 +56,71 @@
   letter-spacing: 0.04em;
 }
 
-/* Navigation */
-.header__nav {
+/* ─── Toolbar (center nav) ──────────────────────────── */
+
+.header__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+}
+
+.header__toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: var(--text-sm);      /* 12px — meets minimum */
+  font-weight: 600;
+  color: var(--text-secondary);   /* 6.3:1 */
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.header__toolbar-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.header__toolbar-btn:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: -2px;
+}
+
+.header__toolbar-btn--active {
+  color: var(--text-primary);           /* 18.3:1 */
+  background: rgba(37, 99, 235, 0.15);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+}
+
+.header__toolbar-icon {
+  font-size: var(--text-base);   /* 14px */
+  line-height: 1;
+}
+
+.header__toolbar-label {
+  line-height: 1;
+}
+
+/* ─── Right Actions ─────────────────────────────────── */
+
+.header__actions {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  flex-shrink: 0;
 }
 
-.header__nav-btn {
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--text-sm);
-  font-weight: 600;
+.header__action-btn {
+  padding: var(--space-2);
+  font-size: var(--text-md);
   color: var(--text-secondary);
   border-radius: var(--radius-md);
   transition:
@@ -63,27 +128,77 @@
     background var(--transition-fast);
 }
 
-.header__nav-btn:hover {
+.header__action-btn:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.06);
 }
 
-.header__nav-btn--active {
-  color: var(--text-primary);
+.header__action-btn:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: -2px;
+}
+
+.header__action-btn--signin {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-accent);        /* 5.1:1 */
+  padding: var(--space-2) var(--space-4);
+}
+
+.header__action-btn--signout {
+  font-size: var(--text-sm);        /* 12px */
+  color: var(--text-muted);         /* 5.2:1 */
+  padding: var(--space-2) var(--space-4);
+}
+
+.header__action-btn--signout:hover {
+  color: var(--score-red);
+}
+
+/* ─── Notification Badge ────────────────────────────── */
+
+.header__badge-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
   background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.header__nav-btn--icon {
-  padding: var(--space-2);
-  font-size: var(--text-md);
+.header__badge-btn:hover {
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.2);
 }
 
-/* Auth section */
+.header__badge-btn:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+}
+
+.header__badge-count {
+  font-size: var(--text-xs);        /* 11px — meets minimum */
+  font-weight: 800;
+  color: var(--text-primary);       /* 18.3:1 */
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Auth Section ──────────────────────────────────── */
+
 .header__auth {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-left: var(--space-2);
+  margin-left: var(--space-1);
   padding-left: var(--space-3);
   border-left: 1px solid var(--border-glass);
 }
@@ -98,33 +213,65 @@
   white-space: nowrap;
 }
 
-.header__nav-btn--signin {
-  color: var(--text-accent);
-  font-weight: 700;
+/* ─── Responsive ────────────────────────────────────── */
+
+@media (max-width: 1200px) {
+  .header__toolbar-icon {
+    display: none;
+  }
+
+  .header__toolbar-btn {
+    padding: 6px 10px;
+  }
 }
 
-.header__nav-btn--signout {
-  color: var(--text-muted); /* 5.2:1 ✓ */
-  font-size: var(--text-sm); /* 12px — body text minimum per CLAUDE.md */
-}
-
-.header__nav-btn--signout:hover {
-  color: var(--score-red);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .header__inner {
     height: 56px;
+    gap: var(--space-2);
   }
 
   .header__tagline {
     display: none;
   }
 
-  .header__nav-btn {
-    padding: var(--space-2) var(--space-3);
+  .header__toolbar-btn {
+    padding: 5px 8px;
     font-size: var(--text-xs);
+  }
+
+  .header__toolbar {
+    gap: 1px;
+    padding: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header__inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  .header__brand {
+    order: 1;
+  }
+
+  .header__actions {
+    order: 2;
+  }
+
+  .header__toolbar {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .header__toolbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -133,7 +280,7 @@
     font-size: var(--text-md);
   }
 
-  .header__nav-btn span {
-    display: none;
+  .header__toolbar-label {
+    font-size: 0.625rem; /* 10px — still readable, icon supplements */
   }
 }
