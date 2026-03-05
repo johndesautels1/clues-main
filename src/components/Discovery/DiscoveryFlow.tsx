@@ -3,6 +3,7 @@
  *
  * Integrates with UserContext for Supabase persistence.
  * localStorage fallback for anonymous users.
+ * Progress bar, auto-save indicator, save & exit, welcome-back toast.
  * All WCAG 2.1 AA fixes applied:
  *  - pageBg = #0a0e1a (matches globals.css --bg-primary)
  *  - All font sizes >= 11px
