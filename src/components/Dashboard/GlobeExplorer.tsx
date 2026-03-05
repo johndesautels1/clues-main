@@ -13,6 +13,7 @@
 
 import { useRef, useState, useCallback, useEffect } from 'react';
 import Globe from 'react-globe.gl';
+import * as THREE from 'three';
 import './GlobeExplorer.css';
 
 // Predefined regions for labeling the user's zoom location
@@ -100,6 +101,7 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
   // Set initial globe appearance — allow deep zoom
   // If user has a saved globe selection, restore their position
   const hasRestored = useRef(false);
+  const hasEnhancedTexture = useRef(false);
 
   useEffect(() => {
     if (!globeRef.current) return;
@@ -109,6 +111,38 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
       controls.enableZoom = true;
       controls.minDistance = 101;  // city/street level
       controls.maxDistance = 500;  // full globe pullback
+    }
+
+    // Enhance texture quality — anisotropic filtering for sharper zoom
+    if (!hasEnhancedTexture.current) {
+      hasEnhancedTexture.current = true;
+      const applyFiltering = () => {
+        try {
+          const renderer = globeRef.current?.renderer?.();
+          const scene = globeRef.current?.scene?.();
+          if (!renderer || !scene) return;
+          const maxAniso = renderer.capabilities.getMaxAnisotropy();
+          scene.traverse((obj: any) => {
+            if (obj.isMesh && obj.material) {
+              const mat = obj.material;
+              if (mat.map) {
+                mat.map.anisotropy = maxAniso;
+                mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+                mat.map.magFilter = THREE.LinearFilter;
+                mat.map.needsUpdate = true;
+              }
+              if (mat.bumpMap) {
+                mat.bumpMap.anisotropy = maxAniso;
+                mat.bumpMap.needsUpdate = true;
+              }
+            }
+          });
+        } catch { /* globe not fully ready */ }
+      };
+      // Texture loads async — retry a few times
+      setTimeout(applyFiltering, 1000);
+      setTimeout(applyFiltering, 3000);
+      setTimeout(applyFiltering, 6000);
     }
 
     // Restore saved globe position on return
@@ -217,8 +251,8 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
           ref={globeRef}
           width={dimensions.width}
           height={dimensions.height}
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+          globeImageUrl="/textures/earth-8k.jpg"
+          bumpImageUrl="/textures/earth-topology-4k.png"
           backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
           atmosphereColor="#2563eb"
           atmosphereAltitude={0.2}
