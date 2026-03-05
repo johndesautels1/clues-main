@@ -84,6 +84,9 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
   );
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
   const [showMap, setShowMap] = useState(false);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(
+    globeSelection ? { lat: globeSelection.lat, lng: globeSelection.lng } : null
+  );
   const hasZoomed = !!globeSelection;
 
   // Responsive sizing
@@ -215,6 +218,7 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
     const region = getClosestRegion(lat, lng);
     setZoomDepth(nextDepth);
     setZoomLabel(getZoomLabel(nextAltitude));
+    setMapCenter({ lat, lng });
 
     setTimeout(() => {
       setIsZooming(false);
@@ -222,8 +226,16 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
     }, 1300);
   }, [onRegionSelected, isZooming]);
 
-  // Switch to high-res map view
+  // Switch to high-res map view — read the globe's current POV so the map
+  // opens exactly where the user is looking, even if they scrolled/dragged
+  // without clicking.
   const handleShowMap = useCallback(() => {
+    if (globeRef.current) {
+      const pov = globeRef.current.pointOfView();
+      if (pov?.lat != null && pov?.lng != null) {
+        setMapCenter({ lat: pov.lat, lng: pov.lng });
+      }
+    }
     setShowMap(true);
   }, []);
 
@@ -274,10 +286,10 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
         />
 
         {/* High-res map overlay — appears at city level when toggled */}
-        {globeSelection && showMap && (
+        {mapCenter && showMap && (
           <MapOverlay
-            lat={globeSelection.lat}
-            lng={globeSelection.lng}
+            lat={mapCenter.lat}
+            lng={mapCenter.lng}
             visible={showMap}
             onBackToGlobe={handleBackToGlobe}
           />
