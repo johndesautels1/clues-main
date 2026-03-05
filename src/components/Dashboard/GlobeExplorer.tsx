@@ -14,6 +14,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
+import { MapOverlay } from './MapOverlay';
 import './GlobeExplorer.css';
 
 // Predefined regions for labeling the user's zoom location
@@ -82,6 +83,7 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
     globeSelection ? getZoomLabel(ZOOM_LEVELS[Math.min(globeSelection.zoomLevel - 1, 2)]?.altitude ?? 2.5) : null
   );
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
+  const [showMap, setShowMap] = useState(false);
   const hasZoomed = !!globeSelection;
 
   // Responsive sizing
@@ -220,10 +222,21 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
     }, 1300);
   }, [onRegionSelected, isZooming]);
 
+  // Switch to high-res map view
+  const handleShowMap = useCallback(() => {
+    setShowMap(true);
+  }, []);
+
+  // Return from map to globe
+  const handleBackToGlobe = useCallback(() => {
+    setShowMap(false);
+  }, []);
+
   // Reset zoom — pull back to full globe view
   const handleResetZoom = useCallback(() => {
     if (!globeRef.current || isZooming) return;
 
+    setShowMap(false);
     setIsZooming(true);
 
     globeRef.current.pointOfView(
@@ -260,8 +273,18 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
           animateIn={true}
         />
 
+        {/* High-res map overlay — appears at city level when toggled */}
+        {globeSelection && showMap && (
+          <MapOverlay
+            lat={globeSelection.lat}
+            lng={globeSelection.lng}
+            visible={showMap}
+            onBackToGlobe={handleBackToGlobe}
+          />
+        )}
+
         {/* Zoom depth indicator — bottom-left of globe */}
-        {zoomDepth > 0 && !isZooming && (
+        {zoomDepth > 0 && !isZooming && !showMap && (
           <div className="globe-explorer__zoom-depth">
             {ZOOM_LEVELS.map((level, i) => (
               <span
@@ -291,21 +314,28 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
       )}
 
       {/* Keep-zooming hint — after first click but not at city level */}
-      {hasZoomed && zoomDepth > 0 && zoomDepth < 3 && !isZooming && (
+      {hasZoomed && zoomDepth > 0 && zoomDepth < 3 && !isZooming && !showMap && (
         <div className="globe-explorer__deeper-hint">
           Click again to zoom to {zoomDepth === 1 ? 'country' : 'city'} level
         </div>
       )}
 
-      {/* At city level — done message */}
-      {hasZoomed && zoomDepth >= 3 && !isZooming && (
+      {/* At city level — done message + map toggle */}
+      {hasZoomed && zoomDepth >= 3 && !isZooming && !showMap && (
         <div className="globe-explorer__deeper-hint globe-explorer__deeper-hint--done">
-          You can scroll to zoom even closer, or click to re-center
+          <span>Scroll to zoom closer, click to re-center, or </span>
+          <button
+            className="globe-explorer__map-toggle"
+            onClick={handleShowMap}
+            type="button"
+          >
+            switch to HD Map
+          </button>
         </div>
       )}
 
       {/* Zooming indicator */}
-      {isZooming && (
+      {isZooming && !showMap && (
         <div className="globe-explorer__zooming">
           <div className="globe-explorer__spinner" />
           <p>Zooming in...</p>
@@ -313,12 +343,21 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
       )}
 
       {/* Region badge + reset button */}
-      {hasZoomed && globeSelection && !isZooming && (
+      {hasZoomed && globeSelection && !isZooming && !showMap && (
         <div className="globe-explorer__region-bar">
           <div className="globe-explorer__region-badge">
             <span className="globe-explorer__region-icon">📍</span>
             <span className="globe-explorer__region-name">{globeSelection.region}</span>
           </div>
+          {zoomDepth >= 3 && (
+            <button
+              className="globe-explorer__map-btn"
+              onClick={handleShowMap}
+              type="button"
+            >
+              HD Map
+            </button>
+          )}
           <button
             className="globe-explorer__reset-btn"
             onClick={handleResetZoom}

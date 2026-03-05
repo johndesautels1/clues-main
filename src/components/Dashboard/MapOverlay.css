@@ -1,0 +1,157 @@
+/* Map Overlay — high-res flat map at deep zoom */
+
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  opacity: 0;
+  animation: map-fade-in 0.5s ease-out forwards;
+}
+
+.map-overlay--visible {
+  opacity: 1;
+}
+
+@keyframes map-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Leaflet map fills its container */
+.map-overlay__map {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary, #0a0e1a);
+}
+
+/* Override Leaflet's default attribution styling for dark mode */
+.map-overlay .leaflet-control-attribution {
+  background: rgba(10, 14, 26, 0.8) !important;
+  color: var(--text-muted, #8b95a5) !important;
+  font-size: 0.6875rem;
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-sm, 4px) 0 0 0;
+}
+
+.map-overlay .leaflet-control-attribution a {
+  color: var(--text-accent, #60a5fa) !important;
+}
+
+/* Dark-mode overrides for Leaflet zoom controls if shown */
+.map-overlay .leaflet-control-zoom a {
+  background: rgba(10, 14, 26, 0.85) !important;
+  color: var(--text-primary, #f9fafb) !important;
+  border-color: var(--border-glass, rgba(255,255,255,0.08)) !important;
+}
+
+.map-overlay .leaflet-control-zoom a:hover {
+  background: rgba(37, 99, 235, 0.2) !important;
+}
+
+/* Controls bar — bottom of map */
+.map-overlay__controls {
+  position: absolute;
+  bottom: var(--space-3, 12px);
+  left: var(--space-3, 12px);
+  right: var(--space-3, 12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 12px);
+  pointer-events: none;
+}
+
+.map-overlay__controls > * {
+  pointer-events: auto;
+}
+
+/* Back to Globe button */
+.map-overlay__back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  padding: var(--space-2, 8px) var(--space-4, 16px);
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--text-primary, #f9fafb);
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-glass-accent, rgba(37,99,235,0.3));
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast, 0.15s),
+    border-color var(--transition-fast, 0.15s);
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.map-overlay__back-btn:hover {
+  background: rgba(37, 99, 235, 0.25);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+
+.map-overlay__back-btn:focus-visible {
+  outline: 2px solid var(--text-accent, #60a5fa);
+  outline-offset: 2px;
+}
+
+.map-overlay__back-icon {
+  font-size: 1.1rem;
+}
+
+/* Layer toggle (Dark / Satellite / Street) */
+.map-overlay__layer-toggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-glass, rgba(255,255,255,0.08));
+  border-radius: var(--radius-full, 9999px);
+  padding: 3px;
+}
+
+.map-overlay__layer-btn {
+  padding: var(--space-1, 4px) var(--space-3, 12px);
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 600;
+  color: var(--text-muted, #8b95a5);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast, 0.15s),
+    background var(--transition-fast, 0.15s);
+  min-height: 36px;
+  min-width: 44px;
+}
+
+.map-overlay__layer-btn:hover {
+  color: var(--text-primary, #f9fafb);
+}
+
+.map-overlay__layer-btn--active {
+  color: var(--text-primary, #f9fafb);
+  background: rgba(37, 99, 235, 0.3);
+}
+
+.map-overlay__layer-btn:focus-visible {
+  outline: 2px solid var(--text-accent, #60a5fa);
+  outline-offset: 2px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .map-overlay__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .map-overlay__layer-toggle {
+    justify-content: center;
+  }
+}
