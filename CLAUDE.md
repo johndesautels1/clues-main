@@ -54,7 +54,10 @@ These rules are **non-negotiable**. Every developer and every AI session must fo
 ---
 
 ## Build Rules
-- Read `CLUES_MAIN_BUILD_REFERENCE.md` before starting any work — it is the single source of truth
+- **MANDATORY FIRST READ**: Read ALL THREE of these files before starting ANY work:
+  1. `CLUES_MAIN_BUILD_REFERENCE.md` — overall system architecture and build state
+  2. `PARAGRAPHICAL_ARCHITECTURE.md` — Paragraphical pipeline, Gemini prompt, metrics, Smart Scores, Cristiano judge, report structure. **This file supersedes any conflicting Paragraphical info in the build reference.**
+  3. This file (`CLAUDE.md`) — WCAG rules, dev rules
 - Commit after each component
 - Update the build reference checklist after each commit
 - Supabase is the heart of the backend — `supabase` export is always a valid `SupabaseClient`, never null
