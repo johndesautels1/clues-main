@@ -11,6 +11,7 @@ import { ParagraphicalButton } from './ParagraphicalButton';
 import { MainModuleExpander } from './MainModuleExpander';
 import { ModuleGrid } from './ModuleGrid';
 import { Header } from '../Shared/Header';
+import { Footer } from '../Shared/Footer';
 import { OliviaBubble } from '../Shared/OliviaBubble';
 import { EmiliaBubble } from '../Shared/EmiliaBubble';
 import { useUser } from '../../context/UserContext';
@@ -150,6 +151,8 @@ export function Dashboard() {
           <ModuleGrid modules={MODULES} />
         </section>
       </main>
+
+      <Footer />
 
       {/* Floating Chat Bubbles */}
       <OliviaBubble />
