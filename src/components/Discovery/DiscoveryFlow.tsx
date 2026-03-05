@@ -2,7 +2,7 @@
  * CLUES Discovery Questionnaire — Main Orchestrator
  *
  * Integrates with UserContext for Supabase persistence.
- * localStorage fallback for anonymous users.
+ * localStorage fallback for anonymous/returning users.
  * Progress bar, auto-save indicator, save & exit, welcome-back toast.
  * All WCAG 2.1 AA fixes applied:
  *  - pageBg = #0a0e1a (matches globals.css --bg-primary)
