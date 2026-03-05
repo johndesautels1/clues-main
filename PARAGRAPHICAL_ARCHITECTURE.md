@@ -445,19 +445,365 @@ interface CitySmartScore {
 
 ---
 
-## 15. LIFESCORE REFERENCE
+## 15. LIFESCORE DEEP STUDY — Patterns to Follow
 
-Before implementing, STUDY the LifeScore codebase at `github.com/johndesautels1/lifescore`:
-- How metrics are defined and numbered
-- How Tavily research feeds into scoring
-- How sources are collected and displayed with direct links
-- How parallel batch firing handles timeouts
-- How Smart Scores are calculated (relative scoring)
-- How the UI displays metric comparisons
-- How cost tracking works per call
-- The two-row header pattern
+> **Source**: Complete analysis of `github.com/johndesautels1/lifescore` (cloned 2026-03-05)
+> LifeScore is the ONLY fully operational module. Its patterns are proven.
+> CLUES Main follows these exact patterns with paragraph-derived metrics instead of pre-defined ones.
 
-LifeScore is the ONLY fully operational module. Its patterns are proven. CLUES Main follows the same patterns with paragraph-derived metrics instead of pre-defined ones.
+### 15.1 METRIC DEFINITION STRUCTURE (How LifeScore Defines 100 Metrics)
+
+Each metric in LifeScore follows the `MetricDefinition` interface:
+
+```typescript
+{
+  id: string;                           // Format: XX_NN_name (e.g., pf_01_cannabis_legal)
+  categoryId: CategoryId;               // One of 6 categories
+  name: string;                         // Full human-readable name
+  shortName: string;                    // Abbreviated for tight UI
+  description: string;                  // Context/purpose
+  weight: number;                       // 1-10 (intra-category importance)
+  scoringDirection: 'higher_is_better' | 'lower_is_better';
+  dataType: 'boolean' | 'numeric' | 'scale' | 'categorical';
+  unit?: string;                        // 'percent', 'currency_per_hour', 'per_100k', 'days', 'score'
+  searchQueries: string[];              // 2+ Tavily queries with {city} placeholder
+  scoringCriteria: ScoringCriteria;     // Type-specific scoring rules
+}
+```
+
+**Metric ID Format**: `XX_NN_name`
+- `XX` = 2-char category prefix (`pf`, `hp`, `bw`, `tr`, `pl`, `sl`)
+- `NN` = 2-digit number (`01`-`25`)
+- `name` = snake_case descriptor
+
+**CLUES Main Adaptation**: Our metric IDs will be `cl_NN_name` where NN auto-increments from M1-M250, and category maps to one of the 20 Human Existence Flow categories.
+
+### 15.2 DATA TYPES & SCORING CRITERIA
+
+| Type | How It Works | Example |
+|------|-------------|---------|
+| `boolean` | true=100, false=0 (inverted if `lower_is_better`) | `pf_14_curfew_laws` |
+| `categorical` | Predefined options with assigned scores (non-uniform) | `pf_01_cannabis_legal`: fully_legal(100), medical_only(60), decriminalized(40), illegal(0) |
+| `scale` | 1-5 ordinal levels: 20/40/60/80/100 | `tr_01_public_transit_quality` |
+| `numeric` (range) | Linear normalization: `((value - min) / (max - min)) * 100` | `bw_03_minimum_wage`: $7-$25/hr mapped to 0-100 |
+
+**All categorical/scale metrics get automatic fallback options:**
+```typescript
+{ value: 'insufficient_data', label: 'Data Not Available', score: -1 }
+{ value: 'transitional', label: 'Pending Legislation/Unclear', score: -1 }
+```
+Score=-1 means "exclude from calculation" (not default to 50).
+
+### 15.3 DUAL SCORING: LEGAL vs LIVED
+
+LifeScore tracks TWO scores per metric per city:
+- **Legal Score** (0-100): What the law technically says
+- **Enforcement Score** (0-100): How it's actually applied in practice
+
+Combined via configurable `LawLivedRatio` (default 50/50):
+```
+normalizedScore = (legalScore * lawRatio) + (livedScore * livedRatio)
+```
+
+**Conservative Mode**: Uses `MIN(legalScore, livedScore)` for pessimistic/realistic view.
+
+**CLUES Main Adaptation**: We should adopt dual scoring for relevant metrics (e.g., "cannabis legal" = legal status vs actual enforcement). Not all metrics need it — climate data is objective.
+
+### 15.4 SCORING ALGORITHM (The Math)
+
+**Step 1: Raw → Normalized (0-100)**
+```typescript
+function normalizeScore(metric, rawValue): number {
+  if (boolean) → true=100, false=0
+  if (range)   → ((value - min) / (max - min)) * 100
+  if (scale)   → levels.find(l.level == value).score
+  if (categorical) → options.find(o.value == category).score
+  if (lower_is_better) → 100 - score
+  return Math.max(0, Math.min(100, score))
+}
+```
+
+**Step 2: Category Score (weighted average within category)**
+```typescript
+function calculateCategoryScore(categoryId, metricScores) {
+  // EXCLUDE missing/null metrics from calculation (don't default to 50)
+  for each metric in category:
+    if (!isMissing && normalizedScore !== null):
+      totalWeightedScore += normalizedScore * metricWeight
+      totalWeight += metricWeight
+
+  averageScore = totalWeightedScore / totalWeight  // 0-100
+  weightedScore = (averageScore * categoryWeight) / 100  // contribution to total
+}
+```
+
+**Step 3: City Total Score**
+```
+totalScore = SUM(all category weightedScores) → 0-100
+```
+
+**Step 4: Winner Determination**
+```
+Tie threshold: scoreDifference < 1 point (city level)
+Category tie: scoreDifference < 2 points
+```
+
+### 15.5 CONFIDENCE LEVELS (from StdDev)
+
+Based on **standard deviation** of LLM responses:
+
+| StdDev | Level | Meaning |
+|--------|-------|---------|
+| < 5 | `unanimous` | All LLMs agree perfectly |
+| < 12 | `strong` | Strong agreement |
+| < 20 | `moderate` | Some disagreement |
+| >= 20 | `split` | Significant disagreement — flagged for Opus review |
+
+**σ > 15 triggers Opus judge review** for that specific metric.
+
+### 15.6 CATEGORY WEIGHTS
+
+LifeScore's 6 categories with default weights:
+
+| Category | Metrics | Weight |
+|----------|---------|--------|
+| Personal Freedom | 15 | 20% |
+| Housing & Property | 20 | 20% |
+| Business & Work | 25 | 20% |
+| Transportation | 15 | 15% |
+| Policing & Legal | 15 | 15% |
+| Speech & Lifestyle | 10 | 10% |
+| **Total** | **100** | **100%** |
+
+Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneur, Family, Libertarian, Investor).
+
+**CLUES Main Adaptation**: 20 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
+
+### 15.7 FIVE-LLM PARALLEL EVALUATION
+
+**LLM Roster**:
+| LLM | Web Search Method | Tavily Use |
+|-----|------------------|------------|
+| Claude Sonnet | Native (Anthropic API tool) | Supplemental |
+| GPT-4o | Tavily injected into prompt context | Primary |
+| Gemini | Google Search grounding (native) | Supplemental |
+| Grok | Tavily injected into prompt context | Primary |
+| Perplexity Sonar | Native (built-in search) | Supplemental |
+
+**Batch Firing Pattern**:
+```
+100 metrics split into 6 category batches
+Fired in 3 WAVES of 2 concurrent categories:
+
+Wave 1 (parallel): Category[0] + Category[1]
+  wait 1s
+Wave 2 (parallel): Category[2] + Category[3]
+  wait 1s
+Wave 3 (parallel): Category[4] + Category[5]
+
+Each wave: POST /api/evaluate per batch
+Dynamic timeout: 120s + 5s per metric (max 300s Vercel limit)
+```
+
+**Retry**: 2 retries, 3s delay, network errors only.
+**Partial Success**: 3/6 categories OR 30+ metric scores = usable result.
+
+### 15.8 OPUS JUDGE IMPLEMENTATION
+
+**Input**: All 5 LLM results aggregated into MetricConsensus objects
+**Focus**: High-disagreement metrics (σ > 15) — max 30 metrics in prompt to fit token budget
+
+**What Opus CAN do**:
+- Upscore/downscore any metric's consensusScore
+- Update legalScore and enforcementScore
+- Provide judgeExplanation per metric
+- Weigh which LLM to trust more for specific metrics
+
+**What Opus CANNOT do**:
+- Override confidence level (must match actual StdDev)
+- Override the computed winner (safeguard force-corrects if Opus hallucinates)
+
+**Anti-Hallucination Safeguards**:
+```typescript
+// SAFEGUARD: Force-correct recommendation to match computed scores
+if (city1Score > city2Score && recommendation !== 'city1') {
+  recommendation = 'city1';  // Opus can't override math
+}
+```
+
+### 15.9 TAVILY RESEARCH STRATEGY
+
+**Two APIs**:
+1. **Research API** (`/research`): Baseline comparison report (~30 credits per call)
+2. **Search API** (`/search`): Category-specific queries (2 cities x 6 categories = 12 calls)
+
+**Query Pattern** (with `{city}` placeholder):
+```
+"${city} personal freedom drugs alcohol cannabis gambling abortion LGBTQ laws 2025"
+"${city} property rights zoning HOA land use housing regulations 2025"
+"${city} business regulations taxes licensing employment labor laws 2025"
+"${city} transportation vehicle regulations transit parking driving laws 2025"
+"${city} criminal justice police enforcement legal rights civil liberties 2025"
+"${city} freedom speech expression privacy lifestyle regulations 2025"
+```
+
+**Caching**: 30-min TTL, max 50 entries, prevents duplicate calls across LLMs.
+
+**CLUES Main Adaptation**: Our queries are paragraph-derived, not pre-defined. Each metric generates its own `research_query` field which becomes the Tavily search.
+
+### 15.10 FIELD KNOWLEDGE SYSTEM (Per-Metric Sources)
+
+LifeScore maintains a `FieldKnowledge` object per metric:
+```typescript
+interface FieldKnowledge {
+  talkingPoints: string[];      // Key conversation points
+  keySourceTypes: string[];     // "government documents", "news", etc.
+  commonQuestions: string[];    // FAQ about this metric
+  dailyLifeImpact?: string;    // Real-world meaning
+}
+```
+
+Split into 6 files by category (`fieldKnowledge-personal-freedom.ts`, etc.)
+Used by: Olivia (chat answers), Court Order (real-world examples), Judge Report (context).
+
+**CLUES Main Adaptation**: Since our metrics are paragraph-derived, field knowledge is generated dynamically by Gemini/Tavily rather than pre-defined. But the pattern (per-metric talking points + source types + daily impact) is the same.
+
+### 15.11 JUDGE REPORT FORMAT
+
+```typescript
+interface JudgeReport {
+  reportId: string;                // "LIFE-JDG-{date}-{userId}-{timestamp}"
+  summaryOfFindings: {
+    city1Score: number;
+    city1Trend: 'improving' | 'stable' | 'declining';
+    city2Score: number;
+    city2Trend: 'improving' | 'stable' | 'declining';
+    overallConfidence: 'high' | 'medium' | 'low';
+  };
+  categoryAnalysis: [{             // ALL 6 categories, always
+    categoryId: string;
+    categoryName: string;
+    city1Analysis: string;         // 2-3 sentences
+    city2Analysis: string;         // 2-3 sentences
+    trendNotes: string;
+  }];
+  executiveSummary: {
+    recommendation: 'city1' | 'city2' | 'tie';
+    rationale: string;             // 2-3 paragraphs
+    keyFactors: string[];          // Top 5 considerations
+    futureOutlook: string;         // 1-2 paragraph forecast
+  };
+  freedomEducation: {              // "Court Order" content
+    categories: [{
+      categoryId: string;
+      winningMetrics: [{           // Only if winner beats loser by 10+ points
+        metricName: string;
+        winnerScore: number;
+        loserScore: number;
+        realWorldExample: string;  // Vivid 1-2 sentence scene using "you"
+      }];
+      heroStatement: string;       // Bold, inspirational vision
+    }];
+  };
+}
+```
+
+### 15.12 GAMMA REPORT STRUCTURE (82 Pages)
+
+LifeScore's Gamma report template:
+
+| Pages | Content |
+|-------|---------|
+| 1-4 | Executive Summary: cover, winner verdict radial gauge, category showdown, TOC |
+| 5-14 | Law vs Reality: legal vs enforcement scores, myth vs reality |
+| 15-42 | Category Deep Dives: all 100 metrics with scores, bar charts, confidence |
+| 43-46 | Your Life in Each City: day-in-the-life narratives |
+| 47-49 | Persona Recommendations: nomad, entrepreneur, family, retiree, libertarian, investor |
+| 50-52 | Surprising Findings: counterintuitive differences |
+| 53-55 | Hidden Costs: financial trade-offs, tax implications |
+| 56-59 | Future Outlook: 5-year trajectory, scenario planning |
+| 60-62 | Next Steps: actionable checklists, key contacts |
+| 63-67 | LLM Consensus: models used, agreement levels, technical explanation |
+| 68-71 | Special Topics (LifeScore: Gun Rights — unscored, facts only) |
+| 72-75 | Methodology: what is LIFE SCORE, categories, personalization |
+| 76-82 | Evidence & Citations: key citations per city, data quality, legal notices |
+
+**Visual elements**: Radial gauges, horizontal bar stats, process steps, comparison tables, city imagery overlays.
+
+**CLUES Main Adaptation**: Same template structure but expanded for 20 categories and 100-250 metrics. Country section added before city comparisons. Town/neighborhood sections after city winner.
+
+### 15.13 CRISTIANO VIDEO PIPELINE (2-Stage)
+
+**Stage 1: Storyboard** (Claude Sonnet generates)
+- 7 scenes, 105-120s total, 200-250 words
+- Scene 1 & 7: A-ROLL (avatar talking)
+- Scenes 2-6: B-ROLL (city footage)
+- QA validation: scene count, duration, word count, category coverage
+- Retries up to 2x if validation fails
+
+**Stage 2: HeyGen Render**
+- Video Agent V2 API
+- B-roll stock footage per scene keywords
+- Cristiano avatar narration (ElevenLabs voice → OpenAI `onyx` fallback)
+- Overlays: Freedom Score badge, category scores, CLUES logo
+- Poll for completion (5s intervals, max 5 min)
+- Save to Supabase Storage
+
+### 15.14 UI/UX PATTERNS FOR RESULTS DISPLAY
+
+**Score Bars**:
+- 12px horizontal bars, rounded endpoints
+- City1 = Sapphire (`#2563eb`), City2 = Orange (`#f97316`)
+- Winner = Green (`#22c55e`)
+- Percentage shown above each bar
+
+**Confidence Dots** (8px circles):
+- High = Green (`#22c55e`)
+- Medium = Gold (`#eab308`)
+- Low = Red (`#ef4444`)
+
+**Winner Hero**:
+- Full-width gradient background
+- Large trophy emoji (4rem)
+- Winner score in gold (5rem, `#d4af37`)
+- Score difference narrative
+- Top 3 advantage categories
+
+**Category Breakdown**:
+- Collapsible sections (one per category)
+- Category icon + name + weight badge
+- Two horizontal comparison bars
+- Expandable metric detail table with confidence legend
+
+**Evidence Panel**:
+- Collapsible card with filter buttons (All, City1, City2)
+- Each evidence item: metric name + city badge + URL domain + snippet
+- Links in sapphire blue, underline on hover
+
+**Two-Row Header**:
+- Row 1: Theme toggle + company name (centered) + user account
+- Row 2: Logo/branding + comparison title
+
+**Judge Verdict ("MI6 Briefing Room")**:
+- Midnight navy background (`#0a1628`) with gold accents
+- Glassmorphic cards throughout
+- Color scheme: Midnight → Cockpit Blue → Brushed Gold → Judge Gold
+- Typography: Clean, purposeful
+
+### 15.15 COST PER COMPARISON (LifeScore Actual)
+
+| Component | Cost |
+|-----------|------|
+| Claude Sonnet (90 metrics) | ~$0.90 |
+| GPT-4o (90 metrics + Tavily) | ~$2.70 |
+| Gemini (90 metrics) | ~$0.45 |
+| Grok (90 metrics + Tavily) | ~$0.90 |
+| Perplexity (90 metrics) | ~$0.90 |
+| Tavily searches (540 calls) | ~$2.70 |
+| Opus Judge | ~$13.50 |
+| **Total per comparison** | **~$22** |
+
+**CLUES Main will be higher** due to 100-250 metrics across 20 categories + country/town/neighborhood layers.
 
 ---
 
