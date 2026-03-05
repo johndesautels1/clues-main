@@ -63,6 +63,9 @@ async function saveToSupabase(session: UserSession): Promise<boolean> {
       confidence: session.confidence,
       paragraphs_completed: completedParagraphs,
 
+      // Denormalized currency from Gemini extraction (for analytics)
+      detected_currency: session.paragraphical.extraction?.detected_currency ?? null,
+
       // Full session state as JSONB
       session_data: session,
 

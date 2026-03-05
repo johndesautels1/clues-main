@@ -16,6 +16,9 @@ interface ParagraphicalResponse {
     costUsd: number;
     durationMs: number;
     paragraphsProcessed: number;
+    metricsExtracted: number;
+    countriesRecommended: number;
+    citiesRecommended: number;
     timestamp: string;
   };
 }
