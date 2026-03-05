@@ -11,7 +11,7 @@
 
 ## 1. WHAT IS THE PARAGRAPHICAL?
 
-The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 24 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 24 paragraphs follow the **Human Existence Flow** (Survival to Soul).
+The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 27 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 27 paragraphs follow the CLUES decision pipeline: Profile (P1-P2) → Dealbreakers (P3) → Must Haves (P4) → Trade-offs (P5) → Module Deep Dives in Human Existence Flow order (P6-P25, one per module with `moduleId`) → Vision (P26-P27).
 
 The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 20 Mini Modules. The Paragraphical alone must be powerful enough to:
 
@@ -42,30 +42,30 @@ CLUES Main does the same thing, except the metrics are **derived from the user's
 ## 3. PARAGRAPH-TO-METRIC CONVERSION (The Key Innovation)
 
 ### Step 1: User Writes Paragraphs
-24 paragraphs covering their entire life context (see paragraph definitions in `src/data/paragraphs.ts`).
+27 paragraphs covering their entire life context (see paragraph definitions in `src/data/paragraphs.ts`).
 
 ### Step 2: Gemini Converts Paragraphs to Numbered Metrics
 Every measurable, researchable preference becomes a discrete metric:
 
 ```
-From P3 ("Your Ideal Climate"):
+From P6 ("Climate & Weather"):
   "I hate humidity and want warm winters around 20-25C"
   -->
-  M1: Average annual humidity below 60% [Category: Climate] [Source: P3]
-  M2: Average winter temperature 20-25C [Category: Climate] [Source: P3]
-  M3: Absence of extreme weather events [Category: Climate] [Source: P3]
+  M1: Average annual humidity below 60% [Category: Climate] [Source: P6]
+  M2: Average winter temperature 20-25C [Category: Climate] [Source: P6]
+  M3: Absence of extreme weather events [Category: Climate] [Source: P6]
 
-From P8 ("Your Financial Picture"):
+From P11 ("Financial & Banking"):
   "I make about 8000 euros a month and want to live comfortably"
   -->
-  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P8]
-  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P8]
+  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P11]
+  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P11]
 
-From P11 ("Staying Connected"):
+From P14 ("Technology & Connectivity"):
   "I need at least 100mbps for my remote work"
   -->
-  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P11]
-  M29: Reliable coworking space availability [Category: Technology] [Source: P11]
+  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P14]
+  M29: Reliable coworking space availability [Category: Technology] [Source: P14]
 ```
 
 ### Target: 100-250 Metrics
@@ -111,7 +111,7 @@ If Gemini recommends Thailand:
 The Paragraphical is NOT a single Gemini call. It is a multi-step pipeline using parallel batch firing (same pattern as LifeScore to handle massive data and avoid timeouts).
 
 ### Call 1: EXTRACT (Gemini + Web Search)
-**Input**: 24 paragraphs + globe region
+**Input**: 27 paragraphs + globe region
 **Output**:
 - Numbered metrics (M1-Mn, minimum 100)
 - Demographic signals (age, gender, household, etc.)
@@ -370,7 +370,7 @@ interface GeminiExtraction {
     id: string;                      // "M1", "M2", etc.
     description: string;             // "Average winter temperature 20-25C"
     category: string;                // "climate", "safety", "financial"...
-    source_paragraph: number;        // Which paragraph (1-24)
+    source_paragraph: number;        // Which paragraph (1-27)
     data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
     research_query: string;          // What Tavily should search
     threshold?: {
