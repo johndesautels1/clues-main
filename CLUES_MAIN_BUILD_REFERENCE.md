@@ -422,9 +422,12 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ 27 paragraph definitions with prompts, placeholders, section groupings, moduleId mapping
 - ✅ Auto-save paragraphs to context (→ Supabase) on navigation
 - ✅ Dashboard loading state during session hydration
+- ✅ Olivia Tutor: Layer 1 (coverage targets data) + Layer 2 (keyword detection) + Layer 3 (Gemini Flash escalation)
+- ✅ 27 paragraph coverage targets with keyword groups and template interjections (`src/data/paragraphTargets.ts`)
+- ✅ Gemini extraction+recommendation prompt rewritten for 27-paragraph pipeline (`api/paragraphical.ts`)
 
 ### What's NOT Built Yet
-- ❌ Gemini extraction endpoint (`/api/paragraphical`)
+- ❌ Gemini extraction endpoint deployment (prompt written, endpoint not yet tested with live API key)
 - ❌ Main Module questionnaire UI (Demographics, DNW, MH, General)
 - ❌ 5 LLM evaluation endpoints
 - ❌ Opus Judge endpoint
