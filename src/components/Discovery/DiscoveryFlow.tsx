@@ -95,7 +95,7 @@ export function DiscoveryFlow() {
       // Welcome back toast
       const filledCount = Object.values(loaded).filter((v) => v?.trim()).length;
       setTimeout(() => {
-        toast.success(`Welcome back! You have ${filledCount}/24 sections saved. Pick up where you left off.`, { duration: 4000 });
+        toast.success(`Welcome back! You have ${filledCount}/${SECTIONS.length} sections saved. Pick up where you left off.`, { duration: 4000 });
       }, 600);
     }
   }, []); // Run once on mount only
@@ -270,7 +270,7 @@ export function DiscoveryFlow() {
         const lines = [
           'CLUES\u2122 DISCOVERY QUESTIONNAIRE',
           'John E. Desautels & Associates',
-          `Completed: ${ts} \u00B7 ${completed}/24 sections`,
+          `Completed: ${ts} \u00B7 ${completed}/${SECTIONS.length} sections`,
           '\u2550'.repeat(60),
           '',
         ];
@@ -306,7 +306,7 @@ export function DiscoveryFlow() {
     const summary = SECTIONS.filter((s) => answers[s.id]?.trim())
       .map((s) => `${s.title}: ${answers[s.id]}`)
       .join('\n\n');
-    const shareText = `My CLUES\u2122 Discovery Questionnaire\n${completed}/24 sections completed\n\n${summary}`;
+    const shareText = `My CLUES\u2122 Discovery Questionnaire\n${completed}/${SECTIONS.length} sections completed\n\n${summary}`;
     if (navigator.share) {
       try { await navigator.share({ title: 'CLUES\u2122 Discovery', text: shareText }); return; } catch { /* user cancelled */ }
     }
@@ -336,8 +336,8 @@ export function DiscoveryFlow() {
     }
 
     const confirmed = window.confirm(
-      `Submit ${filledParagraphs.length} of 24 sections for AI analysis?\n\n` +
-      `${24 - filledParagraphs.length} sections are still empty. You can always come back and add more later.`
+      `Submit ${filledParagraphs.length} of ${SECTIONS.length} sections for AI analysis?\n\n` +
+      `${SECTIONS.length - filledParagraphs.length} sections are still empty. You can always come back and add more later.`
     );
     if (!confirmed) return;
 
@@ -461,7 +461,7 @@ export function DiscoveryFlow() {
           <div style={{ fontSize: 38, marginBottom: 24, color: '#C4A87A' }}>{'\u2726'}</div>
           <h1 style={{ fontFamily: "'Cormorant',serif", fontSize: 34, fontWeight: 300, color: C.textPrimary, margin: '0 0 16px' }}>Your Story Is Written</h1>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 18, color: C.textSecondary, lineHeight: 1.8, margin: '0 0 8px' }}>
-            You completed <strong style={{ color: '#C4A87A' }}>{completed}</strong> of 24 sections.
+            You completed <strong style={{ color: '#C4A87A' }}>{completed}</strong> of ${SECTIONS.length} sections.
           </p>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 16, color: C.textMuted, lineHeight: 1.7, margin: '0 auto 36px', maxWidth: 440 }}>
             Our AI analysts will craft your personalized relocation intelligence report &mdash; best country, top cities, finest neighborhoods, and your roadmap to your new life.
@@ -542,7 +542,7 @@ export function DiscoveryFlow() {
           {/* Save & Continue Later */}
           <button
             onClick={() => {
-              toast.success(`Progress saved! ${completed}/24 sections complete. You can return anytime to continue.`, { duration: 3500 });
+              toast.success(`Progress saved! ${completed}/${SECTIONS.length} sections complete. You can return anytime to continue.`, { duration: 3500 });
               setTimeout(() => navigate('/'), 800);
             }}
             className="discovery-btn" aria-label="Save and continue later"
@@ -566,12 +566,12 @@ export function DiscoveryFlow() {
             <svg width="28" height="28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
               <circle cx="14" cy="14" r="11" fill="none" stroke={C.divider} strokeWidth="2.5" />
               <circle cx="14" cy="14" r="11" fill="none" stroke={accent} strokeWidth="2.5"
-                strokeDasharray={2 * Math.PI * 11} strokeDashoffset={2 * Math.PI * 11 * (1 - completed / 24)}
+                strokeDasharray={2 * Math.PI * 11} strokeDashoffset={2 * Math.PI * 11 * (1 - completed / SECTIONS.length)}
                 strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(0.22,1,0.36,1), stroke 0.5s ease' }}
               />
             </svg>
             <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: 13, color: C.textSecondary }}>
-              <span style={{ color: accent, fontWeight: 500 }}>{completed}</span>/24
+              <span style={{ color: accent, fontWeight: 500 }}>{completed}</span>/{SECTIONS.length}
             </span>
           </div>
           {/* Close (X) button */}
@@ -588,7 +588,7 @@ export function DiscoveryFlow() {
       </header>
 
       {/* Progress bar */}
-      <div role="progressbar" aria-valuenow={completed} aria-valuemin={0} aria-valuemax={24} aria-label={`${completed} of 24 sections completed`}
+      <div role="progressbar" aria-valuenow={completed} aria-valuemin={0} aria-valuemax={24} aria-label={`${completed} of ${SECTIONS.length} sections completed`}
         style={{
           position: 'fixed', top: 58, left: 0, right: 0, zIndex: 99,
           height: 3, background: 'rgba(255,255,255,0.04)',

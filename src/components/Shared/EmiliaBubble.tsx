@@ -43,7 +43,7 @@ export function EmiliaBubble() {
     {
       icon: '\u{270D}\uFE0F',
       label: 'Paragraphical',
-      description: 'Tips for writing your 24 paragraphs',
+      description: 'Tips for writing your 27 paragraphs',
     },
     {
       icon: '\u{1F4CB}',

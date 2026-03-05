@@ -1,6 +1,6 @@
 /**
  * Paragraphical Flow
- * 24-paragraph biographical essay input.
+ * 27-paragraph structured essay input following the CLUES decision pipeline.
  * Stepped interface: one paragraph at a time with sidebar progress.
  * Auto-saves each paragraph to UserContext (→ Supabase).
  */
@@ -9,7 +9,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
-import { PARAGRAPH_DEFS, PARAGRAPH_SECTIONS } from '../../data/paragraphs';
+import { PARAGRAPH_DEFS, PARAGRAPH_SECTIONS, PARAGRAPH_COUNT } from '../../data/paragraphs';
 import { extractParagraphical } from '../../lib/api';
 import { recalculateTier } from '../../lib/tierEngine';
 import { Header } from '../Shared/Header';
@@ -49,7 +49,7 @@ export function ParagraphicalFlow() {
 
   const activeDef = PARAGRAPH_DEFS.find(p => p.id === activeId)!;
   const completedCount = session.paragraphical.paragraphs.filter(p => p.content.trim().length > 0).length;
-  const progress = Math.round((completedCount / 24) * 100);
+  const progress = Math.round((completedCount / PARAGRAPH_COUNT) * 100);
 
   // Save current paragraph
   const saveCurrent = useCallback(() => {
@@ -75,7 +75,7 @@ export function ParagraphicalFlow() {
   // Next paragraph
   const handleNext = useCallback(() => {
     saveCurrent();
-    if (activeId < 24) {
+    if (activeId < PARAGRAPH_COUNT) {
       const nextId = activeId + 1;
       setActiveId(nextId);
       setDraft(getSavedContent(nextId));
@@ -200,7 +200,7 @@ export function ParagraphicalFlow() {
               />
             </div>
             <span className="para-flow__progress-label">
-              {completedCount}/24 paragraphs
+              {completedCount}/{PARAGRAPH_COUNT} paragraphs
             </span>
           </div>
 
@@ -238,7 +238,7 @@ export function ParagraphicalFlow() {
         <main className="para-flow__main">
           <div className="para-flow__header">
             <span className="para-flow__counter">
-              Paragraph {activeId} of 24
+              Paragraph {activeId} of {PARAGRAPH_COUNT}
             </span>
             <span className="para-flow__section-badge">{activeDef.section}</span>
           </div>
@@ -270,7 +270,7 @@ export function ParagraphicalFlow() {
               ← Previous
             </button>
 
-            {activeId < 24 ? (
+            {activeId < PARAGRAPH_COUNT ? (
               <button
                 className="para-flow__btn para-flow__btn--primary"
                 onClick={handleNext}

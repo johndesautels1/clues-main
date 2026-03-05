@@ -132,10 +132,10 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
   if (!hasParagraphical) {
     steps.push({
       action: 'Complete Paragraphical',
-      description: 'Tell us your story in 24 paragraphs',
+      description: 'Tell us your story in 27 paragraphs',
       confidenceGain: CONFIDENCE_GAINS.paragraphical,
       timeEstimate: '30-60 min',
-      questionCount: 24,
+      questionCount: 27,
       completed: false,
     });
   }

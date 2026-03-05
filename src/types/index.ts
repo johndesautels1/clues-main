@@ -26,7 +26,7 @@ export interface GlobeSelection {
 
 // ─── Paragraphical ───────────────────────────────────────────────
 export interface ParagraphEntry {
-  id: number;              // 1-24
+  id: number;              // 1-27
   heading: string;         // "Who You Are"
   content: string;         // User's free-form text
   updatedAt?: string;      // ISO timestamp

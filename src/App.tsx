@@ -5,7 +5,7 @@
  * Route structure:
  *  /                → Dashboard (globe, paragraphical button, modules)
  *  /login           → Login / Sign-up / Forgot password
- *  /paragraphical   → 24-paragraph input flow
+ *  /paragraphical   → 27-paragraph input flow
  *  /questionnaire/* → Demographics, DNW, MH, General questions
  *  /results         → Evaluation results (future)
  *  /reports         → Report viewer (future)

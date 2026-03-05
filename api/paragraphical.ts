@@ -1,7 +1,7 @@
 /**
  * /api/paragraphical — Gemini Extraction Endpoint
  *
- * Receives the user's 24 paragraphs + globe region.
+ * Receives the user's 27 paragraphs + globe region.
  * Sends to Gemini 3.1 Pro for structured narrative extraction.
  * Returns GeminiExtraction that feeds into the evaluation pipeline.
  *
@@ -163,7 +163,7 @@ Return ONLY valid JSON matching this exact schema (no markdown fences, no explan
   "personality_profile": "<string: 2-3 sentence behavioral/lifestyle summary of this person>",
   "paragraph_summaries": [
     {
-      "id": <paragraph number 1-24>,
+      "id": <paragraph number 1-27>,
       "key_themes": [<2-4 key themes extracted>],
       "extracted_preferences": [<specific preferences or requirements stated>]
     }

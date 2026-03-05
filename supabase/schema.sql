@@ -26,7 +26,7 @@ create table if not exists public.sessions (
   -- Completion tracking (denormalized for dashboards/analytics)
   tier          text not null default 'discovery',   -- CompletionTier
   confidence    smallint not null default 0,          -- 0-100
-  paragraphs_completed smallint not null default 0,   -- 0-24
+  paragraphs_completed smallint not null default 0,   -- 0-27
 
   -- Full session state (everything else lives here)
   session_data  jsonb not null default '{}',

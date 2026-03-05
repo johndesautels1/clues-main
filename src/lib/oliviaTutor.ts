@@ -6,7 +6,7 @@
  * the paragraph text for coverage gaps.
  *
  * Model: Gemini 2.0 Flash (see LLM Model Registry in README.md)
- * Cost: ~$0.001 per call, max $0.024 per user (24 paragraphs)
+ * Cost: ~$0.001 per call, max $0.027 per user (27 paragraphs)
  *
  * NOT wired into the hook yet — this is a ready-to-go service for when
  * keyword detection proves insufficient. Wire it by calling
