@@ -1152,7 +1152,7 @@ This is the **single source of truth** for which AI model powers each function i
 |------|-------|----------|-----|
 | **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
 | **Olivia Tutor (Paragraphical)** | Gemini 2.0 Flash | Google | Lightweight coverage-gap detection during writing. ~$0.001/call. Only fires when keyword detection isn't confident enough. |
-| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 24 paragraphs, outputs structured GeminiExtraction. |
+| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 27 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P25 Module Deep Dives, P26-P27 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
 | **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
 | **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
 | **LLM Evaluator #3** | Gemini 3.1 Pro (Preview) | Google | Reuses extraction context for scoring |
