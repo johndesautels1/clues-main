@@ -178,6 +178,40 @@
   border-top: 1px solid var(--border-glass);
 }
 
+/* ─── Tables (Cookie Policy) ─────────────────────────────── */
+
+.privacy-modal__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-3) 0 var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.privacy-modal__table th,
+.privacy-modal__table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.privacy-modal__table th {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.privacy-modal__table td {
+  color: var(--text-secondary);
+}
+
+.privacy-modal__table code {
+  font-size: var(--text-xs);
+  color: var(--text-accent);
+  background: rgba(96, 165, 250, 0.08);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs, 3px);
+}
+
 /* ─── Responsive ─────────────────────────────────────────── */
 
 @media (max-width: 640px) {

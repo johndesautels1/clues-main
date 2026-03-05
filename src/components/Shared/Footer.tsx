@@ -8,6 +8,9 @@
 
 import { useState } from 'react';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
+import { TermsOfServiceModal } from './TermsOfServiceModal';
+import { CookiePolicyModal } from './CookiePolicyModal';
+import { RefundPolicyModal } from './RefundPolicyModal';
 import './Footer.css';
 
 const LEGAL_LINKS = [
@@ -23,12 +26,15 @@ const LEGAL_LINKS = [
 
 export function Footer() {
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showCookies, setShowCookies] = useState(false);
+  const [showRefunds, setShowRefunds] = useState(false);
 
   const handleLegalClick = (link: string) => {
-    if (link === 'Privacy') {
-      setShowPrivacy(true);
-    }
-    // Future: wire other legal links to their respective modals
+    if (link === 'Privacy') setShowPrivacy(true);
+    if (link === 'Terms') setShowTerms(true);
+    if (link === 'Cookies') setShowCookies(true);
+    if (link === 'Refunds') setShowRefunds(true);
   };
 
   return (
@@ -131,6 +137,9 @@ export function Footer() {
       </footer>
 
       <PrivacyPolicyModal isOpen={showPrivacy} onClose={() => setShowPrivacy(false)} />
+      <TermsOfServiceModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
+      <CookiePolicyModal isOpen={showCookies} onClose={() => setShowCookies(false)} />
+      <RefundPolicyModal isOpen={showRefunds} onClose={() => setShowRefunds(false)} />
     </>
   );
 }
