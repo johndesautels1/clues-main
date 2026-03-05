@@ -13,6 +13,8 @@ import { PARAGRAPH_DEFS, PARAGRAPH_SECTIONS } from '../../data/paragraphs';
 import { extractParagraphical } from '../../lib/api';
 import { recalculateTier } from '../../lib/tierEngine';
 import { Header } from '../Shared/Header';
+import { OliviaBubble } from '../Shared/OliviaBubble';
+import { useOliviaTutor } from '../../hooks/useOliviaTutor';
 import './ParagraphicalFlow.css';
 
 export function ParagraphicalFlow() {
@@ -27,6 +29,9 @@ export function ParagraphicalFlow() {
   }, [session.paragraphical.paragraphs]);
 
   const [draft, setDraft] = useState(() => getSavedContent(1));
+
+  // Olivia Tutor — real-time keyword detection for coverage guidance
+  const tutor = useOliviaTutor(activeId, draft);
 
   // Focus textarea on paragraph change
   useEffect(() => {
@@ -293,6 +298,14 @@ export function ParagraphicalFlow() {
           )}
         </main>
       </div>
+
+      {/* Olivia Tutor bubble — shows interjections during writing */}
+      <OliviaBubble
+        interjection={tutor.interjection}
+        pendingCount={tutor.pendingCount}
+        onDismiss={tutor.dismiss}
+        onDismissAll={tutor.dismissAll}
+      />
     </div>
   );
 }
