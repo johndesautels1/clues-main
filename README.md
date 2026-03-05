@@ -636,12 +636,13 @@ Phase 1 (MVP): Keyword/regex detection against coverage target keywords per para
 Phase 2 (Enhanced): Gemini Flash API call (debounced, max 1 per paragraph)
   - Send: paragraph text + coverage targets + paragraph context
   - Return: which targets are covered, which are missing, suggested interjection
-  - Cost: ~$0.001 per call (Flash is cheap), 24 calls max = $0.024 per user
+  - Cost: ~$0.001 per call (Flash is cheap), 27 calls max = $0.027 per user
 
 Phase 3 (Advanced): Context-aware cross-paragraph intelligence
   - Olivia remembers what was said in ALL previous paragraphs
-  - If P14 (Family) mentions kids but P13 (Education) doesn't address schools: prompt
-  - If P8 (Financial) mentions tight budget but P6 (Housing) describes a villa: flag conflict
+  - If P17 (Family) mentions kids but P16 (Education) doesn't address schools: prompt
+  - If P11 (Financial) mentions tight budget but P9 (Housing) describes a villa: flag conflict
+  - If P3 (Dealbreakers) mentions safety but P7 (Safety) is vague: prompt for specifics
   - Cross-paragraph consistency checking
 ```
 
@@ -1175,7 +1176,7 @@ This is the **single source of truth** for which AI model powers each function i
 
 ## Olivia Tutor Architecture (Paragraphical Writing Flow)
 
-Olivia guides users while they write each of the 24 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
+Olivia guides users while they write each of the 27 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
 
 ### Layer 1: Coverage Target Data (Code — Zero Cost)
 **What:** A TypeScript data file defining what each paragraph needs.
@@ -1185,18 +1186,19 @@ Olivia guides users while they write each of the 24 paragraphs, ensuring they co
 // Per-paragraph: coverage targets, keyword groups, template interjections
 {
   paragraphId: 3,
-  heading: "Your Ideal Climate",
+  heading: "Your Dealbreakers",
   coverageTargets: [
-    { id: "temperature", label: "Temperature preference", keywords: ["hot", "cold", "warm", "cool", "degrees", "celsius", "fahrenheit"] },
-    { id: "humidity", label: "Humidity tolerance", keywords: ["humid", "humidity", "dry", "moisture", "sticky", "arid", "tropical"] },
-    { id: "seasons", label: "Seasonal preference", keywords: ["seasons", "winter", "summer", "spring", "autumn", "fall", "year-round"] },
-    { id: "disasters", label: "Natural disaster tolerance", keywords: ["earthquake", "hurricane", "tornado", "flood", "typhoon", "wildfire"] },
-    { id: "sunshine", label: "Sunshine importance", keywords: ["sun", "sunny", "sunshine", "overcast", "gray", "cloudy", "rain"] },
-    { id: "air_quality", label: "Air quality", keywords: ["air quality", "pollution", "smog", "clean air", "asthma", "allergies"] },
+    { id: "climate_dnw", label: "Climate dealbreakers", keywords: ["humidity", "heat", "cold", "snow", "ice", "tropical", "desert", "too hot", "too cold", "freezing"] },
+    { id: "safety_dnw", label: "Safety dealbreakers", keywords: ["crime", "violence", "dangerous", "war", "conflict", "cartel", "corrupt", "unstable"] },
+    { id: "legal_dnw", label: "Legal dealbreakers", keywords: ["no visa", "illegal", "banned", "restricted", "no residency", "no pathway", "deport"] },
+    { id: "healthcare_dnw", label: "Healthcare dealbreakers", keywords: ["no hospital", "no doctor", "no specialist", "no pharmacy", "no healthcare", "medical"] },
+    { id: "region_dnw", label: "Excluded regions/countries", keywords: ["refuse", "never", "not", "exclude", "avoid", "no way", "except", "only"] },
+    { id: "cultural_dnw", label: "Cultural dealbreakers", keywords: ["intolerant", "censorship", "oppressive", "authoritarian", "discrimination", "homophobic", "racist"] },
   ],
   templateInterjections: {
-    humidity: "Love how specific you are about temperature! Quick thought — are you more of a dry-heat person or do you handle humidity okay? That single factor eliminates about 40% of cities.",
-    disasters: "Great detail on the climate vibe! Have you thought about natural disaster risk? Some dream-weather cities sit in earthquake or hurricane zones.",
+    climate_dnw: "What climate would be completely unacceptable? Extreme humidity, freezing winters, desert heat? These hard walls eliminate cities before scoring even begins.",
+    safety_dnw: "Any safety-related dealbreakers? Certain crime levels, political instability, or conflict zones you'd never consider?",
+    region_dnw: "Are there specific countries or regions you absolutely refuse to consider? Even if they'd otherwise score well?",
   }
 }
 ```
@@ -1221,7 +1223,7 @@ Olivia guides users while they write each of the 24 paragraphs, ensuring they co
 Triggers when:
 - User wrote 150+ words but keyword detection only found 1-2 of 5+ targets
 - User's language is indirect/metaphorical (keyword matching fails)
-- Cross-paragraph conflict detected (e.g., P3 says "love the beach" but P6 says "hate tourists")
+- Cross-paragraph conflict detected (e.g., P6 says "love the beach" but P9 says "hate tourists")
 
 The Gemini Flash prompt:
 ```
@@ -1243,13 +1245,13 @@ Reference something they wrote positively first. Ask about ONE missing target.
 Max 2 sentences. Never say "you forgot" — say "have you thought about".
 ```
 
-Cost: ~$0.001 per call x 24 paragraphs = $0.024 max per user (most paragraphs handled by Layer 2).
+Cost: ~$0.001 per call x 27 paragraphs = $0.027 max per user (most paragraphs handled by Layer 2).
 
 ### Layer 4: Cross-Paragraph Intelligence (API — Future)
 **What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
 
-- Fires after paragraphs 6, 12, 18, and 24 (section boundaries)
-- Checks for contradictions (P3 vs P6, P8 vs P10)
+- Fires after paragraphs 5, 12, 18, 25, and 27 (phase boundaries)
+- Checks for contradictions (P3 vs P6, P9 vs P11, P4 vs module paragraphs)
 - Identifies completely unaddressed categories
 - Suggests which remaining paragraphs to focus on
 - Uses conversation history to avoid repetition
