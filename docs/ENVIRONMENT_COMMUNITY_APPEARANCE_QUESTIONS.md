@@ -1,7 +1,7 @@
-# Environment & Community Appearance — 83 Typeform Questions Reference
+# Environment & Community Appearance — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire — International Buyers' Environment & Community Appearance Module
-> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q83)
+> **Structure:** 6 sections, each ending with a ranking question + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -120,4 +120,35 @@
 | 80 | How sensitive are you to odors from waste management and sanitation systems? |
 | 81 | How important is access to information about waste disposal and recycling guidelines? |
 | 82 | Section 5 Priority Ranking |
-| 83 | Final Module Priority Ranking |
+
+---
+
+## Section 6: Sustainability, Climate Resilience & Community Standards (Q83-Q99)
+
+| # | Question |
+|---|----------|
+| 83 | How important is the visibility and adoption of renewable energy infrastructure (solar panels, wind turbines, EV charging stations) in your destination community? |
+| 84 | How concerned are you about light pollution and its impact on night sky visibility and sleep quality? |
+| 85 | How important is effective stormwater drainage and flood prevention infrastructure in your neighborhood? |
+| 86 | How important is the cleanliness and ecological health of local waterways (rivers, canals, harbors, coastline)? |
+| 87 | How concerned are you about proximity to industrial zones, factories, refineries, or major freight corridors? |
+| 88 | How important are urban heat island mitigation features (shade trees, reflective surfaces, cooling centers, misting stations)? |
+| 89 | How important is the enforcement of property upkeep and maintenance standards (abandoned buildings, overgrown lots, derelict vehicles)? |
+| 90 | How important is the accessibility of public spaces for people with mobility challenges (wheelchair ramps, stroller-friendly paths, level sidewalks)? |
+| 91 | How concerned are you about soil contamination or brownfield sites near residential areas? |
+| 92 | How important is the presence of community beautification programs (neighborhood flower boxes, mural projects, adopt-a-street initiatives)? |
+| 93 | How important is the management of pet waste in public spaces (dog waste stations, enforcement of cleanup rules, designated dog areas)? |
+| 94 | How important is effective seasonal environmental management (snow removal, leaf clearing, monsoon drainage, wildfire smoke response)? |
+| 95 | How concerned are you about proximity to high-voltage power lines, cell towers, or electrical substations near your home? |
+| 96 | How important is noise ordinance enforcement and designated quiet hours in residential neighborhoods? |
+| 97 | How important is the condition of public infrastructure (road surfaces, bridges, tunnels, retaining walls) in your daily environment? |
+| 98 | How important is community participation in environmental stewardship (neighborhood cleanups, tree planting days, citizen science programs)? |
+| 99 | Section 6 Priority Ranking |
+
+---
+
+## Final Cross-Section Ranking (Q100)
+
+| # | Question |
+|---|----------|
+| 100 | Final Module Priority Ranking: Based on all your responses above, rank these 6 MAIN SECTIONS in order of overall importance to your international relocation decision: |
