@@ -1233,6 +1233,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 3 | Climate & Weather | 106 | 5 | `CLIMATE_WEATHER_QUESTIONS.md` |
 | 4 | Housing & Property | 122 | 6 | `HOUSING_PROPERTY_QUESTIONS.md` |
 | 5 | Professional & Career | 106 | 5 | `PROFESSIONAL_CAREER_QUESTIONS.md` |
+| 6 | Religion & Spirituality | 106 | 5 | `RELIGION_SPIRITUALITY_QUESTIONS.md` |
 
 ---
 
