@@ -1,7 +1,7 @@
-# Food & Dining — 57 Typeform Questions Reference
+# Food & Dining — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire — International Buyers' Food & Dining Questionnaire Module
-> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q57)
+> **Structure:** 9 sections, each ending with a ranking question + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -94,4 +94,82 @@
 | 54 | How important is having access to familiar international food brands and chains from your home country? |
 | 55 | Share your vision for blending your home country's food culture with your new location's culinary traditions over 5-10 years abroad. Discuss potential challenges in staying connected to your heritage while exploring new flavors. |
 | 56 | Priority Ranking: Food Markets & Cultural Adaptation |
-| 57 | Final Section Priority Ranking: Based on all your responses above, please drag and drop to rank these 5 MAIN SECTIONS in order of overall importance to your international relocation decision: |
+
+---
+
+## Section 6: Home Cooking & Kitchen Culture (Q57-Q68)
+
+| # | Question |
+|---|----------|
+| 57 | How important is having a full-sized kitchen with oven, stovetop, and adequate counter space in typical rental or purchase properties in your destination? |
+| 58 | How important is the local availability of international ingredients and spices needed to cook your home country's cuisine? |
+| 59 | How interested are you in taking cooking classes or culinary workshops to learn the local cuisine? |
+| 60 | How important is the quality and variety of neighborhood butchers, fishmongers, and artisan bakeries near your home? |
+| 61 | How important is access to specialty cooking equipment (woks, outdoor grills, tandoor ovens, bread makers) through local retailers? |
+| 62 | How important is the local home-entertaining and dinner-party culture (do people regularly host meals at home)? |
+| 63 | How important is the availability of meal kit or pre-portioned ingredient delivery services? |
+| 64 | How important is it that local recipe content (cookbooks, cooking blogs, YouTube channels) is accessible in your language? |
+| 65 | How important is having access to a private garden, balcony, or community garden for growing your own herbs and produce? |
+| 66 | How important is tap water quality for everyday cooking and drinking without needing filtration or bottled water? |
+| 67 | How important is access to bulk-buy or wholesale food stores for stocking a home kitchen affordably? |
+| 68 | Priority Ranking: Home Cooking & Kitchen Culture |
+
+---
+
+## Section 7: Street Food, Casual Eats & Late-Night Dining (Q69-Q79)
+
+| # | Question |
+|---|----------|
+| 69 | How important is a vibrant, established street food culture in your destination? |
+| 70 | How important is the safety and hygiene of street food vendors and outdoor food stalls? |
+| 71 | How important is access to late-night food options (available after 10 PM) near your home or social areas? |
+| 72 | How important is a food truck scene or rotating pop-up food vendor culture? |
+| 73 | How important is access to fast-casual and quick-service restaurants for affordable weekday meals? |
+| 74 | How important is the availability of grab-and-go breakfast and lunch options near typical work areas? |
+| 75 | How important is having diverse quick-service food options beyond major international fast food chains? |
+| 76 | How important is the availability of healthy fast-casual options (salad bars, poke bowls, smoothie shops, juice bars)? |
+| 77 | How important is the local bakery and pastry culture for everyday eating (fresh bread, croissants, local pastries)? |
+| 78 | How important is access to food courts, hawker centers, or multi-vendor food halls with many options in one location? |
+| 79 | Priority Ranking: Street Food, Casual Eats & Late-Night Dining |
+
+---
+
+## Section 8: Food Safety, Allergies & Dietary Health (Q80-Q89)
+
+| # | Question |
+|---|----------|
+| 80 | How important is clear allergen labeling on packaged foods and restaurant menus in your destination? |
+| 81 | How important is restaurant staff awareness and training around serious food allergies (anaphylaxis-level risks)? |
+| 82 | How important is the availability of certified organic and pesticide-free food options in local stores? |
+| 83 | How important is GMO labeling and transparency in food sourcing and packaging? |
+| 84 | How important is access to halal, kosher, or other religiously compliant food options in your daily life? |
+| 85 | How important is the availability of plant-based, vegan, and vegetarian products in mainstream grocery stores and restaurants? |
+| 86 | How important are government food safety inspection standards and their consistent enforcement? |
+| 87 | How important are animal welfare standards in local food production (free-range eggs, grass-fed beef, cage-free poultry)? |
+| 88 | How important is the strength of the local farm-to-table movement and transparency around where food is sourced? |
+| 89 | Priority Ranking: Food Safety, Allergies & Dietary Health |
+
+---
+
+## Section 9: Food Economics & Dining Norms (Q90-Q99)
+
+| # | Question |
+|---|----------|
+| 90 | How important is restaurant menu price transparency (no hidden fees, service charges clearly stated, what-you-see-is-what-you-pay)? |
+| 91 | How comfortable are you with the local tipping culture and norms (mandatory service charges, no tipping expected, percentage-based tipping)? |
+| 92 | How important is the overall affordability of dining out compared to your current home country? |
+| 93 | How important is the cost ratio between eating out and cooking at home in your monthly budget planning? |
+| 94 | How important is access to affordable, high-quality lunch options near typical business and work districts? |
+| 95 | How important is the availability of kids' menus, child-sized portions, and family-friendly dining pricing? |
+| 96 | How important is the availability of restaurant reservation systems and queue/wait-time management? |
+| 97 | How important is the local culture around communal dining, shared plates, and family-style eating as a social norm? |
+| 98 | How important is access to loyalty programs, dining discount apps, or restaurant deal platforms in your destination? |
+| 99 | Priority Ranking: Food Economics & Dining Norms |
+
+---
+
+## Final Cross-Section Ranking (Q100)
+
+| # | Question |
+|---|----------|
+| 100 | Final Section Priority Ranking: Based on all your responses above, please drag and drop to rank these 9 MAIN SECTIONS in order of overall importance to your international relocation decision: |
