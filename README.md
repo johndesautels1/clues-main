@@ -1230,6 +1230,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 |---|--------|-----------|----------|------|
 | 1 | Shopping & Services | 101 | 10 | `SHOPPING_SERVICES_QUESTIONS.md` |
 | 2 | Technology & Connectivity | 105 | 5 | `TECHNOLOGY_CONNECTIVITY_QUESTIONS.md` |
+| 3 | Climate & Weather | 106 | 5 | `CLIMATE_WEATHER_QUESTIONS.md` |
 
 ---
 
