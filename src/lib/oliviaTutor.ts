@@ -1,5 +1,5 @@
 /**
- * Olivia Tutor — Layer 3: Gemini 3.1 Pro Preview Escalation
+ * Olivia Tutor — Layer 3: Gemini 3.1 Pro Preview
  *
  * When the keyword detection engine (Layer 2) isn't confident enough,
  * this service fires a Gemini 3.1 Pro Preview API call to analyze
