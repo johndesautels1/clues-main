@@ -1,7 +1,7 @@
-# Legal & Immigration — 102 Typeform Questions Reference
+# Legal & Immigration — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire — International Buyers' Legal & Immigration Questionnaire Module
-> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q102)
+> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -118,7 +118,7 @@
 
 ---
 
-## Section 5: Long-term Legal Strategy (Q85-Q102)
+## Section 5: Long-term Legal Strategy (Q85-Q100)
 
 | # | Question |
 |---|----------|
@@ -130,13 +130,11 @@
 | 90 | How important is it to have legal protection for your business activities in the destination country? |
 | 91 | Are you concerned about potential double taxation issues that might never be fully resolved? |
 | 92 | How important is having legal mechanisms to eventually bring other family members to join you? |
-| 93 | Are you prepared to potentially renounce current citizenship if required for optimal legal status? |
-| 94 | How important is legal protection against potential future asset seizure or confiscation? |
-| 95 | Are you concerned about potential legal complications from global tax compliance failures? |
-| 96 | How important is having legal mechanisms to maintain a connection to your cultural heritage? |
-| 97 | Are you prepared for the legal complexity of potentially managing estate planning across multiple jurisdictions? |
-| 98 | How important is legal certainty and predictability in your destination country's legal system? |
-| 99 | Are you prepared to invest significant time and money in ongoing legal compliance and planning? |
-| 100 | Overall, how confident are you in your ability to successfully navigate the legal complexities of international relocation? |
-| 101 | Please rank these LONG-TERM LEGAL STRATEGY factors by importance to your relocation decision: |
-| 102 | Please rank ALL 5 sections of the Legal & Immigration Module by their overall importance to your international relocation decision: |
+| 93 | How important is legal protection against potential future asset seizure or confiscation? |
+| 94 | Are you concerned about potential legal complications from global tax compliance failures? |
+| 95 | Are you prepared for the legal complexity of potentially managing estate planning across multiple jurisdictions? |
+| 96 | How important is legal certainty and predictability in your destination country's legal system? |
+| 97 | Are you prepared to invest significant time and money in ongoing legal compliance and planning? |
+| 98 | Overall, how confident are you in your ability to successfully navigate the legal complexities of international relocation? |
+| 99 | Please rank these LONG-TERM LEGAL STRATEGY factors by importance to your relocation decision: |
+| 100 | Please rank ALL 5 sections of the Legal & Immigration Module by their overall importance to your international relocation decision: |
