@@ -41,8 +41,9 @@ export interface ParagraphicalInput {
   };
 }
 
-// ─── Gemini Extraction ───────────────────────────────────────────
+// ─── Gemini Extraction (matches api/paragraphical.ts output) ─────
 export interface GeminiExtraction {
+  // Profile
   demographic_signals: {
     age?: number;
     gender?: string;
@@ -52,21 +53,86 @@ export interface GeminiExtraction {
     employment_type?: string;
     income_bracket?: string;
   };
-  dnw_signals: string[];
-  mh_signals: string[];
-  module_relevance: Record<string, number>;
+  personality_profile: string;
+
+  // Currency
+  detected_currency: string;
   budget_range: {
     min: number;
     max: number;
     currency: string;
   };
-  globe_region_preference: string;
-  personality_profile: string;
+
+  // Metrics (100-250 numbered metrics extracted from paragraphs)
+  metrics: {
+    id: string;                  // M1, M2, ...
+    description: string;
+    category: string;            // one of 20 Human Existence Flow categories
+    source_paragraph: number;    // 1-27
+    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+    research_query: string;      // what Tavily should search
+    user_justification: string;  // ties metric to specific paragraph text
+    data_justification: string;  // real-world data supporting this metric
+    source: string;              // data source (Tavily, Google Search, Gemini KB)
+    threshold?: {
+      operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
+      value: number | [number, number];
+      unit: string;
+    };
+  }[];
+
+  // Location Recommendations
+  recommended_countries: {
+    name: string;
+    iso_code: string;
+    reasoning: string;
+    local_currency: string;
+  }[];
+  recommended_cities: {
+    name: string;
+    country: string;
+    reasoning: string;
+  }[];
+  recommended_towns: {
+    name: string;
+    parent_city: string;
+    reasoning: string;
+  }[];
+  recommended_neighborhoods: {
+    name: string;
+    parent_town: string;
+    reasoning: string;
+  }[];
+
+  // Side-by-Side Location Metrics (compare same field across locations)
+  location_metrics: {
+    field_id: string;              // e.g. safety_index, connectivity_5G
+    label: string;                 // human-readable label
+    category: string;              // one of 20 categories
+    locations: {
+      name: string;
+      type: 'city' | 'town' | 'neighborhood';
+      score: number;               // 0.0-10.0
+      user_justification: string;
+      data_justification: string;
+      source: string;
+    }[];
+  }[];
+
+  // Paragraph Summaries
   paragraph_summaries: {
     id: number;
     key_themes: string[];
     extracted_preferences: string[];
+    metrics_derived: string[];   // e.g. ["M1", "M3", "M7"]
   }[];
+
+  // Signals for Downstream
+  dnw_signals: string[];
+  mh_signals: string[];
+  tradeoff_signals: string[];
+  module_relevance: Record<string, number>;
+  globe_region_preference: string;
 }
 
 // ─── Questionnaire Sub-Sections ──────────────────────────────────
@@ -139,7 +205,7 @@ export interface EvaluationResult {
 export type CostProvider =
   | 'claude-sonnet-4-5'
   | 'gpt-4o'
-  | 'gemini-3.1-pro'
+  | 'gemini-3.1-pro-preview'
   | 'grok-4'
   | 'perplexity-sonar'
   | 'claude-opus-4-5'

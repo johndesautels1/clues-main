@@ -132,84 +132,154 @@ LifeScore is one of the 20 category modules (Category 8) but is unique:
 
 ### Per-Paragraph Metric Targets
 
-Each of the 24 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
+Each of the 27 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
 
 ```
 PARAGRAPH → CATEGORY MAPPING → MIN METRICS → COVERAGE TARGETS
 ═══════════════════════════════════════════════════════════════
 
-P1: "Who You Are" → Demographics/Profile → 8-12 metrics
-  Coverage targets:
-  - Age bracket (affects healthcare, nightlife, education weights)
-  - Nationality/passport (affects immigration pathways)
-  - Household composition (solo, couple, family, multi-gen)
-  - Language(s) spoken (affects integration ease)
-  - Cultural identity (affects community matching)
-  Example metrics:
-    M1: Age-appropriate healthcare infrastructure [Healthcare]
-    M2: Passport-compatible visa pathways [Legal]
-    M3: Language accessibility for [detected language] speakers [Education]
-    M4: Cultural community presence for [detected background] [Social]
+═══ PHASE 1: YOUR PROFILE (Demographics) ═══
 
-P2: "Your Life Right Now" → Cross-category signals → 10-15 metrics
+P1: "Who You Are" → Demographics (cross-category) → 8-12 metrics
   Coverage targets:
-  - Current city/country (baseline for comparison)
-  - Push factors (what's WRONG now — critical for DNW signals)
-  - Pull factors (what they're SEEKING — critical for MH signals)
-  - Timeline urgency (affects visa pathway scoring)
-  - Emotional state (affects how we frame the report)
+  - Age (exact or range)
+  - Gender
+  - Nationality / passport(s)
+  - Current citizenship(s)
+  - Household composition (single, married, kids, partner, family size)
+  - Languages spoken (fluency levels)
+  - Employment type (remote, local, hybrid, retired, student, entrepreneur)
   Example metrics:
-    M5: Improvement over current city on [detected push factor] [varies]
-    M6: Cost of living differential vs current location [Financial]
-    M7: Quality of life index improvement [cross-category]
+    M1: Age bracket [Demographics]
+    M2: Passport strength index (Henley ranking) [Legal]
+    M3: Household size for housing calculations [Housing]
+    M4: Remote work requirement → timezone compatibility [Business]
 
-P3: "Your Ideal Climate" → Climate & Weather → 12-18 metrics
+P2: "Your Life Right Now" → Demographics + Financial → 10-15 metrics
   Coverage targets:
-  - Temperature range preference (specific numbers if possible)
-  - Humidity tolerance (tropical vs dry — make-or-break)
-  - Seasonal preference (4 seasons, eternal summer, mild winters)
-  - Natural disaster tolerance (earthquakes, hurricanes, flooding)
-  - Sunshine hours importance
+  - Current city/country
+  - Monthly income (DETECT CURRENCY — never default to USD)
+  - Push factors (why leaving: cost, safety, weather, politics, career, etc.)
+  - Timeline (urgent vs planning vs exploring)
+  - Current pain points that drive the search
+  Example metrics:
+    M5: Monthly income in detected currency [Financial]
+    M6: Timeline urgency (months vs years) [Planning]
+    M7: Push factor: cost of living dissatisfaction [Financial]
+    M8: Push factor: climate dissatisfaction [Climate]
+
+═══ PHASE 2: DO NOT WANTS (Dealbreakers) ═══
+
+P3: "Your Dealbreakers" → Cross-category elimination → 10-20 metrics
+  Coverage targets:
+  - Climate extremes that are absolutely unacceptable (humidity, heat, cold)
+  - Safety/crime levels that are deal-breaking
+  - Political instability or authoritarian regimes
+  - Lack of healthcare or specific medical access
+  - Internet too slow for work requirements
+  - No visa pathway for user's nationality
+  - Religious or cultural intolerance
+  - Specific countries or regions refused
+  - Languages user cannot function in
+  NOTE: These are HARD WALLS. Severity-5 dealbreakers eliminate cities instantly
+  regardless of other scores. Maps directly to DNW severity tiers in Main Module.
+  Example metrics:
+    M9: ELIMINATE IF humidity > 80% [Climate DNW]
+    M10: ELIMINATE IF violent crime rate > [X] per 100k [Safety DNW]
+    M11: ELIMINATE IF no residency pathway for [nationality] [Legal DNW]
+    M12: ELIMINATE IF internet avg < [X] Mbps [Technology DNW]
+    M13: ELIMINATE IF political instability index > [X] [Safety DNW]
+
+═══ PHASE 3: MUST HAVES (Non-Negotiables) ═══
+
+P4: "Your Non-Negotiables" → Cross-category requirements → 10-15 metrics
+  Coverage targets:
+  - Minimum internet speed for work
+  - Specific medical facilities or specialists needed
+  - Airport proximity requirement (within X hours)
+  - English widely spoken requirement
+  - Specific visa type that must be available
+  - Minimum safety rating
+  - Housing type that must exist
+  - Proximity to family
+  - Specific legal rights required
+  NOTE: Unlike DNWs (what you reject), these are what you REQUIRE to be present.
+  Cities that lack these requirements are penalized heavily or eliminated.
+  Example metrics:
+    M14: REQUIRE broadband speed ≥ 100 Mbps [Technology MH]
+    M15: REQUIRE international airport within 2 hours [Transport MH]
+    M16: REQUIRE English widely spoken [Social MH]
+    M17: REQUIRE [specific specialist] access within 30min [Healthcare MH]
+
+═══ PHASE 4: TRADE-OFFS (Priority Weighting) ═══
+
+P5: "Your Trade-offs" → Priority weighting signals → 5-10 signals
+  Coverage targets:
+  - Cost vs quality willingness (pay more for safety? more for location?)
+  - Urban vs nature preference when forced to choose
+  - Convenience vs charm (modern infrastructure vs historic character)
+  - Language barrier tolerance (willing to learn? or English-only?)
+  - Weather vs other priorities (sacrifice weather for lower cost?)
+  NOTE: This paragraph does NOT produce scored metrics. It produces WEIGHTING
+  SIGNALS that tell Gemini how to rank competing metrics when cities score
+  differently. E.g., "I'd pay 20% more rent for safety" → weight safety > cost.
+  Example signals:
+    W1: Safety > Cost of Living (willing to pay premium) [Weight]
+    W2: Nature > Nightlife (sacrifice entertainment for outdoors) [Weight]
+    W3: Language learning acceptable (open to non-English) [Weight]
+
+═══ PHASE 5: MODULE DEEP DIVES (20 paragraphs, 1:1 with modules) ═══
+
+P6: "Climate & Weather" → Climate & Weather (moduleId: climate_weather) → 10-15 metrics
+  Coverage targets:
+  - Temperature range (summer max, winter min — in user's unit C/F)
+  - Humidity tolerance (exact threshold if possible)
+  - Seasonal preference (4 seasons, 2 seasons, year-round warmth)
+  - Sunshine days per year
+  - Natural disaster tolerance
   - Air quality sensitivity
+  - Rain/snow tolerance
   Example metrics:
-    M8: Average winter temperature 20-25C [Climate]
-    M9: Annual humidity below 60% [Climate]
-    M10: Fewer than 2 extreme weather events per decade [Climate]
-    M11: Annual sunshine hours above 2500 [Climate]
-    M12: Air Quality Index below 50 (WHO standard) [Climate]
-    M13: No monsoon/rainy season exceeding 60 days [Climate]
+    M18: Average summer temperature below [X]C [Climate]
+    M19: Average winter temperature above [X]C [Climate]
+    M20: Annual humidity below [X]% [Climate]
+    M21: Sunshine days above [X] per year [Climate]
+    M22: Natural disaster risk index below [X] [Climate]
+    M23: Air quality index (PM2.5) below [X] [Climate]
 
-P4: "Safety & Peace of Mind" → Safety & Security → 10-15 metrics
+P7: "Safety & Security" → Safety & Security (moduleId: safety_security) → 10-12 metrics
   Coverage targets:
-  - Crime type concerns (violent, property, petty, organized)
-  - Political stability importance
+  - Violent crime tolerance
+  - Property crime tolerance
+  - Political stability requirement
+  - Corruption level tolerance
   - Emergency services quality
-  - Women's safety / LGBTQ+ safety (if relevant)
-  - Neighborhood safety feel (walkable at night?)
-  - Natural disaster preparedness
+  - Personal safety concerns (walking at night, solo, LGBTQ+, women, minorities)
+  - Neighborhood safety expectations
   Example metrics:
-    M14: Violent crime rate below [X] per 100k [Safety]
-    M15: Political stability index above 70/100 [Safety]
-    M16: Emergency response time under 10 minutes [Safety]
-    M17: Safe for solo walking after midnight [Safety]
+    M24: Violent crime rate below [X] per 100k [Safety]
+    M25: Political stability index above [X] [Safety]
+    M26: Safe for solo [gender] at night [Safety]
 
-P5: "Your Health & Wellness" → Healthcare & Medical → 12-18 metrics
+P8: "Healthcare & Medical" → Healthcare & Medical (moduleId: healthcare) → 10-15 metrics
   Coverage targets:
-  - Chronic conditions requiring specialist access
-  - Medication availability (specific drugs)
-  - Mental health services
-  - Insurance system (public vs private, cost)
+  - Chronic conditions (specific)
+  - Regular medications (exact names if mentioned)
+  - Specialist access needs
+  - Mental health services need
+  - Public vs private healthcare preference
+  - Health insurance for expats
   - Hospital quality / international accreditation
   - Wellness infrastructure (alternative medicine, prevention)
   - Dental care access
   Example metrics:
-    M18: [Specific specialist] availability within 30min [Healthcare]
-    M19: [Specific medication] legally available and affordable [Healthcare]
-    M20: English-speaking medical professionals [Healthcare]
-    M21: Private health insurance under EUR 300/month [Healthcare]
-    M22: JCI-accredited hospital within 30 minutes [Healthcare]
+    M27: [Specific specialist] availability within 30min [Healthcare]
+    M28: [Specific medication] legally available and affordable [Healthcare]
+    M29: English-speaking medical professionals [Healthcare]
+    M30: Private health insurance under EUR 300/month [Healthcare]
+    M31: JCI-accredited hospital within 30 minutes [Healthcare]
 
-P6: "Your Dream Home" → Housing & Real Estate → 12-15 metrics
+P9: "Housing & Real Estate" → Housing & Real Estate (moduleId: housing) → 12-15 metrics
   Coverage targets:
   - Property type (apartment, house, villa, loft)
   - Size requirements (bedrooms, sqm/sqft)
@@ -219,12 +289,12 @@ P6: "Your Dream Home" → Housing & Real Estate → 12-15 metrics
   - Amenities (garden, pool, parking, elevator)
   - Foreign ownership rules
   Example metrics:
-    M23: 2BR apartment rental under EUR 1,500/month [Housing]
-    M24: Foreigner property ownership permitted [Housing]
-    M25: Walkable neighborhood with shops within 500m [Housing]
-    M26: Building quality / construction standards [Housing]
+    M32: 2BR apartment rental under EUR 1,500/month [Housing]
+    M33: Foreigner property ownership permitted [Housing]
+    M34: Walkable neighborhood with shops within 500m [Housing]
+    M35: Building quality / construction standards [Housing]
 
-P7: "Your Legal Reality" → Legal & Immigration → 10-15 metrics
+P10: "Legal & Immigration" → Legal & Immigration (moduleId: legal_immigration) → 10-15 metrics
   Coverage targets:
   - Current passport(s) and their strength
   - Visa type interest (digital nomad, retirement, investment, work)
@@ -233,12 +303,12 @@ P7: "Your Legal Reality" → Legal & Immigration → 10-15 metrics
   - Tax treaty awareness
   - Dual citizenship possibility
   Example metrics:
-    M27: Digital nomad visa available for [nationality] [Legal]
-    M28: Residency achievable within 12 months [Legal]
-    M29: Tax treaty with [home country] [Financial]
-    M30: Bureaucracy efficiency index [Legal]
+    M36: Digital nomad visa available for [nationality] [Legal]
+    M37: Residency achievable within 12 months [Legal]
+    M38: Tax treaty with [home country] [Financial]
+    M39: Bureaucracy efficiency index [Legal]
 
-P8: "Your Financial Picture" → Financial & Banking → 12-18 metrics
+P11: "Financial & Banking" → Financial & Banking (moduleId: financial) → 12-18 metrics
   Coverage targets:
   - Monthly income (DETECT CURRENCY — never default to USD)
   - Monthly budget tolerance
@@ -247,13 +317,13 @@ P8: "Your Financial Picture" → Financial & Banking → 12-18 metrics
   - Banking needs (international transfers, crypto, investment access)
   - Cost of living expectations (specific: rent, food, transport, healthcare)
   Example metrics:
-    M31: Monthly cost of living below EUR 3,000 [Financial]
-    M32: No income tax on foreign-sourced income [Financial]
-    M33: International banking with EUR/USD accounts [Financial]
-    M34: Grocery cost for family of [X] below EUR 600/month [Financial]
-    M35: Favorable capital gains tax rate (below 20%) [Financial]
+    M40: Monthly cost of living below EUR 3,000 [Financial]
+    M41: No income tax on foreign-sourced income [Financial]
+    M42: International banking with EUR/USD accounts [Financial]
+    M43: Grocery cost for family of [X] below EUR 600/month [Financial]
+    M44: Favorable capital gains tax rate (below 20%) [Financial]
 
-P9: "Freedom & Autonomy" → LifeScore / Legal → 8-12 metrics
+P12: "Legal Independence & Freedom" → LifeScore (moduleId: lifescore) → 8-12 metrics
   Coverage targets:
   - Personal freedoms that matter (speech, press, religion, lifestyle)
   - Substances (alcohol, cannabis, legal status)
@@ -262,12 +332,12 @@ P9: "Freedom & Autonomy" → LifeScore / Legal → 8-12 metrics
   - Gun rights (if applicable)
   - Business freedom / regulatory freedom
   Example metrics:
-    M36: Press Freedom Index in top 30 countries [LifeScore]
-    M37: Cannabis legal or decriminalized [LifeScore]
-    M38: No internet censorship / VPN not required [LifeScore]
-    M39: LGBTQ+ legal protections in place [LifeScore]
+    M45: Press Freedom Index in top 30 countries [LifeScore]
+    M46: Cannabis legal or decriminalized [LifeScore]
+    M47: No internet censorship / VPN not required [LifeScore]
+    M48: LGBTQ+ legal protections in place [LifeScore]
 
-P10: "Your Work & Career" → Business & Entrepreneurship → 12-15 metrics
+P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: business) → 12-15 metrics
   Coverage targets:
   - Remote vs local employment
   - Industry/sector (tech, finance, creative, trades)
@@ -277,12 +347,12 @@ P10: "Your Work & Career" → Business & Entrepreneurship → 12-15 metrics
   - Networking / professional community
   - Time zone compatibility with clients/team
   Example metrics:
-    M40: Coworking spaces with 24/7 access [Business]
-    M41: Startup incorporation under 30 days [Business]
-    M42: Time zone within +/- 3 hours of [client zone] [Business]
-    M43: Active [industry] professional community [Business]
+    M49: Coworking spaces with 24/7 access [Business]
+    M50: Startup incorporation under 30 days [Business]
+    M51: Time zone within +/- 3 hours of [client zone] [Business]
+    M52: Active [industry] professional community [Business]
 
-P11: "Staying Connected" → Technology & Connectivity → 10-12 metrics
+P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: technology) → 10-12 metrics
   Coverage targets:
   - Internet speed requirements (specific Mbps)
   - 5G / mobile data coverage
@@ -291,12 +361,12 @@ P11: "Staying Connected" → Technology & Connectivity → 10-12 metrics
   - Smart city infrastructure
   - Tech startup density (if relevant)
   Example metrics:
-    M44: Average broadband speed above 100 Mbps [Technology]
-    M45: 5G coverage in city center [Technology]
-    M46: Fiber optic availability in residential areas [Technology]
-    M47: Reliable power grid (outages < 5 hours/year) [Technology]
+    M53: Average broadband speed above 100 Mbps [Technology]
+    M54: 5G coverage in city center [Technology]
+    M55: Fiber optic availability in residential areas [Technology]
+    M56: Reliable power grid (outages < 5 hours/year) [Technology]
 
-P12: "Getting Around" → Transportation → 10-15 metrics
+P15: "Transportation & Mobility" → Transportation (moduleId: transportation) → 10-15 metrics
   Coverage targets:
   - Car ownership intention (yes/no/maybe)
   - Public transit quality expectations
@@ -306,12 +376,12 @@ P12: "Getting Around" → Transportation → 10-15 metrics
   - Ride-sharing availability
   - Commute time tolerance
   Example metrics:
-    M48: Public transit coverage reaching 90%+ of city [Transport]
-    M49: Walk Score above 80 [Transport]
-    M50: International airport within 45 minutes [Transport]
-    M51: Bike lane network throughout city center [Transport]
+    M57: Public transit coverage reaching 90%+ of city [Transport]
+    M58: Walk Score above 80 [Transport]
+    M59: International airport within 45 minutes [Transport]
+    M60: Bike lane network throughout city center [Transport]
 
-P13: "Learning & Growth" → Education & Learning → 8-12 metrics
+P16: "Education & Learning" → Education & Learning (moduleId: education) → 8-12 metrics
   Coverage targets:
   - Personal education goals (language, degree, skills)
   - Children's education needs (if applicable)
@@ -320,11 +390,11 @@ P13: "Learning & Growth" → Education & Learning → 8-12 metrics
   - Professional development / conferences
   - Language learning infrastructure
   Example metrics:
-    M52: International schools with IB curriculum [Education]
-    M53: Language schools for [target language] [Education]
-    M54: University ranked in global top 500 [Education]
+    M61: International schools with IB curriculum [Education]
+    M62: Language schools for [target language] [Education]
+    M63: University ranked in global top 500 [Education]
 
-P14: "Your Family" → Family & Children → 10-15 metrics
+P17: "Family & Children" → Family & Children (moduleId: family) → 10-15 metrics
   Coverage targets:
   - Who is relocating (partner, kids ages, parents)
   - Partner's career needs
@@ -334,12 +404,12 @@ P14: "Your Family" → Family & Children → 10-15 metrics
   - Family-friendly neighborhoods
   - Parental leave / family benefits (if employed locally)
   Example metrics:
-    M55: Daycare availability under EUR 500/month [Family]
-    M56: Parks and playgrounds within 10-minute walk [Family]
-    M57: English-medium schooling K-12 [Family]
-    M58: Family-oriented neighborhood culture [Family]
+    M64: Daycare availability under EUR 500/month [Family]
+    M65: Parks and playgrounds within 10-minute walk [Family]
+    M66: English-medium schooling K-12 [Family]
+    M67: Family-oriented neighborhood culture [Family]
 
-P15: "Your Social World" → Dating & Social Life → 10-12 metrics
+P18: "Dating & Social Life" → Dating & Social Life (moduleId: dating_social) → 10-12 metrics
   Coverage targets:
   - Expat community size and activity
   - Dating scene (if single)
@@ -348,26 +418,12 @@ P15: "Your Social World" → Dating & Social Life → 10-12 metrics
   - Nightlife quality (or lack thereof if preferred)
   - Community integration ease
   Example metrics:
-    M59: Active expat community (1000+ in meetup groups) [Social]
-    M60: Cultural openness index for foreigners [Social]
-    M61: English widely spoken in social settings [Social]
-    M62: Regular social events / meetups weekly [Social]
+    M68: Active expat community (1000+ in meetup groups) [Social]
+    M69: Cultural openness index for foreigners [Social]
+    M70: English widely spoken in social settings [Social]
+    M71: Regular social events / meetups weekly [Social]
 
-P16: "Your Animals" → Pets & Animals → 8-10 metrics
-  Coverage targets:
-  - Pet type and breed (affects import regulations)
-  - Pet-friendly housing availability
-  - Veterinary care quality and cost
-  - Pet import regulations and quarantine
-  - Off-leash parks / pet-friendly spaces
-  - Breed-specific legislation (if applicable)
-  Example metrics:
-    M63: Pet-friendly rental apartments available [Pets]
-    M64: No breed-specific legislation for [breed] [Pets]
-    M65: Veterinary care within 15 minutes [Pets]
-    M66: No quarantine requirement for [pet type] import [Pets]
-
-P17: "Food & Dining" → Food & Cuisine → 10-12 metrics
+P19: "Food & Cuisine" → Food & Cuisine (moduleId: food_cuisine) → 10-12 metrics
   Coverage targets:
   - Dietary restrictions (vegan, halal, kosher, gluten-free, allergies)
   - Cuisine preferences (specific cuisines loved)
@@ -377,12 +433,12 @@ P17: "Food & Dining" → Food & Cuisine → 10-12 metrics
   - Local cuisine quality / variety
   - Farmers markets / organic access
   Example metrics:
-    M67: Vegan restaurant density above 5 per 10k people [Food]
-    M68: International grocery stores with [cuisine] ingredients [Food]
-    M69: Average restaurant meal under EUR 15 [Food]
-    M70: Food delivery apps with 30-min delivery [Food]
+    M72: Vegan restaurant density above 5 per 10k people [Food]
+    M73: International grocery stores with [cuisine] ingredients [Food]
+    M74: Average restaurant meal under EUR 15 [Food]
+    M75: Food delivery apps with 30-min delivery [Food]
 
-P18: "Fitness & Activity" → Sports & Fitness → 8-12 metrics
+P20: "Sports & Fitness" → Sports & Fitness (moduleId: sports_fitness) → 8-12 metrics
   Coverage targets:
   - Gym/fitness center access and cost
   - Specific sports (tennis, surfing, yoga, CrossFit, martial arts)
@@ -391,12 +447,12 @@ P18: "Fitness & Activity" → Sports & Fitness → 8-12 metrics
   - Wellness/spa culture
   - Swimming pool access (indoor/outdoor)
   Example metrics:
-    M71: Gym membership under EUR 50/month [Fitness]
-    M72: [Specific sport] clubs with English-speaking members [Fitness]
-    M73: Running/cycling paths along waterfront or parks [Fitness]
-    M74: Year-round outdoor exercise climate [Fitness]
+    M76: Gym membership under EUR 50/month [Fitness]
+    M77: [Specific sport] clubs with English-speaking members [Fitness]
+    M78: Running/cycling paths along waterfront or parks [Fitness]
+    M79: Year-round outdoor exercise climate [Fitness]
 
-P19: "Nature & Outdoors" → Outdoor & Nature → 8-12 metrics
+P21: "Outdoor & Nature" → Outdoor & Nature (moduleId: outdoor_nature) → 8-12 metrics
   Coverage targets:
   - Mountain vs beach preference (or both)
   - Hiking trail accessibility
@@ -405,12 +461,12 @@ P19: "Nature & Outdoors" → Outdoor & Nature → 8-12 metrics
   - National parks / nature reserves proximity
   - Wildlife encounters (positive or concern)
   Example metrics:
-    M75: Beach within 30-minute drive [Outdoor]
-    M76: Hiking trails accessible without car [Outdoor]
-    M77: City green space above 20 sqm per capita [Outdoor]
-    M78: National parks within 2-hour drive [Outdoor]
+    M80: Beach within 30-minute drive [Outdoor]
+    M81: Hiking trails accessible without car [Outdoor]
+    M82: City green space above 20 sqm per capita [Outdoor]
+    M83: National parks within 2-hour drive [Outdoor]
 
-P20: "Arts & Culture" → Arts & Culture → 8-10 metrics
+P22: "Arts & Culture" → Arts & Culture (moduleId: arts_culture) → 8-10 metrics
   Coverage targets:
   - Museum / gallery importance
   - Music scene (live music, genres, festivals)
@@ -419,12 +475,12 @@ P20: "Arts & Culture" → Arts & Culture → 8-10 metrics
   - Cultural events calendar density
   - Art community / creative scene
   Example metrics:
-    M79: Museums per capita in top quartile [Culture]
-    M80: Live music venues with weekly events [Culture]
-    M81: Cultural heritage UNESCO sites nearby [Culture]
-    M82: Active creative/artist community [Culture]
+    M84: Museums per capita in top quartile [Culture]
+    M85: Live music venues with weekly events [Culture]
+    M86: Cultural heritage UNESCO sites nearby [Culture]
+    M87: Active creative/artist community [Culture]
 
-P21: "Fun & Entertainment" → Entertainment & Nightlife → 8-10 metrics
+P23: "Entertainment & Nightlife" → Entertainment & Nightlife (moduleId: entertainment) → 8-10 metrics
   Coverage targets:
   - Nightlife style (clubs, bars, lounges, none)
   - Festival / event calendar
@@ -433,12 +489,12 @@ P21: "Fun & Entertainment" → Entertainment & Nightlife → 8-10 metrics
   - Weekend activity variety
   - Comedy / stand-up scene
   Example metrics:
-    M83: Nightlife district with diverse venue types [Entertainment]
-    M84: Annual festivals exceeding 20 events [Entertainment]
-    M85: Cinema showing English-language films [Entertainment]
-    M86: Weekend activities variety score [Entertainment]
+    M88: Nightlife district with diverse venue types [Entertainment]
+    M89: Annual festivals exceeding 20 events [Entertainment]
+    M90: Cinema showing English-language films [Entertainment]
+    M91: Weekend activities variety score [Entertainment]
 
-P22: "Faith & Spirituality" → Spiritual & Religious → 6-8 metrics
+P24: "Spiritual & Religious" → Spiritual & Religious (moduleId: spiritual) → 6-8 metrics
   Coverage targets:
   - Specific religion / denomination
   - Place of worship proximity
@@ -447,27 +503,44 @@ P22: "Faith & Spirituality" → Spiritual & Religious → 6-8 metrics
   - Religious dietary accommodation
   - Secular-friendly (if non-religious)
   Example metrics:
-    M87: [Specific] places of worship within 20 minutes [Spiritual]
-    M88: Religious tolerance index above 70/100 [Spiritual]
-    M89: Meditation / retreat centers accessible [Spiritual]
+    M92: [Specific] places of worship within 20 minutes [Spiritual]
+    M93: Religious tolerance index above 70/100 [Spiritual]
+    M94: Meditation / retreat centers accessible [Spiritual]
 
-P23: "Your Dream Day" → Cross-category validation → 5-8 metrics
+P25: "Pets & Animals" → Pets & Animals (moduleId: pets) → 8-10 metrics
+  Coverage targets:
+  - Pet type and breed (affects import regulations)
+  - Pet-friendly housing availability
+  - Veterinary care quality and cost
+  - Pet import regulations and quarantine
+  - Off-leash parks / pet-friendly spaces
+  - Breed-specific legislation (if applicable)
+  Example metrics:
+    M95: Pet-friendly rental apartments available [Pets]
+    M96: No breed-specific legislation for [breed] [Pets]
+    M97: Veterinary care within 15 minutes [Pets]
+    M98: No quarantine requirement for [pet type] import [Pets]
+
+═══ PHASE 6: YOUR VISION ═══
+
+P26: "Your Dream Day" → Cross-category validation → 5-8 metrics
   Coverage targets:
   - Morning routine signals (coffee culture, beach sunrise, gym)
   - Afternoon signals (work setup, lunch culture, siesta)
   - Evening signals (dining out, nightlife, family time, nature)
   - Walkability narrative (does the dream day require a car?)
-  - Weather narrative (confirms/refines climate from P3)
+  - Weather narrative (confirms/refines climate from P6)
   NOTE: This paragraph validates and refines metrics from ALL other paragraphs.
   Gemini cross-references "dream day" activities against extracted metrics.
 
-P24: "Anything Else" → Wildcard / Dealbreakers → 5-15 metrics
+P27: "Anything Else" → Wildcard / Catch-all → 5-15 metrics
   Coverage targets:
-  - Absolute dealbreakers not covered elsewhere
+  - Absolute dealbreakers not covered in P3
   - Niche requirements (specific hobby, rare medical need, etc.)
   - Emotional/psychological needs
-  - Things they're afraid to say in earlier paragraphs
+  - Past relocation experiences (cities loved or hated, and WHY)
   - Partner's separate requirements
+  - Future plans (starting family, retiring, building business)
   NOTE: This is the safety net. Olivia should especially encourage depth here.
 ```
 
@@ -498,7 +571,7 @@ USER WRITES PARAGRAPH
 [Debounced analysis — triggers after 3 seconds of pause OR every 150 words]
         |
         v
-OLIVIA ANALYZER (lightweight — Gemini Flash or keyword detection for MVP)
+OLIVIA ANALYZER (keyword detection for MVP, Gemini 3.1 Pro Preview escalation)
   - Checks: which coverage targets for THIS paragraph have been addressed?
   - Checks: is the user off-topic for this paragraph?
   - Checks: has the user provided specific enough detail for metric extraction?
@@ -524,27 +597,31 @@ IF user is too vague:
 
 ### Interjection Examples by Paragraph
 
-**P3 — "Your Ideal Climate"**
+**P3 — "Your Dealbreakers"**
+User mentioned safety concerns but nothing about climate or visa:
+> "Great that you know your safety limits! Have you thought about climate dealbreakers too? Some cities that feel safe have extreme humidity or heat that makes daily life miserable. And is there a visa pathway that MUST exist, or would lack of one be a hard wall?"
+
+**P6 — "Climate & Weather"**
 User wrote about temperature but not humidity:
 > "Love the detail about temperature! Quick thought — how do you feel about humidity? Some places hit your perfect temperature but the humidity makes it feel 10 degrees hotter. Worth mentioning if it matters to you."
 
-**P5 — "Your Health & Wellness"**
+**P8 — "Healthcare & Medical"**
 User mentioned being healthy but didn't discuss medication or specialists:
 > "Great that you're in good health! Just in case — do you take any regular medications or see any specialists? Pharmacy access varies wildly between countries, and some medications that are over-the-counter at home need prescriptions abroad."
 
-**P8 — "Your Financial Picture"**
+**P11 — "Financial & Banking"**
 User mentioned income but not taxes:
 > "Good picture of your income! One thing that can make or break a relocation budget: taxes. Some countries won't tax your foreign income at all, others take 30%+. Any thoughts on your tax tolerance?"
 
-**P12 — "Getting Around"**
+**P15 — "Transportation & Mobility"**
 User described a car-free lifestyle but didn't mention airports:
 > "Love the walkable vision! How often do you travel internationally? Airport proximity matters a lot for some people — a beautiful walkable city that's 3 hours from an airport changes the equation."
 
-**P16 — "Your Animals"**
+**P25 — "Pets & Animals"**
 User mentioned a dog but not the breed:
 > "A fellow dog person! What breed? It matters more than you'd think — some countries ban specific breeds, and size affects housing options and airline transport rules."
 
-**P24 — "Anything Else"**
+**P27 — "Anything Else"**
 User wrote very little:
 > "This is your safety net — anything you've been thinking about that didn't fit neatly into the other sections? Dealbreakers you forgot to mention? Things your partner cares about that are different from your priorities? Even small things can matter."
 
@@ -556,15 +633,16 @@ Phase 1 (MVP): Keyword/regex detection against coverage target keywords per para
   - Each paragraph has a list of target keywords/phrases
   - If 80+ words written and keyword group absent → trigger interjection from template
 
-Phase 2 (Enhanced): Gemini Flash API call (debounced, max 1 per paragraph)
+Phase 2 (Enhanced): Gemini 3.1 Pro Preview API call (debounced, max 1 per paragraph)
   - Send: paragraph text + coverage targets + paragraph context
   - Return: which targets are covered, which are missing, suggested interjection
-  - Cost: ~$0.001 per call (Flash is cheap), 24 calls max = $0.024 per user
+  - Only fires when keyword detection confidence is low
 
 Phase 3 (Advanced): Context-aware cross-paragraph intelligence
   - Olivia remembers what was said in ALL previous paragraphs
-  - If P14 (Family) mentions kids but P13 (Education) doesn't address schools: prompt
-  - If P8 (Financial) mentions tight budget but P6 (Housing) describes a villa: flag conflict
+  - If P17 (Family) mentions kids but P16 (Education) doesn't address schools: prompt
+  - If P11 (Financial) mentions tight budget but P9 (Housing) describes a villa: flag conflict
+  - If P3 (Dealbreakers) mentions safety but P7 (Safety) is vague: prompt for specifics
   - Cross-paragraph consistency checking
 ```
 
@@ -763,7 +841,7 @@ SECTION 3: THE CITY SHOWDOWN (Pages 17-46) — THE CORE
 
   Pages 40-42: WINNING CITY PORTRAIT
            - Why [City] wins: narrative summary
-           - "Your paragraph said [quote from P23] — here's how [City] delivers"
+           - "Your paragraph said [quote from P26] — here's how [City] delivers"
            - Day-in-the-life narrative (morning to night in winning city)
            - Local neighborhood character descriptions
            - VISUAL: Photo collage + pull quotes from user's own paragraphs
@@ -964,10 +1042,19 @@ SECTION 8: ACTION PLAN (Pages 79-86)
 SECTION 9: METHODOLOGY & EVIDENCE (Pages 87-96)
 ────────────────────────────────────────────────
   Page 87: HOW CLUES WORKS
-           - Plain-language explanation of the system
-           - 24 paragraphs → metric extraction → 5-LLM scoring → Opus Judge → Report
+           - Plain-language explanation of the 6-phase pipeline:
+             Phase 1: Your Profile (P1-P2) → demographics, income, timeline
+             Phase 2: Dealbreakers (P3) → hard elimination walls
+             Phase 3: Must Haves (P4) → non-negotiable requirements
+             Phase 4: Trade-offs (P5) → priority weighting signals
+             Phase 5: Module Deep Dives (P6-P25) → 20 categories scored
+             Phase 6: Vision (P26-P27) → validation + wildcard
+           - 27 paragraphs → 100-250 numbered metrics → Tavily research →
+             5-LLM scoring → Opus/Cristiano Judge → 100-page report
+           - DNW elimination explained: severity-5 = instant city removal
+           - MH boosting explained: additive scoring, not eliminative
            - Why this is better than Googling / reading blogs
-           - VISUAL: Pipeline flowchart (simple, clean)
+           - VISUAL: Pipeline flowchart showing 6 phases + downstream modules
 
   Page 88: YOUR METRICS EXPLAINED
            - How paragraphs became metrics
@@ -1073,8 +1160,8 @@ This is the **single source of truth** for which AI model powers each function i
 | Role | Model | Provider | Why |
 |------|-------|----------|-----|
 | **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
-| **Olivia Tutor (Paragraphical)** | Gemini 2.0 Flash | Google | Lightweight coverage-gap detection during writing. ~$0.001/call. Only fires when keyword detection isn't confident enough. |
-| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 24 paragraphs, outputs structured GeminiExtraction. |
+| **Olivia Tutor (Paragraphical)** | Gemini 3.1 Pro (Preview) | Google | Coverage-gap detection during writing. Only fires when keyword detection isn't confident enough. |
+| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 27 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P25 Module Deep Dives, P26-P27 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
 | **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
 | **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
 | **LLM Evaluator #3** | Gemini 3.1 Pro (Preview) | Google | Reuses extraction context for scoring |
@@ -1090,7 +1177,7 @@ This is the **single source of truth** for which AI model powers each function i
 ### Key Rules
 1. **Olivia = GPT-4o everywhere** — chat bubble, help modal, all products. This is a company architecture decision, not per-feature.
 2. **Gemini 3.1 Pro (Preview) for heavy extraction** — the Paragraphical pipeline's main brain.
-3. **Gemini 2.0 Flash for lightweight tasks** — Olivia's tutor interjections during writing, cost validation checks, quick classification.
+3. **Gemini 3.1 Pro (Preview) for tutor escalation** — Olivia's tutor interjections during writing when keyword detection is insufficient.
 4. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
 5. **Cost tracking must match these models.** The `costTracking.ts` rate table must align with this registry.
 
@@ -1098,7 +1185,7 @@ This is the **single source of truth** for which AI model powers each function i
 
 ## Olivia Tutor Architecture (Paragraphical Writing Flow)
 
-Olivia guides users while they write each of the 24 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
+Olivia guides users while they write each of the 27 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
 
 ### Layer 1: Coverage Target Data (Code — Zero Cost)
 **What:** A TypeScript data file defining what each paragraph needs.
@@ -1108,18 +1195,19 @@ Olivia guides users while they write each of the 24 paragraphs, ensuring they co
 // Per-paragraph: coverage targets, keyword groups, template interjections
 {
   paragraphId: 3,
-  heading: "Your Ideal Climate",
+  heading: "Your Dealbreakers",
   coverageTargets: [
-    { id: "temperature", label: "Temperature preference", keywords: ["hot", "cold", "warm", "cool", "degrees", "celsius", "fahrenheit"] },
-    { id: "humidity", label: "Humidity tolerance", keywords: ["humid", "humidity", "dry", "moisture", "sticky", "arid", "tropical"] },
-    { id: "seasons", label: "Seasonal preference", keywords: ["seasons", "winter", "summer", "spring", "autumn", "fall", "year-round"] },
-    { id: "disasters", label: "Natural disaster tolerance", keywords: ["earthquake", "hurricane", "tornado", "flood", "typhoon", "wildfire"] },
-    { id: "sunshine", label: "Sunshine importance", keywords: ["sun", "sunny", "sunshine", "overcast", "gray", "cloudy", "rain"] },
-    { id: "air_quality", label: "Air quality", keywords: ["air quality", "pollution", "smog", "clean air", "asthma", "allergies"] },
+    { id: "climate_dnw", label: "Climate dealbreakers", keywords: ["humidity", "heat", "cold", "snow", "ice", "tropical", "desert", "too hot", "too cold", "freezing"] },
+    { id: "safety_dnw", label: "Safety dealbreakers", keywords: ["crime", "violence", "dangerous", "war", "conflict", "cartel", "corrupt", "unstable"] },
+    { id: "legal_dnw", label: "Legal dealbreakers", keywords: ["no visa", "illegal", "banned", "restricted", "no residency", "no pathway", "deport"] },
+    { id: "healthcare_dnw", label: "Healthcare dealbreakers", keywords: ["no hospital", "no doctor", "no specialist", "no pharmacy", "no healthcare", "medical"] },
+    { id: "region_dnw", label: "Excluded regions/countries", keywords: ["refuse", "never", "not", "exclude", "avoid", "no way", "except", "only"] },
+    { id: "cultural_dnw", label: "Cultural dealbreakers", keywords: ["intolerant", "censorship", "oppressive", "authoritarian", "discrimination", "homophobic", "racist"] },
   ],
   templateInterjections: {
-    humidity: "Love how specific you are about temperature! Quick thought — are you more of a dry-heat person or do you handle humidity okay? That single factor eliminates about 40% of cities.",
-    disasters: "Great detail on the climate vibe! Have you thought about natural disaster risk? Some dream-weather cities sit in earthquake or hurricane zones.",
+    climate_dnw: "What climate would be completely unacceptable? Extreme humidity, freezing winters, desert heat? These hard walls eliminate cities before scoring even begins.",
+    safety_dnw: "Any safety-related dealbreakers? Certain crime levels, political instability, or conflict zones you'd never consider?",
+    region_dnw: "Are there specific countries or regions you absolutely refuse to consider? Even if they'd otherwise score well?",
   }
 }
 ```
@@ -1137,16 +1225,16 @@ Olivia guides users while they write each of the 24 paragraphs, ensuring they co
 - Tracks dismissed interjections (don't repeat)
 - **This alone handles ~70% of tutoring with zero API spend**
 
-### Layer 3: Gemini Flash Escalation (API — ~$0.024/user total)
-**What:** When keyword detection confidence is low, fire a lightweight Gemini 2.0 Flash call.
+### Layer 3: Gemini 3.1 Pro Preview Escalation (API)
+**What:** When keyword detection confidence is low, fire a Gemini 3.1 Pro Preview call.
 **File:** `src/lib/oliviaTutor.ts`
 
 Triggers when:
 - User wrote 150+ words but keyword detection only found 1-2 of 5+ targets
 - User's language is indirect/metaphorical (keyword matching fails)
-- Cross-paragraph conflict detected (e.g., P3 says "love the beach" but P6 says "hate tourists")
+- Cross-paragraph conflict detected (e.g., P6 says "love the beach" but P9 says "hate tourists")
 
-The Gemini Flash prompt:
+The Gemini 3.1 Pro Preview prompt:
 ```
 You are Olivia, analyzing paragraph text for coverage gaps.
 Paragraph {N}: "{heading}" — Coverage targets: {list}
@@ -1166,20 +1254,20 @@ Reference something they wrote positively first. Ask about ONE missing target.
 Max 2 sentences. Never say "you forgot" — say "have you thought about".
 ```
 
-Cost: ~$0.001 per call x 24 paragraphs = $0.024 max per user (most paragraphs handled by Layer 2).
+Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 only fires when keyword confidence is low.
 
 ### Layer 4: Cross-Paragraph Intelligence (API — Future)
 **What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
 
-- Fires after paragraphs 6, 12, 18, and 24 (section boundaries)
-- Checks for contradictions (P3 vs P6, P8 vs P10)
+- Fires after paragraphs 5, 12, 18, 25, and 27 (phase boundaries)
+- Checks for contradictions (P3 vs P6, P9 vs P11, P4 vs module paragraphs)
 - Identifies completely unaddressed categories
 - Suggests which remaining paragraphs to focus on
 - Uses conversation history to avoid repetition
 
 ### Build Order
 1. Layer 1 (data file) → Layer 2 (keyword hook) → Ship as MVP
-2. Layer 3 (Gemini Flash) → Add when keyword detection proves insufficient
+2. Layer 3 (Gemini 3.1 Pro Preview) → Add when keyword detection proves insufficient
 3. Layer 4 (cross-paragraph) → Add after Paragraphical extraction endpoint is built
 
 ### UI Integration

@@ -63,6 +63,9 @@ async function saveToSupabase(session: UserSession): Promise<boolean> {
       confidence: session.confidence,
       paragraphs_completed: completedParagraphs,
 
+      // Denormalized currency from Gemini extraction (for analytics)
+      detected_currency: session.paragraphical.extraction?.detected_currency ?? null,
+
       // Full session state as JSONB
       session_data: session,
 
@@ -129,6 +132,7 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
 
           if (supabaseTime >= localTime) {
             onSessionLoaded(supabaseSession);
+            hydrationDone.current = true;
             console.log('[CLUES] Session restored from Supabase', {
               region: supabaseSession.globe?.region,
               tier: supabaseSession.currentTier,

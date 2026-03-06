@@ -15,7 +15,54 @@ import { recalculateTier } from '../../lib/tierEngine';
 import { Header } from '../Shared/Header';
 import { OliviaBubble } from '../Shared/OliviaBubble';
 import { useOliviaTutor } from '../../hooks/useOliviaTutor';
+import { getTargetsForParagraph } from '../../data/paragraphTargets';
 import './ParagraphicalFlow.css';
+
+/** Writing quality bar — 5-color band from 0-100% */
+function QualityBar({ paragraphId, text, coveredTargets }: { paragraphId: number; text: string; coveredTargets: string[] }) {
+  const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+  const targets = getTargetsForParagraph(paragraphId);
+  const totalTargets = targets?.coverageTargets.length ?? 1;
+  const coveredCount = coveredTargets.length;
+
+  // Quality score: 60% from target coverage, 40% from word count (up to 150 words)
+  const coverageScore = totalTargets > 0 ? (coveredCount / totalTargets) : 0;
+  const wordScore = Math.min(wordCount / 150, 1);
+  const quality = Math.round((coverageScore * 0.6 + wordScore * 0.4) * 100);
+
+  // 5-color band: red < 20, orange < 40, yellow < 60, blue < 80, green >= 80
+  let colorClass = 'quality--red';
+  let label = 'Needs detail';
+  if (quality >= 80) { colorClass = 'quality--green'; label = 'Excellent'; }
+  else if (quality >= 60) { colorClass = 'quality--blue'; label = 'Good'; }
+  else if (quality >= 40) { colorClass = 'quality--yellow'; label = 'Average'; }
+  else if (quality >= 20) { colorClass = 'quality--orange'; label = 'Below average'; }
+
+  return (
+    <div className="para-flow__status-bar">
+      <div className="para-flow__quality">
+        <div className="para-flow__quality-track">
+          <div
+            className={`para-flow__quality-fill ${colorClass}`}
+            style={{ width: `${quality}%` }}
+            role="progressbar"
+            aria-valuenow={quality}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Writing quality: ${quality}% — ${label}`}
+          />
+          {/* 5-color band markers */}
+          <span className="para-flow__quality-marker" style={{ left: '20%' }} aria-hidden="true" />
+          <span className="para-flow__quality-marker" style={{ left: '40%' }} aria-hidden="true" />
+          <span className="para-flow__quality-marker" style={{ left: '60%' }} aria-hidden="true" />
+          <span className="para-flow__quality-marker" style={{ left: '80%' }} aria-hidden="true" />
+        </div>
+        <span className={`para-flow__quality-label ${colorClass}`}>{label}</span>
+      </div>
+      <div className="para-flow__word-count">{wordCount} words</div>
+    </div>
+  );
+}
 
 export function ParagraphicalFlow() {
   const navigate = useNavigate();
@@ -256,9 +303,8 @@ export function ParagraphicalFlow() {
             aria-label={`Paragraph ${activeId}: ${activeDef.heading}`}
           />
 
-          <div className="para-flow__word-count">
-            {draft.trim().split(/\s+/).filter(Boolean).length} words
-          </div>
+          {/* Status bar: quality progress + word count — below the text screen */}
+          <QualityBar paragraphId={activeId} text={draft} coveredTargets={tutor.coveredTargets} />
 
           <div className="para-flow__actions">
             <button

@@ -121,68 +121,104 @@ Each module has **10 general questions** (200 total across 20 modules).
 
 ---
 
-## 5. THE 24-PARAGRAPH PARAGRAPHICAL
+## 5. THE 27-PARAGRAPH PARAGRAPHICAL
 
-Free-form narrative input mapped to the Human Existence Flow. Gemini extracts structured data from all 24 paragraphs.
+Free-form narrative input following the CLUES decision pipeline. Gemini extracts structured data from all 27 paragraphs.
 
 ### Paragraph Map
 ```
-OPENING (Your Story)
-  P1:  "Who You Are"             — Name, age, identity, origins
-  P2:  "Your Life Right Now"     — Current situation, what works/doesn't
+PHASE 1: YOUR PROFILE (Demographics)
+  P1:  "Who You Are"                   — Age, gender, nationality, citizenship, household, languages, employment
+  P2:  "Your Life Right Now"           — Current location, income, currency, push factors, timeline
 
-SURVIVAL & FOUNDATION
-  P3:  "Your Ideal Climate"      — Weather, seasons, environment
-  P4:  "Safety & Peace of Mind"  — What makes you feel secure
-  P5:  "Your Health & Wellness"  — Medical needs, health priorities
-  P6:  "Your Dream Home"         — Housing type, neighborhood, space
+PHASE 2: DO NOT WANTS (Dealbreakers)
+  P3:  "Your Dealbreakers"             — Hard walls that eliminate cities before scoring begins
 
-LEGAL & FINANCIAL
-  P7:  "Your Legal Reality"      — Citizenship, visa situation
-  P8:  "Your Financial Picture"  — Budget, income, cost tolerance
-  P9:  "Freedom & Autonomy"      — What freedoms matter most
+PHASE 3: MUST HAVES (Non-Negotiables)
+  P4:  "Your Non-Negotiables"          — Requirements a city MUST meet to stay in the running
 
-LIVELIHOOD & GROWTH
-  P10: "Your Work & Career"      — Job, remote/local, ambitions
-  P11: "Staying Connected"       — Internet, tech, digital life
-  P12: "Getting Around"          — Car/transit/walk preferences
-  P13: "Learning & Growth"       — Education goals (you or kids)
+PHASE 4: TRADE-OFFS (Priority Weighting)
+  P5:  "Your Trade-offs"               — What user would sacrifice — reveals how to weight competing metrics
 
-PEOPLE & RELATIONSHIPS
-  P14: "Your Family"             — Who comes, family dynamics
-  P15: "Your Social World"       — Friends, dating, community
-  P16: "Your Animals"            — Pets, animal needs
+PHASE 5: MODULE DEEP DIVES (20 paragraphs, 1:1 with modules in Human Existence Flow order)
+  SURVIVAL
+    P6:  "Climate & Weather"           — moduleId: climate_weather
+    P7:  "Safety & Security"           — moduleId: safety_security
+    P8:  "Healthcare & Medical"        — moduleId: healthcare
+    P9:  "Housing & Real Estate"       — moduleId: housing
+  FOUNDATION
+    P10: "Legal & Immigration"         — moduleId: legal_immigration
+    P11: "Financial & Banking"         — moduleId: financial
+    P12: "Legal Independence & Freedom"— moduleId: lifescore
+  GROWTH
+    P13: "Business & Entrepreneurship" — moduleId: business
+    P14: "Technology & Connectivity"   — moduleId: technology
+    P15: "Transportation & Mobility"   — moduleId: transportation
+    P16: "Education & Learning"        — moduleId: education
+  CONNECTION
+    P17: "Family & Children"           — moduleId: family
+    P18: "Dating & Social Life"        — moduleId: dating_social
+  NOURISHMENT
+    P19: "Food & Cuisine"              — moduleId: food_cuisine
+    P20: "Sports & Fitness"            — moduleId: sports_fitness
+    P21: "Outdoor & Nature"            — moduleId: outdoor_nature
+  SOUL
+    P22: "Arts & Culture"              — moduleId: arts_culture
+    P23: "Entertainment & Nightlife"   — moduleId: entertainment
+    P24: "Spiritual & Religious"       — moduleId: spiritual
+    P25: "Pets & Animals"              — moduleId: pets
 
-NOURISHMENT & LIFESTYLE
-  P17: "Food & Dining"           — Dietary needs, cuisines, food culture
-  P18: "Fitness & Activity"      — Exercise, sports, staying active
-  P19: "Nature & Outdoors"       — Mountains/beaches, parks
-
-SOUL & MEANING
-  P20: "Arts & Culture"          — Museums, music, theater
-  P21: "Fun & Entertainment"     — Nightlife, events, hobbies
-  P22: "Faith & Spirituality"    — Religious needs, spiritual community
-
-CLOSING (Your Vision)
-  P23: "Your Dream Day"          — Perfect day in your new city
-  P24: "Anything Else"           — Dealbreakers, wild cards
+PHASE 6: YOUR VISION
+  P26: "Your Dream Day"               — Perfect ordinary Tuesday in your new city
+  P27: "Anything Else"                 — Wildcard: missed dealbreakers, past experiences, future plans
 ```
 
-### Gemini's Extraction Output
+### Key changes vs. the old 24-paragraph structure:
+- **Added P3 (Dealbreakers)** — DNW hard walls the old structure lacked
+- **Added P4 (Non-Negotiables)** — Must Haves the old structure lacked
+- **Added P5 (Trade-offs)** — Priority weighting signals the old structure lacked
+- **Module-mapped paragraphs** — Each P6-P25 has a `moduleId` property linking it to the exact module it mirrors
+- **Enriched prompts** — Every prompt asks for specific, scorable data (numbers, thresholds, concrete preferences)
+
+### Gemini 3.1 Pro Preview Extraction + Recommendation Output
 ```typescript
 interface GeminiExtraction {
-  demographic_signals: { age, gender, household_size, ... };
-  dnw_signals: string[];        // "hates humidity", "avoids instability"
-  mh_signals: string[];         // "needs fast internet", "wants walkable"
-  module_relevance: Record<string, number>;  // climate: 0.9, tech: 0.8
-  budget_range: { min: number, max: number, currency: string };
-  globe_region_preference: string;
+  demographic_signals: { age, gender, household_size, has_children, has_pets, employment_type, income_bracket };
   personality_profile: string;
-  paragraph_summaries: { id: number, key_themes: string[] }[];
+  detected_currency: string;                    // "EUR", "GBP", "USD"
+  budget_range: { min: number, max: number, currency: string };
+  metrics: {                                    // 100-250 numbered metrics
+    id: string;                                 // "M1", "M2", ...
+    description: string;
+    category: string;                           // one of 20 Human Existence Flow categories
+    source_paragraph: number;                   // 1-27
+    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+    research_query: string;                     // what Tavily should search
+    user_justification: string;                 // tied to specific paragraph text (P#)
+    data_justification: string;                 // real-world data from google_search
+    source: string;                             // "Tavily: ...", "Google Search: ...", etc.
+    threshold?: { operator, value, unit };
+  }[];
+  recommended_countries: { name, iso_code, reasoning, local_currency }[];
+  recommended_cities: { name, country, reasoning }[];
+  recommended_towns: { name, parent_city, reasoning }[];
+  recommended_neighborhoods: { name, parent_town, reasoning }[];
+  location_metrics: {                           // Side-by-Side Metric View
+    field_id: string;                           // "safety_index", "connectivity_5G"
+    label: string;
+    category: string;
+    locations: { name, type, score, user_justification, data_justification, source }[];
+  }[];
+  paragraph_summaries: { id, key_themes, extracted_preferences, metrics_derived }[];
+  dnw_signals: string[];                        // "hates humidity", "avoids instability"
+  mh_signals: string[];                         // "needs fast internet", "wants walkable"
+  tradeoff_signals: string[];                   // "safety > cost of living"
+  module_relevance: Record<string, number>;     // climate: 0.9, tech: 0.8
+  globe_region_preference: string;
 }
 ```
 
-**CRITICAL**: Gemini is a narrative-to-data EXTRACTOR. It does NOT score cities or make recommendations. Its output feeds INTO the full evaluation pipeline.
+Gemini 3.1 Pro Preview is the extraction AND recommendation engine. It uses `thinking_level: "high"` for deep reasoning and native `googleSearch` for live data grounding. Each metric includes dual justifications (user-said + real-world data). The `location_metrics` array enables a side-by-side comparison view across all recommended locations.
 
 ---
 
@@ -406,13 +442,16 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Cost tracking dashboard modal (admin-only) with provider breakdown, tier breakdown, profitability analysis
 - ✅ Emilia help panel with categorized help topics (admin sees Cost Tracking + System Status)
 - ✅ React Router (`/` dashboard, `/paragraphical` essay flow)
-- ✅ Paragraphical 24-paragraph stepped input UI with sidebar navigation
-- ✅ 24 paragraph definitions with prompts, placeholders, section groupings
+- ✅ Paragraphical 27-paragraph stepped input UI with sidebar navigation
+- ✅ 27 paragraph definitions with prompts, placeholders, section groupings, moduleId mapping
 - ✅ Auto-save paragraphs to context (→ Supabase) on navigation
 - ✅ Dashboard loading state during session hydration
+- ✅ Olivia Tutor: Layer 1 (coverage targets data) + Layer 2 (keyword detection) + Layer 3 (Gemini 3.1 Pro Preview escalation)
+- ✅ 27 paragraph coverage targets with keyword groups and template interjections (`src/data/paragraphTargets.ts`)
+- ✅ Gemini extraction+recommendation prompt rewritten for 27-paragraph pipeline (`api/paragraphical.ts`)
 
 ### What's NOT Built Yet
-- ❌ Gemini extraction endpoint (`/api/paragraphical`)
+- ❌ Gemini extraction endpoint deployment (prompt written, endpoint not yet tested with live API key)
 - ❌ Main Module questionnaire UI (Demographics, DNW, MH, General)
 - ❌ 5 LLM evaluation endpoints
 - ❌ Opus Judge endpoint
@@ -488,7 +527,7 @@ clues-main/
 
 ## 13. CRITICAL RULES (DO NOT VIOLATE)
 
-1. **Gemini is an EXTRACTOR, not an evaluator.** It reads the 24 paragraphs and outputs structured data. It does NOT score cities or make final recommendations.
+1. **Gemini extracts AND recommends at Discovery tier.** It reads the 27 paragraphs, converts narrative to 100-250 numbered metrics, recommends countries/cities/towns/neighborhoods, and scores them with sourced data. Opus/Cristiano always judges Gemini's output. See PARAGRAPHICAL_ARCHITECTURE.md for details.
 
 2. **Every completion tier produces results.** Always output: countries → cities → towns → neighborhoods. The only difference is quantity, confidence, and AI depth.
 
@@ -539,9 +578,10 @@ clues-main/
 ```typescript
 interface ParagraphicalInput {
   paragraphs: {
-    id: number;           // 1-24
+    id: number;           // 1-27
     heading: string;      // "Who You Are"
     content: string;      // User's free-form text
+    moduleId?: string;    // P6-P25 only: links to the module this paragraph mirrors
   }[];
   globeRegion: string;    // "Southern Europe / Mediterranean"
   metadata: {
@@ -551,7 +591,7 @@ interface ParagraphicalInput {
 }
 ```
 
-### Output from Gemini
+### Output from Gemini 3.1 Pro Preview
 ```typescript
 interface GeminiExtraction {
   demographic_signals: {
@@ -563,30 +603,50 @@ interface GeminiExtraction {
     employment_type?: string;
     income_bracket?: string;
   };
-  dnw_signals: string[];          // Extracted deal-breakers
-  mh_signals: string[];           // Extracted must-haves
-  module_relevance: Record<string, number>;  // Module ID → 0-1 relevance
-  budget_range: {
-    min: number;
-    max: number;
-    currency: string;
-  };
-  globe_region_preference: string;
-  personality_profile: string;    // Behavioral/lifestyle summary
-  paragraph_summaries: {
-    id: number;
-    key_themes: string[];
-    extracted_preferences: string[];
+  personality_profile: string;
+  detected_currency: string;                    // "EUR", "GBP", "USD", "THB"
+  budget_range: { min: number; max: number; currency: string };
+  metrics: {                                    // 100-250 numbered metrics with dual justifications
+    id: string;                                 // "M1", "M2", ...
+    description: string;
+    category: string;
+    source_paragraph: number;
+    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+    research_query: string;
+    user_justification: string;                 // "Matches P3: User said '...' which indicates..."
+    data_justification: string;                 // "Real-world data: City X has... according to..."
+    source: string;                             // "Tavily: ...", "Google Search: ...", etc.
+    threshold?: { operator; value; unit };
   }[];
+  recommended_countries: { name; iso_code; reasoning; local_currency }[];
+  recommended_cities: { name; country; reasoning }[];
+  recommended_towns: { name; parent_city; reasoning }[];
+  recommended_neighborhoods: { name; parent_town; reasoning }[];
+  location_metrics: {                           // Side-by-Side Metric View
+    field_id: string;
+    label: string;
+    category: string;
+    locations: { name; type; score; user_justification; data_justification; source }[];
+  }[];
+  paragraph_summaries: { id; key_themes; extracted_preferences; metrics_derived }[];
+  dnw_signals: string[];
+  mh_signals: string[];
+  tradeoff_signals: string[];
+  module_relevance: Record<string, number>;
+  globe_region_preference: string;
 }
 ```
 
-### What Gemini Extraction Enables
+### What Gemini 3.1 Pro Preview Extraction + Recommendation Enables
 1. Pre-fills Demographics questionnaire (user confirms/corrects)
 2. Suggests DNW severity levels ("Based on P4, political instability seems like a dealbreaker?")
 3. Suggests MH importance levels ("Based on P11, fast internet seems Essential?")
 4. Weights the 20 modules by relevance
 5. Provides context to all 5 LLM evaluators when they score cities
+6. Recommends countries, cities, towns, neighborhoods with reasoning
+7. Produces side-by-side `location_metrics` for cross-location comparison view
+8. Each metric has dual justifications (user paragraph link + real-world data source)
+9. Reasoning trace available via `thinking_details` in API response
 
 ---
 
@@ -677,14 +737,14 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ```
 claude-sonnet-4-5     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
 gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
-gemini-3.1-pro        Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
+gemini-3.1-pro-preview Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
 grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)
 perplexity-sonar      Input: $1.00    Output: $1.00    (LLM Evaluator #5)
 claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
 olivia (gpt-4o)       Input: $2.50    Output: $10.00   (Chat Assistant — GPT-4o company-wide)
-olivia-tutor (flash)  Input: $0.10    Output: $0.40    (Paragraphical tutor — Gemini 2.0 Flash)
+olivia-tutor          Input: $1.25    Output: $10.00   (Paragraphical tutor — Gemini 3.1 Pro Preview)
 tts-elevenlabs        Per character                     (Voice narration)
 tts-openai            Per character                     (Voice narration)
 avatar-heygen         Per minute                        (Video avatar)
@@ -818,7 +878,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 Priority order for development:
 
-1. ~~Paragraphical UI~~ ✅ DONE — 24-paragraph stepped input
+1. ~~Paragraphical UI~~ ✅ DONE — 27-paragraph stepped input (P3=Dealbreakers, P4=Must Haves, P5=Trade-offs, P6-P25=Module Deep Dives, P26-P27=Vision)
 2. ~~Cost Tracking~~ ✅ DONE — Service, modal, admin access, dual persistence
 3. **Gemini extraction endpoint** — `/api/paragraphical` (Vercel serverless function)
 4. **Tier calculator + confidence engine** — `calculateTier()` + `calculateConfidence()`

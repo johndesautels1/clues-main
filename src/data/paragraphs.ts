@@ -41,7 +41,8 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
     section: 'Your Profile',
     prompt:
       'Tell us about yourself. Include your age, gender, nationality, and citizenship(s). ' +
-      'Are you single, married, partnered? Do you have children — how many and what ages? ' +
+      'Are you single, married, partnered? If you have a partner, include their age, nationality, ' +
+      'citizenship(s), and languages they speak. Do you have children — how many and what ages? ' +
       'What languages do you speak? What is your employment type — remote worker, business owner, ' +
       'retired, student? This is the foundation Gemini uses to filter every recommendation.',
     placeholder:
@@ -72,9 +73,10 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
     section: 'Do Not Wants',
     prompt:
       'What would make a place absolutely unacceptable to you? Think about: climate extremes ' +
-      'you cannot tolerate, crime levels, political instability, lack of healthcare, internet ' +
-      'too slow for your work, no visa pathway, religious or cultural intolerance, specific ' +
-      'countries or regions you refuse to consider, languages you cannot function in. ' +
+      'you cannot tolerate, crime levels, political instability or ideology (right-wing, authoritarian), ' +
+      'lack of healthcare, internet too slow for your work, no visa pathway, religious or cultural ' +
+      'intolerance, excessive bureaucracy, specific countries or regions you refuse to consider, ' +
+      'languages you cannot function in. Have you tried living somewhere that did not work out? Tell us what failed. ' +
       'These are HARD walls — if a city hits any of these, it is eliminated regardless of score.',
     placeholder:
       "I absolutely cannot live somewhere with humidity above 80%. I refuse to consider " +
@@ -113,6 +115,7 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
       'Would you pay more rent for better safety? Accept slower internet for beach access? ' +
       'Live farther from an airport for lower cost of living? Give up nightlife for nature? ' +
       'Accept language barriers for better weather? Tolerate bureaucracy for tax advantages? ' +
+      'How important is low bureaucracy vs. other benefits? ' +
       'This tells us how to WEIGHT your priorities when cities score differently on different metrics.',
     placeholder:
       "I'd happily pay 20% more rent for a safer neighborhood. I could sacrifice nightlife " +
@@ -148,7 +151,8 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
     moduleId: 'safety_security',
     prompt:
       'What does feeling safe mean to you specifically? Think about: violent crime rates, ' +
-      'property crime, political stability, corruption levels, police reliability, ' +
+      'property crime, political stability and ideology (progressive, moderate, conservative), ' +
+      'corruption levels, police reliability, gun laws and gun culture, ' +
       'neighborhood safety for walking at night, safety for women/LGBTQ+/minorities, ' +
       'emergency services quality (ambulance response times, fire services). ' +
       'What is your current safety situation and how does it compare to what you want?',
@@ -162,11 +166,13 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
     section: 'Survival',
     moduleId: 'healthcare',
     prompt:
-      'Describe your health needs and medical priorities. Do you have chronic conditions, ' +
-      'take regular medications, need specialist access (cardiologist, therapist, dentist)? ' +
+      'Describe your health needs and medical priorities — for you AND your partner/family. ' +
+      'Do you have chronic conditions, take regular medications (name them), need specialist access ' +
+      '(cardiologist, therapist, dentist)? Does your partner have separate medical needs? ' +
       'How important is public vs. private healthcare? What about health insurance availability ' +
       'and cost for expats? Do you need English-speaking doctors? Mental health services? ' +
-      'Pharmacy access for specific medications? Quality of hospitals?',
+      'Pharmacy access for specific medications (Ozempic, insulin, etc.)? ' +
+      'Do you need world-class teaching hospitals or multidisciplinary medical centers?',
     placeholder:
       "I take daily medication for blood pressure — I need reliable pharmacy access. " +
       "I see a therapist monthly so mental health services in English are important. " +
@@ -181,7 +187,10 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
       'What does your ideal home look like and what can you afford? Apartment, house, villa? ' +
       'How many bedrooms and bathrooms? Urban high-rise, suburban house, rural property? ' +
       'What is your monthly rent budget or purchase budget? Do you want to rent or buy? ' +
-      'How important are property rights for foreigners? Furnished or unfurnished? ' +
+      'Can foreigners legally buy property — is that important to you? Furnished or unfurnished? ' +
+      'Do you need wheelchair/disability accessibility in the building? ' +
+      'Sound insulation for music or work calls? Natural light requirements? Views? ' +
+      'Would you want to rent out the property short-term when traveling? ' +
       'Gated community, walkable neighborhood, near the beach, near a city center?',
     placeholder:
       "I want a modern 2-bedroom apartment in a walkable neighborhood. My rent budget is " +
@@ -248,8 +257,9 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
     moduleId: 'business',
     prompt:
       'What is your professional situation and ambition? Are you a remote employee, freelancer, ' +
-      'business owner, or looking to start something new? How important is the local startup ' +
-      'ecosystem, coworking spaces, networking events, access to talent? ' +
+      'business owner, or looking to start something new? Do you already have businesses registered ' +
+      'in other countries? How important is the local startup ecosystem, coworking spaces, ' +
+      'networking events, access to talent, and the local AI/tech scene? ' +
       'Do you need to register a business locally? How important are business-friendly regulations, ' +
       'low corporate tax, ease of hiring, and intellectual property protection?',
     placeholder:
@@ -279,11 +289,12 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
     section: 'Growth',
     moduleId: 'transportation',
     prompt:
-      'How do you want to get around daily? Walk, bike, public transit, car, scooter, rideshare? ' +
+      'How do you want to get around daily? Walk, bike, e-bike, public transit, car, scooter, rideshare? ' +
       'How important is walkability score? Do you plan to own a car — how important are road quality, ' +
       'traffic, parking, and gas prices? How critical is public transit quality and coverage? ' +
-      'How far can you be from an international airport? Do you need frequent flights to specific ' +
-      'destinations (family, clients)? Direct flight routes matter?',
+      'How important is a high-speed rail network for regional travel and exploring? ' +
+      'How far can you be from an international airport? List specific destinations you need ' +
+      'direct flights to (family, clients, favorite countries). Which flight routes are essential?',
     placeholder:
       "I want to walk or bike for daily errands. I don't want to need a car. Good public " +
       "transit is important. I need an international airport within 1 hour with direct " +
@@ -298,6 +309,8 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
       'What are your education needs — for yourself or your family? Do children need international ' +
       'schools, specific curricula (IB, American, British), or local language immersion? ' +
       'Are you pursuing continuing education, certifications, or university courses? ' +
+      'How important is living near a university or in an intellectually stimulating environment ' +
+      'with well-educated residents? Is the local AI/tech education scene important? ' +
       'How important is access to libraries, language schools, professional development? ' +
       'If you have no education needs, say so — this helps Gemini weight other priorities higher.',
     placeholder:
@@ -315,7 +328,8 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
       'Who is relocating with you? Partner, children, elderly parents, extended family? ' +
       'What does each family member need? Think about: childcare and daycare quality, ' +
       'playgrounds and parks, family-friendly neighborhoods, eldercare facilities, ' +
-      'activities for teens, partner employment opportunities. ' +
+      'disability and wheelchair accessibility for visiting family, activities for teens, ' +
+      'partner employment opportunities. Do you have elderly parents who may visit or need care? ' +
       'How important is proximity to family back home — how often would you fly back? ' +
       'If you are solo with no dependents, say so clearly.',
     placeholder:
@@ -332,9 +346,10 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
       'What kind of social life do you want? If single — how important is the dating scene, ' +
       'dating apps, meeting people organically? How important is an expat community vs. ' +
       'integrating with locals? Do you need English-speaking friend groups? ' +
-      'How important are social activities — meetup groups, clubs, community events, ' +
-      'networking? How do you feel about nightlife as a social tool? ' +
-      'Do you prefer a big social city or a quieter community?',
+      'Is having a specific cultural or ethnic diaspora community important to you ' +
+      '(Asian, Latino, African, European)? ' +
+      'How important are social activities — meetup groups, writers clubs, hobby groups, ' +
+      'community events, networking? Do you prefer a big social city or a quieter community?',
     placeholder:
       "I'm single and the dating scene matters to me — I want a city where it's easy to " +
       "meet people in their 30s. A strong expat community would help me settle in. " +

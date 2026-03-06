@@ -158,7 +158,7 @@ export function DiscoveryFlow() {
   );
 
   const goNext = useCallback(() => {
-    if (current < 23) {
+    if (current < SECTIONS.length - 1) {
       navigateTo(current + 1, 1);
     } else {
       setContentVisible(false);
@@ -254,10 +254,10 @@ export function DiscoveryFlow() {
       if (format === 'json') {
         const data = {
           system: 'CLUES\u2122 Discovery Questionnaire',
-          company: 'John E. Desautels & Associates',
+          company: 'Clues Intelligence LTD',
           completedDate: ts,
           sectionsCompleted: completed,
-          totalSections: 24,
+          totalSections: SECTIONS.length,
           answers: SECTIONS.reduce<Record<number, { title: string; category: string; response: string }>>((acc, s) => {
             acc[s.id] = { title: s.title, category: s.cat, response: answers[s.id] || '' };
             return acc;
@@ -269,7 +269,7 @@ export function DiscoveryFlow() {
       } else {
         const lines = [
           'CLUES\u2122 DISCOVERY QUESTIONNAIRE',
-          'John E. Desautels & Associates',
+          'Clues Intelligence LTD',
           `Completed: ${ts} \u00B7 ${completed}/${SECTIONS.length} sections`,
           '\u2550'.repeat(60),
           '',
@@ -397,7 +397,7 @@ export function DiscoveryFlow() {
             Your Journey Begins Here
           </h1>
           <p style={{ fontFamily: "'Crimson Pro',Georgia,serif", fontSize: 'clamp(16px,1.8vw,18px)', color: C.textSecondary, lineHeight: 1.8, margin: '0 auto 12px', maxWidth: 520 }}>
-            Over 24 intimate conversations, you&rsquo;ll paint a complete portrait of who you are and the life you&rsquo;ve been dreaming about.
+            Over 27 intimate conversations, you&rsquo;ll paint a complete portrait of who you are and the life you&rsquo;ve been dreaming about.
           </p>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 'clamp(14px,1.5vw,16px)', color: C.textMuted, lineHeight: 1.7, margin: '0 auto 32px', maxWidth: 480 }}>
             There are no right or wrong answers &mdash; only your truth.
@@ -421,7 +421,7 @@ export function DiscoveryFlow() {
             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(24px,4vw,44px)', marginBottom: 40 }}>
-            {[{ n: '24', l: 'Sections' }, { n: '8', l: 'Categories' }, { n: '~30', l: 'Minutes' }].map((s, i) => (
+            {[{ n: '27', l: 'Sections' }, { n: '11', l: 'Categories' }, { n: '~30', l: 'Minutes' }].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: "'Cormorant',serif", fontSize: 28, fontWeight: 300, color: '#C4A87A' }}>{s.n}</div>
                 <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 4 }}>{s.l}</div>
@@ -442,7 +442,7 @@ export function DiscoveryFlow() {
             <span aria-hidden="true" style={{ marginLeft: 14, opacity: 0.6, fontSize: 14 }}>&rarr;</span>
           </button>
           <p style={{ marginTop: 36, fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.textMuted }}>
-            John E. Desautels &amp; Associates
+            Clues Intelligence LTD
           </p>
         </div>
       </div>
@@ -461,7 +461,7 @@ export function DiscoveryFlow() {
           <div style={{ fontSize: 38, marginBottom: 24, color: '#C4A87A' }}>{'\u2726'}</div>
           <h1 style={{ fontFamily: "'Cormorant',serif", fontSize: 34, fontWeight: 300, color: C.textPrimary, margin: '0 0 16px' }}>Your Story Is Written</h1>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 18, color: C.textSecondary, lineHeight: 1.8, margin: '0 0 8px' }}>
-            You completed <strong style={{ color: '#C4A87A' }}>{completed}</strong> of ${SECTIONS.length} sections.
+            You completed <strong style={{ color: '#C4A87A' }}>{completed}</strong> of {SECTIONS.length} sections.
           </p>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 16, color: C.textMuted, lineHeight: 1.7, margin: '0 auto 36px', maxWidth: 440 }}>
             Our AI analysts will craft your personalized relocation intelligence report &mdash; best country, top cities, finest neighborhoods, and your roadmap to your new life.
@@ -493,7 +493,7 @@ export function DiscoveryFlow() {
             {!isSubmitting && <span aria-hidden="true">&rarr;</span>}
           </button>
           <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.textMuted }}>
-            John E. Desautels &amp; Associates
+            Clues Intelligence LTD
           </p>
         </div>
       </div>
@@ -588,7 +588,7 @@ export function DiscoveryFlow() {
       </header>
 
       {/* Progress bar */}
-      <div role="progressbar" aria-valuenow={completed} aria-valuemin={0} aria-valuemax={24} aria-label={`${completed} of ${SECTIONS.length} sections completed`}
+      <div role="progressbar" aria-valuenow={completed} aria-valuemin={0} aria-valuemax={SECTIONS.length} aria-label={`${completed} of ${SECTIONS.length} sections completed`}
         style={{
           position: 'fixed', top: 58, left: 0, right: 0, zIndex: 99,
           height: 3, background: 'rgba(255,255,255,0.04)',
@@ -597,7 +597,7 @@ export function DiscoveryFlow() {
         <div style={{
           height: '100%', borderRadius: '0 2px 2px 0',
           background: `linear-gradient(90deg, ${accent}, ${accent}cc)`,
-          width: `${(completed / 24) * 100}%`,
+          width: `${(completed / SECTIONS.length) * 100}%`,
           transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)',
           boxShadow: `0 0 8px ${accent}44`,
         }} />
@@ -635,7 +635,7 @@ export function DiscoveryFlow() {
             <span aria-hidden="true" style={{ fontSize: 13, color: catColor }}>{section.icon}</span>
             <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: catColor }}>{section.cat}</span>
           </div>
-          <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: 12, color: C.textMuted, marginBottom: 18 }}>Section {section.id} of 24</p>
+          <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: 12, color: C.textMuted, marginBottom: 18 }}>Section {section.id} of {SECTIONS.length}</p>
 
           {/* Card */}
           <div className="discovery-glass" style={{ padding: 'clamp(28px,4vw,44px) clamp(24px,3.5vw,40px)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
@@ -772,7 +772,7 @@ export function DiscoveryFlow() {
               })}
             </div>
 
-            {current < 23 ? (
+            {current < SECTIONS.length - 1 ? (
               <button
                 onClick={goNext} className="discovery-btn" aria-label="Next"
                 style={{
