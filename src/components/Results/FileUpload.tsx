@@ -5,7 +5,7 @@
  * to attach supporting documents alongside their 27 paragraphs for 100% accuracy.
  *
  * Blueprint: "If the user has complex medical records (P8) or financial spreadsheets (P11),
- * Gemini 3.1 can now ingest those files directly alongside the 27 paragraphs."
+ * Gemini 3.1 Pro Preview can now ingest those files directly alongside the 27 paragraphs."
  *
  * WCAG 2.1 AA: Drag-and-drop with keyboard alternative, 4.5:1 contrast, focus-visible.
  */

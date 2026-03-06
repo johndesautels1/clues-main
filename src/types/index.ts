@@ -83,7 +83,7 @@ export interface LocationMetrics {
 }
 
 // ─── Gemini 3.1 Pro Preview: Thinking Details ───────────────────
-// Gemini 3.1's thinking_level: "high" returns a reasoning chain.
+// Gemini 3.1 Pro Preview's thinking_level: "high" returns a reasoning chain.
 // Each step shows how the model moved from the user's story
 // to a specific recommendation.
 export interface ThinkingStep {
@@ -222,7 +222,6 @@ export interface EvaluationResult {
 export type CostProvider =
   | 'claude-sonnet-4-5'
   | 'gpt-4o'
-  | 'gemini-3.1-pro'
   | 'gemini-3.1-pro-preview'
   | 'grok-4'
   | 'perplexity-sonar'

@@ -2,7 +2,7 @@
  * ReasoningTrace — Displays Gemini 3.1 Pro Preview's thinking_details array.
  *
  * Shows how the model moved from the user's story to the city recommendation.
- * Gemini 3.1 returns a thinking_details array when include_thinking_details: true.
+ * Gemini 3.1 Pro Preview returns a thinking_details array when include_thinking_details: true.
  * Each step is rendered as an expandable card showing the reasoning chain.
  *
  * WCAG 2.1 AA: All text meets 4.5:1 contrast, focus-visible on all interactive elements.

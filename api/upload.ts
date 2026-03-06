@@ -1,9 +1,9 @@
 /**
  * /api/upload — File Upload for Gemini Ingestion
  *
- * Accepts file uploads (medical records P5, financial spreadsheets P8)
+ * Accepts file uploads (medical records P8, financial spreadsheets P11)
  * and stores them temporarily for Gemini 3.1 Pro Preview to ingest.
- * Gemini 3.1 supports up to 100MB file uploads.
+ * Gemini 3.1 Pro Preview supports up to 100MB file uploads.
  *
  * Files are uploaded to the Google Generative AI File API and a
  * temporary URI is returned for use in the paragraphical extraction call.
