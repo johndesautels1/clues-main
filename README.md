@@ -1244,6 +1244,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 14 | Transportation & Mobility | 57 | 5 | `TRANSPORTATION_MOBILITY_QUESTIONS.md` |
 | 15 | Safety & Security | 100 | 10 | `SAFETY_SECURITY_QUESTIONS.md` |
 | 16 | Cultural Heritage & Traditions | 107 | 5 | `CULTURAL_HERITAGE_TRADITIONS_QUESTIONS.md` |
+| 17 | Social Values & Governance | 100 | 10 | `SOCIAL_VALUES_GOVERNANCE_QUESTIONS.md` |
 
 ---
 
