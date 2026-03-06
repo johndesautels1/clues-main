@@ -2,7 +2,7 @@
 
 ## Overview
 
-CLUES Intelligence is a relocation and lifestyle intelligence platform that helps users find their **Best City, Best Town, and Best Neighborhood** anywhere in the world. The system uses AI-powered analysis across 20 life categories to deliver personalized, data-driven recommendations.
+CLUES Intelligence is a relocation and lifestyle intelligence platform that helps users find their **Best City, Best Town, and Best Neighborhood** anywhere in the world. The system uses AI-powered analysis across 23 life categories to deliver personalized, data-driven recommendations.
 
 This is **not** a law-based app (unlike LifeScore, which focuses on legal freedom metrics). CLUES Main is a **quality-of-life fit** platform — scoring how well a location matches a specific user's lifestyle, priorities, and needs.
 
@@ -19,41 +19,44 @@ This is **not** a law-based app (unlike LifeScore, which focuses on legal freedo
 
 ---
 
-## The 20 Category System (Human Existence Flow)
+## The 23 Category System (Funnel Flow)
 
-### SURVIVAL & FOUNDATION (5 categories)
-1. **Climate & Weather** — temperature, humidity, seasons, natural disasters, air quality
-2. **Safety & Security** — crime rates, political stability, emergency services, personal safety
-3. **Healthcare & Medical** — hospital access, insurance, specialists, mental health, pharma
-4. **Housing & Real Estate** — cost, availability, quality, rental vs ownership, neighborhoods
-5. **Transportation** — public transit, walkability, bike infrastructure, drive times, airports
+### TIER 1: SURVIVAL (3 categories)
+1. **Safety & Security** — crime rates, political stability, emergency services, personal safety
+2. **Health & Wellness** — healthcare system quality, medical access, wellness infrastructure
+3. **Climate & Weather** — temperature, humidity, sunshine, natural disasters, air quality
 
-### LEGAL & FINANCIAL (3 categories)
-6. **Legal & Immigration** — visa types, residency paths, bureaucracy, rights
-7. **Financial & Banking** — cost of living, taxes, banking access, currency, investment
-8. **LifeScore** — personal freedom metrics (standalone 100-metric module, integrated here)
+### TIER 2: FOUNDATION (4 categories)
+4. **Legal & Immigration** — visa types, residency paths, bureaucracy, rights
+5. **Financial & Banking** — cost of living, taxes, banking access, currency, investment
+6. **Housing & Real Estate** — cost, availability, quality, rental vs ownership, neighborhoods
+7. **Professional & Career** — career opportunities, remote work, business climate
 
-### LIVELIHOOD & GROWTH (3 categories)
-9. **Business & Entrepreneurship** — startup ecosystem, regulations, networking, co-working
-10. **Technology & Connectivity** — internet speed, 5G, tech infrastructure, digital services
-11. **Education & Learning** — schools, universities, language courses, professional development
+### TIER 3: INFRASTRUCTURE (4 categories)
+8. **Technology & Connectivity** — internet speed, 5G, tech infrastructure, digital services
+9. **Transportation & Mobility** — public transit, walkability, bike infrastructure, airports
+10. **Education & Learning** — schools, universities, language courses, professional development
+11. **Social Values & Governance** — civic engagement, governance quality, social norms
 
-### PEOPLE & RELATIONSHIPS (3 categories)
-12. **Family & Children** — childcare, schools, family activities, safety, healthcare for kids
-13. **Dating & Social Life** — social scene, expat community, cultural openness, meetups
-14. **Pets & Animals** — pet-friendly housing, vet access, parks, import regulations
+### TIER 4: LIFESTYLE (4 categories)
+12. **Food & Dining** — restaurants, grocery, local cuisine, dietary options, cost
+13. **Shopping & Services** — retail access, services, consumer infrastructure
+14. **Outdoor & Recreation** — parks, hiking, beaches, mountains, green spaces, wildlife
+15. **Entertainment & Nightlife** — bars, clubs, live music, events, festivals, cinema
 
-### NOURISHMENT & LIFESTYLE (3 categories)
-15. **Food & Cuisine** — restaurants, grocery, local cuisine, dietary options, cost
-16. **Sports & Fitness** — gyms, outdoor sports, leagues, wellness, yoga/meditation
-17. **Outdoor & Nature** — parks, hiking, beaches, mountains, green spaces, wildlife
+### TIER 5: CONNECTION (3 categories)
+16. **Family & Children** — childcare, schools, family activities, safety, healthcare for kids
+17. **Neighborhood & Urban Design** — walkability, aesthetics, community feel, urban planning
+18. **Environment & Community Appearance** — cleanliness, green space, infrastructure quality
 
-### SOUL & MEANING (3 categories)
-18. **Arts & Culture** — museums, galleries, music, theater, cultural events, history
-19. **Entertainment & Nightlife** — bars, clubs, live music, events, festivals, cinema
-20. **Spiritual & Religious** — places of worship, communities, meditation, retreats
+### TIER 6: IDENTITY (5 categories)
+19. **Religion & Spirituality** — places of worship, communities, meditation, retreats
+20. **Sexual Beliefs, Practices & Laws** — LGBTQ+ rights, reproductive rights, personal freedom
+21. **Arts & Culture** — museums, galleries, music, theater, cultural events, history
+22. **Cultural Heritage & Traditions** — local customs, heritage preservation, cultural identity
+23. **Pets & Animals** — pet-friendly housing, vet access, parks, import regulations
 
-**Distribution:** 5-3-3-3-3-3 across 6 super-sections. Survival & Foundation is the heaviest group — the non-negotiable baseline for any relocation.
+**Distribution:** 3-4-4-4-3-5 across 6 tiers (Survival > Foundation > Infrastructure > Lifestyle > Connection > Identity). Survival is the baseline — non-negotiable for any relocation.
 
 ---
 

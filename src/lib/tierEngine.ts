@@ -26,7 +26,7 @@ const CONFIDENCE_GAINS = {
   mh: 10,
   generalQuestions: 20,
   miniModuleEach: 0.5,
-  miniModuleCap: 10, // Max 10% from all 20 mini modules
+  miniModuleCap: 10, // Max 10% from all 23 mini modules
 } as const;
 
 // ─── Calculate Tier ─────────────────────────────────────────────

@@ -552,7 +552,7 @@ clues-main/
 
 6. **Reports were built first.** The app exists to feed data into the report pipeline. Report format, brand voice, and quality are non-negotiable. Study summer report files before changing report structure.
 
-7. **Module order follows Human Existence Flow** (Survival → Soul), NOT alphabetical.
+7. **Module order follows Funnel Flow** (Survival → Identity), NOT alphabetical.
 
 8. **DNWs are hard walls.** A severity-5 DNW instantly eliminates a city regardless of other scores.
 

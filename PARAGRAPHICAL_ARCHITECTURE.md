@@ -13,7 +13,7 @@
 
 The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 30 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 30 paragraphs follow the **CLUES decision pipeline** across 6 phases: Profile (P1-P2), Dealbreakers (P3), Must Haves (P4), Trade-offs (P5), Module Deep Dives (P6-P28, one per category module with `moduleId`), and Vision (P29-P30).
 
-The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 20 Mini Modules. The Paragraphical alone must be powerful enough to:
+The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 23 Mini Modules. The Paragraphical alone must be powerful enough to:
 
 1. Convert narrative into 100-250 numbered, researchable metrics
 2. Identify the best country (1 primary, up to 3)
@@ -266,7 +266,7 @@ SECTION 1: YOUR PROFILE (from paragraph extraction)
 
 SECTION 2: YOUR METRICS (100-250 numbered metrics)
   - Each metric with source paragraph reference
-  - Organized by Human Existence Flow categories
+  - Organized by Funnel Flow categories
   - Each metric defines what will be measured
 
 SECTION 3: COUNTRY ANALYSIS
@@ -327,7 +327,7 @@ The recommendation structure follows a strict hierarchy:
 
 ## 12. DOWNSTREAM MODULES (How They Interact)
 
-The 20 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragraphical:
+The 23 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragraphical:
 - They may or may not be completed by the user
 - When completed, they ADD precision to the Paragraphical's metrics
 - They can ADD new metrics the paragraphs didn't cover
@@ -618,7 +618,7 @@ LifeScore's 6 categories with default weights:
 
 Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneur, Family, Libertarian, Investor).
 
-**CLUES Main Adaptation**: 23 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
+**CLUES Main Adaptation**: 23 categories in Funnel Flow order. Weights derived from user's paragraph emphasis + persona presets.
 
 ### 15.7 FIVE-LLM PARALLEL EVALUATION
 
