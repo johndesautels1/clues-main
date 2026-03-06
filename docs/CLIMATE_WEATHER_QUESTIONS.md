@@ -1,146 +1,175 @@
-# Climate & Weather — 106 Typeform Questions Reference
+# Climate & Weather -- 100 Typeform Questions Reference
 
-> **Source:** Typeform questionnaire for the Climate & Weather module
-> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q106)
+> **Source:** Typeform questionnaire -- International Buyers' Climate & Weather Questionnaire Module
+> **Structure:** 10 sections x 10 questions, each ending with a ranking question + 1 final master ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
 
-## Section 1: Temperature Preferences (Q1-Q21)
+## Section 1: Temperature Preferences & Comfort (Q1-Q10)
 
-| # | Question |
-|---|----------|
-| 1 | What is your ideal year-round temperature range? |
-| 2 | What is your maximum tolerable summer temperature? |
-| 3 | What is your minimum tolerable winter temperature? |
-| 4 | How important is temperature consistency throughout the year? |
-| 5 | How do you handle extreme temperature fluctuations within short periods? |
-| 6 | What is your comfort level with nighttime temperature drops? |
-| 7 | How does heat index (temperature plus humidity) affect your comfort? |
-| 8 | How does wind chill factor affect your winter comfort? |
-| 9 | What is your preferred indoor temperature control situation? |
-| 10 | How important is access to temperature-controlled indoor spaces during extreme weather? |
-| 11 | How do you respond to temperature-related health concerns? |
-| 12 | What is your activity level preference in different temperature conditions? |
-| 13 | How important is having distinct thermal seasons for your mental and emotional well-being? |
-| 14 | What is your sleep comfort temperature preference? |
-| 15 | How do you handle temperature transition periods (spring/fall)? |
-| 16 | What is your tolerance for temperature-related clothing requirements? |
-| 17 | How important is access to temperature-appropriate recreational activities year-round? |
-| 18 | What is your preference for temperature-related energy costs? |
-| 19 | How does temperature affect your food preferences and availability needs? |
-| 20 | What is your overall temperature adaptability confidence? |
-| 21 | Please rank these temperature factors by importance to your location satisfaction: Year-round temperature comfort range, Seasonal temperature variation preferences, Extreme temperature tolerance limits, Temperature-related health and sleep comfort, Temperature adaptation and energy considerations |
+| # | Question | Type |
+|---|----------|------|
+| 1 | What is your ideal daytime temperature range for most of the year? | Temperature range |
+| 2 | What is the maximum summer temperature you can comfortably tolerate on a regular basis? | Temperature threshold |
+| 3 | What is the minimum winter temperature you can comfortably tolerate? | Temperature threshold |
+| 4 | How important is it that temperatures stay consistent year-round (tropical stability) versus having distinct seasonal shifts? | Preference |
+| 5 | Do you have medical conditions (arthritis, Raynaud's, heat sensitivity, MS) affected by temperature extremes? | Yes/No + conditions |
+| 6 | How important is reliable home heating and air conditioning infrastructure in your destination? | Importance |
+| 7 | How does extreme heat (above 38C/100F) affect your ability to work, exercise, and go about daily life? | Impact scale |
+| 8 | How does extreme cold (below 0C/32F) affect your ability to work, exercise, and go about daily life? | Impact scale |
+| 9 | Would you accept higher energy costs for a climate that requires year-round heating or cooling? | Trade-off |
+| 10 | Rank these temperature factors from most to least important: Average daily comfort range, Summer heat tolerance, Winter cold tolerance, Temperature consistency, Climate-related health needs | Ranking |
 
 ---
 
-## Section 2: Moisture & Precipitation (Q22-Q42)
+## Section 2: Humidity & Moisture Comfort (Q11-Q20)
 
-| # | Question |
-|---|----------|
-| 22 | What is your ideal annual precipitation amount? |
-| 23 | What is your preferred precipitation distribution throughout the year? |
-| 24 | What is your humidity comfort range? |
-| 25 | How does high humidity affect your daily comfort and activities? |
-| 26 | How does very low humidity affect your health and comfort? |
-| 27 | What is your preference regarding rain frequency and intensity? |
-| 28 | How important is predictable precipitation patterns for your planning? |
-| 29 | What is your comfort level with monsoon or intense seasonal rain periods? |
-| 30 | How does fog and mist affect your daily activities and mood? |
-| 31 | What is your snow preference and tolerance? |
-| 32 | How do you handle ice and freezing precipitation conditions? |
-| 33 | What is your tolerance for extended wet seasons or rainy periods? |
-| 34 | How important is access to covered or indoor activities during wet weather? |
-| 35 | What is your preference regarding air moisture and its effects on your environment? |
-| 36 | How does precipitation affect your transportation and travel preferences? |
-| 37 | What is your comfort level with hail and severe precipitation events? |
-| 38 | How important is having distinct dry seasons for outdoor activities? |
-| 39 | What is your preference for morning dew and overnight moisture conditions? |
-| 40 | How does precipitation variability and unpredictability affect your comfort? |
-| 41 | What is your overall moisture and precipitation adaptability? |
-| 42 | Please rank these moisture factors by importance to your location satisfaction: Annual precipitation amount and distribution, Humidity levels and moisture comfort, Rain frequency and seasonal patterns, Snow and winter precipitation preferences, Weather predictability and planning needs |
+| # | Question | Type |
+|---|----------|------|
+| 11 | What is your ideal relative humidity range? | Humidity range |
+| 12 | How does high humidity (above 70%) affect your daily comfort and energy levels? | Impact scale |
+| 13 | How does very low humidity (below 20%) affect your skin, sinuses, and respiratory health? | Impact scale |
+| 14 | Do you have allergies or asthma that are worsened by specific humidity levels? | Yes/No + details |
+| 15 | How concerned are you about mold, mildew, and moisture damage to your home in humid climates? | Concern scale |
+| 16 | Would you use a dehumidifier or humidifier daily to manage indoor air? | Willingness |
+| 17 | How does humidity affect your outdoor exercise and activity levels? | Impact scale |
+| 18 | How important is a dry climate for preserving personal belongings (electronics, instruments, art, clothing)? | Importance |
+| 19 | How do you feel about the "feels like" temperature when humidity makes it significantly hotter than actual temperature? | Tolerance scale |
+| 20 | Rank these humidity factors from most to least important: Daily comfort level, Health and respiratory impact, Home and property protection, Outdoor activity impact, "Feels like" heat index | Ranking |
 
 ---
 
-## Section 3: Seasonal Patterns (Q43-Q63)
+## Section 3: Rainfall & Precipitation Patterns (Q21-Q30)
 
-| # | Question |
-|---|----------|
-| 43 | What is your ideal seasonal pattern preference? |
-| 44 | How important is experiencing traditional four-season weather patterns? |
-| 45 | What is your preferred spring weather characteristics? |
-| 46 | What is your preferred summer weather characteristics? |
-| 47 | What is your preferred autumn/fall weather characteristics? |
-| 48 | What is your preferred winter weather characteristics? |
-| 49 | How do you respond to seasonal affective changes and light variations? |
-| 50 | What is your tolerance for unpredictable or extreme weather events? |
-| 51 | How important is having reliable weather forecasts for your daily planning? |
-| 52 | What is your comfort level with transitional weather periods between seasons? |
-| 53 | How do weather patterns affect your activity planning and lifestyle? |
-| 54 | What is your preference for weather-related seasonal celebrations and activities? |
-| 55 | How does weather affect your clothing preferences and wardrobe needs? |
-| 56 | What is your tolerance for weather-related transportation disruptions? |
-| 57 | How important is having weather conditions that support your specific hobbies or interests? |
-| 58 | What is your preference for weather-related energy and utility costs? |
-| 59 | How does seasonal weather affect your food preferences and availability needs? |
-| 60 | What is your comfort level with weather emergency preparedness requirements? |
-| 61 | How important is having weather patterns that support local agriculture and fresh food? |
-| 62 | What is your overall seasonal weather adaptability confidence? |
-| 63 | Please rank these seasonal factors by importance to your location satisfaction: Distinct seasonal weather patterns and variety, Comfortable summer and winter conditions, Pleasant spring and autumn transitions, Weather predictability and planning reliability, Seasonal activity and lifestyle support |
+| # | Question | Type |
+|---|----------|------|
+| 21 | How many rainy days per month are you comfortable with? | Frequency range |
+| 22 | Do you prefer brief intense rain showers (tropical style) or long drizzly periods (maritime style)? | Preference |
+| 23 | How important is having a predictable dry season for planning outdoor activities and travel? | Importance |
+| 24 | Could you live in a city with a monsoon season (months of heavy daily rain)? | Yes/No/Depends |
+| 25 | How do you feel about gray, overcast skies for extended periods (weeks without sunshine)? | Tolerance scale |
+| 26 | Do you enjoy snow? How many months of snowfall would you accept? | Preference + duration |
+| 27 | How important is it that roads and infrastructure handle rain and snow effectively (drainage, plowing, de-icing)? | Importance |
+| 28 | Would persistent rain or drizzle negatively affect your mental health and mood? | Impact scale |
+| 29 | How important is annual sunshine hours in your destination (e.g., 300+ sunny days vs. 150)? | Importance |
+| 30 | Rank these precipitation factors from most to least important: Total rainy days per year, Sunshine hours, Snow tolerance, Predictable dry season, Infrastructure quality for weather | Ranking |
 
 ---
 
-## Section 4: Extreme Weather & Natural Disasters (Q64-Q84)
+## Section 4: Seasonal Patterns & Daylight (Q31-Q40)
 
-| # | Question |
-|---|----------|
-| 64 | What is your tolerance for extreme heat events and heat waves? |
-| 65 | What is your tolerance for extreme cold events and cold waves? |
-| 66 | How do you respond to severe thunderstorms and lightning? |
-| 67 | What is your comfort level with tornado risk and tornado alley locations? |
-| 68 | How do you handle hurricane, typhoon, or tropical cyclone risks? |
-| 69 | What is your tolerance for flash flood and severe flooding risks? |
-| 70 | How do you respond to severe winter weather events (blizzards, ice storms)? |
-| 71 | What is your comfort level with drought conditions and water restrictions? |
-| 72 | How do you handle extreme wind events and windstorm conditions? |
-| 73 | What is your tolerance for hail and severe precipitation events? |
-| 74 | How important is having reliable weather warning systems and emergency preparedness infrastructure? |
-| 75 | What is your comfort level with climate change impacts and changing weather patterns? |
-| 76 | How do you respond to air quality issues related to weather patterns? |
-| 77 | What is your tolerance for weather-related power outages and utility disruptions? |
-| 78 | How do extreme weather events affect your insurance and financial planning? |
-| 79 | What is your comfort level with evacuating for weather emergencies? |
-| 80 | How do you handle weather-related travel delays and cancellations? |
-| 81 | What is your preference for weather-related building and infrastructure requirements? |
-| 82 | How important is having weather conditions that don't interfere with communication and internet? |
-| 83 | What is your overall extreme weather adaptability and preparedness confidence? |
-| 84 | Please rank these extreme weather factors by importance to your location safety: Heat wave and extreme temperature tolerance, Storm and severe weather preparedness, Natural disaster risk acceptance, Infrastructure and emergency system reliability, Weather-related financial and insurance planning |
+| # | Question | Type |
+|---|----------|------|
+| 31 | Do you prefer four distinct seasons, two seasons (wet/dry), or year-round consistency? | Preference |
+| 32 | How important is experiencing a traditional autumn with changing leaves and cooler temperatures? | Importance |
+| 33 | How important is a warm, long summer for outdoor activities and social life? | Importance |
+| 34 | How do you handle very short winter daylight hours (sunset at 4pm or earlier)? | Tolerance scale |
+| 35 | How do you handle very long summer daylight hours (sunset at 10pm or later)? | Preference |
+| 36 | Have you experienced or are you concerned about Seasonal Affective Disorder (SAD)? | Yes/No + concern |
+| 37 | How important is consistent daylight hours year-round (tropical locations near the equator)? | Importance |
+| 38 | Do you need specific seasonal conditions for hobbies (skiing, surfing, gardening, cycling)? | Yes/No + details |
+| 39 | How do seasonal transitions affect your wardrobe, energy costs, and daily routine? | Impact scale |
+| 40 | Rank these seasonal factors from most to least important: Number of distinct seasons, Daylight hours consistency, Autumn/spring experience, Summer length and warmth, Seasonal hobby support | Ranking |
 
 ---
 
-## Section 5: Long-term Climate & Health (Q85-Q106)
+## Section 5: Extreme Weather & Natural Disaster Risk (Q41-Q50)
 
-| # | Question |
-|---|----------|
-| 85 | How does climate affect your physical health and medical conditions? |
-| 86 | How does weather affect your mental health and emotional well-being? |
-| 87 | What is your comfort level with climate-related allergies and sensitivities? |
-| 88 | How important is climate stability for your long-term health planning? |
-| 89 | What is your preference for climate-related exercise and fitness opportunities? |
-| 90 | How do you handle climate-related sleep and rest quality? |
-| 91 | What is your comfort level with climate-related skin and hair care needs? |
-| 92 | How important is having climate conditions supporting your dietary preferences? |
-| 93 | What is your preference for climate-related energy levels and productivity? |
-| 94 | How do you handle climate-related clothing and wardrobe comfort? |
-| 95 | What is your comfort level with climate-related home maintenance and property care? |
-| 96 | How important is climate resilience and future climate stability for long-term planning? |
-| 97 | What is your preference for climate-related social and cultural activities? |
-| 98 | How do you handle climate-related pet and animal care considerations? |
-| 99 | What is your comfort level with climate-related utility costs and energy efficiency? |
-| 100 | How important is having climate conditions that support local food production and freshness? |
-| 101 | What is your preference for climate-related travel and vacation opportunities? |
-| 102 | How do you handle climate adaptation stress and adjustment periods? |
-| 103 | What is your overall climate priority in relation to other location factors? |
-| 104 | What would represent your ideal climate outcome for long-term satisfaction and well-being? |
-| 105 | Please rank these long-term climate factors by importance to your location satisfaction: Physical and mental health support through climate, Daily comfort and lifestyle support, Long-term climate stability and resilience, Climate-related costs and maintenance, Climate adaptation and adjustment confidence |
-| 106 | Overall Weather & Climate Priority Ranking: Please drag and drop to rank all five sections by their overall importance to your relocation decision |
+| # | Question | Type |
+|---|----------|------|
+| 41 | Which natural disasters are you most concerned about? (Select all that apply) | Multi-select |
+| 42 | Would you live in a hurricane/typhoon/cyclone zone if housing was built to withstand them? | Willingness |
+| 43 | Would you live in an earthquake-prone area if building codes were strong? | Willingness |
+| 44 | How concerned are you about wildfire risk in your destination? | Concern scale |
+| 45 | How concerned are you about flooding risk (coastal, river, flash flooding)? | Concern scale |
+| 46 | Would you live in a tornado-prone region (e.g., U.S. Tornado Alley)? | Willingness |
+| 47 | How important is a robust early warning system for severe weather events? | Importance |
+| 48 | How concerned are you about volcanic activity in your destination region? | Concern scale |
+| 49 | Would natural disaster insurance costs (flood, earthquake, hurricane) affect your destination choice? | Trade-off |
+| 50 | Rank these extreme weather factors from most to least important: Hurricane/typhoon risk, Earthquake risk, Wildfire risk, Flooding risk, Tornado risk | Ranking |
+
+---
+
+## Section 6: Air Quality & Environmental Health (Q51-Q60)
+
+| # | Question | Type |
+|---|----------|------|
+| 51 | How important is clean air quality (low AQI) in your daily life? | Importance |
+| 52 | What is the maximum Air Quality Index (AQI) you would tolerate on a regular basis? | AQI range |
+| 53 | Do you or family members have respiratory conditions (asthma, COPD) requiring clean air? | Yes/No |
+| 54 | How concerned are you about seasonal smog, haze, or pollution events? | Concern scale |
+| 55 | How important is low pollen count and allergen levels in your destination? | Importance |
+| 56 | Would you avoid cities near heavy industrial areas or traffic pollution corridors? | Yes/No |
+| 57 | How important is access to clean, drinkable tap water? | Importance |
+| 58 | How concerned are you about sand storms or dust storms in arid climates? | Concern scale |
+| 59 | Would you pay a premium to live in an area with certified clean air and low pollution? | Trade-off |
+| 60 | Rank these air quality factors from most to least important: Average AQI level, Respiratory health impact, Pollen and allergens, Industrial pollution proximity, Clean water access | Ranking |
+
+---
+
+## Section 7: Climate & Outdoor Lifestyle (Q61-Q70)
+
+| # | Question | Type |
+|---|----------|------|
+| 61 | How many months per year do you need comfortable outdoor weather for walking, dining, and socializing? | Duration |
+| 62 | Do you need year-round conditions for outdoor sports (running, cycling, swimming, tennis)? | Yes/No + sports |
+| 63 | How important is beach-friendly weather for a significant portion of the year? | Importance |
+| 64 | Do you garden or grow food? How important is a long growing season? | Importance/N/A |
+| 65 | How important is weather that supports an outdoor cafe and restaurant culture? | Importance |
+| 66 | Do you need climate suitable for year-round outdoor play for children? | Yes/No |
+| 67 | How important are sunset and sunrise quality (clear skies, long golden hours) to your lifestyle? | Importance |
+| 68 | Do you need a climate that supports specific outdoor hobbies (sailing, skiing, hiking, surfing)? | Yes/No + hobbies |
+| 69 | How many months of pleasant "windows open" weather do you want per year (no heating or AC needed)? | Duration |
+| 70 | Rank these outdoor lifestyle factors from most to least important: Outdoor months per year, Year-round sports weather, Beach season length, Gardening season, Outdoor dining and socializing | Ranking |
+
+---
+
+## Section 8: Climate Change & Long-Term Trends (Q71-Q80)
+
+| # | Question | Type |
+|---|----------|------|
+| 71 | How concerned are you about climate change impacts on your destination over the next 20-30 years? | Concern scale |
+| 72 | Would you avoid coastal areas at risk of sea-level rise? | Yes/No/Depends |
+| 73 | How concerned are you about increasing frequency of extreme heat events in your destination? | Concern scale |
+| 74 | Would you factor in water scarcity projections when choosing a destination? | Yes/No |
+| 75 | How important is your destination's commitment to climate action and renewable energy? | Importance |
+| 76 | Are you concerned about climate-driven migration putting pressure on your destination's resources? | Concern scale |
+| 77 | How important is the long-term agricultural viability and food security of your region? | Importance |
+| 78 | Would you choose a destination that is expected to become more pleasant due to climate change (e.g., northern regions warming)? | Willingness |
+| 79 | How important is green infrastructure (urban forests, green roofs, flood mitigation) in your destination? | Importance |
+| 80 | Rank these long-term factors from most to least important: Sea-level rise risk, Extreme heat increase, Water scarcity, Climate policy commitment, Food security outlook | Ranking |
+
+---
+
+## Section 9: Climate Adaptation & Personal Resilience (Q81-Q90)
+
+| # | Question | Type |
+|---|----------|------|
+| 81 | Have you previously lived in a significantly different climate than your current one? | Yes/No + details |
+| 82 | How confident are you in your ability to adapt to a new climate? | Confidence scale |
+| 83 | How long do you expect it would take you to fully adjust to a major climate change? | Time range |
+| 84 | Would you invest in home modifications (better insulation, solar panels, hurricane shutters) for climate resilience? | Willingness |
+| 85 | How important is a "trial period" before committing -- spending a full year in the new climate before buying property? | Importance |
+| 86 | Do you have pets whose climate needs must be considered (thick-coated dogs, outdoor cats)? | Yes/No |
+| 87 | How important is reliable and affordable home climate control (central heating, split AC, underfloor heating)? | Importance |
+| 88 | Would you accept a climate you dislike for 3-4 months if the remaining 8-9 months were perfect? | Trade-off |
+| 89 | How important is proximity to a different climate zone for weekend getaways (mountains, coast, desert)? | Importance |
+| 90 | Rank these adaptation factors from most to least important: Previous climate experience, Adaptation confidence, Home climate control, Trial period before committing, Nearby climate variety for getaways | Ranking |
+
+---
+
+## Section 10: Climate Deal-Breakers & Overall Priorities (Q91-Q100)
+
+| # | Question | Type |
+|---|----------|------|
+| 91 | Which climate factors would absolutely disqualify a destination? (Select all that apply) | Multi-select dealbreaker |
+| 92 | What is the single most important climate factor in your relocation decision? | Single select |
+| 93 | Would you accept a less-than-ideal climate for significantly better job opportunities or cost of living? | Trade-off |
+| 94 | How important is climate compared to all other relocation factors (safety, cost, culture, etc.)? | Priority rating |
+| 95 | Do you have a specific "dream climate" in mind? Describe it briefly. | Open text |
+| 96 | Would you split your year between two locations to avoid unpleasant weather seasons? | Willingness |
+| 97 | How important is it that your destination climate is similar to what you are used to? | Importance |
+| 98 | Do you have any specific climate needs not covered above that would impact your relocation? | Open text |
+| 99 | Rate the overall importance of Climate & Weather factors in your relocation decision (1-10) | Rating |
+| 100 | FINAL MODULE RANKING: Drag all 10 sections to rank by overall importance to your relocation decision | Meta-ranking |
