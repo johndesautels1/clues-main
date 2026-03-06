@@ -1,33 +1,27 @@
 /**
- * /api/paragraphical — Gemini 3.1 Pro Preview Extraction + Recommendation
+ * /api/paragraphical — Gemini 3.1 Pro Preview Reasoning Engine
  *
- * Receives the user's 27 paragraphs + globe region.
+ * Receives the user's 27 paragraphs + globe region + optional file uploads.
  * Sends to Gemini 3.1 Pro Preview with:
- *   - thinking_level: "high" for deep multi-step reasoning
- *   - include_thinking_details: true for transparent reasoning trace
- *   - google_search tool for live 2026 data grounding
+ *   - thinking_level: "high" (deep multi-step reasoning)
+ *   - include_thinking_details: true (returns internal reasoning chain)
+ *   - tools: [{ google_search: {} }] (native 2026 search grounding)
  *
- * Gemini performs:
- *   1. Narrative-to-metric conversion (100-250 numbered metrics)
- *   2. Location recommendations (countries, cities, towns, neighborhoods)
- *   3. Side-by-side justification: user_justification + data_justification per metric
- *   4. Structured signal extraction (demographics, DNW, MH, trade-offs)
+ * Returns:
+ *   - 100-250 numbered metrics derived from paragraphs
+ *   - Per-metric justifications (user_justification + data_justification + source)
+ *   - Location recommendations (countries, cities, towns, neighborhoods)
+ *   - Thinking details array for transparency UI
+ *   - tradeoff_signals, module_relevance, globe_region_preference
  *
- * 27-paragraph pipeline:
- *   P1-P2:   Your Profile (demographics, income, timeline)
- *   P3:      Dealbreakers (hard elimination walls)
- *   P4:      Must Haves (non-negotiable requirements)
- *   P5:      Trade-offs (priority weighting signals)
- *   P6-P25:  Module Deep Dives (1:1 with 20 modules, Human Existence Flow)
- *   P26-P27: Your Vision (dream day + wildcard)
- *
- * Critical Rule: Every LLM call must track tokens and cost.
+ * Gemini 3.1 Pro Preview is the reasoning engine — it extracts, recommends,
+ * AND scores at Discovery tier. Opus/Cristiano always judges afterward.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // ─── Types (duplicated here because Vercel functions can't import from src/) ──
+
 interface ParagraphInput {
   id: number;
   heading: string;
@@ -39,14 +33,49 @@ interface ParagraphicalRequest {
   paragraphs: ParagraphInput[];
   globeRegion: string;
   sessionId: string;
+  fileUrls?: string[];  // URLs to uploaded files (medical records, spreadsheets)
   metadata?: {
     timestamp: string;
     appVersion: string;
   };
 }
 
+interface GeminiMetricObject {
+  id: string;                      // "M1", "M2", etc.
+  fieldId: string;                 // Machine-readable field ID
+  description: string;             // "Average winter temperature 20-25C"
+  category: string;                // "climate", "safety", "financial"...
+  source_paragraph: number;        // Which paragraph (1-27)
+  score: number;                   // 0-100
+  user_justification: string;      // Why this matters to the user (traced to paragraph)
+  data_justification: string;      // Real-world data backing the score
+  source: string;                  // Data source attribution
+  data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+  research_query: string;          // What Tavily should search
+  threshold?: {
+    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
+    value: number | [number, number];
+    unit: string;
+  };
+}
+
+interface LocationMetrics {
+  location: string;
+  country: string;
+  location_type: 'city' | 'town' | 'neighborhood';
+  parent?: string;
+  overall_score: number;
+  metrics: GeminiMetricObject[];
+}
+
+interface ThinkingStep {
+  step: number;
+  thought: string;
+  conclusion?: string;
+}
+
 interface GeminiExtraction {
-  // ─── Profile ───
+  // Profile
   demographic_signals: {
     age?: number;
     gender?: string;
@@ -58,7 +87,7 @@ interface GeminiExtraction {
   };
   personality_profile: string;
 
-  // ─── Currency ───
+  // Currency
   detected_currency: string;
   budget_range: {
     min: number;
@@ -66,79 +95,37 @@ interface GeminiExtraction {
     currency: string;
   };
 
-  // ─── Metrics (THE KEY OUTPUT — with dual justifications) ───
-  metrics: {
-    id: string;
-    description: string;
-    category: string;
-    source_paragraph: number;
-    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
-    research_query: string;
-    user_justification: string;
-    data_justification: string;
-    source: string;
-    threshold?: {
-      operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
-      value: number | [number, number];
-      unit: string;
-    };
-  }[];
+  // Metrics (THE KEY OUTPUT)
+  metrics: GeminiMetricObject[];   // Minimum 100, up to 250
 
-  // ─── Location Recommendations (with per-location scored metrics) ───
+  // Location Recommendations with per-location metrics
   recommended_countries: {
     name: string;
     iso_code: string;
     reasoning: string;
     local_currency: string;
   }[];
+  recommended_cities: LocationMetrics[];
+  recommended_towns: LocationMetrics[];
+  recommended_neighborhoods: LocationMetrics[];
 
-  recommended_cities: {
-    name: string;
-    country: string;
-    reasoning: string;
-  }[];
-
-  recommended_towns: {
-    name: string;
-    parent_city: string;
-    reasoning: string;
-  }[];
-
-  recommended_neighborhoods: {
-    name: string;
-    parent_town: string;
-    reasoning: string;
-  }[];
-
-  // ─── Side-by-Side Location Metrics ───
-  location_metrics: {
-    field_id: string;
-    label: string;
-    category: string;
-    locations: {
-      name: string;
-      type: 'city' | 'town' | 'neighborhood';
-      score: number;
-      user_justification: string;
-      data_justification: string;
-      source: string;
-    }[];
-  }[];
-
-  // ─── Paragraph Summaries ───
+  // Paragraph Summaries
   paragraph_summaries: {
     id: number;
     key_themes: string[];
     extracted_preferences: string[];
-    metrics_derived: string[];
+    metrics_derived: string[];     // ["M1", "M2", "M5"]
   }[];
 
-  // ─── Signals for Downstream ───
+  // Signals for Downstream
   dnw_signals: string[];
   mh_signals: string[];
   tradeoff_signals: string[];
   module_relevance: Record<string, number>;
   globe_region_preference: string;
+
+  // Thinking Details (reasoning chain transparency)
+  thinking_details?: ThinkingStep[];
 }
 
 // ─── Cost tracking helper (server-side, writes to Supabase directly) ──
@@ -193,21 +180,16 @@ function buildExtractionPrompt(
     })
     .join('\n\n---\n\n');
 
-  return `You are CLUES Intelligence's Paragraphical engine powered by Gemini 3.1 Pro Preview.
+  return `You are CLUES Intelligence's deep reasoning engine powered by Gemini 3.1 Pro Preview.
 
-Use your DEEP REASONING capabilities (thinking_level: high) to perform multi-step logic chains.
-Use your AGENTIC SEARCH capabilities (google_search) to ground recommendations in live 2026 data.
+Your job is to perform UNPRECEDENTED DEPTH analysis of a user's 27 biographical paragraphs and:
+1. EXTRACT 100-250 numbered, researchable metrics from their narrative
+2. RECOMMEND the best country (up to 3), top 3 cities, top 3 towns, top 3 neighborhoods
+3. SCORE every recommendation against every metric with justifications
+4. PROVIDE source citations for every data point
+5. EXTRACT tradeoff_signals, module_relevance scores, and globe_region_preference
 
-You have THREE jobs:
-
-1. EXTRACT: Convert the user's narrative paragraphs into numbered, researchable metrics (minimum 100, up to 250). Each metric must include DUAL JUSTIFICATIONS:
-   - user_justification: Which paragraph and what the user specifically said that triggered this metric
-   - data_justification: What real-world data supports this metric's relevance (use google_search)
-   - source: The data source (e.g. "Tavily: ...", "Gemini Knowledge Base: ...", "Google Search: ...")
-
-2. RECOMMEND: Based on the extracted metrics and the user's globe region preference, recommend the best country (up to 3), top 3 cities in the winning country, top 3 towns in the winning city, and top 3 neighborhoods in the winning town.
-
-3. SCORE SIDE-BY-SIDE: For the top recommended locations, produce a location_metrics array where each entry compares ALL recommended cities/towns/neighborhoods on the same metric field. This is the "Side-by-Side Metric View."
+Use your native Google Search grounding to verify real-world data for every metric. Do NOT guess — search for current 2026 data.
 
 The user selected globe region: "${globeRegion}"
 This is a starting preference, not a hard constraint. If their dealbreakers eliminate all cities in this region, expand the search.
@@ -220,23 +202,60 @@ The 27 paragraphs follow this pipeline:
 - P6-P25: Module Deep Dives — one per category in Human Existence Flow order (each has a moduleId)
 - P26-P27: Vision — dream day narrative + wildcard catch-all
 
-Here are their paragraphs:
+Here are their 27 paragraphs:
 
 ${paragraphText}
 
-CRITICAL RULES:
-1. DETECT the user's currency from context (mentions of euros, pounds, dollars, baht, etc.). NEVER default to USD. If ambiguous, note it.
-2. Every metric must be numbered (M1, M2, M3...), categorized (one of the 20 Human Existence Flow categories), and sourced to a paragraph (P1-P27).
-3. P3 dealbreakers produce ELIMINATION metrics — prefix with "ELIMINATE IF" for severity-5 hard walls.
-4. P4 must-haves produce REQUIREMENT metrics — prefix with "REQUIRE" for non-negotiables.
-5. P5 trade-offs produce WEIGHTING SIGNALS (not scored metrics) — prefix with "WEIGHT:".
-6. Each metric must include a research_query field — what Tavily should search to find real data.
-7. Each metric must include user_justification (tied to specific paragraph text) and data_justification (from real-world data).
-8. Recommend locations based on the TOTALITY of metrics, not just one category.
-9. Cities must be scored RELATIVE to each other, not in isolation.
-10. Minimum 100 metrics even from sparse paragraphs. Extrapolate reasonable baseline metrics from context.
-11. Only include paragraph_summaries for paragraphs that have content.
-12. The location_metrics array must include at least 20 key fields scored across all recommended cities, towns, and neighborhoods side-by-side.
+═══════════════════════════════════════════════════════════════
+INSTRUCTIONS — READ CAREFULLY
+═══════════════════════════════════════════════════════════════
+
+STEP 1: METRIC EXTRACTION
+Convert every measurable, researchable preference into a discrete metric.
+- Minimum 100 metrics, maximum 250
+- Each metric must be:
+  - Numbered (M1, M2, M3...)
+  - Categorized (one of: climate, safety, healthcare, housing, transportation, legal, financial, lifescore, business, technology, education, family, dating, pets, food, sports, outdoor, arts, entertainment, spiritual)
+  - Sourced to a specific paragraph (P1-P27)
+  - Researchable (you can find real data for it)
+  - Scorable (numeric, boolean, ranking, or index)
+- P3 dealbreakers produce ELIMINATION metrics — prefix with "ELIMINATE IF" for severity-5 hard walls.
+- P4 must-haves produce REQUIREMENT metrics — prefix with "REQUIRE" for non-negotiables.
+- P5 trade-offs produce WEIGHTING SIGNALS — prefix with "WEIGHT:".
+
+Example conversions:
+  P6: "I hate humidity and want warm winters around 20-25C"
+  --> M1: Average annual humidity below 60% [climate] [P6]
+  --> M2: Average winter temperature 20-25C [climate] [P6]
+
+  P14: "I need at least 100mbps for my remote work"
+  --> M28: Average broadband speed above 100 Mbps [technology] [P14]
+
+STEP 2: LOCATION RECOMMENDATIONS
+Using Google Search grounding, identify:
+- Top 1-3 countries that best match the metrics
+- Top 3 cities in the winning country
+- Top 3 towns in the winning city
+- Top 3 neighborhoods in the winning town
+
+IMPORTANT: Go beyond popular/obvious cities. Use your ARC-AGI-2 reasoning to discover EMERGING neighborhoods and towns that match unusual combinations of requirements. If the user has unique needs (e.g., "needs a town where pet capybaras are legal"), reason through that specifically.
+
+STEP 3: SCORING WITH JUSTIFICATIONS
+For each recommended location, score it against EVERY extracted metric. Each metric score MUST include:
+- score (0-100, relative to other recommended locations)
+- user_justification: "Matches P[N]: [specific quote or paraphrase from their paragraph]"
+- data_justification: "[Real-world data point with year]"
+- source: "[Source name]: [Specific report/dataset]"
+
+STEP 4: CURRENCY HANDLING
+Detect the user's home currency from their paragraph text. If they mention euros, use EUR. If dollars, detect USD/AUD/CAD from context. Never default to USD-only.
+
+STEP 5: SIGNALS & MODULE RELEVANCE
+- Extract tradeoff_signals from P5 (priority trade-offs, e.g. "safety > cost of living")
+- Score module_relevance (0.0-1.0) for each of the 20 Human Existence Flow categories
+- Identify globe_region_preference from the user's geographic signals
+
+═══════════════════════════════════════════════════════════════
 
 Return ONLY valid JSON matching this schema (no markdown fences, no explanation):
 
@@ -247,91 +266,84 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
     "household_size": <number or null>,
     "has_children": <boolean or null>,
     "has_pets": <boolean or null>,
-    "employment_type": <string or null: "remote", "local", "hybrid", "retired", "student", "entrepreneur", "unemployed">,
-    "income_bracket": <string or null: "under_30k", "30k_60k", "60k_100k", "100k_200k", "over_200k">
+    "employment_type": <string or null>,
+    "income_bracket": <string or null>
   },
   "personality_profile": "<2-3 sentence behavioral/lifestyle summary>",
-  "detected_currency": "<3-letter ISO code detected from user's text, e.g. EUR, GBP, USD, THB>",
+  "detected_currency": "<ISO currency code detected from paragraphs>",
   "budget_range": {
-    "min": <monthly budget minimum in DETECTED currency>,
-    "max": <monthly budget maximum in DETECTED currency>,
-    "currency": "<same ISO code as detected_currency>"
+    "min": <number>,
+    "max": <number>,
+    "currency": "<user's home currency>"
   },
   "metrics": [
     {
       "id": "M1",
-      "description": "<specific, measurable metric>",
-      "category": "<one of: climate, safety, healthcare, housing, legal, financial, lifescore, business, technology, transportation, education, family, dating_social, food, sports, outdoor, arts, entertainment, spiritual, pets>",
+      "fieldId": "<machine_readable_id like climate_01_humidity>",
+      "description": "<human readable metric description>",
+      "category": "<one of the 20 categories>",
       "source_paragraph": <1-27>,
+      "score": <0-100>,
+      "user_justification": "Matches P[N]: <specific reference to user's paragraph>",
+      "data_justification": "<real-world data backing this score>",
+      "source": "<data source attribution>",
       "data_type": "<numeric|boolean|ranking|index>",
-      "research_query": "<what Tavily should search to find real data for this metric>",
-      "user_justification": "<Matches P#: User specifically said '...' which indicates...>",
-      "data_justification": "<Real-world data: City X has... according to...>",
-      "source": "<Tavily: ..., Google Search: ..., or Gemini Knowledge Base: ...>",
+      "research_query": "<what Tavily should search for this metric>",
       "threshold": {
         "operator": "<gt|lt|eq|gte|lte|between>",
-        "value": <number or [min, max] for between>,
-        "unit": "<celsius|percent|usd|eur|index|per_100k|mbps|minutes|km|sqm|boolean>"
+        "value": <number or [min, max]>,
+        "unit": "<unit of measurement>"
       }
     }
   ],
   "recommended_countries": [
     {
       "name": "<country name>",
-      "iso_code": "<2-letter ISO>",
-      "reasoning": "<2-3 sentences why this country matches>",
-      "local_currency": "<3-letter ISO>"
+      "iso_code": "<ISO 3166-1 alpha-2>",
+      "reasoning": "<why this country matches>",
+      "local_currency": "<ISO currency code>"
     }
   ],
   "recommended_cities": [
     {
-      "name": "<city name>",
-      "country": "<country name>",
-      "reasoning": "<2-3 sentences>"
+      "location": "<city name>",
+      "country": "<country>",
+      "location_type": "city",
+      "overall_score": <0-100>,
+      "metrics": [<same metric objects as above, scored for THIS city>]
     }
   ],
   "recommended_towns": [
     {
-      "name": "<town/district name>",
-      "parent_city": "<city name>",
-      "reasoning": "<1-2 sentences>"
+      "location": "<town name>",
+      "country": "<country>",
+      "location_type": "town",
+      "parent": "<parent city>",
+      "overall_score": <0-100>,
+      "metrics": [<metric objects scored for THIS town>]
     }
   ],
   "recommended_neighborhoods": [
     {
-      "name": "<neighborhood name>",
-      "parent_town": "<town name>",
-      "reasoning": "<1-2 sentences>"
-    }
-  ],
-  "location_metrics": [
-    {
-      "field_id": "<e.g. safety_index, connectivity_5G, healthcare_access>",
-      "label": "<human-readable label>",
-      "category": "<one of 20 categories>",
-      "locations": [
-        {
-          "name": "<city/town/neighborhood name>",
-          "type": "<city|town|neighborhood>",
-          "score": <0.0-10.0>,
-          "user_justification": "<Matches P#: User said...>",
-          "data_justification": "<Real data: ...>",
-          "source": "<data source>"
-        }
-      ]
+      "location": "<neighborhood name>",
+      "country": "<country>",
+      "location_type": "neighborhood",
+      "parent": "<parent town>",
+      "overall_score": <0-100>,
+      "metrics": [<metric objects scored for THIS neighborhood>]
     }
   ],
   "paragraph_summaries": [
     {
-      "id": <paragraph number 1-27>,
-      "key_themes": [<2-4 key themes>],
-      "extracted_preferences": [<specific preferences stated>],
-      "metrics_derived": ["M1", "M3", "M7"]
+      "id": <1-27>,
+      "key_themes": ["<theme1>", "<theme2>"],
+      "extracted_preferences": ["<preference1>"],
+      "metrics_derived": ["M1", "M2"]
     }
   ],
-  "dnw_signals": [<strings from P3: things that ELIMINATE cities, phrased as negatives>],
-  "mh_signals": [<strings from P4: things that are REQUIRED, phrased as positives>],
-  "tradeoff_signals": [<strings from P5: priority trade-offs, e.g. "safety > cost of living">],
+  "dnw_signals": ["<things user wants to avoid>"],
+  "mh_signals": ["<things user needs/wants>"],
+  "tradeoff_signals": ["<priority trade-offs from P5, e.g. safety > cost of living>"],
   "module_relevance": {
     "climate": <0.0-1.0>,
     "safety": <0.0-1.0>,
@@ -355,10 +367,20 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
     "pets": <0.0-1.0>
   },
   "globe_region_preference": "<user's geographic preference from globe + paragraphs>"
-}`;
 }
 
-// ─── Gemini 3.1 Pro Preview Token Rates (per 1M tokens) ─────────────
+Rules:
+1. MINIMUM 100 metrics. If paragraphs are sparse, extrapolate reasonable metrics from what IS stated.
+2. Every metric score must have user_justification referencing a specific paragraph.
+3. Every metric score must have data_justification with real 2026 data.
+4. Cities are scored RELATIVE to each other, not in isolation.
+5. Go beyond obvious cities — use deep reasoning to find emerging/hidden-gem locations.
+6. Detect currency from context. If "euros" mentioned, currency is "EUR". If ambiguous, ask.
+7. Only include paragraph_summaries for paragraphs with content.
+8. Score each location's metrics independently — a metric may score 92 in City A but 45 in City B.`;
+}
+
+// ─── Gemini Token Rates (per 1M tokens) ─────────────────────────────
 const GEMINI_INPUT_RATE = 1.25;
 const GEMINI_OUTPUT_RATE = 10.00;
 
@@ -413,55 +435,91 @@ export default async function handler(
   const startTime = Date.now();
 
   try {
-    // Initialize Gemini 3.1 Pro Preview with thinking + search
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-3.1-pro-preview',
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 32768,
-        responseMimeType: 'application/json',
-        // Gemini 3.1 Pro Preview reasoning parameters
-        thinkingConfig: {
-          thinkingLevel: 'high',
-          includeThinkingDetails: true,
-        },
-      } as Record<string, unknown>,
-      // Enable native Google Search grounding for live data
-      tools: [{ googleSearch: {} }] as unknown[],
-    });
+    // ─── Gemini 3.1 Pro Preview with Thinking + Search ──────────
+    // Using the REST API directly for access to thinking_level and tools
+    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
 
-    // Build the prompt
     const prompt = buildExtractionPrompt(filledParagraphs, body.globeRegion);
 
-    // Call Gemini with deep reasoning
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
-    const durationMs = Date.now() - startTime;
+    // Build the request body with Gemini 3.1 Pro Preview parameters
+    const geminiRequestBody = {
+      contents: [{
+        parts: [{ text: prompt }],
+      }],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 65536,  // Large output for 100+ metrics
+        responseMimeType: 'application/json',
+        thinking_level: 'high',             // Deep multi-step reasoning
+        include_thinking_details: true,     // Return internal reasoning chain
+      },
+      tools: [{
+        google_search: {},                  // Native 2026 search grounding
+      }],
+    };
 
-    // Extract thinking details if available (Gemini 3.1 reasoning trace)
-    const thinkingDetails: string[] = [];
-    const candidates = response.candidates;
-    if (candidates?.[0]?.content?.parts) {
-      for (const part of candidates[0].content.parts) {
-        if ((part as Record<string, unknown>).thought) {
-          thinkingDetails.push((part as Record<string, string>).text ?? '');
-        }
-      }
+    // If file URLs were provided (medical records, financial spreadsheets),
+    // add them as file parts for Gemini's 100MB upload capability
+    if (body.fileUrls && body.fileUrls.length > 0) {
+      const fileParts = body.fileUrls.map(url => ({
+        file_data: { file_uri: url },
+      }));
+      geminiRequestBody.contents[0].parts.push(...fileParts as any);
     }
 
-    // Parse the JSON response
+    const geminiResponse = await fetch(geminiEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(geminiRequestBody),
+    });
+
+    if (!geminiResponse.ok) {
+      const errBody = await geminiResponse.text();
+      throw new Error(`Gemini API error ${geminiResponse.status}: ${errBody}`);
+    }
+
+    const geminiResult = await geminiResponse.json();
+    const durationMs = Date.now() - startTime;
+
+    // ─── Parse response ──────────────────────────────────────────
+    const candidate = geminiResult.candidates?.[0];
+    if (!candidate) {
+      throw new Error('No candidates in Gemini response');
+    }
+
+    // Extract thinking details (reasoning chain) if available
+    let thinkingDetails: ThinkingStep[] = [];
+    if (candidate.thinking_details) {
+      thinkingDetails = candidate.thinking_details;
+    } else if (candidate.content?.parts) {
+      // Some versions put thinking in separate parts
+      const thinkingParts = candidate.content.parts.filter(
+        (p: any) => p.thought || p.thinking
+      );
+      thinkingDetails = thinkingParts.map((p: any, i: number) => ({
+        step: i + 1,
+        thought: p.thought || p.thinking || p.text || '',
+        conclusion: p.conclusion,
+      }));
+    }
+
+    // Extract the main JSON output
+    const textParts = candidate.content?.parts?.filter((p: any) => p.text);
+    const rawText = textParts?.map((p: any) => p.text).join('') ?? '';
+
     let extraction: GeminiExtraction;
     try {
-      extraction = JSON.parse(text);
+      extraction = JSON.parse(rawText);
     } catch {
-      // If Gemini wrapped in markdown fences, strip them
-      const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      // Strip markdown fences if present
+      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       extraction = JSON.parse(cleaned);
     }
 
-    // Validate required fields exist (defensive — don't crash on partial extraction)
+    // Attach thinking details to extraction
+    extraction.thinking_details = thinkingDetails;
+
+    // ─── Validate required fields (defensive) ────────────────────
     if (!extraction.demographic_signals) extraction.demographic_signals = {};
     if (!extraction.personality_profile) extraction.personality_profile = '';
     if (!extraction.detected_currency) extraction.detected_currency = 'USD';
@@ -471,7 +529,6 @@ export default async function handler(
     if (!extraction.recommended_cities) extraction.recommended_cities = [];
     if (!extraction.recommended_towns) extraction.recommended_towns = [];
     if (!extraction.recommended_neighborhoods) extraction.recommended_neighborhoods = [];
-    if (!extraction.location_metrics) extraction.location_metrics = [];
     if (!extraction.paragraph_summaries) extraction.paragraph_summaries = [];
     if (!extraction.dnw_signals) extraction.dnw_signals = [];
     if (!extraction.mh_signals) extraction.mh_signals = [];
@@ -479,24 +536,25 @@ export default async function handler(
     if (!extraction.module_relevance) extraction.module_relevance = {};
     if (!extraction.globe_region_preference) extraction.globe_region_preference = body.globeRegion;
 
-    // Get token usage from response metadata
-    const usage = response.usageMetadata;
+    // ─── Token usage ─────────────────────────────────────────────
+    const usage = geminiResult.usageMetadata;
     const inputTokens = usage?.promptTokenCount ?? 0;
     const outputTokens = usage?.candidatesTokenCount ?? 0;
-    const costUsd = calculateGeminiCost(inputTokens, outputTokens);
+    const thinkingTokens = usage?.thinkingTokenCount ?? 0;
+    const costUsd = calculateGeminiCost(inputTokens, outputTokens + thinkingTokens);
 
-    // Track cost (non-blocking — don't fail the request if cost tracking fails)
+    // Track cost (non-blocking)
     trackCost({
       sessionId: body.sessionId,
       model: 'gemini-3.1-pro-preview',
       endpoint: '/api/paragraphical',
       inputTokens,
-      outputTokens,
+      outputTokens: outputTokens + thinkingTokens,
       costUsd,
       durationMs,
     }).catch(() => {});
 
-    // Return extraction + reasoning trace + metadata
+    // ─── Return extraction + reasoning trace + metadata ─────────
     res.status(200).json({
       extraction,
       thinking_details: thinkingDetails,
@@ -506,14 +564,20 @@ export default async function handler(
         searchGrounded: true,
         inputTokens,
         outputTokens,
+        thinkingTokens,
         costUsd: Number(costUsd.toFixed(6)),
         durationMs,
         paragraphsProcessed: filledParagraphs.length,
         metricsExtracted: extraction.metrics.length,
-        locationMetricsCount: extraction.location_metrics.length,
-        countriesRecommended: extraction.recommended_countries.length,
-        citiesRecommended: extraction.recommended_cities.length,
-        thinkingSteps: thinkingDetails.length,
+        locationsRecommended: {
+          countries: extraction.recommended_countries.length,
+          cities: extraction.recommended_cities.length,
+          towns: extraction.recommended_towns.length,
+          neighborhoods: extraction.recommended_neighborhoods.length,
+        },
+        hasThinkingDetails: thinkingDetails.length > 0,
+        reasoningComplexity: 'high' as const,
+        dataVersion: '2026.Q1-Live',
         timestamp: new Date().toISOString(),
       },
     });

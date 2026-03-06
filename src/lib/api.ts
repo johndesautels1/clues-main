@@ -2,12 +2,16 @@
  * API Client
  * All calls to Vercel serverless functions go through here.
  * Handles retries, error formatting, and response typing.
+ *
+ * Updated for Gemini 3.1 Pro Preview:
+ * - Response includes metrics array, location recommendations, thinking details
+ * - Supports file uploads (medical records, financial spreadsheets) via fileUrls
  */
 
 import type { ParagraphEntry, GeminiExtraction } from '../types';
 
 // ─── Paragraphical Extraction ───────────────────────────────────
-interface ParagraphicalResponse {
+export interface ParagraphicalResponse {
   extraction: GeminiExtraction;
   thinking_details: string[];
   metadata: {
@@ -16,14 +20,20 @@ interface ParagraphicalResponse {
     searchGrounded: boolean;
     inputTokens: number;
     outputTokens: number;
+    thinkingTokens?: number;
     costUsd: number;
     durationMs: number;
     paragraphsProcessed: number;
     metricsExtracted: number;
-    locationMetricsCount: number;
-    countriesRecommended: number;
-    citiesRecommended: number;
-    thinkingSteps: number;
+    locationsRecommended: {
+      countries: number;
+      cities: number;
+      towns: number;
+      neighborhoods: number;
+    };
+    hasThinkingDetails: boolean;
+    reasoningComplexity: 'high' | 'max';
+    dataVersion: string;
     timestamp: string;
   };
 }
@@ -38,6 +48,7 @@ export async function extractParagraphical(params: {
   paragraphs: ParagraphEntry[];
   globeRegion: string;
   sessionId: string;
+  fileUrls?: string[];
 }): Promise<ParagraphicalResponse> {
   const response = await fetch('/api/paragraphical', {
     method: 'POST',
@@ -50,9 +61,10 @@ export async function extractParagraphical(params: {
       })),
       globeRegion: params.globeRegion,
       sessionId: params.sessionId,
+      fileUrls: params.fileUrls,
       metadata: {
         timestamp: new Date().toISOString(),
-        appVersion: '0.1.0',
+        appVersion: '0.2.0',
       },
     }),
   });
@@ -65,4 +77,25 @@ export async function extractParagraphical(params: {
   }
 
   return response.json();
+}
+
+// ─── File Upload for Gemini Ingestion ───────────────────────────
+// Uploads large files (medical records P5, financial spreadsheets P8)
+// to temporary storage and returns URLs for Gemini to ingest.
+// Gemini 3.1 Pro Preview supports up to 100MB file uploads.
+export async function uploadFileForGemini(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Upload failed: HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.fileUrl;
 }

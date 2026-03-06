@@ -20,77 +20,15 @@ export interface ModuleDefinition {
 }
 
 export const MODULES: ModuleDefinition[] = [
-  {
-    id: 'lifescore',
-    name: 'Legal Independence & Freedom',
-    shortName: 'LifeScore',
-    description: 'Legal freedom, personal autonomy, and civil liberties',
-    icon: '\u{1F5FD}',  // Statue of Liberty
-    status: 'completed',
-    score: 100,
-    questionCount: 10,
-    url: 'https://clueslifescore.com'
-  },
-  {
-    id: 'transportation',
-    name: 'Transportation & Mobility',
-    shortName: 'Transport',
-    description: 'Transit systems, walkability, car dependency, and commute quality',
-    icon: '\u{1F687}',  // Metro
-    status: 'recommended',
-    questionCount: 10
-  },
-  {
-    id: 'food_cuisine',
-    name: 'Food & Cuisine',
-    shortName: 'Food',
-    description: 'Restaurant scene, grocery access, dietary options, and food culture',
-    icon: '\u{1F37D}\uFE0F',  // Fork and knife with plate
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'healthcare',
-    name: 'Healthcare & Medical',
-    shortName: 'Healthcare',
-    description: 'System quality, insurance, specialists, and medical infrastructure',
-    icon: '\u{1F3E5}',  // Hospital
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'legal_immigration',
-    name: 'Legal & Immigration',
-    shortName: 'Legal',
-    description: 'Visa pathways, residency programs, rule of law, and legal system',
-    icon: '\u{2696}\uFE0F',  // Scales
-    status: 'not_started',
-    questionCount: 10
-  },
+  // ═══════════════════════════════════════════════════════════════
+  // SURVIVAL (P6-P9) — The basics of staying alive and sheltered
+  // ═══════════════════════════════════════════════════════════════
   {
     id: 'climate_weather',
     name: 'Climate & Weather',
     shortName: 'Climate',
     description: 'Temperature, humidity, sunshine, natural disasters, and seasons',
     icon: '\u{1F326}\uFE0F',  // Sun behind rain cloud
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'dating_social',
-    name: 'Dating & Social Life',
-    shortName: 'Social',
-    description: 'Dating scene, social communities, expat networks, and nightlife',
-    icon: '\u{1F496}',  // Sparkling heart
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'business',
-    name: 'Business & Entrepreneurship',
-    shortName: 'Business',
-    description: 'Startup ecosystem, regulations, coworking, and business climate',
-    icon: '\u{1F4BC}',  // Briefcase
     status: 'not_started',
     questionCount: 10
   },
@@ -104,11 +42,11 @@ export const MODULES: ModuleDefinition[] = [
     questionCount: 10
   },
   {
-    id: 'education',
-    name: 'Education & Learning',
-    shortName: 'Education',
-    description: 'Schools, universities, continuing education, and learning culture',
-    icon: '\u{1F393}',  // Graduation cap
+    id: 'healthcare',
+    name: 'Healthcare & Medical',
+    shortName: 'Healthcare',
+    description: 'System quality, insurance, specialists, and medical infrastructure',
+    icon: '\u{1F3E5}',  // Hospital
     status: 'not_started',
     questionCount: 10
   },
@@ -121,21 +59,16 @@ export const MODULES: ModuleDefinition[] = [
     status: 'not_started',
     questionCount: 10
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // FOUNDATION (P10-P12) — Legal, financial, and personal freedom
+  // ═══════════════════════════════════════════════════════════════
   {
-    id: 'entertainment',
-    name: 'Entertainment & Nightlife',
-    shortName: 'Entertainment',
-    description: 'Cultural venues, events, concerts, and entertainment options',
-    icon: '\u{1F3AD}',  // Performing arts
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'technology',
-    name: 'Technology & Connectivity',
-    shortName: 'Tech',
-    description: 'Internet speed, tech ecosystem, digital infrastructure, and innovation',
-    icon: '\u{1F4F1}',  // Mobile phone
+    id: 'legal_immigration',
+    name: 'Legal & Immigration',
+    shortName: 'Legal',
+    description: 'Visa pathways, residency programs, rule of law, and legal system',
+    icon: '\u{2696}\uFE0F',  // Scales
     status: 'not_started',
     questionCount: 10
   },
@@ -149,11 +82,97 @@ export const MODULES: ModuleDefinition[] = [
     questionCount: 10
   },
   {
+    id: 'lifescore',
+    name: 'Legal Independence & Freedom',
+    shortName: 'LifeScore',
+    description: 'Legal freedom, personal autonomy, and civil liberties',
+    icon: '\u{1F5FD}',  // Statue of Liberty
+    status: 'completed',
+    score: 100,
+    questionCount: 10,
+    url: 'https://clueslifescore.com'
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // GROWTH (P13-P16) — Career, tech, transport, education
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'business',
+    name: 'Business & Entrepreneurship',
+    shortName: 'Business',
+    description: 'Startup ecosystem, regulations, coworking, and business climate',
+    icon: '\u{1F4BC}',  // Briefcase
+    status: 'not_started',
+    questionCount: 10
+  },
+  {
+    id: 'technology',
+    name: 'Technology & Connectivity',
+    shortName: 'Tech',
+    description: 'Internet speed, tech ecosystem, digital infrastructure, and innovation',
+    icon: '\u{1F4F1}',  // Mobile phone
+    status: 'not_started',
+    questionCount: 10
+  },
+  {
+    id: 'transportation',
+    name: 'Transportation & Mobility',
+    shortName: 'Transport',
+    description: 'Transit systems, walkability, car dependency, and commute quality',
+    icon: '\u{1F687}',  // Metro
+    status: 'recommended',
+    questionCount: 10
+  },
+  {
+    id: 'education',
+    name: 'Education & Learning',
+    shortName: 'Education',
+    description: 'Schools, universities, continuing education, and learning culture',
+    icon: '\u{1F393}',  // Graduation cap
+    status: 'not_started',
+    questionCount: 10
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // CONNECTION (P17-P18) — Family and social bonds
+  // ═══════════════════════════════════════════════════════════════
+  {
     id: 'family',
     name: 'Family & Children',
     shortName: 'Family',
     description: 'Family services, kid-friendly amenities, schools, and family life',
     icon: '\u{1F46A}',  // Family
+    status: 'not_started',
+    questionCount: 10
+  },
+  {
+    id: 'dating_social',
+    name: 'Dating & Social Life',
+    shortName: 'Social',
+    description: 'Dating scene, social communities, expat networks, and nightlife',
+    icon: '\u{1F496}',  // Sparkling heart
+    status: 'not_started',
+    questionCount: 10
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // NOURISHMENT (P19-P21) — Food, fitness, nature
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'food_cuisine',
+    name: 'Food & Cuisine',
+    shortName: 'Food',
+    description: 'Restaurant scene, grocery access, dietary options, and food culture',
+    icon: '\u{1F37D}\uFE0F',  // Fork and knife with plate
+    status: 'not_started',
+    questionCount: 10
+  },
+  {
+    id: 'sports_fitness',
+    name: 'Sports & Fitness',
+    shortName: 'Sports',
+    description: 'Gyms, sports leagues, fitness culture, and athletic facilities',
+    icon: '\u{1F3CB}\uFE0F',  // Weight lifter
     status: 'not_started',
     questionCount: 10
   },
@@ -166,6 +185,10 @@ export const MODULES: ModuleDefinition[] = [
     status: 'not_started',
     questionCount: 10
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // SOUL (P22-P25) — Culture, entertainment, spirituality, pets
+  // ═══════════════════════════════════════════════════════════════
   {
     id: 'arts_culture',
     name: 'Arts & Culture',
@@ -176,11 +199,11 @@ export const MODULES: ModuleDefinition[] = [
     questionCount: 10
   },
   {
-    id: 'sports_fitness',
-    name: 'Sports & Fitness',
-    shortName: 'Sports',
-    description: 'Gyms, sports leagues, fitness culture, and athletic facilities',
-    icon: '\u{1F3CB}\uFE0F',  // Weight lifter
+    id: 'entertainment',
+    name: 'Entertainment & Nightlife',
+    shortName: 'Entertainment',
+    description: 'Cultural venues, events, concerts, and entertainment options',
+    icon: '\u{1F3AD}',  // Performing arts
     status: 'not_started',
     questionCount: 10
   },

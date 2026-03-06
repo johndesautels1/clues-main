@@ -12,7 +12,7 @@ This is **not** a law-based app (unlike LifeScore, which focuses on legal freedo
 
 - **Frontend:** React + TypeScript + Vite
 - **Backend:** Supabase (PostgreSQL, Auth, Edge Functions, Realtime)
-- **AI:** Google Gemini (Paragraphical pipeline), Cristiano Judge system (Opus)
+- **AI:** Google Gemini 3.1 Pro Preview (reasoning engine with thinking_level: high + Google Search grounding), Cristiano Judge system (Opus)
 - **Research:** Tavily (search + research APIs)
 - **Reports:** Gamma (100-page visual report), HeyGen (video), InVideo (cinematic)
 - **Styling:** Dark-mode-first, WCAG 2.1 AA compliant in both dark and light mode (see CLAUDE.md)
@@ -133,6 +133,8 @@ LifeScore is one of the 20 category modules (Category 8) but is unique:
 ### Per-Paragraph Metric Targets
 
 Each of the 27 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
+
+See `src/data/paragraphs.ts` for the canonical paragraph definitions (6 phases, 27 paragraphs).
 
 ```
 PARAGRAPH → CATEGORY MAPPING → MIN METRICS → COVERAGE TARGETS
@@ -270,7 +272,6 @@ P8: "Healthcare & Medical" → Healthcare & Medical (moduleId: healthcare) → 1
   - Public vs private healthcare preference
   - Health insurance for expats
   - Hospital quality / international accreditation
-  - Wellness infrastructure (alternative medicine, prevention)
   - Dental care access
   Example metrics:
     M27: [Specific specialist] availability within 30min [Healthcare]
@@ -286,7 +287,6 @@ P9: "Housing & Real Estate" → Housing & Real Estate (moduleId: housing) → 12
   - Rent vs buy preference
   - Budget range for housing specifically
   - Neighborhood character (urban buzz vs quiet residential)
-  - Amenities (garden, pool, parking, elevator)
   - Foreign ownership rules
   Example metrics:
     M32: 2BR apartment rental under EUR 1,500/month [Housing]
@@ -301,7 +301,7 @@ P10: "Legal & Immigration" → Legal & Immigration (moduleId: legal_immigration)
   - Residency pathway length tolerance
   - Bureaucracy tolerance
   - Tax treaty awareness
-  - Dual citizenship possibility
+  - Rule of law / judicial independence
   Example metrics:
     M36: Digital nomad visa available for [nationality] [Legal]
     M37: Residency achievable within 12 months [Legal]
@@ -329,8 +329,7 @@ P12: "Legal Independence & Freedom" → LifeScore (moduleId: lifescore) → 8-12
   - Substances (alcohol, cannabis, legal status)
   - LGBTQ+ rights (if applicable)
   - Internet censorship tolerance
-  - Gun rights (if applicable)
-  - Business freedom / regulatory freedom
+  - Privacy laws / government surveillance
   Example metrics:
     M45: Press Freedom Index in top 30 countries [LifeScore]
     M46: Cannabis legal or decriminalized [LifeScore]
@@ -340,7 +339,6 @@ P12: "Legal Independence & Freedom" → LifeScore (moduleId: lifescore) → 8-12
 P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: business) → 12-15 metrics
   Coverage targets:
   - Remote vs local employment
-  - Industry/sector (tech, finance, creative, trades)
   - Startup ecosystem need
   - Coworking space availability
   - Business registration ease
@@ -357,9 +355,8 @@ P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: techno
   - Internet speed requirements (specific Mbps)
   - 5G / mobile data coverage
   - Remote work infrastructure
+  - Power grid reliability
   - Digital nomad community / ecosystem
-  - Smart city infrastructure
-  - Tech startup density (if relevant)
   Example metrics:
     M53: Average broadband speed above 100 Mbps [Technology]
     M54: 5G coverage in city center [Technology]
@@ -374,7 +371,6 @@ P15: "Transportation & Mobility" → Transportation (moduleId: transportation) �
   - Bike infrastructure
   - Airport proximity for international travel
   - Ride-sharing availability
-  - Commute time tolerance
   Example metrics:
     M57: Public transit coverage reaching 90%+ of city [Transport]
     M58: Walk Score above 80 [Transport]
@@ -383,12 +379,10 @@ P15: "Transportation & Mobility" → Transportation (moduleId: transportation) �
 
 P16: "Education & Learning" → Education & Learning (moduleId: education) → 8-12 metrics
   Coverage targets:
+  - Children's education needs (international schools, curricula)
   - Personal education goals (language, degree, skills)
-  - Children's education needs (if applicable)
-  - International school availability
   - University quality / ranking
-  - Professional development / conferences
-  - Language learning infrastructure
+  - Library and language school access
   Example metrics:
     M61: International schools with IB curriculum [Education]
     M62: Language schools for [target language] [Education]
@@ -399,10 +393,9 @@ P17: "Family & Children" → Family & Children (moduleId: family) → 10-15 metr
   - Who is relocating (partner, kids ages, parents)
   - Partner's career needs
   - Children's age-specific needs (daycare, primary, secondary)
-  - Family activities and entertainment
   - Elderly care (if parents coming)
   - Family-friendly neighborhoods
-  - Parental leave / family benefits (if employed locally)
+  - Proximity to family back home (flight frequency)
   Example metrics:
     M64: Daycare availability under EUR 500/month [Family]
     M65: Parks and playgrounds within 10-minute walk [Family]
@@ -415,8 +408,7 @@ P18: "Dating & Social Life" → Dating & Social Life (moduleId: dating_social) �
   - Dating scene (if single)
   - Social club/meetup availability
   - Cultural openness to foreigners
-  - Nightlife quality (or lack thereof if preferred)
-  - Community integration ease
+  - Nightlife as social tool
   Example metrics:
     M68: Active expat community (1000+ in meetup groups) [Social]
     M69: Cultural openness index for foreigners [Social]
@@ -601,458 +593,12 @@ IF user is too vague:
 User mentioned safety concerns but nothing about climate or visa:
 > "Great that you know your safety limits! Have you thought about climate dealbreakers too? Some cities that feel safe have extreme humidity or heat that makes daily life miserable. And is there a visa pathway that MUST exist, or would lack of one be a hard wall?"
 
-**P6 — "Climate & Weather"**
-User wrote about temperature but not humidity:
-> "Love the detail about temperature! Quick thought — how do you feel about humidity? Some places hit your perfect temperature but the humidity makes it feel 10 degrees hotter. Worth mentioning if it matters to you."
-
-**P8 — "Healthcare & Medical"**
-User mentioned being healthy but didn't discuss medication or specialists:
-> "Great that you're in good health! Just in case — do you take any regular medications or see any specialists? Pharmacy access varies wildly between countries, and some medications that are over-the-counter at home need prescriptions abroad."
-
-**P11 — "Financial & Banking"**
-User mentioned income but not taxes:
-> "Good picture of your income! One thing that can make or break a relocation budget: taxes. Some countries won't tax your foreign income at all, others take 30%+. Any thoughts on your tax tolerance?"
-
-**P15 — "Transportation & Mobility"**
-User described a car-free lifestyle but didn't mention airports:
-> "Love the walkable vision! How often do you travel internationally? Airport proximity matters a lot for some people — a beautiful walkable city that's 3 hours from an airport changes the equation."
-
-**P25 — "Pets & Animals"**
-User mentioned a dog but not the breed:
-> "A fellow dog person! What breed? It matters more than you'd think — some countries ban specific breeds, and size affects housing options and airline transport rules."
-
-**P27 — "Anything Else"**
-User wrote very little:
-> "This is your safety net — anything you've been thinking about that didn't fit neatly into the other sections? Dealbreakers you forgot to mention? Things your partner cares about that are different from your priorities? Even small things can matter."
-
-### Technical Implementation
-
-```
-Phase 1 (MVP): Keyword/regex detection against coverage target keywords per paragraph.
-  - Fast, no API cost, runs locally
-  - Each paragraph has a list of target keywords/phrases
-  - If 80+ words written and keyword group absent → trigger interjection from template
-
-Phase 2 (Enhanced): Gemini 3.1 Pro Preview API call (debounced, max 1 per paragraph)
-  - Send: paragraph text + coverage targets + paragraph context
-  - Return: which targets are covered, which are missing, suggested interjection
-  - Only fires when keyword detection confidence is low
 
 Phase 3 (Advanced): Context-aware cross-paragraph intelligence
   - Olivia remembers what was said in ALL previous paragraphs
   - If P17 (Family) mentions kids but P16 (Education) doesn't address schools: prompt
   - If P11 (Financial) mentions tight budget but P9 (Housing) describes a villa: flag conflict
   - If P3 (Dealbreakers) mentions safety but P7 (Safety) is vague: prompt for specifics
-  - Cross-paragraph consistency checking
-```
-
-### Olivia's Personality During Paragraphical
-
-- **Warm but purposeful** — she cares about getting good data, not just being nice
-- **Knowledgeable** — she knows WHY each data point matters ("humidity affects X because...")
-- **Never condescending** — "have you thought about..." not "you forgot to mention..."
-- **Brief** — 2-3 sentences max per interjection, never a wall of text
-- **Dismissible** — user can close/ignore any interjection, no penalty
-- **Encouraging** — "This is great detail!" before any correction
-- **Contextual** — her examples reference what the user actually wrote
-
----
-
-## The 100-Page Report Blueprint
-
-### Hard Ceiling: 100 Pages
-
-The report is exactly 100 pages maximum. Not 100+. Not "around 100." One hundred.
-
-**Why 100 is the ceiling:**
-- **Gamma timeout**: LLM-Gamma starts timing out above 100 pages of rendered content
-- **Token limits**: The report generation prompt + content approaches context window limits beyond this
-- **User fatigue**: Research shows report engagement drops sharply after page 80. 100 is ambitious but digestible.
-- **Quality**: 100 dense, visual, data-rich pages beats 150 pages with filler
-
-**The data tables can be 250-300 field IDs** — that's the engine underneath. The report is the presentation layer that makes those field IDs meaningful, visual, and educational.
-
-### Section-by-Section Blueprint
-
-```
-THE CLUES INTELLIGENCE REPORT — 100 PAGES
-══════════════════════════════════════════
-
-SECTION 1: COVER & EXECUTIVE SUMMARY (Pages 1-8)
-─────────────────────────────────────────────────
-  Page 1:  COVER PAGE
-           - Full-bleed hero image of winning city (AI-generated or stock)
-           - User's name, report date
-           - CLUES Intelligence branding
-           - Confidence badge (e.g., "87% Confidence")
-           - Report tier label (Discovery / Validated / Precision)
-
-  Page 2:  THE VERDICT — HERO SPREAD
-           - Massive winner declaration: "Your Best City: [CITY]"
-           - Radial gauge showing overall Smart Score (0-100)
-           - Trophy icon, winner score in gold
-           - Top 3 reasons WHY this city wins for YOU (not generic)
-           - Runner-up cities with their scores (smaller)
-           - VISUAL: Radial score gauge + city skyline overlay
-
-  Page 3:  YOUR PROFILE SNAPSHOT
-           - Who you are (from P1-P2 extraction)
-           - Personality profile badge
-           - Key priorities identified (top 5)
-           - Household composition visual
-           - Detected currency + budget range
-           - VISUAL: Profile card with avatar silhouette, icons for each priority
-
-  Page 4:  THE CATEGORY SHOWDOWN — 20-CATEGORY RADAR CHART
-           - Spider/radar chart: winning city vs runner-up on all 20 categories
-           - Each axis labeled with category name + icon
-           - Winner in sapphire blue, runner-up in orange
-           - Categories where winner dominates highlighted in green
-           - Categories where runner-up is stronger highlighted in amber
-           - VISUAL: Large radar chart, clean, readable
-
-  Page 5:  SMART SCORE SUMMARY TABLE
-           - All 20 categories listed
-           - City 1 | City 2 | City 3 scores side by side
-           - Horizontal bar chart per row
-           - Winner of each category marked with gold star
-           - Overall winner row at bottom in bold
-           - VISUAL: Color-coded comparison table with embedded mini bar charts
-
-  Page 6-7: YOUR METRICS AT A GLANCE
-           - Heatmap of ALL extracted metrics (100-250) organized by category
-           - Color intensity = how well the winning city scores
-           - Hover data (in digital version): metric name, score, source
-           - Categories with most metrics = user's biggest priorities (visual proof)
-           - VISUAL: Large heatmap grid, category labels on Y-axis, metric density visible
-
-  Page 8:  TABLE OF CONTENTS
-           - Clean, navigable TOC with page numbers
-           - Section thumbnails (small preview of what's on each section)
-           - "How to read this report" sidebar
-           - Report methodology badge (5-LLM + Opus Judge + Tavily)
-
-SECTION 2: YOUR COUNTRY (Pages 9-16)
-─────────────────────────────────────
-  Page 9:  COUNTRY HERO
-           - Full-bleed country image (flag + landmark + landscape composite)
-           - "Why [COUNTRY] is Your Best Match"
-           - Country at a glance: population, capital, currency, language, timezone
-           - VISUAL: Magazine-style country hero spread
-
-  Page 10: COUNTRY SCORECARD
-           - National-level metrics: GDP, HDI, safety index, healthcare index
-           - Comparison vs user's current country (side-by-side)
-           - Immigration friendliness score
-           - VISUAL: Scorecard with green/amber/red indicators
-
-  Page 11: IMMIGRATION PATHWAY
-           - Visa options available for user's nationality
-           - Timeline: application → approval → residency → citizenship
-           - Cost breakdown for visa/residency process
-           - Key requirements and documents
-           - VISUAL: Horizontal timeline infographic with milestone markers
-
-  Page 12: COST OF LIVING NATIONAL OVERVIEW
-           - National averages: rent, groceries, transport, healthcare, dining
-           - Shown in DUAL CURRENCY (local + user's home currency)
-           - Comparison bar chart vs user's current country
-           - VISUAL: Donut chart of monthly budget allocation + comparison bars
-
-  Page 13-14: COUNTRY DEEP DIVE
-           - Cultural overview: what daily life feels like
-           - Language landscape: English penetration, language learning resources
-           - Digital infrastructure: internet rankings, tech adoption
-           - Climate zones within the country (not all cities have same weather)
-           - VISUAL: Mini-map showing climate zones, broadband coverage heatmap
-
-  Page 15-16: RUNNER-UP COUNTRIES (if applicable)
-           - Why they scored well but didn't win
-           - Key differences from winner
-           - "Consider [country] if [specific scenario]"
-           - Quick scorecard comparison (2-3 rows)
-           - VISUAL: Compact country comparison cards
-
-SECTION 3: THE CITY SHOWDOWN (Pages 17-46) — THE CORE
-──────────────────────────────────────────────────────
-  Page 17: CITY SHOWDOWN INTRO
-           - "We analyzed [X] cities. These 3 rose to the top."
-           - City 1 | City 2 | City 3 hero images side by side
-           - Overall Smart Scores displayed prominently
-           - VISUAL: Three-panel city photo spread with score overlays
-
-  Pages 18-19: OVERALL COMPARISON DASHBOARD
-           - Three-column comparison table (like LifeScore)
-           - Key metrics at a glance: cost of living, safety, weather, transit
-           - Winner of each row highlighted
-           - Overall winner trophy
-           - VISUAL: Dense comparison table with color-coded cells
-
-  Pages 20-39: CATEGORY-BY-CATEGORY DEEP DIVES (20 categories, 1 page each)
-           Each category page follows the SAME template:
-           ┌─────────────────────────────────────────────────────┐
-           │ [CATEGORY ICON] [CATEGORY NAME]        Weight: [X]% │
-           ├─────────────────────────────────────────────────────┤
-           │                                                      │
-           │ SCORE BARS (3 cities, horizontal)                    │
-           │ ████████████████████████  City1: 87                  │
-           │ ██████████████████        City2: 72                  │
-           │ ████████████████████████████ City3: 91  ★ WINNER    │
-           │                                                      │
-           │ KEY METRICS TABLE (top 5-8 metrics for this category)│
-           │ ┌──────────────┬────────┬────────┬────────┐         │
-           │ │ Metric       │ City1  │ City2  │ City3  │         │
-           │ ├──────────────┼────────┼────────┼────────┤         │
-           │ │ Avg Temp     │ 22.4C  │ 18.1C  │ 24.7C  │         │
-           │ │ Humidity     │ 55%    │ 68%    │ 42%    │         │
-           │ │ Sunshine hrs │ 2,800  │ 2,400  │ 3,100  │         │
-           │ └──────────────┴────────┴────────┴────────┘         │
-           │                                                      │
-           │ INSIGHT: 2-3 sentence narrative explaining           │
-           │ what these scores mean for YOUR life                 │
-           │                                                      │
-           │ SOURCE: "Data from WeatherSpark, Climate-Data.org"   │
-           │                                                      │
-           │ MINI CHART: Bar chart, scatter plot, or gauge        │
-           │ (chart TYPE varies by category for visual variety)    │
-           └─────────────────────────────────────────────────────┘
-
-           CHART TYPE ROTATION (for visual variety across 20 pages):
-           - Climate: Temperature line graph (12 months)
-           - Safety: Horizontal bar comparison
-           - Healthcare: Radar chart (sub-metrics)
-           - Housing: Donut chart (budget breakdown)
-           - Transportation: Walkability/transit score gauge
-           - Financial: Stacked bar (expense categories)
-           - Legal: Checklist/boolean table (visa types)
-           - LifeScore: Spider chart (freedom sub-categories)
-           - Business: Bubble chart (ecosystem metrics)
-           - Technology: Speed test visual / gauge
-           - Education: Ranked list with school logos
-           - Family: Icon grid (amenities available)
-           - Social: Population pyramid / community size bars
-           - Pets: Checklist (pet-friendly features)
-           - Food: Pictograph (restaurant density)
-           - Fitness: Availability matrix
-           - Outdoor: Photo strip (nature highlights)
-           - Culture: Event calendar density heatmap
-           - Entertainment: Venue type pie chart
-           - Spiritual: Map pins (places of worship)
-
-  Pages 40-42: WINNING CITY PORTRAIT
-           - Why [City] wins: narrative summary
-           - "Your paragraph said [quote from P26] — here's how [City] delivers"
-           - Day-in-the-life narrative (morning to night in winning city)
-           - Local neighborhood character descriptions
-           - VISUAL: Photo collage + pull quotes from user's own paragraphs
-
-  Pages 43-44: RUNNER-UP CITY PROFILES
-           - City 2: "Strong in [X], weaker in [Y] — consider if [scenario]"
-           - City 3: Same format
-           - What would need to change for each runner-up to win
-           - VISUAL: Compact city cards with key differentiators
-
-  Pages 45-46: SURPRISING FINDINGS
-           - Counterintuitive results ("You'd expect [City2] to win on Safety, but...")
-           - Metrics where the "obvious" choice lost
-           - Hidden advantages of the winner
-           - Hidden costs/risks of the runner-ups
-           - VISUAL: "Did you know?" callout boxes with icons
-
-SECTION 4: YOUR TOWN (Pages 47-56)
-───────────────────────────────────
-  Page 47: TOWN OVERVIEW
-           - "Inside [Winning City]: Your Top 3 Towns"
-           - Map showing town locations within the city
-           - Quick comparison table
-           - VISUAL: City map with 3 town pins + photos
-
-  Pages 48-53: TOWN PROFILES (2 pages each, 3 towns)
-           Each town spread:
-           - Left page: Town photo, character description, walkability, vibe
-           - Right page: Town-specific metrics
-             - Rent prices (specific to this town)
-             - Transit connections
-             - Restaurant/café density
-             - Safety rating
-             - Expat population
-             - School proximity (if applicable)
-             - Green space / parks
-           - VISUAL: Town photo + mini-map + metric cards
-
-  Pages 54-55: TOWN COMPARISON TABLE
-           - Side-by-side comparison of all 3 towns
-           - Metrics specific to town-level decisions
-           - Winner highlighted
-           - "Best for [user priority]" labels
-           - VISUAL: Clean comparison table with recommendation badges
-
-  Page 56: WINNING TOWN DECLARATION
-           - "Your Best Town: [TOWN]"
-           - Why it wins for YOUR specific profile
-           - Transition to neighborhood analysis
-           - VISUAL: Town hero image with score overlay
-
-SECTION 5: YOUR NEIGHBORHOOD (Pages 57-64)
-───────────────────────────────────────────
-  Page 57: NEIGHBORHOOD OVERVIEW
-           - "Inside [Winning Town]: Your Top 3 Neighborhoods"
-           - Street-level map with neighborhood boundaries
-           - Quick comparison
-           - VISUAL: Detailed neighborhood map with highlighted zones
-
-  Pages 58-63: NEIGHBORHOOD PROFILES (2 pages each, 3 neighborhoods)
-           Each neighborhood spread:
-           - Street-level character: architecture, vibe, noise, foot traffic
-           - Specific rental listings / price ranges
-           - Walk-to amenities: grocery, café, gym, park, transit stop
-           - Neighbor demographics (expat mix, families, young professionals)
-           - Photo strip: street views, cafes, parks, buildings
-           - VISUAL: Street photos + annotated walk-time map + lifestyle icons
-
-  Page 64: YOUR NEW ADDRESS
-           - "Your Best Neighborhood: [NEIGHBORHOOD]"
-           - Final recommendation with full reasoning
-           - "Start your housing search in [NEIGHBORHOOD] — here's what to look for"
-           - VISUAL: Neighborhood hero shot + recommendation badge
-
-SECTION 6: CRISTIANO'S VERDICT (Pages 65-72)
-─────────────────────────────────────────────
-  ** AESTHETIC: MI6 Briefing Room — midnight navy background, gold accents,
-     glassmorphic cards, classified-document feel **
-
-  Page 65: THE JUDGE'S CHAMBERS
-           - Cristiano avatar portrait
-           - "Judge's Report: Case #[report-id]"
-           - Case summary: what was evaluated, how many metrics, how many sources
-           - Confidence level declaration
-           - VISUAL: Glassmorphic judge card on navy background
-
-  Pages 66-69: CATEGORY-BY-CATEGORY JUDICIAL ANALYSIS
-           - Each category gets a "court ruling" box:
-             - Score adjustments made (upscores/downscores)
-             - Which LLMs agreed, which disagreed
-             - Judge's reasoning for any overrides
-             - "Court Order": real-world example of what this means for user
-           - 4-5 categories per page (the ones with most judicial action)
-           - VISUAL: Gold-bordered ruling cards, gavel icons, verdict stamps
-
-  Page 70: THE RULING
-           - Final winner declaration
-           - "Having reviewed all evidence across [X] metrics from [Y] sources,
-             evaluated by [Z] independent AI models, this court finds..."
-           - Key factors that sealed the verdict (top 5)
-           - Dissenting opinions (where Opus disagreed with majority)
-           - VISUAL: Full-page verdict declaration with gold seal
-
-  Page 71: FUTURE OUTLOOK
-           - 5-year trajectory for winning city
-           - Trends: improving, stable, or declining per category
-           - Risk factors to watch
-           - "Best time to move" recommendation
-           - VISUAL: Trend arrows + timeline projection chart
-
-  Page 72: LLM CONSENSUS REPORT
-           - Which 5 LLMs were used
-           - Agreement levels (unanimous, strong, moderate, split)
-           - StdDev chart showing where models agreed/disagreed
-           - Metrics with highest disagreement + how Judge resolved them
-           - VISUAL: Agreement heatmap + LLM logo badges
-
-SECTION 7: YOUR LIFE BEFORE & AFTER (Pages 73-78)
-──────────────────────────────────────────────────
-  Page 73: SIDE-BY-SIDE COMPARISON
-           - Current city vs winning city
-           - Key metrics compared (weather, cost, safety, transit, etc.)
-           - Green = improvement, Red = trade-off
-           - VISUAL: Two-column comparison with green/red delta indicators
-
-  Page 74: FINANCIAL TRANSFORMATION
-           - Monthly budget: current city vs winning city
-           - Category breakdown: rent, food, transport, healthcare, entertainment
-           - Dual currency display
-           - Net savings or additional cost per month
-           - VISUAL: Side-by-side donut charts + monthly cash flow bar chart
-
-  Page 75: QUALITY OF LIFE DELTA
-           - Category-by-category: what gets better, what stays same, what's a trade-off
-           - Prioritized by user's own weights (most important changes first)
-           - "What changes most" narrative
-           - VISUAL: Waterfall chart showing QoL improvement by category
-
-  Pages 76-77: YOUR NEW LIFE — NARRATIVE SPREAD
-           - Written in second person ("You wake up in your apartment in [neighborhood]...")
-           - Weaves in real data: "your 5-minute walk to [actual café district name]"
-           - References user's own Dream Day paragraph
-           - Seasonal variation: what summer/winter look like
-           - VISUAL: Full-bleed lifestyle photography + pull quotes
-
-  Page 78: WHAT YOU TRADE
-           - Honest acknowledgment of trade-offs
-           - "You'll miss: [specific things from current city]"
-           - "You'll gain: [specific things in new city]"
-           - "The verdict: [net assessment]"
-           - VISUAL: Balance scale graphic
-
-SECTION 8: ACTION PLAN (Pages 79-86)
-─────────────────────────────────────
-  Page 79: IMMIGRATION ROADMAP
-           - Step-by-step visa/residency pathway
-           - Timeline with milestones
-           - Key documents needed
-           - Estimated costs per step
-           - VISUAL: Horizontal Gantt-style timeline
-
-  Page 80: FINANCIAL PLANNING CHECKLIST
-           - Banking setup steps
-           - Tax considerations (home country + destination)
-           - Insurance transitions
-           - Currency exchange strategy
-           - VISUAL: Checklist with progress indicators
-
-  Page 81: HOUSING SEARCH STRATEGY
-           - Where to search (specific platforms for that country/city)
-           - Price ranges by neighborhood (the 3 recommended ones)
-           - Red flags to watch for
-           - Recommended first steps (short-term rental → long-term)
-           - VISUAL: Price range chart by neighborhood + platform logos
-
-  Page 82: 90-DAY PLAN
-           - Month 1: Research + applications
-           - Month 2: Documentation + preparation
-           - Month 3: Transition + arrival
-           - Key milestones and deadlines
-           - VISUAL: 90-day calendar with action items
-
-  Pages 83-84: RESOURCE DIRECTORY
-           - Expat communities and forums for this city
-           - Government websites (immigration, tax)
-           - Real estate platforms
-           - Healthcare provider directories
-           - Language schools
-           - VISUAL: Resource cards with logos and descriptions
-
-  Pages 85-86: CONFIDENCE BOOSTER — WHAT'S NEXT
-           - Current confidence level and what it means
-           - "Complete these modules to improve your results:"
-           - Module recommendations with confidence gain per module
-           - Before/after visualization: "Your report at 67% vs 92%"
-           - VISUAL: Confidence meter + module recommendation cards with gain badges
-
-SECTION 9: METHODOLOGY & EVIDENCE (Pages 87-96)
-────────────────────────────────────────────────
-  Page 87: HOW CLUES WORKS
-           - Plain-language explanation of the 6-phase pipeline:
-             Phase 1: Your Profile (P1-P2) → demographics, income, timeline
-             Phase 2: Dealbreakers (P3) → hard elimination walls
-             Phase 3: Must Haves (P4) → non-negotiable requirements
-             Phase 4: Trade-offs (P5) → priority weighting signals
-             Phase 5: Module Deep Dives (P6-P25) → 20 categories scored
-             Phase 6: Vision (P26-P27) → validation + wildcard
-           - 27 paragraphs → 100-250 numbered metrics → Tavily research →
-             5-LLM scoring → Opus/Cristiano Judge → 100-page report
-           - DNW elimination explained: severity-5 = instant city removal
-           - MH boosting explained: additive scoring, not eliminative
            - Why this is better than Googling / reading blogs
            - VISUAL: Pipeline flowchart showing 6 phases + downstream modules
 
@@ -1164,7 +710,7 @@ This is the **single source of truth** for which AI model powers each function i
 | **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 27 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P25 Module Deep Dives, P26-P27 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
 | **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
 | **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
-| **LLM Evaluator #3** | Gemini 3.1 Pro (Preview) | Google | Reuses extraction context for scoring |
+| **LLM Evaluator #3** | Gemini 3.1 Pro Preview | Google | Reuses extraction context for scoring |
 | **LLM Evaluator #4** | Grok 4 | xAI | Real-time web context for MH scoring |
 | **LLM Evaluator #5** | Perplexity Sonar | Perplexity | Research-backed citations |
 | **Cristiano Judge** | Claude Opus 4.5 | Anthropic | Consensus builder, reviews stdDev > 15 disagreements |
@@ -1276,6 +822,40 @@ Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 o
 - User can dismiss ("Got it") or expand ("Tell me more")
 - "Tell me more" escalates to GPT-4o (Olivia's full brain) for a detailed explanation
 - Interjection count badge on bubble: "Olivia has 1 suggestion"
+
+---
+
+## Questionnaire Reference Documents
+
+Typeform questionnaire exports for each module, stored in `docs/`:
+
+| # | Module | Questions | Sections | File |
+|---|--------|-----------|----------|------|
+| — | **Main Module (Demographics, DNW, Must Haves)** | **100** | **3** | `MAIN_MODULE_QUESTIONS.md` |
+| — | **General Questions** | **50** | **8** | `GENERAL_QUESTIONS_REFERENCE.md` |
+| 1 | Climate & Weather | 100 | 10 | `CLIMATE_WEATHER_QUESTIONS.md` |
+| 2 | Safety & Security | 100 | 10 | `SAFETY_SECURITY_QUESTIONS.md` |
+| 3 | Financial & Banking | 100 | 10 | `FINANCIAL_BANKING_QUESTIONS.md` |
+| 4 | Housing & Property | 100 | 6 | `HOUSING_PROPERTY_QUESTIONS.md` |
+| 5 | Education & Learning | 100 | 10 | `EDUCATION_LEARNING_QUESTIONS.md` |
+| 6 | Health & Wellness | 100 | 5 | `HEALTH_WELLNESS_QUESTIONS.md` |
+| 7 | Social Values & Governance | 100 | 10 | `SOCIAL_VALUES_GOVERNANCE_QUESTIONS.md` |
+| 8 | Professional & Career | 100 | 5 | `PROFESSIONAL_CAREER_QUESTIONS.md` |
+| 9 | Technology & Connectivity | 100 | 5 | `TECHNOLOGY_CONNECTIVITY_QUESTIONS.md` |
+| 10 | Entertainment & Nightlife | 100 | 10 | `ENTERTAINMENT_NIGHTLIFE_QUESTIONS.md` |
+| 11 | Outdoor & Recreation | 100 | 8 | `OUTDOOR_RECREATION_QUESTIONS.md` |
+| 12 | Family & Children | 100 | 10 | `FAMILY_CHILDREN_QUESTIONS.md` |
+| 13 | Sexual Beliefs, Practices & Laws | 100 | 8 | `SEXUAL_BELIEFS_PRACTICES_LAWS_QUESTIONS.md` |
+| 14 | Food & Dining | 100 | 9 | `FOOD_DINING_QUESTIONS.md` |
+| 15 | Legal & Immigration | 100 | 5 | `LEGAL_IMMIGRATION_QUESTIONS.md` |
+| 16 | Pets & Animals | 100 | 10 | `PETS_ANIMALS_QUESTIONS.md` |
+| 17 | Religion & Spirituality | 100 | 5 | `RELIGION_SPIRITUALITY_QUESTIONS.md` |
+| 18 | Arts & Culture | 100 | 5 | `ARTS_CULTURE_QUESTIONS.md` |
+| 19 | Transportation & Mobility | 100 | 9 | `TRANSPORTATION_MOBILITY_QUESTIONS.md` |
+| 20 | Shopping & Services | 100 | 10 | `SHOPPING_SERVICES_QUESTIONS.md` |
+| 21 | Environment & Community Appearance | 100 | 6 | `ENVIRONMENT_COMMUNITY_APPEARANCE_QUESTIONS.md` |
+| 22 | Neighborhood & Urban Design | 100 | 10 | `NEIGHBORHOOD_URBAN_DESIGN_QUESTIONS.md` |
+| 23 | Cultural Heritage & Traditions | 100 | 5 | `CULTURAL_HERITAGE_TRADITIONS_QUESTIONS.md` |
 
 ---
 

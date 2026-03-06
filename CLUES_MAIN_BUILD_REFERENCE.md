@@ -23,9 +23,9 @@
 | Frontend | React 19 + TypeScript + Vite 7 | Dark glassmorphic UI, Montserrat font |
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
-| LLM Evaluators | Claude Sonnet 4.5, GPT-4o, Gemini 3.1 Pro (Preview), Grok 4, Perplexity Sonar | 5 parallel evaluators |
+| LLM Evaluators | Claude Sonnet 4.5, GPT-4o, Gemini 3.1 Pro Preview, Grok 4, Perplexity Sonar | 5 parallel evaluators |
 | Judge | Claude Opus 4.5 | Consensus builder, reviews stdDev > 15 disagreements |
-| Narrative Engine | Gemini | Paragraphical extraction ONLY (not sole evaluator) |
+| Reasoning Engine | Gemini 3.1 Pro Preview | Paragraphical extraction, metric scoring, location recommendations (with thinking_level: high, Google Search grounding). Opus judges afterward. |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
 | Payments | Stripe | Tiered subscriptions |
 | Reports | Gamma | Polished visual reports |
@@ -123,9 +123,9 @@ Each module has **10 general questions** (200 total across 20 modules).
 
 ## 5. THE 27-PARAGRAPH PARAGRAPHICAL
 
-Free-form narrative input following the CLUES decision pipeline. Gemini extracts structured data from all 27 paragraphs.
+Free-form narrative input following the CLUES decision pipeline. Gemini 3.1 Pro Preview extracts structured data from all 27 paragraphs using deep reasoning and Google Search grounding.
 
-### Paragraph Map
+### Paragraph Map (6 Phases — see `src/data/paragraphs.ts`)
 ```
 PHASE 1: YOUR PROFILE (Demographics)
   P1:  "Who You Are"                   — Age, gender, nationality, citizenship, household, languages, employment
@@ -218,7 +218,7 @@ interface GeminiExtraction {
 }
 ```
 
-Gemini 3.1 Pro Preview is the extraction AND recommendation engine. It uses `thinking_level: "high"` for deep reasoning and native `googleSearch` for live data grounding. Each metric includes dual justifications (user-said + real-world data). The `location_metrics` array enables a side-by-side comparison view across all recommended locations.
+**CRITICAL**: Gemini 3.1 Pro Preview is the REASONING ENGINE. It uses `thinking_level: "high"` for deep reasoning and Google Search grounding for live 2026 data. Each metric includes dual justifications (user-said + real-world data). It extracts metrics, recommends locations, AND scores them at Discovery tier. Opus/Cristiano always judges Gemini's output afterward.
 
 ---
 
@@ -450,6 +450,13 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ 27 paragraph coverage targets with keyword groups and template interjections (`src/data/paragraphTargets.ts`)
 - ✅ Gemini extraction+recommendation prompt rewritten for 27-paragraph pipeline (`api/paragraphical.ts`)
 
+- ✅ Gemini 3.1 Pro Preview reasoning engine (`/api/paragraphical`) with thinking_level, search grounding, metric extraction
+- ✅ File upload endpoint (`/api/upload`) for 100MB Gemini ingestion
+- ✅ Tier engine with `gemini-3.1-pro-preview` model references
+- ✅ Results components: ReasoningTrace, SideBySideMetricView, ReactiveJustification, ThinkingDetailsPanel, FileUpload
+- ✅ GeminiMetricObject type with fieldId, score, user_justification, data_justification, source
+- ✅ Cost tracking updated for `gemini-3.1-pro-preview` provider
+
 ### What's NOT Built Yet
 - ❌ Gemini extraction endpoint deployment (prompt written, endpoint not yet tested with live API key)
 - ❌ Main Module questionnaire UI (Demographics, DNW, MH, General)
@@ -527,7 +534,7 @@ clues-main/
 
 ## 13. CRITICAL RULES (DO NOT VIOLATE)
 
-1. **Gemini extracts AND recommends at Discovery tier.** It reads the 27 paragraphs, converts narrative to 100-250 numbered metrics, recommends countries/cities/towns/neighborhoods, and scores them with sourced data. Opus/Cristiano always judges Gemini's output. See PARAGRAPHICAL_ARCHITECTURE.md for details.
+1. **Gemini 3.1 Pro Preview is the REASONING ENGINE.** It extracts metrics from paragraphs, recommends locations, AND scores them at Discovery tier using deep reasoning (thinking_level: high) and Google Search grounding. Each metric includes dual justifications. Opus/Cristiano always judges Gemini's output afterward. Gemini is NOT the final word — it is the first-pass reasoner.
 
 2. **Every completion tier produces results.** Always output: countries → cities → towns → neighborhoods. The only difference is quantity, confidence, and AI depth.
 
@@ -572,7 +579,29 @@ clues-main/
 
 ---
 
-## 15. GEMINI DATA CONTRACT
+## 15. GEMINI 3.1 PRO PREVIEW DATA CONTRACT
+
+> **IMPORTANT**: Gemini 3.1 Pro Preview (released Feb 2026) is the reasoning engine.
+> It uses `thinking_level: "high"`, `include_thinking_details: true`, and
+> `tools: [{ google_search: {} }]` for deep reasoning with real-time search grounding.
+
+### API Configuration
+```typescript
+// api/paragraphical.ts — Gemini 3.1 Pro Preview config
+const geminiRequestBody = {
+  contents: [{ parts: [{ text: prompt }] }],
+  generationConfig: {
+    temperature: 0.3,
+    maxOutputTokens: 65536,
+    responseMimeType: 'application/json',
+    thinking_level: 'high',             // Deep multi-step reasoning
+    include_thinking_details: true,     // Returns internal reasoning chain
+  },
+  tools: [{
+    google_search: {},                  // Native 2026 search grounding
+  }],
+};
+```
 
 ### Input to Gemini
 ```typescript
@@ -584,6 +613,7 @@ interface ParagraphicalInput {
     moduleId?: string;    // P6-P25 only: links to the module this paragraph mirrors
   }[];
   globeRegion: string;    // "Southern Europe / Mediterranean"
+  fileUrls?: string[];    // Uploaded files (medical records, spreadsheets) — up to 100MB
   metadata: {
     timestamp: string;
     appVersion: string;
@@ -591,62 +621,52 @@ interface ParagraphicalInput {
 }
 ```
 
-### Output from Gemini 3.1 Pro Preview
+### Output from Gemini 3.1 Pro Preview (Metric Object with Justifications)
 ```typescript
+interface GeminiMetricObject {
+  id: string;                      // "M1", "M2", etc.
+  fieldId: string;                 // "climate_01_humidity"
+  description: string;             // "Average annual humidity below 60%"
+  category: string;                // One of 20 Human Existence Flow categories
+  source_paragraph: number;        // Which paragraph (1-27)
+  score: number;                   // 0-100 (relative to other locations)
+  user_justification: string;      // "Matches P4: User prioritized 'low petty crime'"
+  data_justification: string;      // "Cascais 2026 safety reports show 12% decrease"
+  source: string;                  // "Tavily: Portugal Interior Ministry Report 2026"
+  data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+  research_query: string;          // What Tavily should search
+}
+
 interface GeminiExtraction {
-  demographic_signals: {
-    age?: number;
-    gender?: string;
-    household_size?: number;
-    has_children?: boolean;
-    has_pets?: boolean;
-    employment_type?: string;
-    income_bracket?: string;
-  };
+  demographic_signals: { age?, gender?, household_size?, has_children?, has_pets?, employment_type?, income_bracket? };
   personality_profile: string;
-  detected_currency: string;                    // "EUR", "GBP", "USD", "THB"
-  budget_range: { min: number; max: number; currency: string };
-  metrics: {                                    // 100-250 numbered metrics with dual justifications
-    id: string;                                 // "M1", "M2", ...
-    description: string;
-    category: string;
-    source_paragraph: number;
-    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
-    research_query: string;
-    user_justification: string;                 // "Matches P3: User said '...' which indicates..."
-    data_justification: string;                 // "Real-world data: City X has... according to..."
-    source: string;                             // "Tavily: ...", "Google Search: ...", etc.
-    threshold?: { operator; value; unit };
-  }[];
-  recommended_countries: { name; iso_code; reasoning; local_currency }[];
-  recommended_cities: { name; country; reasoning }[];
-  recommended_towns: { name; parent_city; reasoning }[];
-  recommended_neighborhoods: { name; parent_town; reasoning }[];
-  location_metrics: {                           // Side-by-Side Metric View
-    field_id: string;
-    label: string;
-    category: string;
-    locations: { name; type; score; user_justification; data_justification; source }[];
-  }[];
-  paragraph_summaries: { id; key_themes; extracted_preferences; metrics_derived }[];
+  detected_currency: string;       // "EUR", "GBP", "USD" — detected from paragraphs
+  budget_range: { min, max, currency };
+  metrics: GeminiMetricObject[];   // 100-250 numbered metrics (THE KEY OUTPUT)
+  recommended_countries: { name, iso_code, reasoning, local_currency }[];
+  recommended_cities: LocationMetrics[];    // Top 3 with per-city metric scores
+  recommended_towns: LocationMetrics[];     // Top 3 in winning city
+  recommended_neighborhoods: LocationMetrics[]; // Top 3 in winning town
+  paragraph_summaries: { id, key_themes, extracted_preferences, metrics_derived }[];
   dnw_signals: string[];
   mh_signals: string[];
   tradeoff_signals: string[];
   module_relevance: Record<string, number>;
   globe_region_preference: string;
+  thinking_details?: ThinkingStep[];  // Reasoning chain for transparency UI
 }
 ```
 
-### What Gemini 3.1 Pro Preview Extraction + Recommendation Enables
-1. Pre-fills Demographics questionnaire (user confirms/corrects)
-2. Suggests DNW severity levels ("Based on P4, political instability seems like a dealbreaker?")
-3. Suggests MH importance levels ("Based on P11, fast internet seems Essential?")
-4. Weights the 20 modules by relevance
-5. Provides context to all 5 LLM evaluators when they score cities
-6. Recommends countries, cities, towns, neighborhoods with reasoning
-7. Produces side-by-side `location_metrics` for cross-location comparison view
-8. Each metric has dual justifications (user paragraph link + real-world data source)
-9. Reasoning trace available via `thinking_details` in API response
+### What Gemini 3.1 Pro Preview Enables
+1. **100-250 numbered metrics** derived from user's 27 paragraphs
+2. **Location recommendations** (country → city → town → neighborhood)
+3. **Per-metric scoring** with user_justification + data_justification + source
+4. **Reasoning trace** — thinking_details array shows HOW the model reached its conclusions
+5. **100MB file uploads** — medical records (P8), financial spreadsheets (P11) ingested directly
+6. **Emerging neighborhood discovery** — ARC-AGI-2 reasoning finds hidden-gem locations
+7. Pre-fills Demographics, suggests DNW severity levels, suggests MH importance levels
+8. Weights the 20 modules by relevance via module_relevance scores
+9. Extracts tradeoff_signals for priority weighting downstream
 
 ---
 
@@ -737,7 +757,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ```
 claude-sonnet-4-5     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
 gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
-gemini-3.1-pro-preview Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
+gemini-3.1-pro-preview Input: $1.25   Output: $10.00   (Reasoning Engine + LLM Evaluator #3)
 grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)
 perplexity-sonar      Input: $1.00    Output: $1.00    (LLM Evaluator #5)
 claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
@@ -900,7 +920,7 @@ Priority order for development:
 ## 22. WHAT WE KEEP FROM PRIOR DESIGN DISCUSSIONS
 
 ### KEEP (locked in, no debate)
-- **Gemini as extractor, not evaluator** — Narrative-to-data only
+- **Gemini 3.1 Pro Preview as reasoning engine** — Extracts metrics, recommends locations, scores with justifications. Uses thinking_level: high + Google Search grounding. Opus always judges afterward.
 - **Progressive Confidence Architecture** — Every tier produces results
 - **Paragraph-to-metric linking** — P3, P10, P14 references in recommendations
 - **TypeScript interfaces** — `EvaluationContext`, `EvaluationResult`, `GeminiExtraction` as defined
@@ -912,12 +932,10 @@ Priority order for development:
 - **DNW severity 5 = instant elimination** — Hard wall, no exceptions
 - **Globe region as preference, not cage** — System can expand if needed
 
-### DON'T KEEP (rejected from Gemini's original proposal)
-- ~~Gemini as sole evaluator~~ — It proposed doing everything; we use it for extraction only
-- ~~"1 best country" output~~ — We evaluate 1,000+ metros; Gemini alone can't do that
-- ~~Gemini scoring cities~~ — That's the 5-LLM pipeline's job
+### DON'T KEEP (rejected from original proposals)
+- ~~Gemini as SOLE and FINAL evaluator~~ — Gemini is the first-pass reasoner; Opus/Cristiano always judges
 - ~~Skipping DNW/MH structured questionnaire~~ — Narrative misses things (blood thinners, pharmacy access)
-- ~~Claude Opus 4.5 (Gemini hallucinated this model name)~~ — We use actual current model IDs
+- ~~"Gemini is an EXTRACTOR, not an evaluator"~~ — **WRONG.** Gemini 3.1 Pro Preview extracts AND recommends AND scores at Discovery tier. It uses thinking_level: high for deep reasoning. The distinction is that Opus always judges afterward.
 
 ### ADAPTED (good idea, modified execution)
 - **Gemini's TypeScript interfaces** → Kept as starting point, extended with `CompletionTier`, `SessionCostRow`, etc.

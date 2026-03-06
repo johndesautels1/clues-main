@@ -2,6 +2,12 @@
  * CLUES Main - Core type definitions
  * All shared types for the evaluation pipeline, user data, and UI state.
  * Single source of truth — import from here.
+ *
+ * Updated for Gemini 3.1 Pro Preview reasoning engine:
+ * - GeminiMetricObject with fieldId, score, user_justification, data_justification, source
+ * - ThinkingStep for reasoning trace transparency
+ * - LocationMetrics for side-by-side comparison
+ * - Updated GeminiExtraction (V2) with metrics array and recommendations
  */
 
 // ─── Module Status ───────────────────────────────────────────────
@@ -41,7 +47,53 @@ export interface ParagraphicalInput {
   };
 }
 
-// ─── Gemini Extraction (matches api/paragraphical.ts output) ─────
+// ─── Gemini 3.1 Pro Preview: Metric Object ──────────────────────
+// The core data contract for per-field metrics with justifications.
+// Each metric is extracted from the user's paragraphs and scored
+// per-location with sourced data.
+export interface GeminiMetricObject {
+  id: string;                      // "M1", "M2", etc.
+  fieldId: string;                 // Machine-readable: "climate_01_humidity"
+  description: string;             // "Average annual humidity below 60%"
+  category: string;                // One of the 20 Human Existence Flow categories
+  source_paragraph: number;        // Which paragraph (1-27) triggered this metric
+  score: number;                   // 0-100 (relative to other locations)
+  user_justification: string;      // "Matches P4: User prioritized 'low petty crime'"
+  data_justification: string;      // "Cascais 2026 safety reports show 12% decrease"
+  source: string;                  // "Tavily: Portugal Interior Ministry Report 2026"
+  data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+  research_query: string;          // What Tavily should search for this metric
+  threshold?: {
+    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
+    value: number | [number, number];
+    unit: string;                  // "celsius", "percent", "USD", "index"
+  };
+}
+
+// ─── Gemini 3.1 Pro Preview: Location Metrics ───────────────────
+// A location (city, town, or neighborhood) with its scored metrics.
+// Used for side-by-side comparison views.
+export interface LocationMetrics {
+  location: string;
+  country: string;
+  location_type: 'city' | 'town' | 'neighborhood';
+  parent?: string;                 // Parent city (for towns) or parent town (for neighborhoods)
+  overall_score: number;           // 0-100
+  metrics: GeminiMetricObject[];   // All metrics scored for THIS location
+}
+
+// ─── Gemini 3.1 Pro Preview: Thinking Details ───────────────────
+// Gemini 3.1 Pro Preview's thinking_level: "high" returns a reasoning chain.
+// Each step shows how the model moved from the user's story
+// to a specific recommendation.
+export interface ThinkingStep {
+  step: number;
+  thought: string;
+  conclusion?: string;
+}
+
+// ─── Gemini Extraction (V2 — Gemini 3.1 Pro Preview) ────────────
+// Includes metrics array, location recommendations, and thinking details.
 export interface GeminiExtraction {
   // Profile
   demographic_signals: {
@@ -63,23 +115,8 @@ export interface GeminiExtraction {
     currency: string;
   };
 
-  // Metrics (100-250 numbered metrics extracted from paragraphs)
-  metrics: {
-    id: string;                  // M1, M2, ...
-    description: string;
-    category: string;            // one of 20 Human Existence Flow categories
-    source_paragraph: number;    // 1-27
-    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
-    research_query: string;      // what Tavily should search
-    user_justification: string;  // ties metric to specific paragraph text
-    data_justification: string;  // real-world data supporting this metric
-    source: string;              // data source (Tavily, Google Search, Gemini KB)
-    threshold?: {
-      operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
-      value: number | [number, number];
-      unit: string;
-    };
-  }[];
+  // Metrics (THE KEY OUTPUT — 100 to 250 numbered metrics)
+  metrics: GeminiMetricObject[];
 
   // Location Recommendations
   recommended_countries: {
@@ -88,49 +125,26 @@ export interface GeminiExtraction {
     reasoning: string;
     local_currency: string;
   }[];
-  recommended_cities: {
-    name: string;
-    country: string;
-    reasoning: string;
-  }[];
-  recommended_towns: {
-    name: string;
-    parent_city: string;
-    reasoning: string;
-  }[];
-  recommended_neighborhoods: {
-    name: string;
-    parent_town: string;
-    reasoning: string;
-  }[];
-
-  // Side-by-Side Location Metrics (compare same field across locations)
-  location_metrics: {
-    field_id: string;              // e.g. safety_index, connectivity_5G
-    label: string;                 // human-readable label
-    category: string;              // one of 20 categories
-    locations: {
-      name: string;
-      type: 'city' | 'town' | 'neighborhood';
-      score: number;               // 0.0-10.0
-      user_justification: string;
-      data_justification: string;
-      source: string;
-    }[];
-  }[];
+  recommended_cities: LocationMetrics[];
+  recommended_towns: LocationMetrics[];
+  recommended_neighborhoods: LocationMetrics[];
 
   // Paragraph Summaries
   paragraph_summaries: {
     id: number;
     key_themes: string[];
     extracted_preferences: string[];
-    metrics_derived: string[];   // e.g. ["M1", "M3", "M7"]
+    metrics_derived: string[];     // ["M1", "M2", "M5"]
   }[];
 
   // Signals for Downstream
   dnw_signals: string[];
   mh_signals: string[];
   tradeoff_signals: string[];
+
+  // Thinking Details (reasoning chain transparency)
+  thinking_details?: ThinkingStep[];
+
   module_relevance: Record<string, number>;
   globe_region_preference: string;
 }
@@ -146,13 +160,13 @@ export interface DemographicAnswers {
 export interface DNWAnswer {
   questionId: string;
   value: string;
-  severity: 1 | 2 | 3 | 4 | 5;  // Mild → Absolute Dealbreaker
+  severity: 1 | 2 | 3 | 4 | 5;  // Mild -> Absolute Dealbreaker
 }
 
 export interface MHAnswer {
   questionId: string;
   value: string;
-  importance: 1 | 2 | 3 | 4 | 5; // Nice to Have → Essential
+  importance: 1 | 2 | 3 | 4 | 5; // Nice to Have -> Essential
 }
 
 export type DNWAnswers = DNWAnswer[];
