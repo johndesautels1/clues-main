@@ -2,6 +2,12 @@
  * CLUES Main - Core type definitions
  * All shared types for the evaluation pipeline, user data, and UI state.
  * Single source of truth — import from here.
+ *
+ * Updated for Gemini 3.1 Pro Preview reasoning engine:
+ * - GeminiMetricObject with fieldId, score, user_justification, data_justification, source
+ * - ThinkingStep for reasoning trace transparency
+ * - LocationMetrics for side-by-side comparison
+ * - Updated GeminiExtraction (V2) with metrics array and recommendations
  */
 
 // ─── Module Status ───────────────────────────────────────────────
@@ -26,7 +32,7 @@ export interface GlobeSelection {
 
 // ─── Paragraphical ───────────────────────────────────────────────
 export interface ParagraphEntry {
-  id: number;              // 1-27
+  id: number;              // 1-30
   heading: string;         // "Who You Are"
   content: string;         // User's free-form text
   updatedAt?: string;      // ISO timestamp
@@ -41,8 +47,55 @@ export interface ParagraphicalInput {
   };
 }
 
-// ─── Gemini Extraction ───────────────────────────────────────────
+// ─── Gemini 3.1 Pro Preview: Metric Object ──────────────────────
+// The core data contract for per-field metrics with justifications.
+// Each metric is extracted from the user's paragraphs and scored
+// per-location with sourced data.
+export interface GeminiMetricObject {
+  id: string;                      // "M1", "M2", etc.
+  fieldId: string;                 // Machine-readable: "climate_01_humidity"
+  description: string;             // "Average annual humidity below 60%"
+  category: string;                // One of the 23 category modules (funnel order)
+  source_paragraph: number;        // Which paragraph (1-30) triggered this metric
+  score: number;                   // 0-100 (relative to other locations)
+  user_justification: string;      // "Matches P4: User prioritized 'low petty crime'"
+  data_justification: string;      // "Cascais 2026 safety reports show 12% decrease"
+  source: string;                  // "Tavily: Portugal Interior Ministry Report 2026"
+  data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+  research_query: string;          // What Tavily should search for this metric
+  threshold?: {
+    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
+    value: number | [number, number];
+    unit: string;                  // "celsius", "percent", "USD", "index"
+  };
+}
+
+// ─── Gemini 3.1 Pro Preview: Location Metrics ───────────────────
+// A location (city, town, or neighborhood) with its scored metrics.
+// Used for side-by-side comparison views.
+export interface LocationMetrics {
+  location: string;
+  country: string;
+  location_type: 'city' | 'town' | 'neighborhood';
+  parent?: string;                 // Parent city (for towns) or parent town (for neighborhoods)
+  overall_score: number;           // 0-100
+  metrics: GeminiMetricObject[];   // All metrics scored for THIS location
+}
+
+// ─── Gemini 3.1 Pro Preview: Thinking Details ───────────────────
+// Gemini 3.1 Pro Preview's thinking_level: "high" returns a reasoning chain.
+// Each step shows how the model moved from the user's story
+// to a specific recommendation.
+export interface ThinkingStep {
+  step: number;
+  thought: string;
+  conclusion?: string;
+}
+
+// ─── Gemini Extraction (V2 — Gemini 3.1 Pro Preview) ────────────
+// Includes metrics array, location recommendations, and thinking details.
 export interface GeminiExtraction {
+  // Profile
   demographic_signals: {
     age?: number;
     gender?: string;
@@ -52,21 +105,48 @@ export interface GeminiExtraction {
     employment_type?: string;
     income_bracket?: string;
   };
-  dnw_signals: string[];
-  mh_signals: string[];
-  module_relevance: Record<string, number>;
+  personality_profile: string;
+
+  // Currency
+  detected_currency: string;
   budget_range: {
     min: number;
     max: number;
     currency: string;
   };
-  globe_region_preference: string;
-  personality_profile: string;
+
+  // Metrics (THE KEY OUTPUT — 100 to 250 numbered metrics)
+  metrics: GeminiMetricObject[];
+
+  // Location Recommendations
+  recommended_countries: {
+    name: string;
+    iso_code: string;
+    reasoning: string;
+    local_currency: string;
+  }[];
+  recommended_cities: LocationMetrics[];
+  recommended_towns: LocationMetrics[];
+  recommended_neighborhoods: LocationMetrics[];
+
+  // Paragraph Summaries
   paragraph_summaries: {
     id: number;
     key_themes: string[];
     extracted_preferences: string[];
+    metrics_derived: string[];     // ["M1", "M2", "M5"]
   }[];
+
+  // Signals for Downstream
+  dnw_signals: string[];
+  mh_signals: string[];
+  tradeoff_signals: string[];
+
+  // Thinking Details (reasoning chain transparency)
+  thinking_details?: ThinkingStep[];
+
+  module_relevance: Record<string, number>;
+  globe_region_preference: string;
 }
 
 // ─── Questionnaire Sub-Sections ──────────────────────────────────
@@ -80,13 +160,13 @@ export interface DemographicAnswers {
 export interface DNWAnswer {
   questionId: string;
   value: string;
-  severity: 1 | 2 | 3 | 4 | 5;  // Mild → Absolute Dealbreaker
+  severity: 1 | 2 | 3 | 4 | 5;  // Mild -> Absolute Dealbreaker
 }
 
 export interface MHAnswer {
   questionId: string;
   value: string;
-  importance: 1 | 2 | 3 | 4 | 5; // Nice to Have → Essential
+  importance: 1 | 2 | 3 | 4 | 5; // Nice to Have -> Essential
 }
 
 export type DNWAnswers = DNWAnswer[];
@@ -139,7 +219,7 @@ export interface EvaluationResult {
 export type CostProvider =
   | 'claude-sonnet-4-5'
   | 'gpt-4o'
-  | 'gemini-3.1-pro'
+  | 'gemini-3.1-pro-preview'
   | 'grok-4'
   | 'perplexity-sonar'
   | 'claude-opus-4-5'

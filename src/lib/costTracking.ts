@@ -24,7 +24,7 @@ export const PROVIDER_RATES: Record<
 > = {
   'claude-sonnet-4-5':   { input: 3.00,  output: 15.00,  label: 'Claude Sonnet 4.5',       icon: '\u{1F3B5}' },
   'gpt-4o':              { input: 2.50,  output: 10.00,  label: 'GPT-4o',                  icon: '\u{1F916}' },
-  'gemini-3.1-pro':      { input: 1.25,  output: 10.00,  label: 'Gemini 3.1 Pro',           icon: '\u{1F48E}' },
+  'gemini-3.1-pro-preview': { input: 1.25, output: 10.00, label: 'Gemini 3.1 Pro Preview',  icon: '\u{1F48E}' },
   'grok-4':              { input: 3.00,  output: 15.00,  label: 'Grok 4',                   icon: '\u{1F680}' },
   'perplexity-sonar':    { input: 1.00,  output: 1.00,   label: 'Perplexity Sonar',         icon: '\u{1F50D}' },
   'claude-opus-4-5':     { input: 15.00, output: 75.00,  label: 'Claude Opus 4.5 (Judge)',   icon: '\u{1F9E0}' },
@@ -45,7 +45,7 @@ export const PROVIDER_GROUPS: { key: string; label: string; icon: string; provid
   { key: 'tavily',     label: 'Tavily (Research + Search)',  icon: '\u{1F50E}', providers: ['tavily'] },
   { key: 'sonnet',     label: 'Claude Sonnet 4.5',          icon: '\u{1F3B5}', providers: ['claude-sonnet-4-5'] },
   { key: 'gpt4o',      label: 'GPT-4o',                     icon: '\u{1F916}', providers: ['gpt-4o'] },
-  { key: 'gemini',     label: 'Gemini 3.1 Pro',             icon: '\u{1F48E}', providers: ['gemini-3.1-pro'] },
+  { key: 'gemini',     label: 'Gemini 3.1 Pro Preview',     icon: '\u{1F48E}', providers: ['gemini-3.1-pro-preview'] },
   { key: 'grok',       label: 'Grok 4',                     icon: '\u{1F680}', providers: ['grok-4'] },
   { key: 'perplexity', label: 'Perplexity Sonar',           icon: '\u{1F50D}', providers: ['perplexity-sonar'] },
   { key: 'opus',       label: 'Claude Opus 4.5 (Judge)',     icon: '\u{1F9E0}', providers: ['claude-opus-4-5'] },

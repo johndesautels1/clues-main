@@ -4,14 +4,14 @@
 > Every AI assistant and every new conversation MUST read this file FIRST before working on any Paragraphical,
 > Gemini extraction, evaluation pipeline, or report-related code.
 >
-> **Last Updated**: 2026-03-05
-> **Status**: ARCHITECTURAL DESIGN — Implementation pending
+> **Last Updated**: 2026-03-06
+> **Status**: CORE IMPLEMENTATION COMPLETE — Gemini 3.1 Pro Preview reasoning engine built
 
 ---
 
 ## 1. WHAT IS THE PARAGRAPHICAL?
 
-The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 24 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 24 paragraphs follow the **Human Existence Flow** (Survival to Soul).
+The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 30 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 30 paragraphs follow the **CLUES decision pipeline** across 6 phases: Profile (P1-P2), Dealbreakers (P3), Must Haves (P4), Trade-offs (P5), Module Deep Dives (P6-P28, one per category module with `moduleId`), and Vision (P29-P30).
 
 The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 20 Mini Modules. The Paragraphical alone must be powerful enough to:
 
@@ -42,30 +42,30 @@ CLUES Main does the same thing, except the metrics are **derived from the user's
 ## 3. PARAGRAPH-TO-METRIC CONVERSION (The Key Innovation)
 
 ### Step 1: User Writes Paragraphs
-24 paragraphs covering their entire life context (see paragraph definitions in `src/data/paragraphs.ts`).
+30 paragraphs covering their entire life context (see paragraph definitions in `src/data/paragraphs.ts`).
 
 ### Step 2: Gemini Converts Paragraphs to Numbered Metrics
 Every measurable, researchable preference becomes a discrete metric:
 
 ```
-From P3 ("Your Ideal Climate"):
+From P6 ("Climate & Weather"):
   "I hate humidity and want warm winters around 20-25C"
   -->
-  M1: Average annual humidity below 60% [Category: Climate] [Source: P3]
-  M2: Average winter temperature 20-25C [Category: Climate] [Source: P3]
-  M3: Absence of extreme weather events [Category: Climate] [Source: P3]
+  M1: Average annual humidity below 60% [Category: Climate] [Source: P6]
+  M2: Average winter temperature 20-25C [Category: Climate] [Source: P6]
+  M3: Absence of extreme weather events [Category: Climate] [Source: P6]
 
-From P8 ("Your Financial Picture"):
+From P11 ("Financial & Banking"):
   "I make about 8000 euros a month and want to live comfortably"
   -->
-  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P8]
-  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P8]
+  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P11]
+  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P11]
 
-From P11 ("Staying Connected"):
+From P14 ("Technology & Connectivity"):
   "I need at least 100mbps for my remote work"
   -->
-  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P11]
-  M29: Reliable coworking space availability [Category: Technology] [Source: P11]
+  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P14]
+  M29: Reliable coworking space availability [Category: Technology] [Source: P14]
 ```
 
 ### Target: 100-250 Metrics
@@ -73,7 +73,7 @@ From P11 ("Staying Connected"):
 - **Maximum**: ~250 metrics (from very detailed paragraphs)
 - Each metric is:
   - **Numbered** (M1, M2, M3...)
-  - **Categorized** (maps to one of 20 Human Existence Flow categories)
+  - **Categorized** (maps to one of 23 category modules (funnel order))
   - **Sourced to a paragraph** (P3, P10, P14)
   - **Researchable** (Tavily can find real data for it)
   - **Scorable** (can be measured as a number, boolean, or ranking)
@@ -111,7 +111,7 @@ If Gemini recommends Thailand:
 The Paragraphical is NOT a single Gemini call. It is a multi-step pipeline using parallel batch firing (same pattern as LifeScore to handle massive data and avoid timeouts).
 
 ### Call 1: EXTRACT (Gemini + Web Search)
-**Input**: 24 paragraphs + globe region
+**Input**: 30 paragraphs + globe region
 **Output**:
 - Numbered metrics (M1-Mn, minimum 100)
 - Demographic signals (age, gender, household, etc.)
@@ -228,7 +228,7 @@ Metrics roll up into category scores:
 - Climate Smart Score (average of M1, M2, M3...)
 - Safety Smart Score (average of M4, M5, M6...)
 - Financial Smart Score (average of M15, M16, M17...)
-- ...for all 20 categories
+- ...for all 23 categories
 
 ### Overall City Smart Score
 Category scores roll up into overall city score, weighted by user's implied priorities from paragraph content.
@@ -341,7 +341,7 @@ The Paragraphical must stand alone as a complete evaluation. Modules make it bet
 
 ## 13. GEMINI EXTRACTION OUTPUT (Revised Schema)
 
-The old `GeminiExtraction` schema is OBSOLETE. The new schema must include:
+The old `GeminiExtraction` schema is OBSOLETE. The current schema (Gemini 3.1 Pro Preview with thinking + search):
 
 ```typescript
 interface GeminiExtraction {
@@ -365,14 +365,17 @@ interface GeminiExtraction {
     currency: string;                // User's home currency
   };
 
-  // ─── Metrics (THE KEY OUTPUT) ───
+  // ─── Metrics (THE KEY OUTPUT — with dual justifications) ───
   metrics: {
     id: string;                      // "M1", "M2", etc.
     description: string;             // "Average winter temperature 20-25C"
-    category: string;                // "climate", "safety", "financial"...
-    source_paragraph: number;        // Which paragraph (1-24)
+    category: string;                // "climate", "safety", "financial"... (23 categories)
+    source_paragraph: number;        // Which paragraph (1-30)
     data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
     research_query: string;          // What Tavily should search
+    user_justification: string;      // "Matches P3: User said '...' which indicates..."
+    data_justification: string;      // "Real-world data: City X has... according to..."
+    source: string;                  // "Tavily: ...", "Google Search: ...", "Gemini KB: ..."
     threshold?: {
       operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
       value: number | [number, number];
@@ -406,6 +409,21 @@ interface GeminiExtraction {
     reasoning: string;
   }[];                               // Top 3 in winning town
 
+  // ─── Side-by-Side Location Metrics ───
+  location_metrics: {
+    field_id: string;                // "safety_index", "connectivity_5G", "healthcare_access"
+    label: string;                   // Human-readable label
+    category: string;                // One of 23 categories
+    locations: {
+      name: string;                  // City/town/neighborhood name
+      type: 'city' | 'town' | 'neighborhood';
+      score: number;                 // 0.0-10.0
+      user_justification: string;    // Tied to user's paragraph text
+      data_justification: string;    // Real-world data backing
+      source: string;                // Data source
+    }[];
+  }[];                               // Minimum 20 key fields, scored across all locations
+
   // ─── Paragraph Summaries ───
   paragraph_summaries: {
     id: number;
@@ -417,6 +435,29 @@ interface GeminiExtraction {
   // ─── Signals for Downstream ───
   dnw_signals: string[];             // Potential dealbreakers for DNW pre-fill
   mh_signals: string[];              // Potential must-haves for MH pre-fill
+  tradeoff_signals: string[];        // Priority trade-offs: "safety > cost of living"
+  module_relevance: Record<string, number>;  // Module ID → 0-1 relevance
+  globe_region_preference: string;   // User's geographic preference
+}
+
+// API Response includes reasoning trace:
+interface ParagraphicalResponse {
+  extraction: GeminiExtraction;
+  thinking_details: string[];        // Gemini 3.1 reasoning trace steps
+  metadata: {
+    model: 'gemini-3.1-pro-preview';
+    thinkingLevel: 'high';
+    searchGrounded: true;
+    inputTokens: number;
+    outputTokens: number;
+    costUsd: number;
+    durationMs: number;
+    paragraphsProcessed: number;
+    metricsExtracted: number;
+    locationMetricsCount: number;
+    thinkingSteps: number;
+    timestamp: string;
+  };
 }
 ```
 
@@ -476,7 +517,7 @@ Each metric in LifeScore follows the `MetricDefinition` interface:
 - `NN` = 2-digit number (`01`-`25`)
 - `name` = snake_case descriptor
 
-**CLUES Main Adaptation**: Our metric IDs will be `cl_NN_name` where NN auto-increments from M1-M250, and category maps to one of the 20 Human Existence Flow categories.
+**CLUES Main Adaptation**: Our metric IDs will be `cl_NN_name` where NN auto-increments from M1-M250, and category maps to one of the 23 category modules (funnel order).
 
 ### 15.2 DATA TYPES & SCORING CRITERIA
 
@@ -577,7 +618,7 @@ LifeScore's 6 categories with default weights:
 
 Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneur, Family, Libertarian, Investor).
 
-**CLUES Main Adaptation**: 20 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
+**CLUES Main Adaptation**: 23 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
 
 ### 15.7 FIVE-LLM PARALLEL EVALUATION
 
@@ -730,7 +771,7 @@ LifeScore's Gamma report template:
 
 **Visual elements**: Radial gauges, horizontal bar stats, process steps, comparison tables, city imagery overlays.
 
-**CLUES Main Adaptation**: Same template structure but expanded for 20 categories and 100-250 metrics. Country section added before city comparisons. Town/neighborhood sections after city winner.
+**CLUES Main Adaptation**: Same template structure but expanded for 23 categories and 100-250 metrics. Country section added before city comparisons. Town/neighborhood sections after city winner.
 
 ### 15.13 CRISTIANO VIDEO PIPELINE (2-Stage)
 
@@ -803,36 +844,63 @@ LifeScore's Gamma report template:
 | Opus Judge | ~$13.50 |
 | **Total per comparison** | **~$22** |
 
-**CLUES Main will be higher** due to 100-250 metrics across 20 categories + country/town/neighborhood layers.
+**CLUES Main will be higher** due to 100-250 metrics across 23 categories + country/town/neighborhood layers.
 
 ---
 
-## 16. WHAT THE OLD PROMPT GOT WRONG
+## 16. WHAT THE OLD PROMPT GOT WRONG (FIXED 2026-03-06)
 
-The current `api/paragraphical.ts` prompt says:
-- "You do NOT score cities or make recommendations" — **WRONG.** Gemini IS the first-pass recommender
-- `module_relevance` scoring 20 modules 0-1 — **IRRELEVANT.** We need location recommendations and metrics
-- Budget in USD only — **WRONG.** Global app, multi-currency
-- No metric extraction — **THE MOST IMPORTANT STEP IS MISSING**
-- No location output — **THE WHOLE POINT IS MISSING**
-- No data source strategy — **Every metric needs sourced, provable data**
-- "Gemini is an EXTRACTOR, not an evaluator" — **PARTIALLY WRONG.** Gemini extracts AND recommends AND scores at Discovery tier. The distinction is that Gemini alone is not the FINAL word — Opus/Cristiano always judges.
+> **ALL ISSUES BELOW HAVE BEEN FIXED.** The old `api/paragraphical.ts` has been completely
+> rewritten to use Gemini 3.1 Pro Preview with thinking_level: high, Google Search grounding,
+> and the full metric extraction + recommendation + scoring pipeline.
+
+~~The old prompt said "You do NOT score cities" — WRONG.~~ **FIXED**: Gemini now extracts, recommends, AND scores.
+~~`module_relevance` scoring 23 modules 0-1~~ **FIXED**: Replaced with 100-250 numbered metrics.
+~~Budget in USD only~~ **FIXED**: Currency detected from context, multi-currency support.
+~~No metric extraction~~ **FIXED**: 100-250 metrics extracted with fieldId, score, justifications, sources.
+~~No location output~~ **FIXED**: Country → City → Town → Neighborhood recommendations with per-location scoring.
+~~No data source strategy~~ **FIXED**: Every metric has user_justification + data_justification + source.
+~~"Gemini is an EXTRACTOR, not an evaluator"~~ **FIXED**: Gemini 3.1 Pro Preview is the reasoning engine. Opus judges afterward.
+
+### Gemini 3.1 Pro Preview Configuration (Implemented)
+```typescript
+generationConfig: {
+  thinking_level: 'high',             // Deep multi-step reasoning
+  include_thinking_details: true,     // Returns reasoning chain for transparency UI
+},
+tools: [{
+  google_search: {},                  // Native 2026 search grounding
+}],
+```
+
+### Frontend Components (Implemented)
+- `ReasoningTrace` — Displays thinking_details array from Gemini
+- `SideBySideMetricView` — Compares City vs Town vs Neighborhood metrics
+- `ReactiveJustification` — Click justification to highlight source Paragraph (P1-P30)
+- `ThinkingDetailsPanel` — Full transparency UI with model info, token stats, timeline
+- `FileUpload` — 100MB upload for medical records (P8), financial spreadsheets (P11)
 
 ---
 
-## 17. IMPLEMENTATION PRIORITY
+## 17. IMPLEMENTATION STATUS (Updated 2026-03-06)
 
-1. Study LifeScore codebase completely
-2. Rewrite `GeminiExtraction` TypeScript interfaces
-3. Rewrite Gemini prompt for Call 1 (extract metrics)
-4. Build Tavily research pipeline for metric data
-5. Write Gemini prompt for Call 2 (recommend + score with sourced data)
-6. Build Opus/Cristiano judge call for Paragraphical tier
-7. Build Smart Score engine
-8. Build report data structure
-9. Build parallel batch firing for large metric sets
-10. Update `api/paragraphical.ts` endpoint
-11. Update frontend to display metric comparisons + sources
+### COMPLETED
+1. ✅ Gemini 3.1 Pro Preview reasoning engine (`api/paragraphical.ts`)
+2. ✅ GeminiExtraction V2 types with metrics array and justifications
+3. ✅ File upload endpoint (`api/upload.ts`) for 100MB Gemini ingestion
+4. ✅ ReasoningTrace, SideBySideMetricView, ReactiveJustification components
+5. ✅ ThinkingDetailsPanel transparency UI
+6. ✅ FileUpload component
+7. ✅ Tier engine updated with `gemini-3.1-pro-preview` model references
+8. ✅ Cost tracking updated for new provider
+
+### REMAINING
+9. Build Tavily research pipeline for metric data
+10. Build Opus/Cristiano judge call for Paragraphical tier
+11. Build Smart Score engine
+12. Build report data structure
+13. Build parallel batch firing for large metric sets
+14. Wire Results components into /results route
 
 ---
 

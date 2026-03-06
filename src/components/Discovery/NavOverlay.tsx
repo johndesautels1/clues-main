@@ -55,7 +55,7 @@ export function NavOverlay({ visible, onClose, current, answers, onNavigate }: N
               Your Discovery Map
             </h2>
             <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: 13, color: C.textMuted, marginTop: 6 }}>
-              {completedCount} of 24 sections completed
+              {completedCount} of {SECTIONS.length} sections completed
             </p>
           </div>
           <button

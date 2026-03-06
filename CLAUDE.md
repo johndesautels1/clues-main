@@ -71,3 +71,12 @@ These rules are **non-negotiable**. Every developer and every AI session must fo
 - Update the build reference checklist after each commit
 - Supabase is the heart of the backend — `supabase` export is always a valid `SupabaseClient`, never null
 - No guessing — verify actual errors before proposing fixes
+
+## Data Integrity Rules (ZERO TOLERANCE)
+- **READ the actual codebase before writing ANY code or documentation.** Do not assume structure from memory, blueprints, or prior context. The source files are the ONLY source of truth.
+- **Never label anything "legacy" or "backward compatible" to avoid fixing it.** If something is wrong, fix it. If something is stale, remove it. There is no "legacy" excuse.
+- **Never claim work is complete without a full grep verification.** Every change must be followed by a codebase-wide search confirming zero remaining stale references.
+- **The Gemini model is `gemini-3.1-pro-preview`.** Not `gemini-3.1-pro`. Not `Gemini 3.1`. The full name is always "Gemini 3.1 Pro Preview". There is exactly ONE Gemini model ID in this codebase and it is `gemini-3.1-pro-preview`. Any deviation is a bug.
+- **The Paragraphical has 27 paragraphs (P1-P27) in 6 phases.** Not 24. See `src/data/paragraphs.ts` for the canonical structure. Any deviation is a bug.
+- **Gemini is the REASONING ENGINE, not an extractor.** It extracts, recommends, AND scores. Opus/Cristiano judges afterward. Any documentation saying otherwise is wrong and must be corrected immediately.
+- **Audit failures are treated as lies.** If an AI agent marks something as correct when it is not, or labels stale data as "legacy" to avoid fixing it, that is a trust violation. The project owner runs independent auditors behind every AI session.

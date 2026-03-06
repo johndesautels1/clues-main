@@ -109,11 +109,34 @@ export function useOliviaTutor(paragraphId: number, text: string): TutorState & 
     setPendingCount(0);
   }, [paragraphId, getDismissed]);
 
-  // Reset interjection when paragraph changes
+  // Track which paragraphs have already shown a welcome message
+  const welcomeShownRef = useRef<Set<number>>(new Set());
+
+  // Reset interjection when paragraph changes + fire welcome message
   useEffect(() => {
     setInterjection(null);
     lastAnalyzedWordCountRef.current = 0;
-  }, [paragraphId]);
+
+    // Fire a welcome interjection if this paragraph hasn't shown one yet
+    // and the user hasn't started writing much
+    const wordCount = countWords(text);
+    if (wordCount < MIN_WORDS && !welcomeShownRef.current.has(paragraphId)) {
+      const targets = getTargetsForParagraph(paragraphId);
+      if (targets?.welcomeMessage) {
+        welcomeShownRef.current.add(paragraphId);
+        // Small delay so the UI transition completes first
+        const timer = setTimeout(() => {
+          setInterjection({
+            paragraphId,
+            targetId: '__welcome__',
+            targetLabel: targets.heading,
+            message: targets.welcomeMessage!,
+          });
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [paragraphId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Main analysis — debounced
   useEffect(() => {

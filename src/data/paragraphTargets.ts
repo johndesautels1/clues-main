@@ -28,6 +28,8 @@ export interface ParagraphTargets {
   heading: string;
   coverageTargets: CoverageTarget[];
   templateInterjections: Record<string, string>;
+  /** Olivia's auto-greeting when user first lands on this paragraph */
+  welcomeMessage?: string;
 }
 
 export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
@@ -40,13 +42,16 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'gender', label: 'Gender', keywords: ['male', 'female', 'man', 'woman', 'non-binary', 'he', 'she', 'they'] },
       { id: 'nationality', label: 'Nationality/citizenship', keywords: ['passport', 'citizen', 'nationality', 'american', 'british', 'canadian', 'australian', 'european', 'dual'] },
       { id: 'household', label: 'Household composition', keywords: ['single', 'married', 'partner', 'wife', 'husband', 'kids', 'children', 'family', 'alone', 'couple', 'solo', 'daughter', 'son'] },
-      { id: 'languages', label: 'Languages spoken', keywords: ['speak', 'language', 'fluent', 'english', 'spanish', 'french', 'german', 'bilingual', 'native', 'learning'] },
+      { id: 'partner_details', label: 'Partner details', keywords: ["partner's", "wife's", "husband's", "spouse's", 'my wife', 'my husband', 'my partner', 'filipina', 'her nationality', 'his nationality', 'their age'] },
+      { id: 'languages', label: 'Languages spoken', keywords: ['speak', 'language', 'fluent', 'english', 'spanish', 'french', 'german', 'bilingual', 'native', 'learning', 'tagalog', 'mandarin'] },
       { id: 'employment_type', label: 'Employment type', keywords: ['remote', 'freelance', 'business owner', 'retired', 'student', 'self-employed', 'employee', 'contractor', 'entrepreneur'] },
     ],
+    welcomeMessage: "Let's start with the basics! Tell me who you are — your age, nationality, household, and how you work. If you have a partner, include their details too. This is the foundation for every recommendation I'll help you build.",
     templateInterjections: {
       age: "Great start! Your age bracket matters a lot — healthcare, visa options, and even nightlife vary hugely by age. Mind sharing roughly how old you are?",
       nationality: "Love the detail! What passport(s) do you hold? It's the single biggest factor for visa pathways and where you can actually move.",
       household: "Nice picture of who you are! Are you moving solo, with a partner, or with family? It changes recommendations dramatically.",
+      partner_details: "If you have a partner, tell me about them too — their age, nationality, and languages. Their needs could open or close visa doors.",
       employment_type: "What's your employment type — remote worker, freelancer, business owner, retired? It affects which visas you qualify for.",
     },
   },
@@ -60,6 +65,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'push_factors', label: 'Push factors', keywords: ['hate', 'tired of', 'frustrated', 'expensive', 'crime', 'traffic', 'weather', 'leaving because', 'escape'] },
       { id: 'timeline', label: 'Timeline', keywords: ['soon', 'asap', 'next year', 'months', 'ready', 'planning', 'years', 'timeline', 'when', 'urgent'] },
     ],
+    welcomeMessage: "Now paint the picture of your life right now — where you live, what you earn, what's pushing you to move, and when you want to make it happen.",
     templateInterjections: {
       income: "Where you live now is clear — what about your monthly income or budget? Even a rough range helps us match cities to your financial reality.",
       timeline: "Quick thought — what's your timeline? Moving next month versus next year changes which visa pathways are realistic.",
@@ -78,11 +84,17 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'healthcare_dnw', label: 'Healthcare dealbreakers', keywords: ['no hospital', 'no doctor', 'no specialist', 'no pharmacy', 'no healthcare', 'medical'] },
       { id: 'region_dnw', label: 'Excluded regions/countries', keywords: ['refuse', 'never', 'not', 'exclude', 'avoid', 'no way', 'except', 'only'] },
       { id: 'cultural_dnw', label: 'Cultural dealbreakers', keywords: ['intolerant', 'censorship', 'oppressive', 'authoritarian', 'discrimination', 'homophobic', 'racist'] },
+      { id: 'bureaucracy_dnw', label: 'Bureaucracy dealbreakers', keywords: ['bureaucracy', 'bureaucratic', 'red tape', 'paperwork', 'administrative', 'slow process', 'inefficient'] },
+      { id: 'political_dnw', label: 'Political ideology', keywords: ['right wing', 'right-wing', 'fascist', 'far right', 'far-right', 'left', 'center-left', 'progressive', 'conservative', 'nationalist'] },
+      { id: 'past_failed', label: 'Places that did not work', keywords: ['tried', 'lived in', 'visited', 'rejected', 'hated', 'did not work', 'not the right fit', 'left because', 'moved from'] },
     ],
+    welcomeMessage: "This is your elimination round. What are your absolute dealbreakers — climate, safety, legal, cultural, political, bureaucracy? Have you tried living somewhere that failed? Anything you write here becomes a hard wall.",
     templateInterjections: {
       climate_dnw: "What climate would be completely unacceptable? Extreme humidity, freezing winters, desert heat? These hard walls eliminate cities before scoring even begins.",
       safety_dnw: "Any safety-related dealbreakers? Certain crime levels, political instability, or conflict zones you'd never consider?",
       region_dnw: "Are there specific countries or regions you absolutely refuse to consider? Even if they'd otherwise score well?",
+      bureaucracy_dnw: "How do you feel about bureaucracy? Some countries are notoriously slow with paperwork and processes — is that a dealbreaker?",
+      past_failed: "Have you tried living somewhere that didn't work out? That experience is incredibly valuable for understanding what to avoid.",
     },
   },
 
@@ -98,6 +110,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'visa_mh', label: 'Visa requirement', keywords: ['visa', 'residency', 'permit', 'legal', 'pathway', 'digital nomad', 'work permit'] },
       { id: 'safety_mh', label: 'Safety requirement', keywords: ['safe', 'safety', 'low crime', 'secure', 'stable', 'peaceful'] },
     ],
+    welcomeMessage: "What absolutely must be there? Internet speed, hospital access, visa pathways — these are your non-negotiable requirements that every recommended city must meet.",
     templateInterjections: {
       internet_mh: "What's the minimum internet speed your life requires? If you work remotely, this is a hard filter.",
       medical_mh: "Any medical must-haves? Specific specialists, medications, or hospital standards you absolutely need access to?",
@@ -115,7 +128,9 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'convenience_vs_charm', label: 'Convenience vs charm', keywords: ['modern', 'convenient', 'character', 'charm', 'old', 'historic', 'infrastructure'] },
       { id: 'language_barrier', label: 'Language barrier tolerance', keywords: ['language', 'learn', 'barrier', 'speak', 'english', 'local language', 'immerse'] },
       { id: 'weather_vs_other', label: 'Weather vs other priorities', keywords: ['weather', 'climate', 'sacrifice', 'tolerate', 'accept', 'give up', 'trade'] },
+      { id: 'bureaucracy_tolerance', label: 'Bureaucracy tolerance', keywords: ['bureaucracy', 'bureaucratic', 'red tape', 'paperwork', 'administrative', 'efficient', 'slow process', 'detest', 'HOA'] },
     ],
+    welcomeMessage: "Life is trade-offs. Would you pay more for safety? Accept worse weather for a better social scene? How much bureaucracy can you tolerate? Tell me what you'd sacrifice and what you'd never give up.",
     templateInterjections: {
       cost_vs_quality: "Would you pay significantly more rent for a safer, better-located neighborhood? How you answer trade-offs tells us how to weight your priorities.",
       language_barrier: "How much of a language barrier can you tolerate? Some amazing cities require learning a new language — is that a plus or a minus for you?",
@@ -134,6 +149,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'disasters', label: 'Natural disaster tolerance', keywords: ['earthquake', 'hurricane', 'tornado', 'flood', 'typhoon', 'wildfire', 'disaster', 'storm'] },
       { id: 'air_quality', label: 'Air quality', keywords: ['air quality', 'pollution', 'smog', 'clean air', 'asthma', 'allergies'] },
     ],
+    welcomeMessage: "Let's talk weather! Temperature, humidity, seasons, sunshine — be specific. The more detail you give me, the better I can match you to your perfect climate.",
     templateInterjections: {
       humidity: "Love how specific you are about temperature! Are you more of a dry-heat person or do you handle humidity okay? That single factor eliminates about 40% of cities.",
       disasters: "Have you thought about natural disaster risk? Some dream-weather cities sit in earthquake or hurricane zones.",
@@ -147,8 +163,11 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'political', label: 'Political stability', keywords: ['political', 'government', 'corrupt', 'stable', 'democracy', 'protest', 'coup', 'conflict'] },
       { id: 'emergency', label: 'Emergency services', keywords: ['police', 'ambulance', 'hospital', 'fire', 'emergency', '911', 'response time'] },
       { id: 'personal_safety', label: 'Personal safety specifics', keywords: ['walk at night', 'solo', 'woman', 'lgbtq', 'minority', 'discrimination', 'harass'] },
+      { id: 'gun_laws', label: 'Gun laws', keywords: ['gun', 'guns', 'firearm', 'weapon', 'armed', 'gun-free', 'gun control', 'concealed carry', 'open carry'] },
+      { id: 'political_ideology', label: 'Political ideology preference', keywords: ['progressive', 'liberal', 'left', 'center-left', 'conservative', 'right wing', 'moderate', 'social democrat', 'multicultural'] },
       { id: 'neighborhood', label: 'Neighborhood feel', keywords: ['neighborhood', 'street', 'walk', 'night', 'comfortable', 'vibe', 'friendly', 'quiet'] },
     ],
+    welcomeMessage: "How safe do you need to feel? Think about crime, political ideology, gun laws, walking at night, and personal safety concerns that matter to you specifically.",
     templateInterjections: {
       political: "What about political stability? Some cities feel safe day-to-day but have underlying political instability affecting long-term planning.",
       personal_safety: "Any specific personal safety concerns? Walking alone at night, LGBTQ+ friendliness, or being a visible minority vary enormously between cities.",
@@ -158,12 +177,14 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
     paragraphId: 8,
     heading: 'Healthcare & Medical',
     coverageTargets: [
-      { id: 'conditions', label: 'Medical conditions', keywords: ['condition', 'chronic', 'diabetes', 'asthma', 'allergy', 'disability', 'mental health', 'anxiety', 'depression'] },
-      { id: 'medication', label: 'Medication needs', keywords: ['medication', 'medicine', 'prescription', 'drug', 'pharmacy', 'refill', 'blood thinner', 'insulin'] },
-      { id: 'specialists', label: 'Specialist access', keywords: ['specialist', 'doctor', 'surgeon', 'therapist', 'psychiatrist', 'dentist', 'cardiologist'] },
-      { id: 'insurance', label: 'Healthcare system/insurance', keywords: ['insurance', 'healthcare', 'public health', 'private', 'cost', 'coverage', 'universal'] },
+      { id: 'conditions', label: 'Medical conditions', keywords: ['condition', 'chronic', 'diabetes', 'asthma', 'allergy', 'disability', 'mental health', 'anxiety', 'depression', 'bowel', 'fistula', 'thyroid', 'cancer', 'heart valve', 'A-fib', 'pacemaker', 'arrhythmia'] },
+      { id: 'medication', label: 'Medication needs', keywords: ['medication', 'medicine', 'prescription', 'drug', 'pharmacy', 'refill', 'blood thinner', 'insulin', 'Ozempic', 'GLP-1', 'specific medication'] },
+      { id: 'specialists', label: 'Specialist access', keywords: ['specialist', 'doctor', 'surgeon', 'therapist', 'psychiatrist', 'dentist', 'cardiologist', 'teaching hospital', 'multidisciplinary', 'world class', 'top tier'] },
+      { id: 'partner_health', label: 'Partner/family health needs', keywords: ["wife's", "partner's", "husband's", "spouse's", 'their health', 'heart', 'pacemaker', 'their condition', 'both of us', 'my wife has', 'my husband has'] },
+      { id: 'insurance', label: 'Healthcare system/insurance', keywords: ['insurance', 'healthcare', 'public health', 'private', 'cost', 'coverage', 'universal', 'affordable care', 'public system'] },
       { id: 'english_doctors', label: 'English-speaking doctors', keywords: ['english', 'speak english', 'communicate', 'understand', 'english-speaking'] },
     ],
+    welcomeMessage: "Healthcare can make or break a relocation. Tell me about any medical conditions, medications, specialist needs, and how you'd want to handle insurance.",
     templateInterjections: {
       medication: "Do you take any regular medications? Pharmacy access varies wildly — some medications that are over-the-counter at home need prescriptions abroad.",
       insurance: "How would you handle health insurance abroad? Some countries have excellent public systems, others require expensive private coverage.",
@@ -177,11 +198,20 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'size', label: 'Size requirements', keywords: ['bedroom', 'bathroom', 'sqm', 'sqft', 'space', 'big', 'small', 'spacious'] },
       { id: 'rent_buy', label: 'Rent vs buy', keywords: ['rent', 'buy', 'purchase', 'own', 'lease', 'mortgage', 'invest'] },
       { id: 'budget', label: 'Housing budget', keywords: ['budget', 'afford', 'cost', 'price', 'per month', 'rent for', 'spend'] },
-      { id: 'neighborhood_char', label: 'Neighborhood character', keywords: ['urban', 'suburban', 'rural', 'quiet', 'lively', 'downtown', 'central', 'walkable'] },
+      { id: 'neighborhood_char', label: 'Neighborhood character', keywords: ['urban', 'suburban', 'rural', 'quiet', 'lively', 'downtown', 'central', 'walkable', 'eclectic', 'gentrified'] },
+      { id: 'foreign_ownership', label: 'Foreign property ownership', keywords: ['foreign ownership', 'foreigners can buy', 'US citizens', 'property rights', 'freehold', 'leasehold', 'allow', 'own property'] },
+      { id: 'accessibility', label: 'Disability/accessibility', keywords: ['wheelchair', 'accessible', 'disability', 'mobility', 'elevator', 'ramp', 'elderly', 'disabilities'] },
+      { id: 'sound_quality', label: 'Sound insulation', keywords: ['noise', 'sound', 'soundproof', 'quiet building', 'music', 'neighbors', 'insulation', 'acoustic', 'sound resistant'] },
+      { id: 'rental_income', label: 'Short-term rental potential', keywords: ['rent out', 'rental income', 'short-term rental', 'Airbnb', 'investment', 'when traveling', 'part time rental'] },
+      { id: 'natural_light', label: 'Natural light/views', keywords: ['natural light', 'bright', 'light', 'view', 'overlooking', 'riverfront', 'city view', 'open floorplan'] },
     ],
+    welcomeMessage: "Describe your ideal home — apartment or house, budget, neighborhood vibe. Tell me about foreign ownership needs, accessibility, sound insulation, and whether you'd want rental income when traveling.",
     templateInterjections: {
       rent_buy: "Renting or buying? It's a huge factor — some countries restrict foreign ownership entirely.",
       budget: "What's your housing budget? Knowing a range lets us find cities where your dream home is actually affordable.",
+      foreign_ownership: "Can foreigners buy property where you want to live? Some countries restrict this entirely for non-citizens.",
+      accessibility: "Do you or visiting family members need wheelchair accessibility or disability-friendly buildings?",
+      rental_income: "Would you want to rent out the property short-term when traveling? Some cities heavily regulate Airbnb.",
     },
   },
 
@@ -195,6 +225,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'residency', label: 'Residency pathway', keywords: ['residency', 'permanent', 'citizenship', 'naturalize', 'path', 'timeline', 'temporary'] },
       { id: 'rule_of_law', label: 'Rule of law', keywords: ['rule of law', 'judicial', 'contract', 'enforcement', 'legal system', 'courts', 'corruption'] },
     ],
+    welcomeMessage: "Visas and legal pathways are the gatekeepers. What passport do you hold, what visa type interests you, and how important is rule of law to your long-term plans?",
     templateInterjections: {
       visa_type: "What type of visa pathway interests you? Digital nomad, retirement, investor — each opens different countries.",
       rule_of_law: "How important is rule of law? Contract enforcement, judicial independence, and corruption levels vary dramatically.",
@@ -209,6 +240,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'taxes', label: 'Tax sensitivity', keywords: ['tax', 'income tax', 'capital gains', 'property tax', 'tax-free', 'low tax', 'effective rate'] },
       { id: 'banking', label: 'Banking needs', keywords: ['bank', 'banking', 'transfer', 'crypto', 'international', 'account', 'currency'] },
     ],
+    welcomeMessage: "Money matters! Tell me about your income, cost-of-living expectations, tax sensitivity, and banking needs. Some countries won't tax your foreign income at all.",
     templateInterjections: {
       taxes: "Tax structure can make or break a budget. Some countries won't tax your foreign income at all, others take 30%+. Any thoughts on your tax tolerance?",
       banking: "How important is banking access for foreigners? Some countries make it very difficult to open an account.",
@@ -224,6 +256,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'internet_freedom', label: 'Internet freedom', keywords: ['internet', 'censorship', 'vpn', 'blocked', 'surveillance', 'privacy', 'firewall'] },
       { id: 'lifestyle', label: 'Lifestyle freedom', keywords: ['lifestyle', 'gambling', 'alternative', 'freedom', 'choice', 'autonomy', 'liberty'] },
     ],
+    welcomeMessage: "Freedom looks different everywhere. Tell me about your expectations for speech, internet, LGBTQ+ rights, substance laws, and personal lifestyle freedom.",
     templateInterjections: {
       substances: "How do you feel about substance laws? Cannabis legality, alcohol availability — these vary wildly and surprise many expats.",
       internet_freedom: "How important is unrestricted internet? Some countries block VPNs, social media, or news sites.",
@@ -239,7 +272,10 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'coworking', label: 'Coworking needs', keywords: ['coworking', 'co-working', 'workspace', 'office', 'cafe', 'desk', 'nomad'] },
       { id: 'business_reg', label: 'Business registration', keywords: ['register', 'llc', 'company', 'incorporate', 'business', 'corporate tax', 'license'] },
       { id: 'networking', label: 'Professional networking', keywords: ['network', 'community', 'meetup', 'conference', 'professional', 'ecosystem'] },
+      { id: 'existing_business', label: 'Existing businesses', keywords: ['existing business', 'brokerage', 'tech company', 'London', 'UK company', 'US company', 'international business', 'multiple countries', 'already have'] },
+      { id: 'ai_tech_scene', label: 'AI/tech ecosystem', keywords: ['AI', 'artificial intelligence', 'tech scene', 'startup ecosystem', 'tech hub', 'digital nomad scene', 'innovation'] },
     ],
+    welcomeMessage: "How do you work and earn? Do you have existing businesses in other countries? Tell me about your professional needs, the AI/tech ecosystem, and business registration plans.",
     templateInterjections: {
       coworking: "Do you need coworking spaces or good cafe-working culture? Some cities have incredible nomad infrastructure; others have nothing.",
       business_reg: "Planning to register a business locally? Corporate tax and regulations vary enormously — some cities make it trivial, others are bureaucratic nightmares.",
@@ -254,6 +290,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'power_grid', label: 'Power reliability', keywords: ['power', 'outage', 'blackout', 'reliable', 'electric', 'grid', 'backup', 'generator'] },
       { id: 'cloud_services', label: 'Cloud/service access', keywords: ['aws', 'cloud', 'google', 'vpn', 'latency', 'service', 'platform'] },
     ],
+    welcomeMessage: "In a connected world, tech infrastructure is critical. What internet speeds do you need, how important is 5G, and can you tolerate power outages?",
     templateInterjections: {
       internet_speed: "What internet speed do you actually need? Download AND upload? If you do video calls, 50+ Mbps minimum.",
       power_grid: "How reliable does the power grid need to be? Some tropical paradises have daily outages.",
@@ -266,9 +303,13 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'car', label: 'Car ownership', keywords: ['car', 'drive', 'driving', 'parking', 'vehicle', 'motorcycle', 'scooter'] },
       { id: 'transit', label: 'Public transit', keywords: ['transit', 'bus', 'metro', 'subway', 'train', 'tram', 'public transport'] },
       { id: 'walkability', label: 'Walkability', keywords: ['walk', 'walkable', 'pedestrian', 'foot', 'walkability', 'sidewalk'] },
+      { id: 'rail_network', label: 'Rail/train network', keywords: ['train', 'rail', 'high-speed', 'TGV', 'Eurostar', 'intercity', 'rail network', 'rail pass', 'explore Europe', 'regional travel'] },
       { id: 'airport', label: 'Airport proximity', keywords: ['airport', 'fly', 'flight', 'international', 'travel', 'airline', 'hub', 'direct'] },
+      { id: 'flight_routes', label: 'Specific flight routes', keywords: ['direct to', 'flights to', 'Tampa', 'Denver', 'Japan', 'Korea', 'Philippines', 'Eastern Europe', 'United States', 'nonstop', 'specific destinations'] },
       { id: 'rideshare', label: 'Ride-sharing', keywords: ['uber', 'lyft', 'grab', 'taxi', 'rideshare', 'cab'] },
+      { id: 'ebike', label: 'E-bike/cycling', keywords: ['e-bike', 'ebike', 'electric bike', 'cycling', 'bike lane', 'bicycle', 'biking'] },
     ],
+    welcomeMessage: "How do you want to get around? Car, public transit, walking, e-biking? How important is a rail network for regional travel? List the specific flight routes you need.",
     templateInterjections: {
       airport: "How often do you travel internationally? Airport proximity matters — a walkable city 3 hours from an airport changes the equation.",
       car: "Car or car-free? It's a major lifestyle and cost difference. Some cities are impossible without one.",
@@ -281,8 +322,11 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'kids_ed', label: 'Children\'s education', keywords: ['school', 'kids', 'children', 'international school', 'ib', 'curriculum', 'preschool'] },
       { id: 'personal_ed', label: 'Personal education', keywords: ['learn', 'study', 'degree', 'course', 'university', 'certification'] },
       { id: 'language_learning', label: 'Language learning', keywords: ['language', 'spanish', 'french', 'portuguese', 'mandarin', 'immersion', 'class'] },
+      { id: 'intellectual_env', label: 'University/intellectual atmosphere', keywords: ['university', 'educated', 'academic', 'intellectual', 'college town', 'research', 'well-read', 'advanced degrees', 'university atmosphere'] },
+      { id: 'ai_education', label: 'AI/tech education presence', keywords: ['AI', 'artificial intelligence', 'tech education', 'computer science', 'AI research', 'tech university'] },
       { id: 'no_ed_needs', label: 'No education needs', keywords: ['no kids', 'no children', 'not applicable', 'not a priority', 'doesn\'t apply'] },
     ],
+    welcomeMessage: "Education needs — for you or your children. How important is living near a university or in an intellectually stimulating environment? Is the local AI/tech education scene important?",
     templateInterjections: {
       kids_ed: "Do your kids need schooling? International school quality varies enormously — costs range from free to $30,000/year.",
       language_learning: "Interested in learning the local language? Cities with strong language schools make integration much easier.",
@@ -298,8 +342,10 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'partner_needs', label: 'Partner\'s needs', keywords: ['partner', 'spouse', 'their job', 'their career', 'they need', 'they want'] },
       { id: 'kids_ages', label: 'Children\'s ages/needs', keywords: ['baby', 'toddler', 'teenager', 'teen', 'school age', 'years old', 'daycare'] },
       { id: 'family_visits', label: 'Visiting family back home', keywords: ['visit', 'family', 'parents', 'fly back', 'home', 'times a year'] },
+      { id: 'eldercare', label: 'Elderly parent care/visits', keywords: ['elderly', 'parent', 'mother', 'father', 'wheelchair', 'stroke', 'aging', 'care', 'disability', 'accessible', 'caregiver', 'long-term care'] },
       { id: 'solo', label: 'Solo/no dependents', keywords: ['solo', 'alone', 'no kids', 'no dependents', 'just me', 'single'] },
     ],
+    welcomeMessage: "Who's coming with you? Tell me about everyone's needs. Do you have elderly parents who may visit or need care? How important is accessibility and disability-friendly infrastructure?",
     templateInterjections: {
       partner_needs: "What does your partner need from the new city? Their career needs or dealbreakers might be different from yours.",
       family_visits: "How often would you fly back to visit family? That affects both location choice and airport access needs.",
@@ -313,7 +359,10 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'expat', label: 'Expat community', keywords: ['expat', 'expatriate', 'foreigner', 'international', 'community', 'english-speaking'] },
       { id: 'social_clubs', label: 'Social activities', keywords: ['meetup', 'club', 'group', 'social', 'hobby', 'event', 'volunteer'] },
       { id: 'integration', label: 'Integration with locals', keywords: ['integrate', 'local', 'friends', 'connect', 'fit in', 'outsider', 'belong'] },
+      { id: 'cultural_diaspora', label: 'Cultural/ethnic community', keywords: ['Asian', 'Filipino', 'Filipina', 'pro-Asian', 'Asian presence', 'Asian community', 'Latino', 'African', 'diaspora', 'ethnic community', 'cultural affinity'] },
+      { id: 'hobby_groups', label: 'Hobby/interest groups', keywords: ['writers', 'book club', 'writing group', 'meetup group', 'hobby', 'botanical', 'photography', 'start a group'] },
     ],
+    welcomeMessage: "Social life is what makes a place feel like home. Tell me about community needs, cultural affinity, hobby groups, and whether you want to integrate with locals or find a specific diaspora.",
     templateInterjections: {
       expat: "How important is an expat community? Some cities have thousands of English-speaking expats with weekly meetups; others you'll be the only foreigner.",
       integration: "Do you want to integrate with locals or stick with an expat bubble? Both are valid — they just suit different cities.",
@@ -330,6 +379,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'grocery', label: 'Grocery expectations', keywords: ['grocery', 'supermarket', 'market', 'organic', 'farmers market', 'fresh', 'produce'] },
       { id: 'food_budget', label: 'Food budget', keywords: ['budget', 'spend', 'cost', 'expensive', 'cheap', 'monthly', 'per month'] },
     ],
+    welcomeMessage: "Food is culture! Tell me about dietary needs, favorite cuisines, grocery expectations, and what you'd want to spend on food monthly.",
     templateInterjections: {
       dietary: "Do you have dietary restrictions? Vegan in Tokyo is very different from vegan in Berlin — availability varies wildly.",
       food_budget: "What do you expect to spend on food monthly? Costs can be 2-3x different between cities that otherwise seem similar.",
@@ -345,6 +395,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'leagues', label: 'Sports leagues/clubs', keywords: ['league', 'club', 'team', 'play', 'recreational', 'join'] },
       { id: 'not_priority', label: 'Not a priority', keywords: ['not a priority', 'not important', 'don\'t exercise', 'not active'] },
     ],
+    welcomeMessage: "Stay active abroad! Tell me about gym needs, specific sports you play, outdoor fitness, or if fitness isn't a priority — that's fine too.",
     templateInterjections: {
       sports: "What specific sports do you do? Not every city has good surfing, padel courts, or climbing gyms.",
       outdoor_fitness: "Do you exercise outdoors? Running paths, cycling lanes — some cities are built for it and others aren't.",
@@ -359,6 +410,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'water_sports', label: 'Water activities', keywords: ['surf', 'dive', 'snorkel', 'kayak', 'sail', 'swim', 'paddle', 'kite'] },
       { id: 'green_space', label: 'Urban green space', keywords: ['park', 'garden', 'green', 'tree', 'nature', 'botanical'] },
     ],
+    welcomeMessage: "Mountains, beaches, forests, or all three? How close does nature need to be — walkable daily or weekend trips? Paint your outdoor picture.",
     templateInterjections: {
       landscape: "Mountains or beaches? Or both? This is often the single biggest lifestyle factor. Some cities let you surf in the morning and ski in the afternoon.",
       proximity: "How close does nature need to be? Walkable daily parks vs. weekend drive to mountains are very different requirements.",
@@ -375,6 +427,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'theater', label: 'Theater/performing arts', keywords: ['theater', 'theatre', 'opera', 'ballet', 'dance', 'performance'] },
       { id: 'heritage', label: 'Historic character', keywords: ['history', 'historical', 'heritage', 'ancient', 'architecture', 'old town', 'culture'] },
     ],
+    welcomeMessage: "Feed your soul! Museums, live music, theater, historic architecture — what cultural experiences does your ideal city need to offer?",
     templateInterjections: {
       music: "What kind of music scene do you want? Some cities are world-class for jazz, others for electronic music, others for live indie.",
       heritage: "How important is architectural and historical richness? Old-world charm vs. modern cities are very different vibes.",
@@ -389,6 +442,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'entertainment_budget', label: 'Entertainment budget', keywords: ['budget', 'spend', 'monthly', 'cost', 'afford'] },
       { id: 'hobbies', label: 'Hobbies/activities', keywords: ['hobby', 'gaming', 'cooking class', 'pottery', 'photography', 'reading', 'book'] },
     ],
+    welcomeMessage: "Fun matters! Tell me about your nightlife style, festivals you love, entertainment budget, and hobbies you'd want to keep doing abroad.",
     templateInterjections: {
       nightlife: "What's your nightlife vibe? Thriving bar scene or quiet evenings? Both are valid — it changes the recommendations.",
       entertainment_budget: "How much do you spend monthly on entertainment? This helps us match cities to your lifestyle expectations.",
@@ -403,6 +457,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'spiritual', label: 'Spiritual practice', keywords: ['spiritual', 'meditation', 'yoga', 'retreat', 'mindfulness', 'zen', 'community'] },
       { id: 'not_factor', label: 'Not a factor', keywords: ['not religious', 'atheist', 'agnostic', 'secular', 'not a factor', 'doesn\'t matter'] },
     ],
+    welcomeMessage: "Spiritual life — or the freedom from it. Do you practice a religion, need community for it, or is secular tolerance the priority? All answers are equally valid.",
     templateInterjections: {
       tolerance: "Whether religious or not — how important is religious tolerance? Some places are wonderfully diverse; others quite restrictive.",
     },
@@ -417,6 +472,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'import', label: 'Pet import regulations', keywords: ['import', 'quarantine', 'microchip', 'rabies', 'vaccination', 'fly with'] },
       { id: 'no_pets', label: 'No pets', keywords: ['no pets', 'no animals', 'don\'t have', 'no plans'] },
     ],
+    welcomeMessage: "Furry family members! Tell me about your pets — type, breed, size. Or if no pets, just say so and we'll skip this factor in scoring.",
     templateInterjections: {
       import: "Have you looked into pet import regulations? Some countries require months of quarantine. Start researching early.",
       pet_housing: "Pet-friendly housing can be very hard to find in some cities — it dramatically narrows your options.",
@@ -434,6 +490,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'transport_mode', label: 'How you get around', keywords: ['walk', 'drive', 'bike', 'bus', 'metro', 'taxi', 'stroll'] },
       { id: 'weather_feel', label: 'Weather in the scene', keywords: ['sun', 'warm', 'breeze', 'cool', 'weather', 'outdoor', 'terrace'] },
     ],
+    welcomeMessage: "Close your eyes and imagine your perfect day in your new city. Walk me through morning to night — the sights, sounds, weather, and how you move through it all.",
     templateInterjections: {
       evening: "Love your morning and afternoon! What does the evening look like? This tells us a lot about what you need from a city.",
       transport_mode: "In your dream day, how are you getting around? This confirms what city infrastructure you actually need.",
@@ -448,6 +505,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
       { id: 'past_experience', label: 'Past relocation experience', keywords: ['visited', 'lived in', 'tried', 'loved', 'hated', 'experience', 'before'] },
       { id: 'future_plans', label: 'Future plans', keywords: ['plan', 'future', 'start a family', 'retire', 'build', 'business', 'eventually'] },
     ],
+    welcomeMessage: "Last chance to tell me anything! Missed dealbreakers, niche requirements, past relocation experience, future plans — this is your safety net.",
     templateInterjections: {
       dealbreakers: "This is your safety net — any dealbreakers you forgot? Even small things can make or break a relocation.",
       past_experience: "Have you visited or lived in any cities you loved or hated? That real experience is incredibly valuable for our matching.",

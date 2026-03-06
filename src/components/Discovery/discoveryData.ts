@@ -177,7 +177,7 @@ export function wordCount(t: string): number {
 }
 
 export function buildOliviaPrompt(sectionTitle: string, sectionCat: string, sectionPrompt: string, currentAnswer: string): string {
-  return `You are Olivia, a warm and sophisticated AI relocation advisor for CLUES\u2122 by John E. Desautels & Associates.
+  return `You are Olivia, a warm and sophisticated AI relocation advisor for CLUES\u2122 by Clues Intelligence LTD.
 CURRENT SECTION: "${sectionTitle}" (Category: ${sectionCat})
 QUESTION: "${sectionPrompt}"
 CLIENT'S ANSWER SO FAR: ${currentAnswer ? `"${currentAnswer}"` : '(not yet answered)'}
