@@ -180,21 +180,45 @@ PHASE 6: YOUR VISION
 - **Module-mapped paragraphs** — Each P6-P25 has a `moduleId` property linking it to the exact module it mirrors
 - **Enriched prompts** — Every prompt asks for specific, scorable data (numbers, thresholds, concrete preferences)
 
-### Gemini's Extraction Output
+### Gemini 3.1 Pro Preview Extraction + Recommendation Output
 ```typescript
 interface GeminiExtraction {
-  demographic_signals: { age, gender, household_size, ... };
-  dnw_signals: string[];        // "hates humidity", "avoids instability"
-  mh_signals: string[];         // "needs fast internet", "wants walkable"
-  module_relevance: Record<string, number>;  // climate: 0.9, tech: 0.8
-  budget_range: { min: number, max: number, currency: string };
-  globe_region_preference: string;
+  demographic_signals: { age, gender, household_size, has_children, has_pets, employment_type, income_bracket };
   personality_profile: string;
-  paragraph_summaries: { id: number, key_themes: string[] }[];
+  detected_currency: string;                    // "EUR", "GBP", "USD"
+  budget_range: { min: number, max: number, currency: string };
+  metrics: {                                    // 100-250 numbered metrics
+    id: string;                                 // "M1", "M2", ...
+    description: string;
+    category: string;                           // one of 20 Human Existence Flow categories
+    source_paragraph: number;                   // 1-27
+    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+    research_query: string;                     // what Tavily should search
+    user_justification: string;                 // tied to specific paragraph text (P#)
+    data_justification: string;                 // real-world data from google_search
+    source: string;                             // "Tavily: ...", "Google Search: ...", etc.
+    threshold?: { operator, value, unit };
+  }[];
+  recommended_countries: { name, iso_code, reasoning, local_currency }[];
+  recommended_cities: { name, country, reasoning }[];
+  recommended_towns: { name, parent_city, reasoning }[];
+  recommended_neighborhoods: { name, parent_town, reasoning }[];
+  location_metrics: {                           // Side-by-Side Metric View
+    field_id: string;                           // "safety_index", "connectivity_5G"
+    label: string;
+    category: string;
+    locations: { name, type, score, user_justification, data_justification, source }[];
+  }[];
+  paragraph_summaries: { id, key_themes, extracted_preferences, metrics_derived }[];
+  dnw_signals: string[];                        // "hates humidity", "avoids instability"
+  mh_signals: string[];                         // "needs fast internet", "wants walkable"
+  tradeoff_signals: string[];                   // "safety > cost of living"
+  module_relevance: Record<string, number>;     // climate: 0.9, tech: 0.8
+  globe_region_preference: string;
 }
 ```
 
-**CRITICAL**: Gemini is a narrative-to-data EXTRACTOR. It does NOT score cities or make recommendations. Its output feeds INTO the full evaluation pipeline.
+Gemini 3.1 Pro Preview is the extraction AND recommendation engine. It uses `thinking_level: "high"` for deep reasoning and native `googleSearch` for live data grounding. Each metric includes dual justifications (user-said + real-world data). The `location_metrics` array enables a side-by-side comparison view across all recommended locations.
 
 ---
 
@@ -567,7 +591,7 @@ interface ParagraphicalInput {
 }
 ```
 
-### Output from Gemini
+### Output from Gemini 3.1 Pro Preview
 ```typescript
 interface GeminiExtraction {
   demographic_signals: {
@@ -579,30 +603,50 @@ interface GeminiExtraction {
     employment_type?: string;
     income_bracket?: string;
   };
-  dnw_signals: string[];          // Extracted deal-breakers
-  mh_signals: string[];           // Extracted must-haves
-  module_relevance: Record<string, number>;  // Module ID → 0-1 relevance
-  budget_range: {
-    min: number;
-    max: number;
-    currency: string;
-  };
-  globe_region_preference: string;
-  personality_profile: string;    // Behavioral/lifestyle summary
-  paragraph_summaries: {
-    id: number;
-    key_themes: string[];
-    extracted_preferences: string[];
+  personality_profile: string;
+  detected_currency: string;                    // "EUR", "GBP", "USD", "THB"
+  budget_range: { min: number; max: number; currency: string };
+  metrics: {                                    // 100-250 numbered metrics with dual justifications
+    id: string;                                 // "M1", "M2", ...
+    description: string;
+    category: string;
+    source_paragraph: number;
+    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+    research_query: string;
+    user_justification: string;                 // "Matches P3: User said '...' which indicates..."
+    data_justification: string;                 // "Real-world data: City X has... according to..."
+    source: string;                             // "Tavily: ...", "Google Search: ...", etc.
+    threshold?: { operator; value; unit };
   }[];
+  recommended_countries: { name; iso_code; reasoning; local_currency }[];
+  recommended_cities: { name; country; reasoning }[];
+  recommended_towns: { name; parent_city; reasoning }[];
+  recommended_neighborhoods: { name; parent_town; reasoning }[];
+  location_metrics: {                           // Side-by-Side Metric View
+    field_id: string;
+    label: string;
+    category: string;
+    locations: { name; type; score; user_justification; data_justification; source }[];
+  }[];
+  paragraph_summaries: { id; key_themes; extracted_preferences; metrics_derived }[];
+  dnw_signals: string[];
+  mh_signals: string[];
+  tradeoff_signals: string[];
+  module_relevance: Record<string, number>;
+  globe_region_preference: string;
 }
 ```
 
-### What Gemini Extraction Enables
+### What Gemini 3.1 Pro Preview Extraction + Recommendation Enables
 1. Pre-fills Demographics questionnaire (user confirms/corrects)
 2. Suggests DNW severity levels ("Based on P4, political instability seems like a dealbreaker?")
 3. Suggests MH importance levels ("Based on P11, fast internet seems Essential?")
 4. Weights the 20 modules by relevance
 5. Provides context to all 5 LLM evaluators when they score cities
+6. Recommends countries, cities, towns, neighborhoods with reasoning
+7. Produces side-by-side `location_metrics` for cross-location comparison view
+8. Each metric has dual justifications (user paragraph link + real-world data source)
+9. Reasoning trace available via `thinking_details` in API response
 
 ---
 

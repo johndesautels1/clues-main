@@ -341,7 +341,7 @@ The Paragraphical must stand alone as a complete evaluation. Modules make it bet
 
 ## 13. GEMINI EXTRACTION OUTPUT (Revised Schema)
 
-The old `GeminiExtraction` schema is OBSOLETE. The new schema must include:
+The old `GeminiExtraction` schema is OBSOLETE. The current schema (Gemini 3.1 Pro Preview with thinking + search):
 
 ```typescript
 interface GeminiExtraction {
@@ -365,14 +365,17 @@ interface GeminiExtraction {
     currency: string;                // User's home currency
   };
 
-  // ─── Metrics (THE KEY OUTPUT) ───
+  // ─── Metrics (THE KEY OUTPUT — with dual justifications) ───
   metrics: {
     id: string;                      // "M1", "M2", etc.
     description: string;             // "Average winter temperature 20-25C"
-    category: string;                // "climate", "safety", "financial"...
+    category: string;                // "climate", "safety", "financial"... (20 categories)
     source_paragraph: number;        // Which paragraph (1-27)
     data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
     research_query: string;          // What Tavily should search
+    user_justification: string;      // "Matches P3: User said '...' which indicates..."
+    data_justification: string;      // "Real-world data: City X has... according to..."
+    source: string;                  // "Tavily: ...", "Google Search: ...", "Gemini KB: ..."
     threshold?: {
       operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
       value: number | [number, number];
@@ -406,6 +409,21 @@ interface GeminiExtraction {
     reasoning: string;
   }[];                               // Top 3 in winning town
 
+  // ─── Side-by-Side Location Metrics ───
+  location_metrics: {
+    field_id: string;                // "safety_index", "connectivity_5G", "healthcare_access"
+    label: string;                   // Human-readable label
+    category: string;                // One of 20 categories
+    locations: {
+      name: string;                  // City/town/neighborhood name
+      type: 'city' | 'town' | 'neighborhood';
+      score: number;                 // 0.0-10.0
+      user_justification: string;    // Tied to user's paragraph text
+      data_justification: string;    // Real-world data backing
+      source: string;                // Data source
+    }[];
+  }[];                               // Minimum 20 key fields, scored across all locations
+
   // ─── Paragraph Summaries ───
   paragraph_summaries: {
     id: number;
@@ -417,6 +435,29 @@ interface GeminiExtraction {
   // ─── Signals for Downstream ───
   dnw_signals: string[];             // Potential dealbreakers for DNW pre-fill
   mh_signals: string[];              // Potential must-haves for MH pre-fill
+  tradeoff_signals: string[];        // Priority trade-offs: "safety > cost of living"
+  module_relevance: Record<string, number>;  // Module ID → 0-1 relevance
+  globe_region_preference: string;   // User's geographic preference
+}
+
+// API Response includes reasoning trace:
+interface ParagraphicalResponse {
+  extraction: GeminiExtraction;
+  thinking_details: string[];        // Gemini 3.1 reasoning trace steps
+  metadata: {
+    model: 'gemini-3.1-pro-preview';
+    thinkingLevel: 'high';
+    searchGrounded: true;
+    inputTokens: number;
+    outputTokens: number;
+    costUsd: number;
+    durationMs: number;
+    paragraphsProcessed: number;
+    metricsExtracted: number;
+    locationMetricsCount: number;
+    thinkingSteps: number;
+    timestamp: string;
+  };
 }
 ```
 
