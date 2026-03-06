@@ -84,7 +84,7 @@ export async function analyzeWithFlash(
   const payload = {
     system: FLASH_SYSTEM_PROMPT,
     user: buildUserPrompt(paragraphId, heading, targets, userText),
-    model: 'gemini-2.0-flash',
+    model: 'gemini-3.1-pro-preview',
     temperature: 0.3,
     maxTokens: 300,
   };

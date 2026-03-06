@@ -693,7 +693,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ```
 claude-sonnet-4-5     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
 gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
-gemini-3.1-pro        Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
+gemini-3.1-pro-preview Input: $1.25    Output: $10.00   (Extraction + LLM Evaluator #3)
 grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)
 perplexity-sonar      Input: $1.00    Output: $1.00    (LLM Evaluator #5)
 claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)

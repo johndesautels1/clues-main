@@ -187,7 +187,7 @@ export interface EvaluationResult {
 export type CostProvider =
   | 'claude-sonnet-4-5'
   | 'gpt-4o'
-  | 'gemini-3.1-pro'
+  | 'gemini-3.1-pro-preview'
   | 'grok-4'
   | 'perplexity-sonar'
   | 'claude-opus-4-5'

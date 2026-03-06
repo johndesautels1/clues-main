@@ -305,9 +305,9 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
 }`;
 }
 
-// ─── Gemini Token Rates (per 1M tokens) ─────────────────────────────
-const GEMINI_INPUT_RATE = 1.25;
-const GEMINI_OUTPUT_RATE = 10.00;
+// ─── Gemini 2.0 Flash Token Rates (per 1M tokens) ──────────────────
+const GEMINI_INPUT_RATE = 0.075;
+const GEMINI_OUTPUT_RATE = 0.30;
 
 function calculateGeminiCost(inputTokens: number, outputTokens: number): number {
   return (inputTokens * GEMINI_INPUT_RATE + outputTokens * GEMINI_OUTPUT_RATE) / 1_000_000;
@@ -363,7 +363,7 @@ export default async function handler(
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3.1-pro',
+      model: 'gemini-3.1-pro-preview',
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 16384,
@@ -416,7 +416,7 @@ export default async function handler(
     // Track cost (non-blocking — don't fail the request if cost tracking fails)
     trackCost({
       sessionId: body.sessionId,
-      model: 'gemini-3.1-pro',
+      model: 'gemini-3.1-pro-preview',
       endpoint: '/api/paragraphical',
       inputTokens,
       outputTokens,
@@ -428,7 +428,7 @@ export default async function handler(
     res.status(200).json({
       extraction,
       metadata: {
-        model: 'gemini-3.1-pro',
+        model: 'gemini-3.1-pro-preview',
         inputTokens,
         outputTokens,
         costUsd: Number(costUsd.toFixed(6)),
