@@ -4,8 +4,8 @@
 > Every AI assistant and every new conversation MUST read this file FIRST before working on any Paragraphical,
 > Gemini extraction, evaluation pipeline, or report-related code.
 >
-> **Last Updated**: 2026-03-05
-> **Status**: ARCHITECTURAL DESIGN — Implementation pending
+> **Last Updated**: 2026-03-06
+> **Status**: CORE IMPLEMENTATION COMPLETE — Gemini 3.1 Pro Preview reasoning engine built
 
 ---
 
@@ -807,32 +807,59 @@ LifeScore's Gamma report template:
 
 ---
 
-## 16. WHAT THE OLD PROMPT GOT WRONG
+## 16. WHAT THE OLD PROMPT GOT WRONG (FIXED 2026-03-06)
 
-The current `api/paragraphical.ts` prompt says:
-- "You do NOT score cities or make recommendations" — **WRONG.** Gemini IS the first-pass recommender
-- `module_relevance` scoring 20 modules 0-1 — **IRRELEVANT.** We need location recommendations and metrics
-- Budget in USD only — **WRONG.** Global app, multi-currency
-- No metric extraction — **THE MOST IMPORTANT STEP IS MISSING**
-- No location output — **THE WHOLE POINT IS MISSING**
-- No data source strategy — **Every metric needs sourced, provable data**
-- "Gemini is an EXTRACTOR, not an evaluator" — **PARTIALLY WRONG.** Gemini extracts AND recommends AND scores at Discovery tier. The distinction is that Gemini alone is not the FINAL word — Opus/Cristiano always judges.
+> **ALL ISSUES BELOW HAVE BEEN FIXED.** The old `api/paragraphical.ts` has been completely
+> rewritten to use Gemini 3.1 Pro Preview with thinking_level: high, Google Search grounding,
+> and the full metric extraction + recommendation + scoring pipeline.
+
+~~The old prompt said "You do NOT score cities" — WRONG.~~ **FIXED**: Gemini now extracts, recommends, AND scores.
+~~`module_relevance` scoring 20 modules 0-1~~ **FIXED**: Replaced with 100-250 numbered metrics.
+~~Budget in USD only~~ **FIXED**: Currency detected from context, multi-currency support.
+~~No metric extraction~~ **FIXED**: 100-250 metrics extracted with fieldId, score, justifications, sources.
+~~No location output~~ **FIXED**: Country → City → Town → Neighborhood recommendations with per-location scoring.
+~~No data source strategy~~ **FIXED**: Every metric has user_justification + data_justification + source.
+~~"Gemini is an EXTRACTOR, not an evaluator"~~ **FIXED**: Gemini 3.1 Pro Preview is the reasoning engine. Opus judges afterward.
+
+### Gemini 3.1 Pro Preview Configuration (Implemented)
+```typescript
+generationConfig: {
+  thinking_level: 'high',             // Deep multi-step reasoning
+  include_thinking_details: true,     // Returns reasoning chain for transparency UI
+},
+tools: [{
+  google_search: {},                  // Native 2026 search grounding
+}],
+```
+
+### Frontend Components (Implemented)
+- `ReasoningTrace` — Displays thinking_details array from Gemini
+- `SideBySideMetricView` — Compares City vs Town vs Neighborhood metrics
+- `ReactiveJustification` — Click justification to highlight source Paragraph (P1-P24)
+- `ThinkingDetailsPanel` — Full transparency UI with model info, token stats, timeline
+- `FileUpload` — 100MB upload for medical records (P5), financial spreadsheets (P8)
 
 ---
 
-## 17. IMPLEMENTATION PRIORITY
+## 17. IMPLEMENTATION STATUS (Updated 2026-03-06)
 
-1. Study LifeScore codebase completely
-2. Rewrite `GeminiExtraction` TypeScript interfaces
-3. Rewrite Gemini prompt for Call 1 (extract metrics)
-4. Build Tavily research pipeline for metric data
-5. Write Gemini prompt for Call 2 (recommend + score with sourced data)
-6. Build Opus/Cristiano judge call for Paragraphical tier
-7. Build Smart Score engine
-8. Build report data structure
-9. Build parallel batch firing for large metric sets
-10. Update `api/paragraphical.ts` endpoint
-11. Update frontend to display metric comparisons + sources
+### COMPLETED
+1. ✅ Gemini 3.1 Pro Preview reasoning engine (`api/paragraphical.ts`)
+2. ✅ GeminiExtraction V2 types with metrics array and justifications
+3. ✅ File upload endpoint (`api/upload.ts`) for 100MB Gemini ingestion
+4. ✅ ReasoningTrace, SideBySideMetricView, ReactiveJustification components
+5. ✅ ThinkingDetailsPanel transparency UI
+6. ✅ FileUpload component
+7. ✅ Tier engine updated with `gemini-3.1-pro-preview` model references
+8. ✅ Cost tracking updated for new provider
+
+### REMAINING
+9. Build Tavily research pipeline for metric data
+10. Build Opus/Cristiano judge call for Paragraphical tier
+11. Build Smart Score engine
+12. Build report data structure
+13. Build parallel batch firing for large metric sets
+14. Wire Results components into /results route
 
 ---
 
