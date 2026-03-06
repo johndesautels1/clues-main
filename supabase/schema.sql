@@ -34,7 +34,7 @@ create table if not exists public.sessions (
   -- Full session state (everything else lives here)
   -- Includes: paragraphical.extraction (GeminiExtraction with 100-250 metrics
   --   with dual justifications, recommended_countries/cities/towns/neighborhoods,
-  --   location_metrics (side-by-side), dnw_signals, mh_signals, tradeoff_signals,
+  --   dnw_signals, mh_signals, tradeoff_signals,
   --   detected_currency, budget_range, paragraph_summaries)
   session_data  jsonb not null default '{}',
 

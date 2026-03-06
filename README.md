@@ -78,7 +78,7 @@ After entry point(s) are complete, the system has initial data. Here's what happ
 
 - **Margin of Error Calculation** — The system analyzes ALL raw data (metrics, weights, judge reports) and calculates a confidence/margin of error for the current recommendations
 - **Holistic User Analysis** — Looks at the specific user's profile, priorities, and data gaps to determine which category modules would most reduce uncertainty
-- **Module Recommendations** — Tells the user: "Complete Climate, Healthcare, and Dating modules to improve your confidence from 65% to 92%." The system doesn't guess which modules matter — it KNOWS based on what data is missing for THIS user
+- **Module Recommendations** — Tells the user: "Complete Climate & Weather, Health & Wellness, and Cultural Heritage & Traditions modules to improve your confidence from 65% to 92%." The system doesn't guess which modules matter — it KNOWS based on what data is missing for THIS user
 - **Dynamic Weighting** — No fixed weights per category. A retiree doesn't need Education weighted heavily. A family with kids does. Weights emerge from the user's own data
 
 ### Module Completion Loop
@@ -103,7 +103,7 @@ High-confidence report identifying:
 
 Each of the 23 category modules is ALSO a **freestanding web app**. This serves three purposes:
 
-1. **Brand Awareness** — Someone discovers CLUES through the Climate module or Dating module, has fun with it, discovers the full platform
+1. **Brand Awareness** — Someone discovers CLUES through the Climate & Weather module or Food & Dining module, has fun with it, discovers the full platform
 2. **Revenue** — Individual modules have value on their own and can be monetized independently
 3. **Data Collection** — Every standalone module interaction feeds back into the intelligence engine if the user later joins the full platform
 
