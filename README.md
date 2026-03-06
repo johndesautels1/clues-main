@@ -1238,6 +1238,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 8 | Arts & Culture | 97 | 5 | `ARTS_CULTURE_QUESTIONS.md` |
 | 9 | Legal & Immigration | 102 | 5 | `LEGAL_IMMIGRATION_QUESTIONS.md` |
 | 10 | Environment & Community Appearance | 83 | 5 | `ENVIRONMENT_COMMUNITY_APPEARANCE_QUESTIONS.md` |
+| 11 | Sexual Beliefs, Practices & Laws | 79 | 7 | `SEXUAL_BELIEFS_PRACTICES_LAWS_QUESTIONS.md` |
 
 ---
 
