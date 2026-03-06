@@ -319,7 +319,126 @@ The Main Module has 4 sub-sections, unlocking sequentially:
 
 ---
 
-## 8. THREE-LAYER WEIGHT SYSTEM
+## 8. CLUES 5-TIER SCORING SCALE & QUESTION RESPONSE TYPE TAXONOMY
+
+> **PURPOSE**: Every question across all 23 category modules (2,300 questions) and the Main Module (~300 questions) must return structured data that maps to the universal CLUES 5-Tier Color Scale. This section defines the scale, the approved response types, and how each response type maps to a 0-100 score.
+
+### The CLUES 5-Tier Color Scale (Universal)
+
+This is the **single scoring backbone** used across the entire CLUES ecosystem — LifeScore, Main Module, category modules, reports, dashboards, and all LLM evaluations. Every score, everywhere, maps to one of these five tiers.
+
+| Tier | Range | Color | Label | Hex |
+|------|-------|-------|-------|-----|
+| 1 | 0-20 | Red | Poor | `#ef4444` |
+| 2 | 21-40 | Orange | Below Average / Fair | `#f97316` |
+| 3 | 41-60 | Yellow | Average | `#eab308` |
+| 4 | 61-80 | Blue | Good / Above Average | `#3b82f6` |
+| 5 | 81-100 | Green | Excellent | `#22c55e` |
+
+**Rule**: Every question's answer must ultimately be convertible to a **0-100 score** that lands in one of these tiers. This is the contract between the questionnaire system and the LLM evaluation pipeline.
+
+### Approved Response Types
+
+Every question in every module file MUST have a `| Type |` column with one of these approved values:
+
+#### Direct-Scoring Types (user answer maps directly to 0-100)
+
+These response types produce a score immediately from the user's selection. The 5 options in each Likert variant map to `0, 25, 50, 75, 100` (the midpoints of each tier).
+
+| Type Code | Label Set (1→5) | Use For |
+|-----------|-----------------|---------|
+| `Likert-Importance` | Not Important → Slightly → Moderately → Very → Essential | "How important is X?" questions |
+| `Likert-Frequency` | Never → Rarely → Sometimes → Often → Always | "How often do you X?" questions |
+| `Likert-Comfort` | Very Uncomfortable → Uncomfortable → Neutral → Comfortable → Very Comfortable | "How comfortable are you with X?" questions |
+| `Likert-Concern` | Not Concerned → Slightly → Moderately → Very → Extremely Concerned | "How concerned are you about X?" questions |
+| `Likert-Willingness` | Unwilling → Reluctant → Neutral → Willing → Eager | "Would you accept / are you willing to X?" questions |
+| `Likert-Satisfaction` | Very Dissatisfied → Dissatisfied → Neutral → Satisfied → Very Satisfied | "How satisfied are you with X?" questions |
+| `Likert-Agreement` | Strongly Disagree → Disagree → Neutral → Agree → Strongly Agree | "Do you agree that X?" questions |
+| `Dealbreaker` | Not a Factor → Mild Preference → Moderate Preference → Strong Preference → Absolute Dealbreaker | DNW-style severity questions |
+
+#### Indirect-Scoring Types (LLM calculates 0-100 by comparing user answer to city data)
+
+These response types collect structured user preferences. The LLMs then compare the user's selections/values against real-world city data (via Tavily/Google Search) to produce a 0-100 match score.
+
+| Type Code | UI Component | How LLM Scores It |
+|-----------|-------------|-------------------|
+| `Multi-select` | Checkboxes (select all that apply) | % of user's selections available in the city → 0-100 |
+| `Single-select` | Radio buttons (pick one) | Binary match (city has it or doesn't) → feeds weighted section score |
+| `Range` | Predefined brackets (budget, distance, time) | Proximity of city's actual value to user's ideal range → 0-100 |
+| `Ranking` | Drag-and-drop ordering of 5 items | NOT a score — becomes **section weights** for how much each sub-topic matters within its module |
+| `Yes/No` | Binary toggle | Acts as a **gate/filter** — determines module relevance (e.g., "Do you have pets?" gates the entire Pets module) |
+| `Yes/No/Maybe` | Ternary toggle | Like Yes/No but "Maybe" = half-weight gate |
+| `Number` | Numeric input | Compared against city data (e.g., "How many pets?" → checked against breed/import restrictions) |
+| `Slider` | 0-100 continuous slider | Direct 0-100 value — used for trade-off and Cultural Flex questions |
+| `Text` | Short free-text input | Demographics only (name, languages, nationality) — NOT scored, used as context for LLMs |
+
+### Score Mapping Rules
+
+1. **All Likert types** → User picks 1 of 5 → maps to `0, 25, 50, 75, 100`
+2. **Dealbreaker type** → Same 5-point mapping, but severity 5 (100) triggers **instant city elimination** per DNW rules
+3. **Multi-select** → LLM calculates `(matched_items / total_selected) × 100`
+4. **Range** → LLM calculates proximity: if user wants $2k-3k/mo and city is $2.5k, score = 100; if city is $5k, score = 20
+5. **Ranking** → Does NOT produce a score. Produces **weights** (1st place = highest weight) for the section's questions
+6. **Yes/No** → `Yes` = module/section is relevant (scored normally); `No` = module/section weight drops to 0
+7. **Slider** → Raw 0-100 value IS the score
+8. **Text** → No score. Context only.
+
+### Section Structure Rule
+
+Every module follows this pattern:
+- **10 sections** of ~10 questions each (may vary slightly per module)
+- **Every section's last question is a `Ranking` type** — user drag-and-drops the section's key factors in priority order
+- **Question 100 is always a `Ranking` type** — master cross-section priority ranking for the entire module
+- The Ranking answers become the **weights** the LLMs use when computing the module's overall city score
+
+### How This Feeds the LLM Pipeline
+
+```
+USER ANSWERS (structured)
+    │
+    ├── Likert scores (0/25/50/75/100) ──→ "User wants X at importance level 75"
+    ├── Multi-selects ──→ "User needs: Thai, Italian, Japanese cuisine"
+    ├── Ranges ──→ "User budget: $2,000-$3,000/month"
+    ├── Rankings ──→ "User weights: Safety > Cost > Climate > Culture"
+    ├── Yes/No gates ──→ "User has no pets → skip Pets module"
+    │
+    ▼
+LLM + TAVILY RESEARCH
+    │
+    ├── Compare user preferences against real city data
+    ├── Score each metric 0-100 on the CLUES 5-Tier Scale
+    ├── Apply section weights from Ranking answers
+    ├── Apply module weights from master Rankings (Q100)
+    │
+    ▼
+CITY SCORE (0-100, maps to Red/Orange/Yellow/Blue/Green)
+```
+
+### Question File Format Standard
+
+Every question file in `docs/` MUST use this table format:
+
+```markdown
+| # | Question | Type |
+|---|----------|------|
+| 1 | How important is access to major international banks near your home? | Likert-Importance |
+| 2 | Which banking services are essential for your daily life? (Select all that apply) | Multi-select |
+| 3 | Do you need multi-currency accounts? | Yes/No/Maybe |
+| 10 | Rank these factors from most to least important: Factor A, Factor B, Factor C, Factor D, Factor E | Ranking |
+```
+
+### Cultural Flex Questions
+
+Questions tagged `CULTURAL FLEX` in the question text use `Slider` type (0-100). These measure the user's willingness to adapt to local customs. The slider value maps directly to the CLUES scale:
+- 0-20 (Red): "I need things exactly like home"
+- 21-40 (Orange): "I prefer familiar but can tolerate some differences"
+- 41-60 (Yellow): "I'm neutral — some adaptation is fine"
+- 61-80 (Blue): "I enjoy adapting to local ways"
+- 81-100 (Green): "I want full cultural immersion"
+
+---
+
+## 9. THREE-LAYER WEIGHT SYSTEM
 
 ```
 Layer 1: PERSONA DEFAULTS
@@ -337,7 +456,7 @@ Layer 3: OPUS JUDGE OVERRIDES
 
 ---
 
-## 9. REPORT PIPELINE (5 Deliverables)
+## 10. REPORT PIPELINE (5 Deliverables)
 
 ```
 EVALUATION COMPLETE (any tier)
@@ -389,7 +508,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 
 ---
 
-## 10. UI/UX SPECIFICATION
+## 11. UI/UX SPECIFICATION
 
 ### Design Language
 - **Theme**: Dark mode default, glassmorphic (frosted glass with backdrop blur). WCAG 2.1 AA compliance required for BOTH dark and light mode.
@@ -419,7 +538,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 
 ---
 
-## 11. CURRENT PROJECT STATE (Phase 2 In Progress)
+## 12. CURRENT PROJECT STATE (Phase 2 In Progress)
 
 ### What's Built
 - ✅ Dashboard layout with Paragraphical button, Main Module expander, Module Grid
@@ -480,7 +599,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 
 ---
 
-## 12. FILE STRUCTURE
+## 13. FILE STRUCTURE
 
 ```
 clues-main/
@@ -538,7 +657,7 @@ clues-main/
 
 ---
 
-## 13. CRITICAL RULES (DO NOT VIOLATE)
+## 14. CRITICAL RULES (DO NOT VIOLATE)
 
 1. **Gemini 3.1 Pro Preview is the REASONING ENGINE.** It extracts metrics from paragraphs, recommends locations, AND scores them at Discovery tier using deep reasoning (thinking_level: high) and Google Search grounding. Each metric includes dual justifications. Opus/Cristiano always judges Gemini's output afterward. Gemini is NOT the final word — it is the first-pass reasoner.
 
@@ -570,7 +689,7 @@ clues-main/
 
 ---
 
-## 14. BUGS TO AVOID (from LifeScore lessons)
+## 15. BUGS TO AVOID (from LifeScore lessons)
 
 1. **Don't put function configs in vercel.json for routes that don't exist yet** - causes build failures
 2. **tmpclaude-* files**: Add to .gitignore, never commit
@@ -585,7 +704,7 @@ clues-main/
 
 ---
 
-## 15. GEMINI 3.1 PRO PREVIEW DATA CONTRACT
+## 16. GEMINI 3.1 PRO PREVIEW DATA CONTRACT
 
 > **IMPORTANT**: Gemini 3.1 Pro Preview (released Feb 2026) is the reasoning engine.
 > It uses `thinking_level: "high"`, `include_thinking_details: true`, and
@@ -676,7 +795,7 @@ interface GeminiExtraction {
 
 ---
 
-## 16. SMART SCALING RULES (Cost vs. Depth)
+## 17. SMART SCALING RULES (Cost vs. Depth)
 
 The system scales AI spend proportionally to data completeness. A busy executive pays less and gets a Discovery report in 30 seconds. A thorough user pays more and gets a Precision report. Both get the same output format.
 
@@ -711,7 +830,7 @@ The system scales AI spend proportionally to data completeness. A busy executive
 
 ---
 
-## 17. NEXT STEPS RECOMMENDATION ENGINE
+## 18. NEXT STEPS RECOMMENDATION ENGINE
 
 Every report ends with a "Next Steps" block that nudges users down the funnel without forcing them. The confidence gain values drive urgency ordering.
 
@@ -750,7 +869,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 
 ---
 
-## 18. COST TRACKING SYSTEM (Built)
+## 19. COST TRACKING SYSTEM (Built)
 
 ### Architecture
 - **Types**: `CostProvider` (16 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
@@ -793,7 +912,7 @@ kling-ai              Per image                         (Image generation)
 
 ---
 
-## 19. THE CORE RULE
+## 20. THE CORE RULE
 
 **Every entry point produces: best countries → best cities → best towns → best neighborhoods. Always. No exceptions.**
 
@@ -811,7 +930,7 @@ Reports must label what was NOT completed:
 
 ---
 
-## 20. EVALUATION PIPELINE IMPLEMENTATION PLAN
+## 21. EVALUATION PIPELINE IMPLEMENTATION PLAN
 
 ### One Function, Adaptive Depth
 
@@ -900,7 +1019,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 ---
 
-## 21. NEXT STEPS (Updated Phase 2 Priority)
+## 22. NEXT STEPS (Updated Phase 2 Priority)
 
 Priority order for development:
 
@@ -923,7 +1042,7 @@ Priority order for development:
 
 ---
 
-## 22. WHAT WE KEEP FROM PRIOR DESIGN DISCUSSIONS
+## 23. WHAT WE KEEP FROM PRIOR DESIGN DISCUSSIONS
 
 ### KEEP (locked in, no debate)
 - **Gemini 3.1 Pro Preview as reasoning engine** — Extracts metrics, recommends locations, scores with justifications. Uses thinking_level: high + Google Search grounding. Opus always judges afterward.
