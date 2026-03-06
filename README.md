@@ -1232,6 +1232,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 2 | Technology & Connectivity | 105 | 5 | `TECHNOLOGY_CONNECTIVITY_QUESTIONS.md` |
 | 3 | Climate & Weather | 106 | 5 | `CLIMATE_WEATHER_QUESTIONS.md` |
 | 4 | Housing & Property | 122 | 6 | `HOUSING_PROPERTY_QUESTIONS.md` |
+| 5 | Professional & Career | 106 | 5 | `PROFESSIONAL_CAREER_QUESTIONS.md` |
 
 ---
 
