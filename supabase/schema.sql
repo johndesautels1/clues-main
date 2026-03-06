@@ -32,9 +32,10 @@ create table if not exists public.sessions (
   detected_currency text,           -- ISO 4217: "EUR", "GBP", "THB", etc.
 
   -- Full session state (everything else lives here)
-  -- Includes: paragraphical.extraction (GeminiExtraction with 100-250 metrics,
-  --   recommended_countries/cities/towns/neighborhoods, dnw_signals, mh_signals,
-  --   tradeoff_signals, detected_currency, budget_range, paragraph_summaries)
+  -- Includes: paragraphical.extraction (GeminiExtraction with 100-250 metrics
+  --   with dual justifications, recommended_countries/cities/towns/neighborhoods,
+  --   location_metrics (side-by-side), dnw_signals, mh_signals, tradeoff_signals,
+  --   detected_currency, budget_range, paragraph_summaries)
   session_data  jsonb not null default '{}',
 
   -- Timestamps

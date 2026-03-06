@@ -571,7 +571,7 @@ USER WRITES PARAGRAPH
 [Debounced analysis — triggers after 3 seconds of pause OR every 150 words]
         |
         v
-OLIVIA ANALYZER (lightweight — Gemini Flash or keyword detection for MVP)
+OLIVIA ANALYZER (keyword detection for MVP, Gemini 3.1 Pro Preview escalation)
   - Checks: which coverage targets for THIS paragraph have been addressed?
   - Checks: is the user off-topic for this paragraph?
   - Checks: has the user provided specific enough detail for metric extraction?
@@ -633,10 +633,10 @@ Phase 1 (MVP): Keyword/regex detection against coverage target keywords per para
   - Each paragraph has a list of target keywords/phrases
   - If 80+ words written and keyword group absent → trigger interjection from template
 
-Phase 2 (Enhanced): Gemini Flash API call (debounced, max 1 per paragraph)
+Phase 2 (Enhanced): Gemini 3.1 Pro Preview API call (debounced, max 1 per paragraph)
   - Send: paragraph text + coverage targets + paragraph context
   - Return: which targets are covered, which are missing, suggested interjection
-  - Cost: ~$0.001 per call (Flash is cheap), 27 calls max = $0.027 per user
+  - Only fires when keyword detection confidence is low
 
 Phase 3 (Advanced): Context-aware cross-paragraph intelligence
   - Olivia remembers what was said in ALL previous paragraphs
@@ -1160,7 +1160,7 @@ This is the **single source of truth** for which AI model powers each function i
 | Role | Model | Provider | Why |
 |------|-------|----------|-----|
 | **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
-| **Olivia Tutor (Paragraphical)** | Gemini 2.0 Flash | Google | Lightweight coverage-gap detection during writing. ~$0.001/call. Only fires when keyword detection isn't confident enough. |
+| **Olivia Tutor (Paragraphical)** | Gemini 3.1 Pro (Preview) | Google | Coverage-gap detection during writing. Only fires when keyword detection isn't confident enough. |
 | **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 27 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P25 Module Deep Dives, P26-P27 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
 | **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
 | **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
@@ -1177,7 +1177,7 @@ This is the **single source of truth** for which AI model powers each function i
 ### Key Rules
 1. **Olivia = GPT-4o everywhere** — chat bubble, help modal, all products. This is a company architecture decision, not per-feature.
 2. **Gemini 3.1 Pro (Preview) for heavy extraction** — the Paragraphical pipeline's main brain.
-3. **Gemini 2.0 Flash for lightweight tasks** — Olivia's tutor interjections during writing, cost validation checks, quick classification.
+3. **Gemini 3.1 Pro (Preview) for tutor escalation** — Olivia's tutor interjections during writing when keyword detection is insufficient.
 4. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
 5. **Cost tracking must match these models.** The `costTracking.ts` rate table must align with this registry.
 
@@ -1225,8 +1225,8 @@ Olivia guides users while they write each of the 27 paragraphs, ensuring they co
 - Tracks dismissed interjections (don't repeat)
 - **This alone handles ~70% of tutoring with zero API spend**
 
-### Layer 3: Gemini Flash Escalation (API — ~$0.024/user total)
-**What:** When keyword detection confidence is low, fire a lightweight Gemini 2.0 Flash call.
+### Layer 3: Gemini 3.1 Pro Preview Escalation (API)
+**What:** When keyword detection confidence is low, fire a Gemini 3.1 Pro Preview call.
 **File:** `src/lib/oliviaTutor.ts`
 
 Triggers when:
@@ -1234,7 +1234,7 @@ Triggers when:
 - User's language is indirect/metaphorical (keyword matching fails)
 - Cross-paragraph conflict detected (e.g., P6 says "love the beach" but P9 says "hate tourists")
 
-The Gemini Flash prompt:
+The Gemini 3.1 Pro Preview prompt:
 ```
 You are Olivia, analyzing paragraph text for coverage gaps.
 Paragraph {N}: "{heading}" — Coverage targets: {list}
@@ -1254,7 +1254,7 @@ Reference something they wrote positively first. Ask about ONE missing target.
 Max 2 sentences. Never say "you forgot" — say "have you thought about".
 ```
 
-Cost: ~$0.001 per call x 27 paragraphs = $0.027 max per user (most paragraphs handled by Layer 2).
+Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 only fires when keyword confidence is low.
 
 ### Layer 4: Cross-Paragraph Intelligence (API — Future)
 **What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
@@ -1267,7 +1267,7 @@ Cost: ~$0.001 per call x 27 paragraphs = $0.027 max per user (most paragraphs ha
 
 ### Build Order
 1. Layer 1 (data file) → Layer 2 (keyword hook) → Ship as MVP
-2. Layer 3 (Gemini Flash) → Add when keyword detection proves insufficient
+2. Layer 3 (Gemini 3.1 Pro Preview) → Add when keyword detection proves insufficient
 3. Layer 4 (cross-paragraph) → Add after Paragraphical extraction endpoint is built
 
 ### UI Integration

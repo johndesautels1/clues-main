@@ -132,6 +132,7 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
 
           if (supabaseTime >= localTime) {
             onSessionLoaded(supabaseSession);
+            hydrationDone.current = true;
             console.log('[CLUES] Session restored from Supabase', {
               region: supabaseSession.globe?.region,
               tier: supabaseSession.currentTier,

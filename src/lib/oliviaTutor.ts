@@ -1,12 +1,11 @@
 /**
- * Olivia Tutor — Layer 3: Gemini Flash Escalation
+ * Olivia Tutor — Layer 3: Gemini 3.1 Pro Preview Escalation
  *
  * When the keyword detection engine (Layer 2) isn't confident enough,
- * this service fires a lightweight Gemini 2.0 Flash API call to analyze
+ * this service fires a Gemini 3.1 Pro Preview API call to analyze
  * the paragraph text for coverage gaps.
  *
- * Model: Gemini 2.0 Flash (see LLM Model Registry in README.md)
- * Cost: ~$0.001 per call, max $0.027 per user (27 paragraphs)
+ * Model: Gemini 3.1 Pro Preview (see LLM Model Registry in README.md)
  *
  * NOT wired into the hook yet — this is a ready-to-go service for when
  * keyword detection proves insufficient. Wire it by calling
@@ -67,7 +66,7 @@ User wrote:
 }
 
 /**
- * Analyze paragraph text using Gemini 2.0 Flash.
+ * Analyze paragraph text using Gemini 3.1 Pro Preview.
  * Call this when keyword detection confidence is low.
  *
  * Requires GEMINI_API_KEY in environment (Vercel env or .env.local).

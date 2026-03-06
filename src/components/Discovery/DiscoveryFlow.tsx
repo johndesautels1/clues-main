@@ -461,7 +461,7 @@ export function DiscoveryFlow() {
           <div style={{ fontSize: 38, marginBottom: 24, color: '#C4A87A' }}>{'\u2726'}</div>
           <h1 style={{ fontFamily: "'Cormorant',serif", fontSize: 34, fontWeight: 300, color: C.textPrimary, margin: '0 0 16px' }}>Your Story Is Written</h1>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 18, color: C.textSecondary, lineHeight: 1.8, margin: '0 0 8px' }}>
-            You completed <strong style={{ color: '#C4A87A' }}>{completed}</strong> of ${SECTIONS.length} sections.
+            You completed <strong style={{ color: '#C4A87A' }}>{completed}</strong> of {SECTIONS.length} sections.
           </p>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 16, color: C.textMuted, lineHeight: 1.7, margin: '0 auto 36px', maxWidth: 440 }}>
             Our AI analysts will craft your personalized relocation intelligence report &mdash; best country, top cities, finest neighborhoods, and your roadmap to your new life.

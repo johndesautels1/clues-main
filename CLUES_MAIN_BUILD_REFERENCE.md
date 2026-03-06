@@ -446,7 +446,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ 27 paragraph definitions with prompts, placeholders, section groupings, moduleId mapping
 - ✅ Auto-save paragraphs to context (→ Supabase) on navigation
 - ✅ Dashboard loading state during session hydration
-- ✅ Olivia Tutor: Layer 1 (coverage targets data) + Layer 2 (keyword detection) + Layer 3 (Gemini Flash escalation)
+- ✅ Olivia Tutor: Layer 1 (coverage targets data) + Layer 2 (keyword detection) + Layer 3 (Gemini 3.1 Pro Preview escalation)
 - ✅ 27 paragraph coverage targets with keyword groups and template interjections (`src/data/paragraphTargets.ts`)
 - ✅ Gemini extraction+recommendation prompt rewritten for 27-paragraph pipeline (`api/paragraphical.ts`)
 
@@ -744,7 +744,7 @@ claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
 olivia (gpt-4o)       Input: $2.50    Output: $10.00   (Chat Assistant — GPT-4o company-wide)
-olivia-tutor (flash)  Input: $0.10    Output: $0.40    (Paragraphical tutor — Gemini 2.0 Flash)
+olivia-tutor          Input: $1.25    Output: $10.00   (Paragraphical tutor — Gemini 3.1 Pro Preview)
 tts-elevenlabs        Per character                     (Voice narration)
 tts-openai            Per character                     (Voice narration)
 avatar-heygen         Per minute                        (Video avatar)
