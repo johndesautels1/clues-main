@@ -121,51 +121,56 @@ Each module has **10 general questions** (200 total across 20 modules).
 
 ---
 
-## 5. THE 24-PARAGRAPH PARAGRAPHICAL
+## 5. THE 27-PARAGRAPH PARAGRAPHICAL
 
-Free-form narrative input mapped to the Human Existence Flow. Gemini extracts structured data from all 24 paragraphs.
+Free-form narrative input mapped to the Human Existence Flow. Gemini extracts structured data from all 27 paragraphs.
 
-### Paragraph Map
+### Paragraph Map (6 Phases — see `src/data/paragraphs.ts`)
 ```
-OPENING (Your Story)
-  P1:  "Who You Are"             — Name, age, identity, origins
-  P2:  "Your Life Right Now"     — Current situation, what works/doesn't
+PHASE 1: YOUR PROFILE (Demographics)
+  P1:  "Who You Are"               — Age, gender, nationality, citizenship, languages, employment
+  P2:  "Your Life Right Now"       — Current location, income, budget, motivation, timeline
 
-SURVIVAL & FOUNDATION
-  P3:  "Your Ideal Climate"      — Weather, seasons, environment
-  P4:  "Safety & Peace of Mind"  — What makes you feel secure
-  P5:  "Your Health & Wellness"  — Medical needs, health priorities
-  P6:  "Your Dream Home"         — Housing type, neighborhood, space
+PHASE 2: DO NOT WANTS (Dealbreakers)
+  P3:  "Your Dealbreakers"         — Hard walls: climate extremes, crime, instability, visa, language
 
-LEGAL & FINANCIAL
-  P7:  "Your Legal Reality"      — Citizenship, visa situation
-  P8:  "Your Financial Picture"  — Budget, income, cost tolerance
-  P9:  "Freedom & Autonomy"      — What freedoms matter most
+PHASE 3: MUST HAVES (Non-Negotiables)
+  P4:  "Your Non-Negotiables"      — Requirements: internet speed, medical, airport, safety, housing
 
-LIVELIHOOD & GROWTH
-  P10: "Your Work & Career"      — Job, remote/local, ambitions
-  P11: "Staying Connected"       — Internet, tech, digital life
-  P12: "Getting Around"          — Car/transit/walk preferences
-  P13: "Learning & Growth"       — Education goals (you or kids)
+PHASE 4: TRADE-OFFS
+  P5:  "Your Trade-offs"           — What you'd sacrifice, priority weighting
 
-PEOPLE & RELATIONSHIPS
-  P14: "Your Family"             — Who comes, family dynamics
-  P15: "Your Social World"       — Friends, dating, community
-  P16: "Your Animals"            — Pets, animal needs
+PHASE 5: MODULE DEEP DIVES (20 paragraphs, Human Existence Flow order)
+  SURVIVAL
+    P6:  "Climate & Weather"        — Temperature, humidity, sunshine, natural disasters
+    P7:  "Safety & Security"        — Crime, stability, corruption, emergency services
+    P8:  "Healthcare & Medical"     — Chronic conditions, specialists, insurance, pharmacies
+    P9:  "Housing & Real Estate"    — Type, budget, rent/buy, neighborhoods
+  FOUNDATION
+    P10: "Legal & Immigration"      — Visa pathways, residency, rule of law
+    P11: "Financial & Banking"      — Income, taxes, banking, cost of living
+    P12: "Legal Independence & Freedom" — Speech, LGBTQ+, privacy, censorship
+  GROWTH
+    P13: "Business & Entrepreneurship" — Remote work, startup ecosystem, coworking
+    P14: "Technology & Connectivity"   — Internet speed, 5G, power grid, tech scene
+    P15: "Transportation & Mobility"   — Walkability, transit, airport, flights
+    P16: "Education & Learning"        — Schools, curricula, libraries, language classes
+  CONNECTION
+    P17: "Family & Children"        — Partner, kids, eldercare, proximity to family
+    P18: "Dating & Social Life"     — Dating scene, expat community, meetups, nightlife
+  NOURISHMENT
+    P19: "Food & Cuisine"           — Dietary needs, restaurants, groceries, food culture
+    P20: "Sports & Fitness"         — Gym, sports, fitness culture, outdoor exercise
+    P21: "Outdoor & Nature"         — Beach, mountains, hiking, parks, water sports
+  SOUL
+    P22: "Arts & Culture"           — Museums, galleries, music, architecture
+    P23: "Entertainment & Nightlife" — Bars, concerts, festivals, events
+    P24: "Spiritual & Religious"    — Worship, tolerance, meditation, community
+    P25: "Pets & Animals"           — Pet-friendly housing, vets, import regulations
 
-NOURISHMENT & LIFESTYLE
-  P17: "Food & Dining"           — Dietary needs, cuisines, food culture
-  P18: "Fitness & Activity"      — Exercise, sports, staying active
-  P19: "Nature & Outdoors"       — Mountains/beaches, parks
-
-SOUL & MEANING
-  P20: "Arts & Culture"          — Museums, music, theater
-  P21: "Fun & Entertainment"     — Nightlife, events, hobbies
-  P22: "Faith & Spirituality"    — Religious needs, spiritual community
-
-CLOSING (Your Vision)
-  P23: "Your Dream Day"          — Perfect day in your new city
-  P24: "Anything Else"           — Dealbreakers, wild cards
+PHASE 6: YOUR VISION
+  P26: "Your Dream Day"            — Perfect ordinary day in new city, morning to night
+  P27: "Anything Else"             — Wildcard, past experiences, future plans
 ```
 
 ### Gemini's Extraction Output
@@ -406,8 +411,8 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Cost tracking dashboard modal (admin-only) with provider breakdown, tier breakdown, profitability analysis
 - ✅ Emilia help panel with categorized help topics (admin sees Cost Tracking + System Status)
 - ✅ React Router (`/` dashboard, `/paragraphical` essay flow)
-- ✅ Paragraphical 24-paragraph stepped input UI with sidebar navigation
-- ✅ 24 paragraph definitions with prompts, placeholders, section groupings
+- ✅ Paragraphical 27-paragraph stepped input UI with sidebar navigation
+- ✅ 27 paragraph definitions with prompts, placeholders, section groupings
 - ✅ Auto-save paragraphs to context (→ Supabase) on navigation
 - ✅ Dashboard loading state during session hydration
 
@@ -567,7 +572,7 @@ const geminiRequestBody = {
 ```typescript
 interface ParagraphicalInput {
   paragraphs: {
-    id: number;           // 1-24
+    id: number;           // 1-27
     heading: string;      // "Who You Are"
     content: string;      // User's free-form text
   }[];
@@ -587,7 +592,7 @@ interface GeminiMetricObject {
   fieldId: string;                 // "climate_01_humidity"
   description: string;             // "Average annual humidity below 60%"
   category: string;                // One of 20 Human Existence Flow categories
-  source_paragraph: number;        // Which paragraph (1-24)
+  source_paragraph: number;        // Which paragraph (1-27)
   score: number;                   // 0-100 (relative to other locations)
   user_justification: string;      // "Matches P4: User prioritized 'low petty crime'"
   data_justification: string;      // "Cascais 2026 safety reports show 12% decrease"
@@ -614,11 +619,11 @@ interface GeminiExtraction {
 ```
 
 ### What Gemini 3.1 Pro Preview Enables
-1. **100-250 numbered metrics** derived from user's 24 paragraphs
+1. **100-250 numbered metrics** derived from user's 27 paragraphs
 2. **Location recommendations** (country → city → town → neighborhood)
 3. **Per-metric scoring** with user_justification + data_justification + source
 4. **Reasoning trace** — thinking_details array shows HOW the model reached its conclusions
-5. **100MB file uploads** — medical records (P5), financial spreadsheets (P8) ingested directly
+5. **100MB file uploads** — medical records (P8), financial spreadsheets (P11) ingested directly
 6. **Emerging neighborhood discovery** — ARC-AGI-2 reasoning finds hidden-gem locations
 7. Pre-fills Demographics, suggests DNW severity levels, suggests MH importance levels
 
@@ -852,7 +857,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 Priority order for development:
 
-1. ~~Paragraphical UI~~ ✅ DONE — 24-paragraph stepped input
+1. ~~Paragraphical UI~~ ✅ DONE — 27-paragraph stepped input
 2. ~~Cost Tracking~~ ✅ DONE — Service, modal, admin access, dual persistence
 3. **Gemini extraction endpoint** — `/api/paragraphical` (Vercel serverless function)
 4. **Tier calculator + confidence engine** — `calculateTier()` + `calculateConfidence()`

@@ -1,7 +1,7 @@
 /**
  * /api/paragraphical — Gemini 3.1 Pro Preview Reasoning Engine
  *
- * Receives the user's 24 paragraphs + globe region + optional file uploads.
+ * Receives the user's 27 paragraphs + globe region + optional file uploads.
  * Sends to Gemini 3.1 Pro Preview with:
  *   - thinking_level: "high" (deep multi-step reasoning)
  *   - include_thinking_details: true (returns internal reasoning chain)
@@ -43,7 +43,7 @@ interface GeminiMetricObject {
   fieldId: string;                 // Machine-readable field ID
   description: string;             // "Average winter temperature 20-25C"
   category: string;                // "climate", "safety", "financial"...
-  source_paragraph: number;        // Which paragraph (1-24)
+  source_paragraph: number;        // Which paragraph (1-27)
   score: number;                   // 0-100
   user_justification: string;      // Why this matters to the user (traced to paragraph)
   data_justification: string;      // Real-world data backing the score
@@ -174,7 +174,7 @@ function buildExtractionPrompt(
 
   return `You are CLUES Intelligence's deep reasoning engine powered by Gemini 3.1 Pro Preview.
 
-Your job is to perform UNPRECEDENTED DEPTH analysis of a user's 24 biographical paragraphs and:
+Your job is to perform UNPRECEDENTED DEPTH analysis of a user's 27 biographical paragraphs and:
 1. EXTRACT 100-250 numbered, researchable metrics from their narrative
 2. RECOMMEND the best country (up to 3), top 3 cities, top 3 towns, top 3 neighborhoods
 3. SCORE every recommendation against every metric with justifications
@@ -184,7 +184,7 @@ Use your native Google Search grounding to verify real-world data for every metr
 
 The user selected globe region: "${globeRegion}"
 
-Here are their 24 paragraphs:
+Here are their 27 paragraphs:
 
 ${paragraphText}
 
@@ -198,17 +198,17 @@ Convert every measurable, researchable preference into a discrete metric.
 - Each metric must be:
   - Numbered (M1, M2, M3...)
   - Categorized (one of: climate, safety, healthcare, housing, transportation, legal, financial, lifescore, business, technology, education, family, dating, pets, food, sports, outdoor, arts, entertainment, spiritual)
-  - Sourced to a specific paragraph (P1-P24)
+  - Sourced to a specific paragraph (P1-P27)
   - Researchable (you can find real data for it)
   - Scorable (numeric, boolean, ranking, or index)
 
 Example conversions:
-  P3: "I hate humidity and want warm winters around 20-25C"
-  --> M1: Average annual humidity below 60% [climate] [P3]
-  --> M2: Average winter temperature 20-25C [climate] [P3]
+  P6: "I hate humidity and want warm winters around 20-25C"
+  --> M1: Average annual humidity below 60% [climate] [P6]
+  --> M2: Average winter temperature 20-25C [climate] [P6]
 
-  P11: "I need at least 100mbps for my remote work"
-  --> M28: Average broadband speed above 100 Mbps [technology] [P11]
+  P14: "I need at least 100mbps for my remote work"
+  --> M28: Average broadband speed above 100 Mbps [technology] [P14]
 
 STEP 2: LOCATION RECOMMENDATIONS
 Using Google Search grounding, identify:
@@ -256,7 +256,7 @@ Return ONLY valid JSON matching this exact schema (no markdown fences, no explan
       "fieldId": "<machine_readable_id like climate_01_humidity>",
       "description": "<human readable metric description>",
       "category": "<one of the 20 categories>",
-      "source_paragraph": <1-24>,
+      "source_paragraph": <1-27>,
       "score": <0-100>,
       "user_justification": "Matches P[N]: <specific reference to user's paragraph>",
       "data_justification": "<real-world data backing this score>",
@@ -309,7 +309,7 @@ Return ONLY valid JSON matching this exact schema (no markdown fences, no explan
   ],
   "paragraph_summaries": [
     {
-      "id": <1-24>,
+      "id": <1-27>,
       "key_themes": ["<theme1>", "<theme2>"],
       "extracted_preferences": ["<preference1>"],
       "metrics_derived": ["M1", "M2"]

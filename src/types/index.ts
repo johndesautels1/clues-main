@@ -32,7 +32,7 @@ export interface GlobeSelection {
 
 // ─── Paragraphical ───────────────────────────────────────────────
 export interface ParagraphEntry {
-  id: number;              // 1-24
+  id: number;              // 1-27
   heading: string;         // "Who You Are"
   content: string;         // User's free-form text
   updatedAt?: string;      // ISO timestamp
@@ -56,7 +56,7 @@ export interface GeminiMetricObject {
   fieldId: string;                 // Machine-readable: "climate_01_humidity"
   description: string;             // "Average annual humidity below 60%"
   category: string;                // One of the 20 Human Existence Flow categories
-  source_paragraph: number;        // Which paragraph (1-24) triggered this metric
+  source_paragraph: number;        // Which paragraph (1-27) triggered this metric
   score: number;                   // 0-100 (relative to other locations)
   user_justification: string;      // "Matches P4: User prioritized 'low petty crime'"
   data_justification: string;      // "Cascais 2026 safety reports show 12% decrease"

@@ -132,11 +132,15 @@ LifeScore is one of the 20 category modules (Category 8) but is unique:
 
 ### Per-Paragraph Metric Targets
 
-Each of the 24 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
+Each of the 27 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
+
+See `src/data/paragraphs.ts` for the canonical paragraph definitions (6 phases, 27 paragraphs).
 
 ```
 PARAGRAPH → CATEGORY MAPPING → MIN METRICS → COVERAGE TARGETS
 ═══════════════════════════════════════════════════════════════
+
+PHASE 1: YOUR PROFILE
 
 P1: "Who You Are" → Demographics/Profile → 8-12 metrics
   Coverage targets:
@@ -145,6 +149,7 @@ P1: "Who You Are" → Demographics/Profile → 8-12 metrics
   - Household composition (solo, couple, family, multi-gen)
   - Language(s) spoken (affects integration ease)
   - Cultural identity (affects community matching)
+  - Employment type (remote, business owner, retired, student)
   Example metrics:
     M1: Age-appropriate healthcare infrastructure [Healthcare]
     M2: Passport-compatible visa pathways [Legal]
@@ -154,16 +159,66 @@ P1: "Who You Are" → Demographics/Profile → 8-12 metrics
 P2: "Your Life Right Now" → Cross-category signals → 10-15 metrics
   Coverage targets:
   - Current city/country (baseline for comparison)
+  - Monthly income/budget in user's currency
   - Push factors (what's WRONG now — critical for DNW signals)
   - Pull factors (what they're SEEKING — critical for MH signals)
   - Timeline urgency (affects visa pathway scoring)
-  - Emotional state (affects how we frame the report)
   Example metrics:
     M5: Improvement over current city on [detected push factor] [varies]
     M6: Cost of living differential vs current location [Financial]
     M7: Quality of life index improvement [cross-category]
 
-P3: "Your Ideal Climate" → Climate & Weather → 12-18 metrics
+PHASE 2: DO NOT WANTS
+
+P3: "Your Dealbreakers" → Cross-category HARD WALLS → 10-18 metrics
+  Coverage targets:
+  - Climate extremes they cannot tolerate (humidity, heat, cold)
+  - Crime levels / political instability
+  - Lack of healthcare / internet too slow
+  - No visa pathway / language barriers
+  - Countries or regions they refuse to consider
+  - Religious or cultural intolerance
+  NOTE: These are ELIMINATION metrics — any city hitting a DNW is removed regardless of score.
+  Example metrics:
+    M8: Average annual humidity below 80% [Climate — DNW]
+    M9: No political instability (conflict-free zone) [Safety — DNW]
+    M10: Visa pathway must exist for [nationality] [Legal — DNW]
+    M11: Internet speed above [X] Mbps minimum [Technology — DNW]
+
+PHASE 3: MUST HAVES
+
+P4: "Your Non-Negotiables" → Cross-category REQUIREMENTS → 10-15 metrics
+  Coverage targets:
+  - Minimum internet speed for work
+  - Specific medical facilities / specialists
+  - Airport within X hours
+  - English widely spoken
+  - Specific visa type available
+  - Minimum safety rating
+  - Specific housing type must exist
+  Example metrics:
+    M12: Broadband speed above 100 Mbps [Technology — MH]
+    M13: International airport within 2 hours [Transport — MH]
+    M14: English widely spoken in daily life [Social — MH]
+    M15: [Specific specialist] available within 30min [Healthcare — MH]
+
+PHASE 4: TRADE-OFFS
+
+P5: "Your Trade-offs" → Priority weighting signals → 5-10 metrics
+  Coverage targets:
+  - What they'd sacrifice for safety (reveals safety weight)
+  - What they'd sacrifice for cost savings (reveals budget weight)
+  - Language barrier tolerance (reveals integration weight)
+  - Comfort vs adventure preference (reveals lifestyle weight)
+  NOTE: This paragraph doesn't generate location metrics directly — it generates
+  WEIGHT MULTIPLIERS for metrics from other paragraphs.
+  Example signals:
+    "Pay 20% more for safety" → safety_weight: 1.3x
+    "Accept slower internet for beach" → technology_weight: 0.8x, outdoor_weight: 1.2x
+
+PHASE 5: MODULE DEEP DIVES (P6-P25, one per Human Existence Flow module)
+
+P6: "Climate & Weather" → Climate & Weather → 12-18 metrics
   Coverage targets:
   - Temperature range preference (specific numbers if possible)
   - Humidity tolerance (tropical vs dry — make-or-break)
@@ -172,73 +227,66 @@ P3: "Your Ideal Climate" → Climate & Weather → 12-18 metrics
   - Sunshine hours importance
   - Air quality sensitivity
   Example metrics:
-    M8: Average winter temperature 20-25C [Climate]
-    M9: Annual humidity below 60% [Climate]
-    M10: Fewer than 2 extreme weather events per decade [Climate]
-    M11: Annual sunshine hours above 2500 [Climate]
-    M12: Air Quality Index below 50 (WHO standard) [Climate]
-    M13: No monsoon/rainy season exceeding 60 days [Climate]
+    M16: Average winter temperature 20-25C [Climate]
+    M17: Annual humidity below 60% [Climate]
+    M18: Annual sunshine hours above 2500 [Climate]
+    M19: Air Quality Index below 50 (WHO standard) [Climate]
 
-P4: "Safety & Peace of Mind" → Safety & Security → 10-15 metrics
+P7: "Safety & Security" → Safety & Security → 10-15 metrics
   Coverage targets:
   - Crime type concerns (violent, property, petty, organized)
   - Political stability importance
   - Emergency services quality
   - Women's safety / LGBTQ+ safety (if relevant)
   - Neighborhood safety feel (walkable at night?)
-  - Natural disaster preparedness
   Example metrics:
-    M14: Violent crime rate below [X] per 100k [Safety]
-    M15: Political stability index above 70/100 [Safety]
-    M16: Emergency response time under 10 minutes [Safety]
-    M17: Safe for solo walking after midnight [Safety]
+    M20: Violent crime rate below [X] per 100k [Safety]
+    M21: Political stability index above 70/100 [Safety]
+    M22: Emergency response time under 10 minutes [Safety]
+    M23: Safe for solo walking after midnight [Safety]
 
-P5: "Your Health & Wellness" → Healthcare & Medical → 12-18 metrics
+P8: "Healthcare & Medical" → Healthcare & Medical → 12-18 metrics
   Coverage targets:
   - Chronic conditions requiring specialist access
   - Medication availability (specific drugs)
   - Mental health services
   - Insurance system (public vs private, cost)
   - Hospital quality / international accreditation
-  - Wellness infrastructure (alternative medicine, prevention)
   - Dental care access
   Example metrics:
-    M18: [Specific specialist] availability within 30min [Healthcare]
-    M19: [Specific medication] legally available and affordable [Healthcare]
-    M20: English-speaking medical professionals [Healthcare]
-    M21: Private health insurance under EUR 300/month [Healthcare]
-    M22: JCI-accredited hospital within 30 minutes [Healthcare]
+    M24: [Specific specialist] availability within 30min [Healthcare]
+    M25: [Specific medication] legally available and affordable [Healthcare]
+    M26: English-speaking medical professionals [Healthcare]
+    M27: Private health insurance under EUR 300/month [Healthcare]
 
-P6: "Your Dream Home" → Housing & Real Estate → 12-15 metrics
+P9: "Housing & Real Estate" → Housing & Real Estate → 12-15 metrics
   Coverage targets:
   - Property type (apartment, house, villa, loft)
   - Size requirements (bedrooms, sqm/sqft)
   - Rent vs buy preference
   - Budget range for housing specifically
   - Neighborhood character (urban buzz vs quiet residential)
-  - Amenities (garden, pool, parking, elevator)
   - Foreign ownership rules
   Example metrics:
-    M23: 2BR apartment rental under EUR 1,500/month [Housing]
-    M24: Foreigner property ownership permitted [Housing]
-    M25: Walkable neighborhood with shops within 500m [Housing]
-    M26: Building quality / construction standards [Housing]
+    M28: 2BR apartment rental under EUR 1,500/month [Housing]
+    M29: Foreigner property ownership permitted [Housing]
+    M30: Walkable neighborhood with shops within 500m [Housing]
 
-P7: "Your Legal Reality" → Legal & Immigration → 10-15 metrics
+P10: "Legal & Immigration" → Legal & Immigration → 10-15 metrics
   Coverage targets:
   - Current passport(s) and their strength
   - Visa type interest (digital nomad, retirement, investment, work)
   - Residency pathway length tolerance
   - Bureaucracy tolerance
   - Tax treaty awareness
-  - Dual citizenship possibility
+  - Rule of law / judicial independence
   Example metrics:
-    M27: Digital nomad visa available for [nationality] [Legal]
-    M28: Residency achievable within 12 months [Legal]
-    M29: Tax treaty with [home country] [Financial]
-    M30: Bureaucracy efficiency index [Legal]
+    M31: Digital nomad visa available for [nationality] [Legal]
+    M32: Residency achievable within 12 months [Legal]
+    M33: Tax treaty with [home country] [Financial]
+    M34: Rule of law index in top 30 countries [Legal]
 
-P8: "Your Financial Picture" → Financial & Banking → 12-18 metrics
+P11: "Financial & Banking" → Financial & Banking → 12-18 metrics
   Coverage targets:
   - Monthly income (DETECT CURRENCY — never default to USD)
   - Monthly budget tolerance
@@ -247,56 +295,52 @@ P8: "Your Financial Picture" → Financial & Banking → 12-18 metrics
   - Banking needs (international transfers, crypto, investment access)
   - Cost of living expectations (specific: rent, food, transport, healthcare)
   Example metrics:
-    M31: Monthly cost of living below EUR 3,000 [Financial]
-    M32: No income tax on foreign-sourced income [Financial]
-    M33: International banking with EUR/USD accounts [Financial]
-    M34: Grocery cost for family of [X] below EUR 600/month [Financial]
-    M35: Favorable capital gains tax rate (below 20%) [Financial]
+    M35: Monthly cost of living below EUR 3,000 [Financial]
+    M36: No income tax on foreign-sourced income [Financial]
+    M37: International banking with EUR/USD accounts [Financial]
+    M38: Favorable capital gains tax rate (below 20%) [Financial]
 
-P9: "Freedom & Autonomy" → LifeScore / Legal → 8-12 metrics
+P12: "Legal Independence & Freedom" → LifeScore / Legal → 8-12 metrics
   Coverage targets:
   - Personal freedoms that matter (speech, press, religion, lifestyle)
   - Substances (alcohol, cannabis, legal status)
   - LGBTQ+ rights (if applicable)
   - Internet censorship tolerance
-  - Gun rights (if applicable)
-  - Business freedom / regulatory freedom
+  - Privacy laws / government surveillance
   Example metrics:
-    M36: Press Freedom Index in top 30 countries [LifeScore]
-    M37: Cannabis legal or decriminalized [LifeScore]
-    M38: No internet censorship / VPN not required [LifeScore]
-    M39: LGBTQ+ legal protections in place [LifeScore]
+    M39: Press Freedom Index in top 30 countries [LifeScore]
+    M40: Cannabis legal or decriminalized [LifeScore]
+    M41: No internet censorship / VPN not required [LifeScore]
+    M42: LGBTQ+ legal protections in place [LifeScore]
 
-P10: "Your Work & Career" → Business & Entrepreneurship → 12-15 metrics
+P13: "Business & Entrepreneurship" → Business & Entrepreneurship → 12-15 metrics
   Coverage targets:
   - Remote vs local employment
-  - Industry/sector (tech, finance, creative, trades)
   - Startup ecosystem need
   - Coworking space availability
   - Business registration ease
   - Networking / professional community
   - Time zone compatibility with clients/team
   Example metrics:
-    M40: Coworking spaces with 24/7 access [Business]
-    M41: Startup incorporation under 30 days [Business]
-    M42: Time zone within +/- 3 hours of [client zone] [Business]
-    M43: Active [industry] professional community [Business]
+    M43: Coworking spaces with 24/7 access [Business]
+    M44: Startup incorporation under 30 days [Business]
+    M45: Time zone within +/- 3 hours of [client zone] [Business]
+    M46: Active [industry] professional community [Business]
 
-P11: "Staying Connected" → Technology & Connectivity → 10-12 metrics
+P14: "Technology & Connectivity" → Technology & Connectivity → 10-12 metrics
   Coverage targets:
   - Internet speed requirements (specific Mbps)
   - 5G / mobile data coverage
   - Remote work infrastructure
+  - Power grid reliability
   - Digital nomad community / ecosystem
-  - Smart city infrastructure
-  - Tech startup density (if relevant)
   Example metrics:
-    M44: Average broadband speed above 100 Mbps [Technology]
-    M45: 5G coverage in city center [Technology]
-    M46: Fiber optic availability in residential areas [Technology]
-    M47: Reliable power grid (outages < 5 hours/year) [Technology]
+    M47: Average broadband speed above 100 Mbps [Technology]
+    M48: 5G coverage in city center [Technology]
+    M49: Fiber optic availability in residential areas [Technology]
+    M50: Reliable power grid (outages < 5 hours/year) [Technology]
 
-P12: "Getting Around" → Transportation → 10-15 metrics
+P15: "Transportation & Mobility" → Transportation → 10-15 metrics
   Coverage targets:
   - Car ownership intention (yes/no/maybe)
   - Public transit quality expectations
@@ -304,56 +348,124 @@ P12: "Getting Around" → Transportation → 10-15 metrics
   - Bike infrastructure
   - Airport proximity for international travel
   - Ride-sharing availability
-  - Commute time tolerance
   Example metrics:
-    M48: Public transit coverage reaching 90%+ of city [Transport]
-    M49: Walk Score above 80 [Transport]
-    M50: International airport within 45 minutes [Transport]
-    M51: Bike lane network throughout city center [Transport]
+    M51: Public transit coverage reaching 90%+ of city [Transport]
+    M52: Walk Score above 80 [Transport]
+    M53: International airport within 45 minutes [Transport]
+    M54: Bike lane network throughout city center [Transport]
 
-P13: "Learning & Growth" → Education & Learning → 8-12 metrics
+P16: "Education & Learning" → Education & Learning → 8-12 metrics
   Coverage targets:
+  - Children's education needs (international schools, curricula)
   - Personal education goals (language, degree, skills)
-  - Children's education needs (if applicable)
-  - International school availability
   - University quality / ranking
-  - Professional development / conferences
-  - Language learning infrastructure
+  - Library and language school access
   Example metrics:
-    M52: International schools with IB curriculum [Education]
-    M53: Language schools for [target language] [Education]
-    M54: University ranked in global top 500 [Education]
+    M55: International schools with IB curriculum [Education]
+    M56: Language schools for [target language] [Education]
+    M57: University ranked in global top 500 [Education]
 
-P14: "Your Family" → Family & Children → 10-15 metrics
+P17: "Family & Children" → Family & Children → 10-15 metrics
   Coverage targets:
   - Who is relocating (partner, kids ages, parents)
   - Partner's career needs
   - Children's age-specific needs (daycare, primary, secondary)
-  - Family activities and entertainment
   - Elderly care (if parents coming)
   - Family-friendly neighborhoods
-  - Parental leave / family benefits (if employed locally)
+  - Proximity to family back home (flight frequency)
   Example metrics:
-    M55: Daycare availability under EUR 500/month [Family]
-    M56: Parks and playgrounds within 10-minute walk [Family]
-    M57: English-medium schooling K-12 [Family]
-    M58: Family-oriented neighborhood culture [Family]
+    M58: Daycare availability under EUR 500/month [Family]
+    M59: Parks and playgrounds within 10-minute walk [Family]
+    M60: English-medium schooling K-12 [Family]
+    M61: Direct flights to [home country] 3+ times/week [Family]
 
-P15: "Your Social World" → Dating & Social Life → 10-12 metrics
+P18: "Dating & Social Life" → Dating & Social Life → 10-12 metrics
   Coverage targets:
   - Expat community size and activity
   - Dating scene (if single)
   - Social club/meetup availability
   - Cultural openness to foreigners
-  - Nightlife quality (or lack thereof if preferred)
-  - Community integration ease
+  - Nightlife as social tool
   Example metrics:
-    M59: Active expat community (1000+ in meetup groups) [Social]
-    M60: Cultural openness index for foreigners [Social]
-    M61: English widely spoken in social settings [Social]
-    M62: Regular social events / meetups weekly [Social]
+    M62: Active expat community (1000+ in meetup groups) [Social]
+    M63: Cultural openness index for foreigners [Social]
+    M64: English widely spoken in social settings [Social]
+    M65: Regular social events / meetups weekly [Social]
 
-P16: "Your Animals" → Pets & Animals → 8-10 metrics
+P19: "Food & Cuisine" → Food & Cuisine → 10-12 metrics
+  Coverage targets:
+  - Dietary restrictions (vegan, halal, kosher, gluten-free, allergies)
+  - Cuisine preferences (specific cuisines loved)
+  - Grocery budget expectations
+  - Restaurant culture importance
+  - Food delivery infrastructure
+  Example metrics:
+    M66: Vegan restaurant density above 5 per 10k people [Food]
+    M67: International grocery stores with [cuisine] ingredients [Food]
+    M68: Average restaurant meal under EUR 15 [Food]
+    M69: Food delivery apps with 30-min delivery [Food]
+
+P20: "Sports & Fitness" → Sports & Fitness → 8-12 metrics
+  Coverage targets:
+  - Gym/fitness center access and cost
+  - Specific sports (tennis, surfing, yoga, CrossFit, padel)
+  - Sports league / club availability
+  - Outdoor fitness infrastructure
+  Example metrics:
+    M70: Gym membership under EUR 50/month [Fitness]
+    M71: [Specific sport] clubs with English-speaking members [Fitness]
+    M72: Running/cycling paths along waterfront or parks [Fitness]
+    M73: Year-round outdoor exercise climate [Fitness]
+
+P21: "Outdoor & Nature" → Outdoor & Nature → 8-12 metrics
+  Coverage targets:
+  - Mountain vs beach preference (or both)
+  - Hiking trail accessibility
+  - Water sports access (surfing, diving, sailing)
+  - Green space within city
+  - National parks / nature reserves proximity
+  Example metrics:
+    M74: Beach within 30-minute drive [Outdoor]
+    M75: Hiking trails accessible without car [Outdoor]
+    M76: City green space above 20 sqm per capita [Outdoor]
+    M77: National parks within 2-hour drive [Outdoor]
+
+P22: "Arts & Culture" → Arts & Culture → 8-10 metrics
+  Coverage targets:
+  - Museum / gallery importance
+  - Music scene (live music, genres, festivals)
+  - Historical / architectural richness
+  - Art community / creative scene
+  Example metrics:
+    M78: Museums per capita in top quartile [Culture]
+    M79: Live music venues with weekly events [Culture]
+    M80: Cultural heritage UNESCO sites nearby [Culture]
+    M81: Active creative/artist community [Culture]
+
+P23: "Entertainment & Nightlife" → Entertainment & Nightlife → 8-10 metrics
+  Coverage targets:
+  - Nightlife style (clubs, bars, lounges, none)
+  - Festival / event calendar
+  - Cinema / theater
+  - Weekend activity variety
+  Example metrics:
+    M82: Nightlife district with diverse venue types [Entertainment]
+    M83: Annual festivals exceeding 20 events [Entertainment]
+    M84: Cinema showing English-language films [Entertainment]
+    M85: Weekend activities variety score [Entertainment]
+
+P24: "Spiritual & Religious" → Spiritual & Religious → 6-8 metrics
+  Coverage targets:
+  - Specific religion / denomination
+  - Place of worship proximity
+  - Religious tolerance / interfaith
+  - Spiritual community (meditation, yoga, retreats)
+  Example metrics:
+    M86: [Specific] places of worship within 20 minutes [Spiritual]
+    M87: Religious tolerance index above 70/100 [Spiritual]
+    M88: Meditation / retreat centers accessible [Spiritual]
+
+P25: "Pets & Animals" → Pets & Animals → 8-10 metrics
   Coverage targets:
   - Pet type and breed (affects import regulations)
   - Pet-friendly housing availability
@@ -362,112 +474,31 @@ P16: "Your Animals" → Pets & Animals → 8-10 metrics
   - Off-leash parks / pet-friendly spaces
   - Breed-specific legislation (if applicable)
   Example metrics:
-    M63: Pet-friendly rental apartments available [Pets]
-    M64: No breed-specific legislation for [breed] [Pets]
-    M65: Veterinary care within 15 minutes [Pets]
-    M66: No quarantine requirement for [pet type] import [Pets]
+    M89: Pet-friendly rental apartments available [Pets]
+    M90: No breed-specific legislation for [breed] [Pets]
+    M91: Veterinary care within 15 minutes [Pets]
+    M92: No quarantine requirement for [pet type] import [Pets]
 
-P17: "Food & Dining" → Food & Cuisine → 10-12 metrics
-  Coverage targets:
-  - Dietary restrictions (vegan, halal, kosher, gluten-free, allergies)
-  - Cuisine preferences (specific cuisines loved)
-  - Grocery budget expectations
-  - Restaurant culture importance
-  - Food delivery infrastructure
-  - Local cuisine quality / variety
-  - Farmers markets / organic access
-  Example metrics:
-    M67: Vegan restaurant density above 5 per 10k people [Food]
-    M68: International grocery stores with [cuisine] ingredients [Food]
-    M69: Average restaurant meal under EUR 15 [Food]
-    M70: Food delivery apps with 30-min delivery [Food]
+PHASE 6: YOUR VISION
 
-P18: "Fitness & Activity" → Sports & Fitness → 8-12 metrics
-  Coverage targets:
-  - Gym/fitness center access and cost
-  - Specific sports (tennis, surfing, yoga, CrossFit, martial arts)
-  - Sports league / club availability
-  - Outdoor fitness infrastructure (running paths, outdoor gyms)
-  - Wellness/spa culture
-  - Swimming pool access (indoor/outdoor)
-  Example metrics:
-    M71: Gym membership under EUR 50/month [Fitness]
-    M72: [Specific sport] clubs with English-speaking members [Fitness]
-    M73: Running/cycling paths along waterfront or parks [Fitness]
-    M74: Year-round outdoor exercise climate [Fitness]
-
-P19: "Nature & Outdoors" → Outdoor & Nature → 8-12 metrics
-  Coverage targets:
-  - Mountain vs beach preference (or both)
-  - Hiking trail accessibility
-  - Water sports access (surfing, diving, sailing)
-  - Green space within city
-  - National parks / nature reserves proximity
-  - Wildlife encounters (positive or concern)
-  Example metrics:
-    M75: Beach within 30-minute drive [Outdoor]
-    M76: Hiking trails accessible without car [Outdoor]
-    M77: City green space above 20 sqm per capita [Outdoor]
-    M78: National parks within 2-hour drive [Outdoor]
-
-P20: "Arts & Culture" → Arts & Culture → 8-10 metrics
-  Coverage targets:
-  - Museum / gallery importance
-  - Music scene (live music, genres, festivals)
-  - Theater / performing arts
-  - Historical / architectural richness
-  - Cultural events calendar density
-  - Art community / creative scene
-  Example metrics:
-    M79: Museums per capita in top quartile [Culture]
-    M80: Live music venues with weekly events [Culture]
-    M81: Cultural heritage UNESCO sites nearby [Culture]
-    M82: Active creative/artist community [Culture]
-
-P21: "Fun & Entertainment" → Entertainment & Nightlife → 8-10 metrics
-  Coverage targets:
-  - Nightlife style (clubs, bars, lounges, none)
-  - Festival / event calendar
-  - Cinema / theater
-  - Gaming / esports (if relevant)
-  - Weekend activity variety
-  - Comedy / stand-up scene
-  Example metrics:
-    M83: Nightlife district with diverse venue types [Entertainment]
-    M84: Annual festivals exceeding 20 events [Entertainment]
-    M85: Cinema showing English-language films [Entertainment]
-    M86: Weekend activities variety score [Entertainment]
-
-P22: "Faith & Spirituality" → Spiritual & Religious → 6-8 metrics
-  Coverage targets:
-  - Specific religion / denomination
-  - Place of worship proximity
-  - Religious tolerance / interfaith
-  - Spiritual community (meditation, yoga, retreats)
-  - Religious dietary accommodation
-  - Secular-friendly (if non-religious)
-  Example metrics:
-    M87: [Specific] places of worship within 20 minutes [Spiritual]
-    M88: Religious tolerance index above 70/100 [Spiritual]
-    M89: Meditation / retreat centers accessible [Spiritual]
-
-P23: "Your Dream Day" → Cross-category validation → 5-8 metrics
+P26: "Your Dream Day" → Cross-category validation → 5-8 metrics
   Coverage targets:
   - Morning routine signals (coffee culture, beach sunrise, gym)
   - Afternoon signals (work setup, lunch culture, siesta)
   - Evening signals (dining out, nightlife, family time, nature)
   - Walkability narrative (does the dream day require a car?)
-  - Weather narrative (confirms/refines climate from P3)
+  - Weather narrative (confirms/refines climate from P6)
   NOTE: This paragraph validates and refines metrics from ALL other paragraphs.
   Gemini cross-references "dream day" activities against extracted metrics.
 
-P24: "Anything Else" → Wildcard / Dealbreakers → 5-15 metrics
+P27: "Anything Else" → Wildcard / Dealbreakers → 5-15 metrics
   Coverage targets:
   - Absolute dealbreakers not covered elsewhere
   - Niche requirements (specific hobby, rare medical need, etc.)
   - Emotional/psychological needs
   - Things they're afraid to say in earlier paragraphs
   - Partner's separate requirements
+  - Past relocation experiences (loved/hated cities and WHY)
   NOTE: This is the safety net. Olivia should especially encourage depth here.
 ```
 
@@ -524,27 +555,27 @@ IF user is too vague:
 
 ### Interjection Examples by Paragraph
 
-**P3 — "Your Ideal Climate"**
+**P6 — "Climate & Weather"**
 User wrote about temperature but not humidity:
 > "Love the detail about temperature! Quick thought — how do you feel about humidity? Some places hit your perfect temperature but the humidity makes it feel 10 degrees hotter. Worth mentioning if it matters to you."
 
-**P5 — "Your Health & Wellness"**
+**P8 — "Healthcare & Medical"**
 User mentioned being healthy but didn't discuss medication or specialists:
 > "Great that you're in good health! Just in case — do you take any regular medications or see any specialists? Pharmacy access varies wildly between countries, and some medications that are over-the-counter at home need prescriptions abroad."
 
-**P8 — "Your Financial Picture"**
+**P11 — "Financial & Banking"**
 User mentioned income but not taxes:
 > "Good picture of your income! One thing that can make or break a relocation budget: taxes. Some countries won't tax your foreign income at all, others take 30%+. Any thoughts on your tax tolerance?"
 
-**P12 — "Getting Around"**
+**P15 — "Transportation & Mobility"**
 User described a car-free lifestyle but didn't mention airports:
 > "Love the walkable vision! How often do you travel internationally? Airport proximity matters a lot for some people — a beautiful walkable city that's 3 hours from an airport changes the equation."
 
-**P16 — "Your Animals"**
+**P25 — "Pets & Animals"**
 User mentioned a dog but not the breed:
 > "A fellow dog person! What breed? It matters more than you'd think — some countries ban specific breeds, and size affects housing options and airline transport rules."
 
-**P24 — "Anything Else"**
+**P27 — "Anything Else"**
 User wrote very little:
 > "This is your safety net — anything you've been thinking about that didn't fit neatly into the other sections? Dealbreakers you forgot to mention? Things your partner cares about that are different from your priorities? Even small things can matter."
 
@@ -559,12 +590,12 @@ Phase 1 (MVP): Keyword/regex detection against coverage target keywords per para
 Phase 2 (Enhanced): Gemini Flash API call (debounced, max 1 per paragraph)
   - Send: paragraph text + coverage targets + paragraph context
   - Return: which targets are covered, which are missing, suggested interjection
-  - Cost: ~$0.001 per call (Flash is cheap), 24 calls max = $0.024 per user
+  - Cost: ~$0.001 per call (Flash is cheap), 27 calls max = $0.027 per user
 
 Phase 3 (Advanced): Context-aware cross-paragraph intelligence
   - Olivia remembers what was said in ALL previous paragraphs
-  - If P14 (Family) mentions kids but P13 (Education) doesn't address schools: prompt
-  - If P8 (Financial) mentions tight budget but P6 (Housing) describes a villa: flag conflict
+  - If P17 (Family) mentions kids but P16 (Education) doesn't address schools: prompt
+  - If P11 (Financial) mentions tight budget but P9 (Housing) describes a villa: flag conflict
   - Cross-paragraph consistency checking
 ```
 
@@ -965,7 +996,7 @@ SECTION 9: METHODOLOGY & EVIDENCE (Pages 87-96)
 ────────────────────────────────────────────────
   Page 87: HOW CLUES WORKS
            - Plain-language explanation of the system
-           - 24 paragraphs → metric extraction → 5-LLM scoring → Opus Judge → Report
+           - 27 paragraphs → metric extraction → 5-LLM scoring → Opus Judge → Report
            - Why this is better than Googling / reading blogs
            - VISUAL: Pipeline flowchart (simple, clean)
 
@@ -1098,7 +1129,7 @@ This is the **single source of truth** for which AI model powers each function i
 
 ## Olivia Tutor Architecture (Paragraphical Writing Flow)
 
-Olivia guides users while they write each of the 24 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
+Olivia guides users while they write each of the 27 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
 
 ### Layer 1: Coverage Target Data (Code — Zero Cost)
 **What:** A TypeScript data file defining what each paragraph needs.
@@ -1107,8 +1138,8 @@ Olivia guides users while they write each of the 24 paragraphs, ensuring they co
 ```typescript
 // Per-paragraph: coverage targets, keyword groups, template interjections
 {
-  paragraphId: 3,
-  heading: "Your Ideal Climate",
+  paragraphId: 6,
+  heading: "Climate & Weather",
   coverageTargets: [
     { id: "temperature", label: "Temperature preference", keywords: ["hot", "cold", "warm", "cool", "degrees", "celsius", "fahrenheit"] },
     { id: "humidity", label: "Humidity tolerance", keywords: ["humid", "humidity", "dry", "moisture", "sticky", "arid", "tropical"] },
@@ -1166,13 +1197,13 @@ Reference something they wrote positively first. Ask about ONE missing target.
 Max 2 sentences. Never say "you forgot" — say "have you thought about".
 ```
 
-Cost: ~$0.001 per call x 24 paragraphs = $0.024 max per user (most paragraphs handled by Layer 2).
+Cost: ~$0.001 per call x 27 paragraphs = $0.027 max per user (most paragraphs handled by Layer 2).
 
 ### Layer 4: Cross-Paragraph Intelligence (API — Future)
 **What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
 
-- Fires after paragraphs 6, 12, 18, and 24 (section boundaries)
-- Checks for contradictions (P3 vs P6, P8 vs P10)
+- Fires after paragraphs 5, 9, 12, 16, 21, 25, and 27 (phase/section boundaries)
+- Checks for contradictions (P3 Dealbreakers vs P6 Climate, P11 Financial vs P9 Housing)
 - Identifies completely unaddressed categories
 - Suggests which remaining paragraphs to focus on
 - Uses conversation history to avoid repetition

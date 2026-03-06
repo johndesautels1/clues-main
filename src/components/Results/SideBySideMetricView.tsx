@@ -2,7 +2,7 @@
  * SideBySideMetricView — Compares City, Town, and Neighborhood metrics.
  *
  * Each row shows a metric scored across all three location levels.
- * Clicking a justification highlights the source Paragraph (P1-P24)
+ * Clicking a justification highlights the source Paragraph (P1-P27)
  * via the onParagraphClick callback.
  *
  * Blueprint requirement: "Implement a Side-by-Side Metric View where each row

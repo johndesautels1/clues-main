@@ -1,8 +1,8 @@
 /**
- * ReactiveJustification — Click a justification to highlight the source Paragraph (P1-P24).
+ * ReactiveJustification — Click a justification to highlight the source Paragraph (P1-P27).
  *
  * Blueprint requirement: "Ensure the 'Justification' field is reactive - clicking it
- * should highlight the specific Paragraph (P1-P24) that triggered that metric score."
+ * should highlight the specific Paragraph (P1-P27) that triggered that metric score."
  *
  * This component renders a single metric's justification with a clickable paragraph tag.
  * When clicked, it scrolls to and highlights the source paragraph in the Paragraphical view
