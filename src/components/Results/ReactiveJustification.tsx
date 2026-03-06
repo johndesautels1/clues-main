@@ -11,7 +11,7 @@
  * WCAG 2.1 AA: Focus-visible, 4.5:1 contrast, 44x44 touch targets.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { GeminiMetricObject, ParagraphEntry } from '../../types';
 
 interface ReactiveJustificationProps {
