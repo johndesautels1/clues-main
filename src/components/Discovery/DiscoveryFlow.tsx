@@ -397,7 +397,7 @@ export function DiscoveryFlow() {
             Your Journey Begins Here
           </h1>
           <p style={{ fontFamily: "'Crimson Pro',Georgia,serif", fontSize: 'clamp(16px,1.8vw,18px)', color: C.textSecondary, lineHeight: 1.8, margin: '0 auto 12px', maxWidth: 520 }}>
-            Over 27 intimate conversations, you&rsquo;ll paint a complete portrait of who you are and the life you&rsquo;ve been dreaming about.
+            Over 30 intimate conversations, you&rsquo;ll paint a complete portrait of who you are and the life you&rsquo;ve been dreaming about.
           </p>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 'clamp(14px,1.5vw,16px)', color: C.textMuted, lineHeight: 1.7, margin: '0 auto 32px', maxWidth: 480 }}>
             There are no right or wrong answers &mdash; only your truth.
