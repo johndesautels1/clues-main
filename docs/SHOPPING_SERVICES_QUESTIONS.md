@@ -1,7 +1,7 @@
-# Shopping & Services — 101 Typeform Questions Reference
+# Shopping & Services — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire for the Shopping & Services module
-> **Structure:** 10 sections x 10 questions + 1 final cross-section ranking (Q101)
+> **Structure:** 10 sections x 10 questions (Q1-Q99) + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -159,21 +159,20 @@
 
 ---
 
-## Section 10: Shopping Habits & Cross-Cutting Preferences (Q91-Q101)
+## Section 10: Shopping Habits & Cross-Cutting Preferences (Q91-Q100)
 
 | # | Question | Type |
 |---|----------|------|
 | 91 | What is your preferred payment method for shopping? | Preference |
 | 92 | How important is cashless payment acceptance at retailers? | Importance |
-| 93 | Do you actively use digital loyalty programs or rewards cards? | Yes/No |
-| 94 | How do you prefer to research products before purchasing? | Preference |
-| 95 | How important are online booking/reservation systems for services? | Importance |
-| 96 | Would lack of your preferred shopping brands be a dealbreaker for relocation? | Dealbreaker |
-| 97 | What percentage of your shopping is done online vs. in-store? | Ratio |
-| 98 | Would you accept limited luxury shopping for excellent everyday essentials? | Trade-off |
-| 99 | How important is having shopping areas with gender-specific or culturally-appropriate options? | Importance |
-| 100 | Describe any shopping or service needs not covered above that would significantly impact your relocation decision: | Open text |
-| 101 | Rank these 10 sections from most important to least important | Meta-ranking |
+| 93 | How do you prefer to research products before purchasing? | Preference |
+| 94 | How important are online booking/reservation systems for services? | Importance |
+| 95 | Would lack of your preferred shopping brands be a dealbreaker for relocation? | Dealbreaker |
+| 96 | What percentage of your shopping is done online vs. in-store? | Ratio |
+| 97 | Would you accept limited luxury shopping for excellent everyday essentials? | Trade-off |
+| 98 | How important is having shopping areas with gender-specific or culturally-appropriate options? | Importance |
+| 99 | Describe any shopping or service needs not covered above that would significantly impact your relocation decision: | Open text |
+| 100 | Rank these 10 sections from most important to least important | Meta-ranking |
 
 ---
 
@@ -195,4 +194,4 @@ Every section follows the same 10-question structure:
 
 ## Key Observation
 
-Q101 is the **meta-ranking** — the user ranks all 10 sections against each other, giving Gemini the cross-section weighting it needs to prioritize Shopping & Services metrics.
+Q100 is the **meta-ranking** — the user ranks all 10 sections against each other, giving Gemini the cross-section weighting it needs to prioritize Shopping & Services metrics.
