@@ -1222,6 +1222,17 @@ Cost: ~$0.001 per call x 27 paragraphs = $0.027 max per user (most paragraphs ha
 
 ---
 
+## Questionnaire Reference Documents
+
+Typeform questionnaire exports for each module, stored in `docs/`:
+
+| # | Module | Questions | Sections | File |
+|---|--------|-----------|----------|------|
+| 1 | Shopping & Services | 101 | 10 | `SHOPPING_SERVICES_QUESTIONS.md` |
+| 2 | Technology & Connectivity | 105 | 5 | `TECHNOLOGY_CONNECTIVITY_QUESTIONS.md` |
+
+---
+
 ## Development
 
 See `CLAUDE.md` for WCAG 2.1 AA compliance rules, build rules, and development guidelines.
