@@ -1234,6 +1234,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 4 | Housing & Property | 122 | 6 | `HOUSING_PROPERTY_QUESTIONS.md` |
 | 5 | Professional & Career | 106 | 5 | `PROFESSIONAL_CAREER_QUESTIONS.md` |
 | 6 | Religion & Spirituality | 106 | 5 | `RELIGION_SPIRITUALITY_QUESTIONS.md` |
+| 7 | Health & Wellness | 106 | 5 | `HEALTH_WELLNESS_QUESTIONS.md` |
 
 ---
 
