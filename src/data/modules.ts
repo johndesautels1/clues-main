@@ -1,6 +1,8 @@
 /**
- * CLUES Main Module - 20 Module Definitions
- * Each module is a freestanding app contributing 10 general questions
+ * CLUES Main Module - 23 Category Module Definitions (Funnel Order)
+ * Each module has 100 questions in its freestanding app.
+ *
+ * Funnel order: Survival > Foundation > Infrastructure > Lifestyle > Connection > Identity
  *
  * Clues Intelligence LTD
  */
@@ -15,23 +17,14 @@ export interface ModuleDefinition {
   icon: string;
   status: ModuleStatus;
   score?: number;          // 0-100 completion/SMART score
-  questionCount: number;   // Always 10 for general questions
+  questionCount: number;   // 100 per category module
   url?: string;            // Link to freestanding module app
 }
 
 export const MODULES: ModuleDefinition[] = [
   // ═══════════════════════════════════════════════════════════════
-  // SURVIVAL (P6-P9) — The basics of staying alive and sheltered
+  // TIER 1: SURVIVAL (P6-P8) — Can I survive here?
   // ═══════════════════════════════════════════════════════════════
-  {
-    id: 'climate_weather',
-    name: 'Climate & Weather',
-    shortName: 'Climate',
-    description: 'Temperature, humidity, sunshine, natural disasters, and seasons',
-    icon: '\u{1F326}\uFE0F',  // Sun behind rain cloud
-    status: 'not_started',
-    questionCount: 10
-  },
   {
     id: 'safety_security',
     name: 'Safety & Security',
@@ -39,29 +32,29 @@ export const MODULES: ModuleDefinition[] = [
     description: 'Crime rates, political stability, emergency services, and personal safety',
     icon: '\u{1F6E1}\uFE0F',  // Shield
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'healthcare',
-    name: 'Healthcare & Medical',
-    shortName: 'Healthcare',
-    description: 'System quality, insurance, specialists, and medical infrastructure',
+    id: 'health_wellness',
+    name: 'Health & Wellness',
+    shortName: 'Health',
+    description: 'Healthcare system quality, medical access, wellness infrastructure',
     icon: '\u{1F3E5}',  // Hospital
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'housing',
-    name: 'Housing & Real Estate',
-    shortName: 'Housing',
-    description: 'Cost, availability, quality, property rights, and neighborhoods',
-    icon: '\u{1F3E0}',  // House
+    id: 'climate_weather',
+    name: 'Climate & Weather',
+    shortName: 'Climate',
+    description: 'Temperature, humidity, sunshine, natural disasters, air quality, and seasons',
+    icon: '\u{1F326}\uFE0F',  // Sun behind rain cloud
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // FOUNDATION (P10-P12) — Legal, financial, and personal freedom
+  // TIER 2: FOUNDATION (P9-P12) — Can I legally/financially exist here?
   // ═══════════════════════════════════════════════════════════════
   {
     id: 'legal_immigration',
@@ -70,160 +63,194 @@ export const MODULES: ModuleDefinition[] = [
     description: 'Visa pathways, residency programs, rule of law, and legal system',
     icon: '\u{2696}\uFE0F',  // Scales
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'financial',
+    id: 'financial_banking',
     name: 'Financial & Banking',
     shortName: 'Finance',
     description: 'Banking access, tax structure, cost of living, and financial services',
     icon: '\u{1F4B0}',  // Money bag
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'lifescore',
-    name: 'Legal Independence & Freedom',
-    shortName: 'LifeScore',
-    description: 'Legal freedom, personal autonomy, and civil liberties',
-    icon: '\u{1F5FD}',  // Statue of Liberty
-    status: 'completed',
-    score: 100,
-    questionCount: 10,
-    url: 'https://clueslifescore.com'
+    id: 'housing_real_estate',
+    name: 'Housing & Real Estate',
+    shortName: 'Housing',
+    description: 'Cost, availability, quality, property rights, and neighborhoods',
+    icon: '\u{1F3E0}',  // House
+    status: 'not_started',
+    questionCount: 100
+  },
+  {
+    id: 'professional_career',
+    name: 'Professional & Career',
+    shortName: 'Career',
+    description: 'Job market, remote work infrastructure, entrepreneurship, coworking',
+    icon: '\u{1F4BC}',  // Briefcase
+    status: 'not_started',
+    questionCount: 100
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // GROWTH (P13-P16) — Career, tech, transport, education
+  // TIER 3: INFRASTRUCTURE (P13-P16) — Can I function daily here?
   // ═══════════════════════════════════════════════════════════════
   {
-    id: 'business',
-    name: 'Business & Entrepreneurship',
-    shortName: 'Business',
-    description: 'Startup ecosystem, regulations, coworking, and business climate',
-    icon: '\u{1F4BC}',  // Briefcase
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'technology',
+    id: 'technology_connectivity',
     name: 'Technology & Connectivity',
     shortName: 'Tech',
     description: 'Internet speed, tech ecosystem, digital infrastructure, and innovation',
     icon: '\u{1F4F1}',  // Mobile phone
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'transportation',
+    id: 'transportation_mobility',
     name: 'Transportation & Mobility',
     shortName: 'Transport',
-    description: 'Transit systems, walkability, car dependency, and commute quality',
+    description: 'Transit systems, walkability, car dependency, rail networks, and airports',
     icon: '\u{1F687}',  // Metro
-    status: 'recommended',
-    questionCount: 10
+    status: 'not_started',
+    questionCount: 100
   },
   {
-    id: 'education',
+    id: 'education_learning',
     name: 'Education & Learning',
     shortName: 'Education',
     description: 'Schools, universities, continuing education, and learning culture',
     icon: '\u{1F393}',  // Graduation cap
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
+  },
+  {
+    id: 'social_values_governance',
+    name: 'Social Values & Governance',
+    shortName: 'Values',
+    description: 'Political freedom, social tolerance, civic engagement, personal liberty',
+    icon: '\u{1F5FD}',  // Statue of Liberty
+    status: 'not_started',
+    questionCount: 100
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // CONNECTION (P17-P18) — Family and social bonds
+  // TIER 4: LIFESTYLE (P17-P20) — Can I enjoy life here?
   // ═══════════════════════════════════════════════════════════════
   {
-    id: 'family',
-    name: 'Family & Children',
-    shortName: 'Family',
-    description: 'Family services, kid-friendly amenities, schools, and family life',
-    icon: '\u{1F46A}',  // Family
-    status: 'not_started',
-    questionCount: 10
-  },
-  {
-    id: 'dating_social',
-    name: 'Dating & Social Life',
-    shortName: 'Social',
-    description: 'Dating scene, social communities, expat networks, and nightlife',
-    icon: '\u{1F496}',  // Sparkling heart
-    status: 'not_started',
-    questionCount: 10
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // NOURISHMENT (P19-P21) — Food, fitness, nature
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: 'food_cuisine',
-    name: 'Food & Cuisine',
+    id: 'food_dining',
+    name: 'Food & Dining',
     shortName: 'Food',
     description: 'Restaurant scene, grocery access, dietary options, and food culture',
     icon: '\u{1F37D}\uFE0F',  // Fork and knife with plate
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'sports_fitness',
-    name: 'Sports & Fitness',
-    shortName: 'Sports',
-    description: 'Gyms, sports leagues, fitness culture, and athletic facilities',
-    icon: '\u{1F3CB}\uFE0F',  // Weight lifter
+    id: 'shopping_services',
+    name: 'Shopping & Services',
+    shortName: 'Shopping',
+    description: 'Retail, convenience, international products, delivery services',
+    icon: '\u{1F6CD}\uFE0F',  // Shopping bags
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'outdoor_nature',
-    name: 'Outdoor & Nature',
+    id: 'outdoor_recreation',
+    name: 'Outdoor & Recreation',
     shortName: 'Outdoors',
-    description: 'Parks, recreation, hiking, beaches, and natural geography',
+    description: 'Parks, hiking, sports facilities, beaches, and nature access',
     icon: '\u{1F3D4}\uFE0F',  // Snow-capped mountain
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
+  },
+  {
+    id: 'entertainment_nightlife',
+    name: 'Entertainment & Nightlife',
+    shortName: 'Entertainment',
+    description: 'Venues, events, concerts, nightlife, and cultural programming',
+    icon: '\u{1F3AD}',  // Performing arts
+    status: 'not_started',
+    questionCount: 100
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // SOUL (P22-P25) — Culture, entertainment, spirituality, pets
+  // TIER 5: CONNECTION (P21-P23) — Can I build a life here?
   // ═══════════════════════════════════════════════════════════════
   {
-    id: 'arts_culture',
-    name: 'Arts & Culture',
-    shortName: 'Arts',
-    description: 'Museums, galleries, heritage sites, and cultural identity',
-    icon: '\u{1F3A8}',  // Artist palette
+    id: 'family_children',
+    name: 'Family & Children',
+    shortName: 'Family',
+    description: 'Family services, child safety, schools, pediatric care',
+    icon: '\u{1F46A}',  // Family
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'entertainment',
-    name: 'Entertainment & Nightlife',
-    shortName: 'Entertainment',
-    description: 'Cultural venues, events, concerts, and entertainment options',
-    icon: '\u{1F3AD}',  // Performing arts
+    id: 'neighborhood_urban_design',
+    name: 'Neighborhood & Urban Design',
+    shortName: 'Neighborhood',
+    description: 'Street-level livability, walkability, public spaces, urban planning',
+    icon: '\u{1F3D8}\uFE0F',  // Cityscape
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'spiritual',
-    name: 'Spiritual & Religious',
+    id: 'environment_community_appearance',
+    name: 'Environment & Community Appearance',
+    shortName: 'Environment',
+    description: 'Cleanliness, green space, aesthetic quality, environmental standards',
+    icon: '\u{1F333}',  // Deciduous tree
+    status: 'not_started',
+    questionCount: 100
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // TIER 6: IDENTITY (P24-P28) — Can I be myself here?
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'religion_spirituality',
+    name: 'Religion & Spirituality',
     shortName: 'Spiritual',
     description: 'Places of worship, religious tolerance, and spiritual communities',
     icon: '\u{1F54C}',  // Mosque (representing all faiths)
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   },
   {
-    id: 'pets',
+    id: 'sexual_beliefs_practices_laws',
+    name: 'Sexual Beliefs, Practices & Laws',
+    shortName: 'Sexual Freedom',
+    description: 'LGBTQ+ rights, personal freedom, legal protections, social acceptance',
+    icon: '\u{1F308}',  // Rainbow
+    status: 'not_started',
+    questionCount: 100
+  },
+  {
+    id: 'arts_culture',
+    name: 'Arts & Culture',
+    shortName: 'Arts',
+    description: 'Museums, galleries, creative communities, and intellectual life',
+    icon: '\u{1F3A8}',  // Artist palette
+    status: 'not_started',
+    questionCount: 100
+  },
+  {
+    id: 'cultural_heritage_traditions',
+    name: 'Cultural Heritage & Traditions',
+    shortName: 'Heritage',
+    description: 'Local customs, integration expectations, belonging, cultural identity',
+    icon: '\u{1F30D}',  // Globe Europe-Africa
+    status: 'not_started',
+    questionCount: 100
+  },
+  {
+    id: 'pets_animals',
     name: 'Pets & Animals',
     shortName: 'Pets',
-    description: 'Pet-friendly policies, veterinary care, and animal welfare',
+    description: 'Pet-friendly policies, veterinary care, animal welfare, and pet housing',
     icon: '\u{1F43E}',  // Paw prints
     status: 'not_started',
-    questionCount: 10
+    questionCount: 100
   }
 ];
 

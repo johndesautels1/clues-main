@@ -2,7 +2,7 @@
 
 ## Overview
 
-CLUES Intelligence is a relocation and lifestyle intelligence platform that helps users find their **Best City, Best Town, and Best Neighborhood** anywhere in the world. The system uses AI-powered analysis across 20 life categories to deliver personalized, data-driven recommendations.
+CLUES Intelligence is a relocation and lifestyle intelligence platform that helps users find their **Best City, Best Town, and Best Neighborhood** anywhere in the world. The system uses AI-powered analysis across 23 life categories to deliver personalized, data-driven recommendations.
 
 This is **not** a law-based app (unlike LifeScore, which focuses on legal freedom metrics). CLUES Main is a **quality-of-life fit** platform — scoring how well a location matches a specific user's lifestyle, priorities, and needs.
 
@@ -19,41 +19,44 @@ This is **not** a law-based app (unlike LifeScore, which focuses on legal freedo
 
 ---
 
-## The 20 Category System (Human Existence Flow)
+## The 23 Category System (Funnel Flow)
 
-### SURVIVAL & FOUNDATION (5 categories)
-1. **Climate & Weather** — temperature, humidity, seasons, natural disasters, air quality
-2. **Safety & Security** — crime rates, political stability, emergency services, personal safety
-3. **Healthcare & Medical** — hospital access, insurance, specialists, mental health, pharma
-4. **Housing & Real Estate** — cost, availability, quality, rental vs ownership, neighborhoods
-5. **Transportation** — public transit, walkability, bike infrastructure, drive times, airports
+### TIER 1: SURVIVAL (3 categories)
+1. **Safety & Security** — crime rates, political stability, emergency services, personal safety
+2. **Health & Wellness** — healthcare system quality, medical access, wellness infrastructure
+3. **Climate & Weather** — temperature, humidity, sunshine, natural disasters, air quality
 
-### LEGAL & FINANCIAL (3 categories)
-6. **Legal & Immigration** — visa types, residency paths, bureaucracy, rights
-7. **Financial & Banking** — cost of living, taxes, banking access, currency, investment
-8. **LifeScore** — personal freedom metrics (standalone 100-metric module, integrated here)
+### TIER 2: FOUNDATION (4 categories)
+4. **Legal & Immigration** — visa types, residency paths, bureaucracy, rights
+5. **Financial & Banking** — cost of living, taxes, banking access, currency, investment
+6. **Housing & Real Estate** — cost, availability, quality, rental vs ownership, neighborhoods
+7. **Professional & Career** — career opportunities, remote work, business climate
 
-### LIVELIHOOD & GROWTH (3 categories)
-9. **Business & Entrepreneurship** — startup ecosystem, regulations, networking, co-working
-10. **Technology & Connectivity** — internet speed, 5G, tech infrastructure, digital services
-11. **Education & Learning** — schools, universities, language courses, professional development
+### TIER 3: INFRASTRUCTURE (4 categories)
+8. **Technology & Connectivity** — internet speed, 5G, tech infrastructure, digital services
+9. **Transportation & Mobility** — public transit, walkability, bike infrastructure, airports
+10. **Education & Learning** — schools, universities, language courses, professional development
+11. **Social Values & Governance** — civic engagement, governance quality, social norms
 
-### PEOPLE & RELATIONSHIPS (3 categories)
-12. **Family & Children** — childcare, schools, family activities, safety, healthcare for kids
-13. **Dating & Social Life** — social scene, expat community, cultural openness, meetups
-14. **Pets & Animals** — pet-friendly housing, vet access, parks, import regulations
+### TIER 4: LIFESTYLE (4 categories)
+12. **Food & Dining** — restaurants, grocery, local cuisine, dietary options, cost
+13. **Shopping & Services** — retail access, services, consumer infrastructure
+14. **Outdoor & Recreation** — parks, hiking, beaches, mountains, green spaces, wildlife
+15. **Entertainment & Nightlife** — bars, clubs, live music, events, festivals, cinema
 
-### NOURISHMENT & LIFESTYLE (3 categories)
-15. **Food & Cuisine** — restaurants, grocery, local cuisine, dietary options, cost
-16. **Sports & Fitness** — gyms, outdoor sports, leagues, wellness, yoga/meditation
-17. **Outdoor & Nature** — parks, hiking, beaches, mountains, green spaces, wildlife
+### TIER 5: CONNECTION (3 categories)
+16. **Family & Children** — childcare, schools, family activities, safety, healthcare for kids
+17. **Neighborhood & Urban Design** — walkability, aesthetics, community feel, urban planning
+18. **Environment & Community Appearance** — cleanliness, green space, infrastructure quality
 
-### SOUL & MEANING (3 categories)
-18. **Arts & Culture** — museums, galleries, music, theater, cultural events, history
-19. **Entertainment & Nightlife** — bars, clubs, live music, events, festivals, cinema
-20. **Spiritual & Religious** — places of worship, communities, meditation, retreats
+### TIER 6: IDENTITY (5 categories)
+19. **Religion & Spirituality** — places of worship, communities, meditation, retreats
+20. **Sexual Beliefs, Practices & Laws** — LGBTQ+ rights, reproductive rights, personal freedom
+21. **Arts & Culture** — museums, galleries, music, theater, cultural events, history
+22. **Cultural Heritage & Traditions** — local customs, heritage preservation, cultural identity
+23. **Pets & Animals** — pet-friendly housing, vet access, parks, import regulations
 
-**Distribution:** 5-3-3-3-3-3 across 6 super-sections. Survival & Foundation is the heaviest group — the non-negotiable baseline for any relocation.
+**Distribution:** 3-4-4-4-3-5 across 6 tiers (Survival > Foundation > Infrastructure > Lifestyle > Connection > Identity). Survival is the baseline — non-negotiable for any relocation.
 
 ---
 
@@ -65,7 +68,7 @@ CLUES is designed as a progressive intelligence funnel. Users enter at any point
 
 1. **Paragraphical (Optional)** — User writes freely about their life, priorities, dreams, dealbreakers. AI extracts metrics, weights, and preferences. Generates an initial report with top 3 Cities, 3 Towns, 3 Neighborhoods. Fast, intuitive, surprisingly powerful.
 
-2. **Main Module (Optional)** — Structured questionnaire covering all 20 categories. More systematic data collection. Same output format: top 3/3/3.
+2. **Main Module (Optional)** — Structured questionnaire covering all 23 categories. More systematic data collection. Same output format: top 3/3/3.
 
 3. **Both (Best Results)** — Paragraphical + Main Module together yields the richest data and lowest margin of error. The system cross-references free-form narrative with structured answers.
 
@@ -75,7 +78,7 @@ After entry point(s) are complete, the system has initial data. Here's what happ
 
 - **Margin of Error Calculation** — The system analyzes ALL raw data (metrics, weights, judge reports) and calculates a confidence/margin of error for the current recommendations
 - **Holistic User Analysis** — Looks at the specific user's profile, priorities, and data gaps to determine which category modules would most reduce uncertainty
-- **Module Recommendations** — Tells the user: "Complete Climate, Healthcare, and Dating modules to improve your confidence from 65% to 92%." The system doesn't guess which modules matter — it KNOWS based on what data is missing for THIS user
+- **Module Recommendations** — Tells the user: "Complete Climate & Weather, Health & Wellness, and Cultural Heritage & Traditions modules to improve your confidence from 65% to 92%." The system doesn't guess which modules matter — it KNOWS based on what data is missing for THIS user
 - **Dynamic Weighting** — No fixed weights per category. A retiree doesn't need Education weighted heavily. A family with kids does. Weights emerge from the user's own data
 
 ### Module Completion Loop
@@ -98,9 +101,9 @@ High-confidence report identifying:
 
 ## Modules as Standalone Products
 
-Each of the 20 category modules is ALSO a **freestanding web app**. This serves three purposes:
+Each of the 23 category modules is ALSO a **freestanding web app**. This serves three purposes:
 
-1. **Brand Awareness** — Someone discovers CLUES through the Climate module or Dating module, has fun with it, discovers the full platform
+1. **Brand Awareness** — Someone discovers CLUES through the Climate & Weather module or Food & Dining module, has fun with it, discovers the full platform
 2. **Revenue** — Individual modules have value on their own and can be monetized independently
 3. **Data Collection** — Every standalone module interaction feeds back into the intelligence engine if the user later joins the full platform
 
@@ -110,7 +113,7 @@ Many modules are inherently fun and educational on their own — you don't need 
 
 ## LifeScore Integration
 
-LifeScore is one of the 20 category modules (Category 8) but is unique:
+LifeScore's freedom metrics are now integrated into the Social Values & Governance category module. It is unique:
 - It has its own 100-metric system already built
 - It focuses specifically on legal freedom and personal liberty
 - **No dual legal/enforcement scoring in CLUES Main** — that's a LifeScore-specific concept for law-based analysis
@@ -230,9 +233,48 @@ P5: "Your Trade-offs" → Priority weighting signals → 5-10 signals
     W2: Nature > Nightlife (sacrifice entertainment for outdoors) [Weight]
     W3: Language learning acceptable (open to non-English) [Weight]
 
-═══ PHASE 5: MODULE DEEP DIVES (20 paragraphs, 1:1 with modules) ═══
+═══ PHASE 5: MODULE DEEP DIVES (23 paragraphs, 1:1 with category modules in funnel order) ═══
 
-P6: "Climate & Weather" → Climate & Weather (moduleId: climate_weather) → 10-15 metrics
+NOTE: Paragraph numbering follows the funnel order (Survival → Foundation → Infrastructure → Lifestyle → Connection → Identity).
+P6-P28 map 1:1 to the 23 category modules. See src/data/paragraphs.ts for the canonical source.
+
+--- TIER 1: SURVIVAL (P6-P8) ---
+
+P6: "Safety & Security" → moduleId: safety_security → 10-12 metrics
+  Coverage targets:
+  - Violent crime tolerance (rate per 100k)
+  - Property crime tolerance
+  - Political stability and ideology (progressive, moderate, conservative)
+  - Corruption level tolerance
+  - Police reliability and emergency services quality
+  - Gun laws and gun culture
+  - Personal safety (walking at night, women, LGBTQ+, minorities)
+  - Neighborhood safety expectations
+  Example metrics:
+    M18: Violent crime rate below [X] per 100k [Safety]
+    M19: Political stability index above [X] [Safety]
+    M20: Safe for solo [gender] at night [Safety]
+    M21: Corruption Perceptions Index above [X] [Safety]
+    M22: Emergency response time under [X] minutes [Safety]
+
+P7: "Health & Wellness" → moduleId: health_wellness → 10-15 metrics
+  Coverage targets:
+  - Chronic conditions (specific)
+  - Regular medications (exact names if mentioned)
+  - Specialist access needs (cardiologist, therapist, dentist)
+  - Mental health services need
+  - Public vs private healthcare preference
+  - Health insurance for expats
+  - Hospital quality / international accreditation
+  - Wellness infrastructure (gyms, spas, yoga studios)
+  Example metrics:
+    M23: [Specific specialist] availability within 30min [Healthcare]
+    M24: [Specific medication] legally available and affordable [Healthcare]
+    M25: English-speaking medical professionals [Healthcare]
+    M26: Private health insurance under EUR 300/month [Healthcare]
+    M27: JCI-accredited hospital within 30 minutes [Healthcare]
+
+P8: "Climate & Weather" → moduleId: climate_weather → 10-12 metrics
   Coverage targets:
   - Temperature range (summer max, winter min — in user's unit C/F)
   - Humidity tolerance (exact threshold if possible)
@@ -242,59 +284,16 @@ P6: "Climate & Weather" → Climate & Weather (moduleId: climate_weather) → 10
   - Air quality sensitivity
   - Rain/snow tolerance
   Example metrics:
-    M18: Average summer temperature below [X]C [Climate]
-    M19: Average winter temperature above [X]C [Climate]
-    M20: Annual humidity below [X]% [Climate]
-    M21: Sunshine days above [X] per year [Climate]
-    M22: Natural disaster risk index below [X] [Climate]
-    M23: Air quality index (PM2.5) below [X] [Climate]
+    M28: Average summer temperature below [X]C [Climate]
+    M29: Average winter temperature above [X]C [Climate]
+    M30: Annual humidity below [X]% [Climate]
+    M31: Sunshine days above [X] per year [Climate]
+    M32: Natural disaster risk index below [X] [Climate]
+    M33: Air quality index (PM2.5) below [X] [Climate]
 
-P7: "Safety & Security" → Safety & Security (moduleId: safety_security) → 10-12 metrics
-  Coverage targets:
-  - Violent crime tolerance
-  - Property crime tolerance
-  - Political stability requirement
-  - Corruption level tolerance
-  - Emergency services quality
-  - Personal safety concerns (walking at night, solo, LGBTQ+, women, minorities)
-  - Neighborhood safety expectations
-  Example metrics:
-    M24: Violent crime rate below [X] per 100k [Safety]
-    M25: Political stability index above [X] [Safety]
-    M26: Safe for solo [gender] at night [Safety]
+--- TIER 2: FOUNDATION (P9-P12) ---
 
-P8: "Healthcare & Medical" → Healthcare & Medical (moduleId: healthcare) → 10-15 metrics
-  Coverage targets:
-  - Chronic conditions (specific)
-  - Regular medications (exact names if mentioned)
-  - Specialist access needs
-  - Mental health services need
-  - Public vs private healthcare preference
-  - Health insurance for expats
-  - Hospital quality / international accreditation
-  - Dental care access
-  Example metrics:
-    M27: [Specific specialist] availability within 30min [Healthcare]
-    M28: [Specific medication] legally available and affordable [Healthcare]
-    M29: English-speaking medical professionals [Healthcare]
-    M30: Private health insurance under EUR 300/month [Healthcare]
-    M31: JCI-accredited hospital within 30 minutes [Healthcare]
-
-P9: "Housing & Real Estate" → Housing & Real Estate (moduleId: housing) → 12-15 metrics
-  Coverage targets:
-  - Property type (apartment, house, villa, loft)
-  - Size requirements (bedrooms, sqm/sqft)
-  - Rent vs buy preference
-  - Budget range for housing specifically
-  - Neighborhood character (urban buzz vs quiet residential)
-  - Foreign ownership rules
-  Example metrics:
-    M32: 2BR apartment rental under EUR 1,500/month [Housing]
-    M33: Foreigner property ownership permitted [Housing]
-    M34: Walkable neighborhood with shops within 500m [Housing]
-    M35: Building quality / construction standards [Housing]
-
-P10: "Legal & Immigration" → Legal & Immigration (moduleId: legal_immigration) → 10-15 metrics
+P9: "Legal & Immigration" → moduleId: legal_immigration → 10-15 metrics
   Coverage targets:
   - Current passport(s) and their strength
   - Visa type interest (digital nomad, retirement, investment, work)
@@ -303,12 +302,12 @@ P10: "Legal & Immigration" → Legal & Immigration (moduleId: legal_immigration)
   - Tax treaty awareness
   - Rule of law / judicial independence
   Example metrics:
-    M36: Digital nomad visa available for [nationality] [Legal]
-    M37: Residency achievable within 12 months [Legal]
-    M38: Tax treaty with [home country] [Financial]
-    M39: Bureaucracy efficiency index [Legal]
+    M34: Digital nomad visa available for [nationality] [Legal]
+    M35: Residency achievable within 12 months [Legal]
+    M36: Tax treaty with [home country] [Legal]
+    M37: Bureaucracy efficiency index [Legal]
 
-P11: "Financial & Banking" → Financial & Banking (moduleId: financial) → 12-18 metrics
+P10: "Financial & Banking" → moduleId: financial_banking → 12-18 metrics
   Coverage targets:
   - Monthly income (DETECT CURRENCY — never default to USD)
   - Monthly budget tolerance
@@ -317,26 +316,27 @@ P11: "Financial & Banking" → Financial & Banking (moduleId: financial) → 12-
   - Banking needs (international transfers, crypto, investment access)
   - Cost of living expectations (specific: rent, food, transport, healthcare)
   Example metrics:
-    M40: Monthly cost of living below EUR 3,000 [Financial]
-    M41: No income tax on foreign-sourced income [Financial]
-    M42: International banking with EUR/USD accounts [Financial]
-    M43: Grocery cost for family of [X] below EUR 600/month [Financial]
-    M44: Favorable capital gains tax rate (below 20%) [Financial]
+    M38: Monthly cost of living below EUR 3,000 [Financial]
+    M39: No income tax on foreign-sourced income [Financial]
+    M40: International banking with EUR/USD accounts [Financial]
+    M41: Grocery cost for family of [X] below EUR 600/month [Financial]
+    M42: Favorable capital gains tax rate (below 20%) [Financial]
 
-P12: "Legal Independence & Freedom" → LifeScore (moduleId: lifescore) → 8-12 metrics
+P11: "Housing & Real Estate" → moduleId: housing_real_estate → 12-15 metrics
   Coverage targets:
-  - Personal freedoms that matter (speech, press, religion, lifestyle)
-  - Substances (alcohol, cannabis, legal status)
-  - LGBTQ+ rights (if applicable)
-  - Internet censorship tolerance
-  - Privacy laws / government surveillance
+  - Property type (apartment, house, villa, loft)
+  - Size requirements (bedrooms, sqm/sqft)
+  - Rent vs buy preference
+  - Budget range for housing specifically
+  - Neighborhood character (urban buzz vs quiet residential)
+  - Foreign ownership rules
   Example metrics:
-    M45: Press Freedom Index in top 30 countries [LifeScore]
-    M46: Cannabis legal or decriminalized [LifeScore]
-    M47: No internet censorship / VPN not required [LifeScore]
-    M48: LGBTQ+ legal protections in place [LifeScore]
+    M43: 2BR apartment rental under EUR 1,500/month [Housing]
+    M44: Foreigner property ownership permitted [Housing]
+    M45: Walkable neighborhood with shops within 500m [Housing]
+    M46: Building quality / construction standards [Housing]
 
-P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: business) → 12-15 metrics
+P12: "Professional & Career" → moduleId: professional_career → 12-15 metrics
   Coverage targets:
   - Remote vs local employment
   - Startup ecosystem need
@@ -345,12 +345,14 @@ P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: bu
   - Networking / professional community
   - Time zone compatibility with clients/team
   Example metrics:
-    M49: Coworking spaces with 24/7 access [Business]
-    M50: Startup incorporation under 30 days [Business]
-    M51: Time zone within +/- 3 hours of [client zone] [Business]
-    M52: Active [industry] professional community [Business]
+    M47: Coworking spaces with 24/7 access [Professional]
+    M48: Startup incorporation under 30 days [Professional]
+    M49: Time zone within +/- 3 hours of [client zone] [Professional]
+    M50: Active [industry] professional community [Professional]
 
-P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: technology) → 10-12 metrics
+--- TIER 3: INFRASTRUCTURE (P13-P16) ---
+
+P13: "Technology & Connectivity" → moduleId: technology_connectivity → 10-12 metrics
   Coverage targets:
   - Internet speed requirements (specific Mbps)
   - 5G / mobile data coverage
@@ -358,12 +360,12 @@ P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: techno
   - Power grid reliability
   - Digital nomad community / ecosystem
   Example metrics:
-    M53: Average broadband speed above 100 Mbps [Technology]
-    M54: 5G coverage in city center [Technology]
-    M55: Fiber optic availability in residential areas [Technology]
-    M56: Reliable power grid (outages < 5 hours/year) [Technology]
+    M51: Average broadband speed above 100 Mbps [Technology]
+    M52: 5G coverage in city center [Technology]
+    M53: Fiber optic availability in residential areas [Technology]
+    M54: Reliable power grid (outages < 5 hours/year) [Technology]
 
-P15: "Transportation & Mobility" → Transportation (moduleId: transportation) → 10-15 metrics
+P14: "Transportation & Mobility" → moduleId: transportation_mobility → 10-15 metrics
   Coverage targets:
   - Car ownership intention (yes/no/maybe)
   - Public transit quality expectations
@@ -372,50 +374,39 @@ P15: "Transportation & Mobility" → Transportation (moduleId: transportation) �
   - Airport proximity for international travel
   - Ride-sharing availability
   Example metrics:
-    M57: Public transit coverage reaching 90%+ of city [Transport]
-    M58: Walk Score above 80 [Transport]
-    M59: International airport within 45 minutes [Transport]
-    M60: Bike lane network throughout city center [Transport]
+    M55: Public transit coverage reaching 90%+ of city [Transport]
+    M56: Walk Score above 80 [Transport]
+    M57: International airport within 45 minutes [Transport]
+    M58: Bike lane network throughout city center [Transport]
 
-P16: "Education & Learning" → Education & Learning (moduleId: education) → 8-12 metrics
+P15: "Education & Learning" → moduleId: education_learning → 8-12 metrics
   Coverage targets:
   - Children's education needs (international schools, curricula)
   - Personal education goals (language, degree, skills)
   - University quality / ranking
   - Library and language school access
   Example metrics:
-    M61: International schools with IB curriculum [Education]
-    M62: Language schools for [target language] [Education]
-    M63: University ranked in global top 500 [Education]
+    M59: International schools with IB curriculum [Education]
+    M60: Language schools for [target language] [Education]
+    M61: University ranked in global top 500 [Education]
 
-P17: "Family & Children" → Family & Children (moduleId: family) → 10-15 metrics
+P16: "Social Values & Governance" → moduleId: social_values_governance → 8-12 metrics
   Coverage targets:
-  - Who is relocating (partner, kids ages, parents)
-  - Partner's career needs
-  - Children's age-specific needs (daycare, primary, secondary)
-  - Elderly care (if parents coming)
-  - Family-friendly neighborhoods
-  - Proximity to family back home (flight frequency)
+  - Personal freedoms that matter (speech, press, religion, lifestyle)
+  - Substances (alcohol, cannabis, legal status)
+  - Government transparency and civic participation
+  - Internet censorship tolerance
+  - Privacy laws / government surveillance
+  - LGBTQ+ rights (if applicable)
   Example metrics:
-    M64: Daycare availability under EUR 500/month [Family]
-    M65: Parks and playgrounds within 10-minute walk [Family]
-    M66: English-medium schooling K-12 [Family]
-    M67: Family-oriented neighborhood culture [Family]
+    M62: Press Freedom Index in top 30 countries [Governance]
+    M63: Cannabis legal or decriminalized [Governance]
+    M64: No internet censorship / VPN not required [Governance]
+    M65: LGBTQ+ legal protections in place [Governance]
 
-P18: "Dating & Social Life" → Dating & Social Life (moduleId: dating_social) → 10-12 metrics
-  Coverage targets:
-  - Expat community size and activity
-  - Dating scene (if single)
-  - Social club/meetup availability
-  - Cultural openness to foreigners
-  - Nightlife as social tool
-  Example metrics:
-    M68: Active expat community (1000+ in meetup groups) [Social]
-    M69: Cultural openness index for foreigners [Social]
-    M70: English widely spoken in social settings [Social]
-    M71: Regular social events / meetups weekly [Social]
+--- TIER 4: LIFESTYLE (P17-P20) ---
 
-P19: "Food & Cuisine" → Food & Cuisine (moduleId: food_cuisine) → 10-12 metrics
+P17: "Food & Dining" → moduleId: food_dining → 10-12 metrics
   Coverage targets:
   - Dietary restrictions (vegan, halal, kosher, gluten-free, allergies)
   - Cuisine preferences (specific cuisines loved)
@@ -425,68 +416,98 @@ P19: "Food & Cuisine" → Food & Cuisine (moduleId: food_cuisine) → 10-12 metr
   - Local cuisine quality / variety
   - Farmers markets / organic access
   Example metrics:
-    M72: Vegan restaurant density above 5 per 10k people [Food]
-    M73: International grocery stores with [cuisine] ingredients [Food]
-    M74: Average restaurant meal under EUR 15 [Food]
-    M75: Food delivery apps with 30-min delivery [Food]
+    M66: Vegan restaurant density above 5 per 10k people [Food]
+    M67: International grocery stores with [cuisine] ingredients [Food]
+    M68: Average restaurant meal under EUR 15 [Food]
+    M69: Food delivery apps with 30-min delivery [Food]
 
-P20: "Sports & Fitness" → Sports & Fitness (moduleId: sports_fitness) → 8-12 metrics
+P18: "Shopping & Services" → moduleId: shopping_services → 8-10 metrics
   Coverage targets:
-  - Gym/fitness center access and cost
-  - Specific sports (tennis, surfing, yoga, CrossFit, martial arts)
-  - Sports league / club availability
-  - Outdoor fitness infrastructure (running paths, outdoor gyms)
-  - Wellness/spa culture
-  - Swimming pool access (indoor/outdoor)
+  - International product availability
+  - Amazon or equivalent delivery services
+  - Home delivery speed and reliability
+  - Personal care services (barbers, salons)
+  - Modern retail infrastructure vs local market charm
   Example metrics:
-    M76: Gym membership under EUR 50/month [Fitness]
-    M77: [Specific sport] clubs with English-speaking members [Fitness]
-    M78: Running/cycling paths along waterfront or parks [Fitness]
-    M79: Year-round outdoor exercise climate [Fitness]
+    M70: Amazon or equivalent with fast delivery [Shopping]
+    M71: International brands availability [Shopping]
+    M72: Home delivery services reliable [Shopping]
 
-P21: "Outdoor & Nature" → Outdoor & Nature (moduleId: outdoor_nature) → 8-12 metrics
+P19: "Outdoor & Recreation" → moduleId: outdoor_recreation → 10-15 metrics
   Coverage targets:
   - Mountain vs beach preference (or both)
   - Hiking trail accessibility
   - Water sports access (surfing, diving, sailing)
   - Green space within city
   - National parks / nature reserves proximity
-  - Wildlife encounters (positive or concern)
+  - Gym/fitness center access and cost
+  - Specific sports (tennis, yoga, CrossFit, martial arts)
   Example metrics:
-    M80: Beach within 30-minute drive [Outdoor]
-    M81: Hiking trails accessible without car [Outdoor]
-    M82: City green space above 20 sqm per capita [Outdoor]
-    M83: National parks within 2-hour drive [Outdoor]
+    M73: Beach within 30-minute drive [Outdoor]
+    M74: Hiking trails accessible without car [Outdoor]
+    M75: City green space above 20 sqm per capita [Outdoor]
+    M76: Gym membership under EUR 50/month [Outdoor]
 
-P22: "Arts & Culture" → Arts & Culture (moduleId: arts_culture) → 8-10 metrics
-  Coverage targets:
-  - Museum / gallery importance
-  - Music scene (live music, genres, festivals)
-  - Theater / performing arts
-  - Historical / architectural richness
-  - Cultural events calendar density
-  - Art community / creative scene
-  Example metrics:
-    M84: Museums per capita in top quartile [Culture]
-    M85: Live music venues with weekly events [Culture]
-    M86: Cultural heritage UNESCO sites nearby [Culture]
-    M87: Active creative/artist community [Culture]
-
-P23: "Entertainment & Nightlife" → Entertainment & Nightlife (moduleId: entertainment) → 8-10 metrics
+P20: "Entertainment & Nightlife" → moduleId: entertainment_nightlife → 8-10 metrics
   Coverage targets:
   - Nightlife style (clubs, bars, lounges, none)
   - Festival / event calendar
   - Cinema / theater
-  - Gaming / esports (if relevant)
   - Weekend activity variety
   - Comedy / stand-up scene
   Example metrics:
-    M88: Nightlife district with diverse venue types [Entertainment]
-    M89: Annual festivals exceeding 20 events [Entertainment]
-    M90: Cinema showing English-language films [Entertainment]
-    M91: Weekend activities variety score [Entertainment]
+    M77: Nightlife district with diverse venue types [Entertainment]
+    M78: Annual festivals exceeding 20 events [Entertainment]
+    M79: Cinema showing English-language films [Entertainment]
+    M80: Weekend activities variety score [Entertainment]
 
-P24: "Spiritual & Religious" → Spiritual & Religious (moduleId: spiritual) → 6-8 metrics
+--- TIER 5: CONNECTION (P21-P23) ---
+
+P21: "Family & Children" → moduleId: family_children → 10-15 metrics
+  Coverage targets:
+  - Who is relocating (partner, kids ages, parents)
+  - Partner's career needs
+  - Children's age-specific needs (daycare, primary, secondary)
+  - Elderly care (if parents coming)
+  - Family-friendly neighborhoods
+  - Proximity to family back home (flight frequency)
+  Example metrics:
+    M81: Daycare availability under EUR 500/month [Family]
+    M82: Parks and playgrounds within 10-minute walk [Family]
+    M83: English-medium schooling K-12 [Family]
+    M84: Family-oriented neighborhood culture [Family]
+
+P22: "Neighborhood & Urban Design" → moduleId: neighborhood_urban_design → 8-10 metrics
+  Coverage targets:
+  - Walkability and pedestrian infrastructure
+  - Bike lanes and public spaces
+  - Mixed-use vs residential-only zoning
+  - Noise levels and street lighting
+  - Urban density preferences
+  - Community feeling and neighborhood vibe
+  Example metrics:
+    M85: Walk Score above 80 [Neighborhood]
+    M86: Mixed-use zoning with shops within 500m [Neighborhood]
+    M87: Street lighting and sidewalk quality [Neighborhood]
+    M88: Community-oriented neighborhood culture [Neighborhood]
+
+P23: "Environment & Community Appearance" → moduleId: environment_community_appearance → 8-10 metrics
+  Coverage targets:
+  - Street cleanliness and maintenance
+  - Air quality and noise pollution
+  - Green spaces and tree coverage
+  - Waste management and recycling infrastructure
+  - Architectural consistency and building maintenance
+  - Environmental sustainability initiatives
+  Example metrics:
+    M89: Air quality index (PM2.5) below [X] [Environment]
+    M90: Green space per capita above [X] sqm [Environment]
+    M91: Active recycling infrastructure [Environment]
+    M92: Street cleanliness rating [Environment]
+
+--- TIER 6: IDENTITY (P24-P28) ---
+
+P24: "Religion & Spirituality" → moduleId: religion_spirituality → 6-8 metrics
   Coverage targets:
   - Specific religion / denomination
   - Place of worship proximity
@@ -495,11 +516,52 @@ P24: "Spiritual & Religious" → Spiritual & Religious (moduleId: spiritual) →
   - Religious dietary accommodation
   - Secular-friendly (if non-religious)
   Example metrics:
-    M92: [Specific] places of worship within 20 minutes [Spiritual]
-    M93: Religious tolerance index above 70/100 [Spiritual]
-    M94: Meditation / retreat centers accessible [Spiritual]
+    M93: [Specific] places of worship within 20 minutes [Spiritual]
+    M94: Religious tolerance index above 70/100 [Spiritual]
+    M95: Meditation / retreat centers accessible [Spiritual]
 
-P25: "Pets & Animals" → Pets & Animals (moduleId: pets) → 8-10 metrics
+P25: "Sexual Beliefs, Practices & Laws" → moduleId: sexual_beliefs_practices_laws → 6-8 metrics
+  Coverage targets:
+  - LGBTQ+ legal rights and social acceptance
+  - Same-sex marriage recognition
+  - Anti-discrimination protections
+  - Dating culture openness
+  - Reproductive healthcare access
+  - Attitudes toward alternative relationships
+  Example metrics:
+    M96: LGBTQ+ anti-discrimination protections [Sexual Rights]
+    M97: Same-sex marriage or civil union legal [Sexual Rights]
+    M98: Reproductive healthcare accessible [Sexual Rights]
+
+P26: "Arts & Culture" → moduleId: arts_culture → 8-10 metrics
+  Coverage targets:
+  - Museum / gallery importance
+  - Music scene (live music, genres, festivals)
+  - Theater / performing arts
+  - Historical / architectural richness
+  - Cultural events calendar density
+  - Art community / creative scene
+  Example metrics:
+    M99: Museums per capita in top quartile [Culture]
+    M100: Live music venues with weekly events [Culture]
+    M101: Cultural heritage UNESCO sites nearby [Culture]
+    M102: Active creative/artist community [Culture]
+
+P27: "Cultural Heritage & Traditions" → moduleId: cultural_heritage_traditions → 8-10 metrics
+  Coverage targets:
+  - Local festivals and celebrations
+  - Attitudes toward foreigners and integration expectations
+  - Expat community size and activity
+  - Cultural formality vs informality
+  - Language and cultural barriers
+  - Social openness to newcomers
+  Example metrics:
+    M103: Active expat community (1000+ in meetup groups) [Heritage]
+    M104: Cultural openness index for foreigners [Heritage]
+    M105: English widely spoken in social settings [Heritage]
+    M106: Regular social events / meetups weekly [Heritage]
+
+P28: "Pets & Animals" → moduleId: pets_animals → 8-10 metrics
   Coverage targets:
   - Pet type and breed (affects import regulations)
   - Pet-friendly housing availability
@@ -508,10 +570,10 @@ P25: "Pets & Animals" → Pets & Animals (moduleId: pets) → 8-10 metrics
   - Off-leash parks / pet-friendly spaces
   - Breed-specific legislation (if applicable)
   Example metrics:
-    M95: Pet-friendly rental apartments available [Pets]
-    M96: No breed-specific legislation for [breed] [Pets]
-    M97: Veterinary care within 15 minutes [Pets]
-    M98: No quarantine requirement for [pet type] import [Pets]
+    M107: Pet-friendly rental apartments available [Pets]
+    M108: No breed-specific legislation for [breed] [Pets]
+    M109: Veterinary care within 15 minutes [Pets]
+    M110: No quarantine requirement for [pet type] import [Pets]
 
 ═══ PHASE 6: YOUR VISION ═══
 
@@ -521,7 +583,7 @@ P29: "Your Dream Day" → Cross-category validation → 5-8 metrics
   - Afternoon signals (work setup, lunch culture, siesta)
   - Evening signals (dining out, nightlife, family time, nature)
   - Walkability narrative (does the dream day require a car?)
-  - Weather narrative (confirms/refines climate from P6)
+  - Weather narrative (confirms/refines climate from P8)
   NOTE: This paragraph validates and refines metrics from ALL other paragraphs.
   Gemini cross-references "dream day" activities against extracted metrics.
 
@@ -805,7 +867,7 @@ Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 o
 ### Layer 4: Cross-Paragraph Intelligence (API — Future)
 **What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
 
-- Fires after paragraphs 5, 12, 18, 25, and 27 (phase boundaries)
+- Fires after paragraphs 5, 12, 16, 20, 23, 28, and 30 (phase boundaries)
 - Checks for contradictions (P3 vs P6, P9 vs P11, P4 vs module paragraphs)
 - Identifies completely unaddressed categories
 - Suggests which remaining paragraphs to focus on

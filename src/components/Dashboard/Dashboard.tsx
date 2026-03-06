@@ -1,6 +1,6 @@
 /**
  * CLUES Main Dashboard
- * Layout: Hero Heading → Globe → Paragraphical → Main Module → 20 Module Grid
+ * Layout: Hero Heading → Globe → Paragraphical → Main Module → 23 Module Grid
  * Reads/writes from UserContext (centralized state with Supabase auto-save).
  */
 
@@ -139,7 +139,7 @@ export function Dashboard() {
           />
         </section>
 
-        {/* 20 Module Grid */}
+        {/* 23 Module Grid */}
         <section
           className="dashboard__section"
           style={{ animationDelay: '450ms' }}

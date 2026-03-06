@@ -5,7 +5,7 @@
  * Route structure:
  *  /                → Dashboard (globe, paragraphical button, modules)
  *  /login           → Login / Sign-up / Forgot password
- *  /paragraphical   → 27-paragraph input flow
+ *  /paragraphical   → 30-paragraph input flow
  *  /questionnaire/* → Demographics, DNW, MH, General questions
  *  /results         → Evaluation results (future)
  *  /reports         → Report viewer (future)
@@ -43,7 +43,7 @@ function App() {
               }
             />
 
-            {/* Discovery Questionnaire — 27-section Olivia-enhanced flow */}
+            {/* Discovery Questionnaire — 30-paragraph Olivia-enhanced flow */}
             <Route
               path="/paragraphical"
               element={

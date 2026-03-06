@@ -421,7 +421,7 @@ export function DiscoveryFlow() {
             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(24px,4vw,44px)', marginBottom: 40 }}>
-            {[{ n: '27', l: 'Sections' }, { n: '11', l: 'Categories' }, { n: '~30', l: 'Minutes' }].map((s, i) => (
+            {[{ n: '30', l: 'Paragraphs' }, { n: '11', l: 'Categories' }, { n: '~30', l: 'Minutes' }].map((s, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: "'Cormorant',serif", fontSize: 28, fontWeight: 300, color: '#C4A87A' }}>{s.n}</div>
                 <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 4 }}>{s.l}</div>

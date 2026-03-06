@@ -26,7 +26,7 @@ const CONFIDENCE_GAINS = {
   mh: 10,
   generalQuestions: 20,
   miniModuleEach: 0.5,
-  miniModuleCap: 10, // Max 10% from all 20 mini modules
+  miniModuleCap: 10, // Max 10% from all 23 mini modules
 } as const;
 
 // ─── Calculate Tier ─────────────────────────────────────────────
@@ -132,10 +132,10 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
   if (!hasParagraphical) {
     steps.push({
       action: 'Complete Paragraphical',
-      description: 'Tell us your story in 27 paragraphs',
+      description: 'Tell us your story in 30 paragraphs',
       confidenceGain: CONFIDENCE_GAINS.paragraphical,
       timeEstimate: '30-60 min',
-      questionCount: 27,
+      questionCount: 30,
       completed: false,
     });
   }
@@ -161,7 +161,7 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
 
   steps.push({
     action: 'Complete General Questions',
-    description: 'Deep scoring across all 20 life modules',
+    description: 'Deep scoring across all 23 life modules',
     confidenceGain: CONFIDENCE_GAINS.generalQuestions,
     timeEstimate: '~30 minutes',
     questionCount: 200,
@@ -179,8 +179,8 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
 
   // Mini modules — show as a group if general questions are done
   const moduleCount = session.completedModules.length;
-  if (moduleCount < 20) {
-    const remainingModules = 20 - moduleCount;
+  if (moduleCount < 23) {
+    const remainingModules = 23 - moduleCount;
     steps.push({
       action: `Complete Mini Modules (${remainingModules} remaining)`,
       description: 'Each module narrows your recommendation further',

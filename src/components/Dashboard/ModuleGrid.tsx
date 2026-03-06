@@ -1,6 +1,6 @@
 /**
  * Module Grid
- * 5-column responsive grid of 20 module buttons with staggered animations
+ * 5-column responsive grid of 23 module buttons with staggered animations
  */
 
 import type { ModuleDefinition } from '../../data/modules';

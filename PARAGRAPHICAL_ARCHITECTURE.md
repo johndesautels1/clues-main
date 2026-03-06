@@ -13,7 +13,7 @@
 
 The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 30 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 30 paragraphs follow the **CLUES decision pipeline** across 6 phases: Profile (P1-P2), Dealbreakers (P3), Must Haves (P4), Trade-offs (P5), Module Deep Dives (P6-P28, one per category module with `moduleId`), and Vision (P29-P30).
 
-The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 20 Mini Modules. The Paragraphical alone must be powerful enough to:
+The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 23 Mini Modules. The Paragraphical alone must be powerful enough to:
 
 1. Convert narrative into 100-250 numbered, researchable metrics
 2. Identify the best country (1 primary, up to 3)
@@ -266,7 +266,7 @@ SECTION 1: YOUR PROFILE (from paragraph extraction)
 
 SECTION 2: YOUR METRICS (100-250 numbered metrics)
   - Each metric with source paragraph reference
-  - Organized by Human Existence Flow categories
+  - Organized by Funnel Flow categories
   - Each metric defines what will be measured
 
 SECTION 3: COUNTRY ANALYSIS
@@ -327,7 +327,7 @@ The recommendation structure follows a strict hierarchy:
 
 ## 12. DOWNSTREAM MODULES (How They Interact)
 
-The 20 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragraphical:
+The 23 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragraphical:
 - They may or may not be completed by the user
 - When completed, they ADD precision to the Paragraphical's metrics
 - They can ADD new metrics the paragraphs didn't cover
@@ -344,6 +344,42 @@ The Paragraphical must stand alone as a complete evaluation. Modules make it bet
 The old `GeminiExtraction` schema is OBSOLETE. The current schema (Gemini 3.1 Pro Preview with thinking + search):
 
 ```typescript
+// Source of truth: api/paragraphical.ts
+
+interface GeminiMetricObject {
+  id: string;                      // "M1", "M2", etc.
+  fieldId: string;                 // Machine-readable field ID
+  description: string;             // "Average winter temperature 20-25C"
+  category: string;                // "climate", "safety", "financial"... (23 categories)
+  source_paragraph: number;        // Which paragraph (1-30)
+  score: number;                   // 0-100
+  user_justification: string;      // Why this matters to the user (traced to paragraph)
+  data_justification: string;      // Real-world data backing the score
+  source: string;                  // Data source attribution
+  data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
+  research_query: string;          // What Tavily should search
+  threshold?: {
+    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
+    value: number | [number, number];
+    unit: string;                  // "celsius", "percent", "USD", "index"
+  };
+}
+
+interface LocationMetrics {
+  location: string;                // City/town/neighborhood name
+  country: string;
+  location_type: 'city' | 'town' | 'neighborhood';
+  parent?: string;                 // Parent city/town for towns/neighborhoods
+  overall_score: number;           // 0-100 overall match score
+  metrics: GeminiMetricObject[];   // Per-location scored metrics
+}
+
+interface ThinkingStep {
+  step: number;
+  thought: string;
+  conclusion?: string;
+}
+
 interface GeminiExtraction {
   // ─── Profile ───
   demographic_signals: {
@@ -366,24 +402,9 @@ interface GeminiExtraction {
   };
 
   // ─── Metrics (THE KEY OUTPUT — with dual justifications) ───
-  metrics: {
-    id: string;                      // "M1", "M2", etc.
-    description: string;             // "Average winter temperature 20-25C"
-    category: string;                // "climate", "safety", "financial"... (23 categories)
-    source_paragraph: number;        // Which paragraph (1-30)
-    data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
-    research_query: string;          // What Tavily should search
-    user_justification: string;      // "Matches P3: User said '...' which indicates..."
-    data_justification: string;      // "Real-world data: City X has... according to..."
-    source: string;                  // "Tavily: ...", "Google Search: ...", "Gemini KB: ..."
-    threshold?: {
-      operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
-      value: number | [number, number];
-      unit: string;                  // "celsius", "percent", "USD", "index"
-    };
-  }[];                               // Minimum 100, up to 250
+  metrics: GeminiMetricObject[];     // Minimum 100, up to 250
 
-  // ─── Location Recommendations ───
+  // ─── Location Recommendations (each carries its own scored metrics) ───
   recommended_countries: {
     name: string;
     iso_code: string;
@@ -391,38 +412,12 @@ interface GeminiExtraction {
     local_currency: string;
   }[];                               // 1 primary, up to 3
 
-  recommended_cities: {
-    name: string;
-    country: string;
-    reasoning: string;
-  }[];                               // Top 3 per country
+  recommended_cities: LocationMetrics[];         // Top 3 per country, with per-city metrics
+  recommended_towns: LocationMetrics[];          // Top 3 in winning city, with per-town metrics
+  recommended_neighborhoods: LocationMetrics[];  // Top 3 in winning town, with per-neighborhood metrics
 
-  recommended_towns: {
-    name: string;
-    parent_city: string;
-    reasoning: string;
-  }[];                               // Top 3 in winning city
-
-  recommended_neighborhoods: {
-    name: string;
-    parent_town: string;
-    reasoning: string;
-  }[];                               // Top 3 in winning town
-
-  // ─── Side-by-Side Location Metrics ───
-  location_metrics: {
-    field_id: string;                // "safety_index", "connectivity_5G", "healthcare_access"
-    label: string;                   // Human-readable label
-    category: string;                // One of 23 categories
-    locations: {
-      name: string;                  // City/town/neighborhood name
-      type: 'city' | 'town' | 'neighborhood';
-      score: number;                 // 0.0-10.0
-      user_justification: string;    // Tied to user's paragraph text
-      data_justification: string;    // Real-world data backing
-      source: string;                // Data source
-    }[];
-  }[];                               // Minimum 20 key fields, scored across all locations
+  // NOTE: There is NO separate "location_metrics" field.
+  // Per-location scoring is embedded inside LocationMetrics.metrics[].
 
   // ─── Paragraph Summaries ───
   paragraph_summaries: {
@@ -438,26 +433,9 @@ interface GeminiExtraction {
   tradeoff_signals: string[];        // Priority trade-offs: "safety > cost of living"
   module_relevance: Record<string, number>;  // Module ID → 0-1 relevance
   globe_region_preference: string;   // User's geographic preference
-}
 
-// API Response includes reasoning trace:
-interface ParagraphicalResponse {
-  extraction: GeminiExtraction;
-  thinking_details: string[];        // Gemini 3.1 reasoning trace steps
-  metadata: {
-    model: 'gemini-3.1-pro-preview';
-    thinkingLevel: 'high';
-    searchGrounded: true;
-    inputTokens: number;
-    outputTokens: number;
-    costUsd: number;
-    durationMs: number;
-    paragraphsProcessed: number;
-    metricsExtracted: number;
-    locationMetricsCount: number;
-    thinkingSteps: number;
-    timestamp: string;
-  };
+  // ─── Thinking Details (reasoning chain transparency) ───
+  thinking_details?: ThinkingStep[]; // Gemini 3.1 reasoning trace steps
 }
 ```
 
@@ -618,7 +596,7 @@ LifeScore's 6 categories with default weights:
 
 Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneur, Family, Libertarian, Investor).
 
-**CLUES Main Adaptation**: 23 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
+**CLUES Main Adaptation**: 23 categories in Funnel Flow order. Weights derived from user's paragraph emphasis + persona presets.
 
 ### 15.7 FIVE-LLM PARALLEL EVALUATION
 
