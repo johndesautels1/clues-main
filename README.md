@@ -1247,6 +1247,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 17 | Social Values & Governance | 100 | 10 | `SOCIAL_VALUES_GOVERNANCE_QUESTIONS.md` |
 | 18 | Neighborhood & Urban Design | 100 | 10 | `NEIGHBORHOOD_URBAN_DESIGN_QUESTIONS.md` |
 | 19 | Core Module (INCOMPLETE DRAFT) | 130 | — | `CORE_MODULE_QUESTIONS.md` |
+| 20 | General Questions (FINAL) | 50 | 8 | `GENERAL_QUESTIONS_REFERENCE.md` |
 
 ---
 
