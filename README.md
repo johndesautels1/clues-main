@@ -1236,6 +1236,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 6 | Religion & Spirituality | 106 | 5 | `RELIGION_SPIRITUALITY_QUESTIONS.md` |
 | 7 | Health & Wellness | 106 | 5 | `HEALTH_WELLNESS_QUESTIONS.md` |
 | 8 | Arts & Culture | 97 | 5 | `ARTS_CULTURE_QUESTIONS.md` |
+| 9 | Legal & Immigration | 102 | 5 | `LEGAL_IMMIGRATION_QUESTIONS.md` |
 
 ---
 
