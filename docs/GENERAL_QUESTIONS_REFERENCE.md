@@ -13,7 +13,7 @@
 |---|----------|
 | 1 | Who is the primary decision-maker for this relocation? |
 | 2 | How aligned is your partner/household on relocation priorities? |
-| 3 | What is your decision-making style? |
+| 3 | What regions, countries, or cities are you most drawn to — and which have you already visited or lived in? |
 | 4 | Do you have family obligations that affect where you can relocate? |
 | 5 | What type of family obligations do you have, and how often must you travel for them? |
 
@@ -25,7 +25,7 @@
 |---|----------|
 | 6 | How do you approach risk in life decisions? |
 | 7 | How do you handle uncertainty and change? |
-| 8 | How do you approach obstacles and setbacks? |
+| 8 | What is the PRIMARY reason driving your relocation? (Career opportunity, lifestyle change, retirement, cost savings, family reunification, escape/fresh start, adventure, relationship, health/climate, safety) |
 | 9 | What is your overall risk tolerance for major life changes? (1-5) |
 | 10 | What is your openness to lifestyle experimentation? |
 | 11 | What pace of life do you prefer? |
@@ -38,8 +38,8 @@
 | # | Question |
 |---|----------|
 | 13 | What is your international living experience? |
-| 14 | How far along are you in relocation research? |
-| 15 | What is your relocation confidence level? |
+| 14 | Which cities or countries have you visited or lived in that you LOVED, and which did you hate — and specifically WHY? |
+| 15 | If you could split your monthly budget any way you wanted, what percentage would go to housing, food, entertainment, travel, savings, and healthcare? |
 | 16 | What are your biggest relocation fears? |
 | 17 | Do you prefer the familiar or the adventurous? |
 
@@ -64,8 +64,8 @@
 |---|----------|
 | 24 | How would you describe your ideal social environment? |
 | 25 | How comfortable are you attending social events? (1 = prefer intimate gatherings, 5 = love large events) |
-| 26 | Do you prefer group or solo activities? |
-| 27 | How social or independent do you prefer to be? (1-5) |
+| 26 | What specific communities, hobbies, or subcultures do you NEED access to in order to feel fulfilled? |
+| 27 | How important is it that your neighborhood has people in a similar life stage to yours (young professionals, families, retirees)? (1-5) |
 | 28 | How private or open do you prefer to be within your community? (1-5) |
 | 29 | What social support systems do you need to thrive? |
 | 30 | How important is building local community roots? |
