@@ -224,12 +224,12 @@ Convert every measurable, researchable preference into a discrete metric.
 - P5 trade-offs produce WEIGHTING SIGNALS — prefix with "WEIGHT:".
 
 Example conversions:
-  P6: "I hate humidity and want warm winters around 20-25C"
-  --> M1: Average annual humidity below 60% [climate] [P6]
-  --> M2: Average winter temperature 20-25C [climate] [P6]
+  P8: "I hate humidity and want warm winters around 20-25C"
+  --> M1: Average annual humidity below 60% [climate_weather] [P8]
+  --> M2: Average winter temperature 20-25C [climate_weather] [P8]
 
-  P14: "I need at least 100mbps for my remote work"
-  --> M28: Average broadband speed above 100 Mbps [technology] [P14]
+  P13: "I need at least 100mbps for my remote work"
+  --> M28: Average broadband speed above 100 Mbps [technology_connectivity] [P13]
 
 STEP 2: LOCATION RECOMMENDATIONS
 Using Google Search grounding, identify:
