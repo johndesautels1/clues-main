@@ -9,16 +9,21 @@ import type { ParagraphEntry, GeminiExtraction } from '../types';
 // ─── Paragraphical Extraction ───────────────────────────────────
 interface ParagraphicalResponse {
   extraction: GeminiExtraction;
+  thinking_details: string[];
   metadata: {
     model: string;
+    thinkingLevel: string;
+    searchGrounded: boolean;
     inputTokens: number;
     outputTokens: number;
     costUsd: number;
     durationMs: number;
     paragraphsProcessed: number;
     metricsExtracted: number;
+    locationMetricsCount: number;
     countriesRecommended: number;
     citiesRecommended: number;
+    thinkingSteps: number;
     timestamp: string;
   };
 }

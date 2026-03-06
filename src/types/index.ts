@@ -71,6 +71,9 @@ export interface GeminiExtraction {
     source_paragraph: number;    // 1-27
     data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
     research_query: string;      // what Tavily should search
+    user_justification: string;  // ties metric to specific paragraph text
+    data_justification: string;  // real-world data supporting this metric
+    source: string;              // data source (Tavily, Google Search, Gemini KB)
     threshold?: {
       operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
       value: number | [number, number];
@@ -99,6 +102,21 @@ export interface GeminiExtraction {
     name: string;
     parent_town: string;
     reasoning: string;
+  }[];
+
+  // Side-by-Side Location Metrics (compare same field across locations)
+  location_metrics: {
+    field_id: string;              // e.g. safety_index, connectivity_5G
+    label: string;                 // human-readable label
+    category: string;              // one of 20 categories
+    locations: {
+      name: string;
+      type: 'city' | 'town' | 'neighborhood';
+      score: number;               // 0.0-10.0
+      user_justification: string;
+      data_justification: string;
+      source: string;
+    }[];
   }[];
 
   // Paragraph Summaries
