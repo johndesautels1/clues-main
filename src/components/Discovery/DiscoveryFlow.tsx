@@ -158,7 +158,7 @@ export function DiscoveryFlow() {
   );
 
   const goNext = useCallback(() => {
-    if (current < 23) {
+    if (current < SECTIONS.length - 1) {
       navigateTo(current + 1, 1);
     } else {
       setContentVisible(false);
@@ -772,7 +772,7 @@ export function DiscoveryFlow() {
               })}
             </div>
 
-            {current < 23 ? (
+            {current < SECTIONS.length - 1 ? (
               <button
                 onClick={goNext} className="discovery-btn" aria-label="Next"
                 style={{
