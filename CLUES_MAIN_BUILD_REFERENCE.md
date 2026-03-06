@@ -81,103 +81,109 @@ export default async function handler(req, res) {
 
 ---
 
-## 4. THE 20 MODULES (Human Existence Flow)
+## 4. THE 23 CATEGORY MODULES (Funnel Flow)
 
-Modules are ordered by human need hierarchy, NOT alphabetically:
+Modules are ordered by evaluation funnel logic — each tier progressively narrows candidate locations:
 
-### SURVIVAL & FOUNDATION
-1. **Climate & Weather** 🌡️ - Temperature, seasons, natural disasters
-2. **Safety & Security** 🛡️ - Crime rates, emergency services, stability
-3. **Healthcare & Medical** 🏥 - System quality, insurance, accessibility
-4. **Housing & Real Estate** 🏠 - Cost, availability, types, quality
+### TIER 1: SURVIVAL (Can I survive here?)
+1. **Safety & Security** — Crime rates, emergency services, political stability
+2. **Health & Wellness** — Healthcare system, medical access, wellness infrastructure
+3. **Climate & Weather** — Temperature, seasons, natural disasters, air quality
 
-### LEGAL & FINANCIAL
-5. **Legal & Immigration** ⚖️ - Visa pathways, residency, rule of law
-6. **Financial & Banking** 💰 - Banking, cost of living, taxes
-7. **LifeScore** 🗽 - Legal independence & freedom (100 metrics) ✅ COMPLETED
+### TIER 2: FOUNDATION (Can I legally/financially exist here?)
+4. **Legal & Immigration** — Visa pathways, residency, rule of law, property rights
+5. **Financial & Banking** — Banking access, cost of living, taxes, currency stability
+6. **Housing & Real Estate** — Cost, availability, types, rental/purchase options
+7. **Professional & Career** — Job market, remote work infrastructure, industry presence
 
-### LIVELIHOOD & GROWTH
-8. **Business & Entrepreneurship** 💼 - Startup ecosystem, regulations
-9. **Technology & Connectivity** 📡 - Internet, digital infrastructure
-10. **Transportation** 🚇 - Transit, walkability, infrastructure
-11. **Education & Learning** 🎓 - Schools, universities, programs
+### TIER 3: INFRASTRUCTURE (Can I function daily here?)
+8. **Technology & Connectivity** — Internet, digital infrastructure, tech ecosystem
+9. **Transportation & Mobility** — Transit, walkability, cycling, driving infrastructure
+10. **Education & Learning** — Schools, universities, language programs, continuing education
+11. **Social Values & Governance** — Political freedom, social tolerance, civic engagement
 
-### PEOPLE & RELATIONSHIPS
-12. **Family & Children** 👨‍👩‍👧‍👦 - Family services, schools, safety
-13. **Dating & Social Life** 💬 - Dating scene, social communities
-14. **Pets & Animals** 🐾 - Pet policies, veterinary care
+### TIER 4: LIFESTYLE (Can I enjoy life here?)
+12. **Food & Dining** — Restaurants, dietary options, food culture, grocery access
+13. **Shopping & Services** — Retail, convenience, international products, delivery
+14. **Outdoor & Recreation** — Parks, hiking, sports facilities, nature access
+15. **Entertainment & Nightlife** — Venues, events, nightlife, cultural programming
 
-### NOURISHMENT & LIFESTYLE
-15. **Food & Cuisine** 🍽️ - Restaurants, dietary options, food culture
-16. **Sports & Fitness** 🏃 - Gyms, sports leagues, facilities
-17. **Outdoor & Nature** 🌿 - Parks, hiking, recreation
+### TIER 5: CONNECTION (Can I build a life here?)
+16. **Family & Children** — Family services, child safety, schools, pediatric care
+17. **Neighborhood & Urban Design** — Street-level livability, walkability, public spaces
+18. **Environment & Community Appearance** — Cleanliness, green space, aesthetic quality
 
-### SOUL & MEANING
-18. **Arts & Culture** 🎨 - Museums, galleries, heritage
-19. **Entertainment & Nightlife** 🎭 - Venues, events, nightlife
-20. **Spiritual & Religious** 🕊️ - Places of worship, tolerance
+### TIER 6: IDENTITY (Can I be myself here?)
+19. **Religion & Spirituality** — Places of worship, tolerance, spiritual communities
+20. **Sexual Beliefs, Practices & Laws** — LGBTQ+ rights, personal freedom, legal protections
+21. **Arts & Culture** — Museums, galleries, creative communities, intellectual life
+22. **Cultural Heritage & Traditions** — Local customs, integration expectations, belonging
+23. **Pets & Animals** — Pet policies, veterinary care, pet-friendly housing/spaces
 
-Each module has **10 general questions** (200 total across 20 modules).
+Each module has **100 questions** (2,300 total across 23 modules).
 
 ---
 
-## 5. THE 27-PARAGRAPH PARAGRAPHICAL
+## 5. THE 30-PARAGRAPH PARAGRAPHICAL
 
-Free-form narrative input following the CLUES decision pipeline. Gemini 3.1 Pro Preview extracts structured data from all 27 paragraphs using deep reasoning and Google Search grounding.
+Free-form narrative input following the CLUES decision pipeline. Gemini 3.1 Pro Preview extracts structured data from all 30 paragraphs using deep reasoning and Google Search grounding.
 
 ### Paragraph Map (6 Phases — see `src/data/paragraphs.ts`)
 ```
 PHASE 1: YOUR PROFILE (Demographics)
-  P1:  "Who You Are"                   — Age, gender, nationality, citizenship, household, languages, employment
-  P2:  "Your Life Right Now"           — Current location, income, currency, push factors, timeline
+  P1:  "Who You Are"                          — Age, gender, nationality, citizenship, household, languages, employment
+  P2:  "Your Life Right Now"                  — Current location, income, currency, push factors, timeline
 
 PHASE 2: DO NOT WANTS (Dealbreakers)
-  P3:  "Your Dealbreakers"             — Hard walls that eliminate cities before scoring begins
+  P3:  "Your Dealbreakers"                    — Hard walls that eliminate cities before scoring begins
 
 PHASE 3: MUST HAVES (Non-Negotiables)
-  P4:  "Your Non-Negotiables"          — Requirements a city MUST meet to stay in the running
+  P4:  "Your Non-Negotiables"                 — Requirements a city MUST meet to stay in the running
 
 PHASE 4: TRADE-OFFS (Priority Weighting)
-  P5:  "Your Trade-offs"               — What user would sacrifice — reveals how to weight competing metrics
+  P5:  "Your Trade-offs"                      — What user would sacrifice — reveals how to weight competing metrics
 
-PHASE 5: MODULE DEEP DIVES (20 paragraphs, 1:1 with modules in Human Existence Flow order)
-  SURVIVAL
-    P6:  "Climate & Weather"           — moduleId: climate_weather
-    P7:  "Safety & Security"           — moduleId: safety_security
-    P8:  "Healthcare & Medical"        — moduleId: healthcare
-    P9:  "Housing & Real Estate"       — moduleId: housing
-  FOUNDATION
-    P10: "Legal & Immigration"         — moduleId: legal_immigration
-    P11: "Financial & Banking"         — moduleId: financial
-    P12: "Legal Independence & Freedom"— moduleId: lifescore
-  GROWTH
-    P13: "Business & Entrepreneurship" — moduleId: business
-    P14: "Technology & Connectivity"   — moduleId: technology
-    P15: "Transportation & Mobility"   — moduleId: transportation
-    P16: "Education & Learning"        — moduleId: education
-  CONNECTION
-    P17: "Family & Children"           — moduleId: family
-    P18: "Dating & Social Life"        — moduleId: dating_social
-  NOURISHMENT
-    P19: "Food & Cuisine"              — moduleId: food_cuisine
-    P20: "Sports & Fitness"            — moduleId: sports_fitness
-    P21: "Outdoor & Nature"            — moduleId: outdoor_nature
-  SOUL
-    P22: "Arts & Culture"              — moduleId: arts_culture
-    P23: "Entertainment & Nightlife"   — moduleId: entertainment
-    P24: "Spiritual & Religious"       — moduleId: spiritual
-    P25: "Pets & Animals"              — moduleId: pets
+PHASE 5: MODULE DEEP DIVES (23 paragraphs, 1:1 with category modules in funnel order)
+  TIER 1: SURVIVAL
+    P6:  "Safety & Security"                  — moduleId: safety_security
+    P7:  "Health & Wellness"                  — moduleId: health_wellness
+    P8:  "Climate & Weather"                  — moduleId: climate_weather
+  TIER 2: FOUNDATION
+    P9:  "Legal & Immigration"                — moduleId: legal_immigration
+    P10: "Financial & Banking"                — moduleId: financial_banking
+    P11: "Housing & Real Estate"              — moduleId: housing_real_estate
+    P12: "Professional & Career"              — moduleId: professional_career
+  TIER 3: INFRASTRUCTURE
+    P13: "Technology & Connectivity"           — moduleId: technology_connectivity
+    P14: "Transportation & Mobility"           — moduleId: transportation_mobility
+    P15: "Education & Learning"                — moduleId: education_learning
+    P16: "Social Values & Governance"          — moduleId: social_values_governance
+  TIER 4: LIFESTYLE
+    P17: "Food & Dining"                       — moduleId: food_dining
+    P18: "Shopping & Services"                 — moduleId: shopping_services
+    P19: "Outdoor & Recreation"                — moduleId: outdoor_recreation
+    P20: "Entertainment & Nightlife"           — moduleId: entertainment_nightlife
+  TIER 5: CONNECTION
+    P21: "Family & Children"                   — moduleId: family_children
+    P22: "Neighborhood & Urban Design"         — moduleId: neighborhood_urban_design
+    P23: "Environment & Community Appearance"  — moduleId: environment_community_appearance
+  TIER 6: IDENTITY
+    P24: "Religion & Spirituality"             — moduleId: religion_spirituality
+    P25: "Sexual Beliefs, Practices & Laws"    — moduleId: sexual_beliefs_practices_laws
+    P26: "Arts & Culture"                      — moduleId: arts_culture
+    P27: "Cultural Heritage & Traditions"      — moduleId: cultural_heritage_traditions
+    P28: "Pets & Animals"                      — moduleId: pets_animals
 
 PHASE 6: YOUR VISION
-  P26: "Your Dream Day"               — Perfect ordinary Tuesday in your new city
-  P27: "Anything Else"                 — Wildcard: missed dealbreakers, past experiences, future plans
+  P29: "Your Dream Day"                       — Perfect ordinary Tuesday in your new city
+  P30: "Anything Else"                        — Wildcard: missed dealbreakers, past experiences, future plans
 ```
 
 ### Key changes vs. the old 24-paragraph structure:
 - **Added P3 (Dealbreakers)** — DNW hard walls the old structure lacked
 - **Added P4 (Non-Negotiables)** — Must Haves the old structure lacked
 - **Added P5 (Trade-offs)** — Priority weighting signals the old structure lacked
-- **Module-mapped paragraphs** — Each P6-P25 has a `moduleId` property linking it to the exact module it mirrors
+- **Module-mapped paragraphs** — Each P6-P28 has a `moduleId` property linking it to the exact category module it mirrors
 - **Enriched prompts** — Every prompt asks for specific, scorable data (numbers, thresholds, concrete preferences)
 
 ### Gemini 3.1 Pro Preview Extraction + Recommendation Output
@@ -190,8 +196,8 @@ interface GeminiExtraction {
   metrics: {                                    // 100-250 numbered metrics
     id: string;                                 // "M1", "M2", ...
     description: string;
-    category: string;                           // one of 20 Human Existence Flow categories
-    source_paragraph: number;                   // 1-27
+    category: string;                           // one of 23 category modules (funnel order)
+    source_paragraph: number;                   // 1-30
     data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
     research_query: string;                     // what Tavily should search
     user_justification: string;                 // tied to specific paragraph text (P#)
@@ -417,7 +423,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 
 ### What's Built
 - ✅ Dashboard layout with Paragraphical button, Main Module expander, Module Grid
-- ✅ 20 module cards with illumination states and animations
+- ✅ 23 module cards with illumination states and animations
 - ✅ Glassmorphic design system (CSS custom properties, utilities)
 - ✅ Header with navigation placeholders
 - ✅ Olivia (AI assistant) and Emilia (help) floating chat bubbles
@@ -442,13 +448,13 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 - ✅ Cost tracking dashboard modal (admin-only) with provider breakdown, tier breakdown, profitability analysis
 - ✅ Emilia help panel with categorized help topics (admin sees Cost Tracking + System Status)
 - ✅ React Router (`/` dashboard, `/paragraphical` essay flow)
-- ✅ Paragraphical 27-paragraph stepped input UI with sidebar navigation
-- ✅ 27 paragraph definitions with prompts, placeholders, section groupings, moduleId mapping
+- ✅ Paragraphical 30-paragraph stepped input UI with sidebar navigation
+- ✅ 30 paragraph definitions with prompts, placeholders, section groupings, moduleId mapping
 - ✅ Auto-save paragraphs to context (→ Supabase) on navigation
 - ✅ Dashboard loading state during session hydration
 - ✅ Olivia Tutor: Layer 1 (coverage targets data) + Layer 2 (keyword detection) + Layer 3 (Gemini 3.1 Pro Preview escalation)
-- ✅ 27 paragraph coverage targets with keyword groups and template interjections (`src/data/paragraphTargets.ts`)
-- ✅ Gemini extraction+recommendation prompt rewritten for 27-paragraph pipeline (`api/paragraphical.ts`)
+- ✅ 30 paragraph coverage targets with keyword groups and template interjections (`src/data/paragraphTargets.ts`)
+- ✅ Gemini extraction+recommendation prompt rewritten for 30-paragraph pipeline (`api/paragraphical.ts`)
 
 - ✅ Gemini 3.1 Pro Preview reasoning engine (`/api/paragraphical`) with thinking_level, search grounding, metric extraction
 - ✅ File upload endpoint (`/api/upload`) for 100MB Gemini ingestion
@@ -524,7 +530,7 @@ clues-main/
     │       └── CostTrackingModal.css   # Cost dashboard styles
     │
     ├── data/
-    │   └── modules.ts                  # 20 module definitions, types, map
+    │   └── modules.ts                  # 23 module definitions, types, map
     │
     └── styles/
         └── globals.css                 # Full CSS design system
@@ -607,10 +613,10 @@ const geminiRequestBody = {
 ```typescript
 interface ParagraphicalInput {
   paragraphs: {
-    id: number;           // 1-27
+    id: number;           // 1-30
     heading: string;      // "Who You Are"
     content: string;      // User's free-form text
-    moduleId?: string;    // P6-P25 only: links to the module this paragraph mirrors
+    moduleId?: string;    // P6-P28 only: links to the category module this paragraph mirrors
   }[];
   globeRegion: string;    // "Southern Europe / Mediterranean"
   fileUrls?: string[];    // Uploaded files (medical records, spreadsheets) — up to 100MB
@@ -627,8 +633,8 @@ interface GeminiMetricObject {
   id: string;                      // "M1", "M2", etc.
   fieldId: string;                 // "climate_01_humidity"
   description: string;             // "Average annual humidity below 60%"
-  category: string;                // One of 20 Human Existence Flow categories
-  source_paragraph: number;        // Which paragraph (1-27)
+  category: string;                // One of 23 category modules (funnel order)
+  source_paragraph: number;        // Which paragraph (1-30)
   score: number;                   // 0-100 (relative to other locations)
   user_justification: string;      // "Matches P4: User prioritized 'low petty crime'"
   data_justification: string;      // "Cascais 2026 safety reports show 12% decrease"
@@ -658,14 +664,14 @@ interface GeminiExtraction {
 ```
 
 ### What Gemini 3.1 Pro Preview Enables
-1. **100-250 numbered metrics** derived from user's 27 paragraphs
+1. **100-250 numbered metrics** derived from user's 30 paragraphs
 2. **Location recommendations** (country → city → town → neighborhood)
 3. **Per-metric scoring** with user_justification + data_justification + source
 4. **Reasoning trace** — thinking_details array shows HOW the model reached its conclusions
 5. **100MB file uploads** — medical records (P8), financial spreadsheets (P11) ingested directly
 6. **Emerging neighborhood discovery** — ARC-AGI-2 reasoning finds hidden-gem locations
 7. Pre-fills Demographics, suggests DNW severity levels, suggests MH importance levels
-8. Weights the 20 modules by relevance via module_relevance scores
+8. Weights the 23 category modules by relevance via module_relevance scores
 9. Extracts tradeoff_signals for priority weighting downstream
 
 ---
@@ -898,7 +904,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 Priority order for development:
 
-1. ~~Paragraphical UI~~ ✅ DONE — 27-paragraph stepped input (P3=Dealbreakers, P4=Must Haves, P5=Trade-offs, P6-P25=Module Deep Dives, P26-P27=Vision)
+1. ~~Paragraphical UI~~ ✅ DONE — 30-paragraph stepped input (P3=Dealbreakers, P4=Must Haves, P5=Trade-offs, P6-P28=Module Deep Dives, P29-P30=Vision)
 2. ~~Cost Tracking~~ ✅ DONE — Service, modal, admin access, dual persistence
 3. **Gemini extraction endpoint** — `/api/paragraphical` (Vercel serverless function)
 4. **Tier calculator + confidence engine** — `calculateTier()` + `calculateConfidence()`

@@ -11,7 +11,7 @@
 
 ## 1. WHAT IS THE PARAGRAPHICAL?
 
-The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 27 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 27 paragraphs follow the **CLUES decision pipeline** across 6 phases: Profile (P1-P2), Dealbreakers (P3), Must Haves (P4), Trade-offs (P5), Module Deep Dives (P6-P25, one per module with `moduleId`), and Vision (P26-P27).
+The Paragraphical is the **primary entry point** into the CLUES Intelligence platform. It consists of 30 free-form paragraphs where users describe their life, preferences, needs, and dreams in narrative form. These 30 paragraphs follow the **CLUES decision pipeline** across 6 phases: Profile (P1-P2), Dealbreakers (P3), Must Haves (P4), Trade-offs (P5), Module Deep Dives (P6-P28, one per category module with `moduleId`), and Vision (P29-P30).
 
 The Paragraphical is NOT a lightweight signal extractor. It is designed to produce a **standalone 100+ page report** even if the user never touches the Main Module or the 20 Mini Modules. The Paragraphical alone must be powerful enough to:
 
@@ -42,7 +42,7 @@ CLUES Main does the same thing, except the metrics are **derived from the user's
 ## 3. PARAGRAPH-TO-METRIC CONVERSION (The Key Innovation)
 
 ### Step 1: User Writes Paragraphs
-27 paragraphs covering their entire life context (see paragraph definitions in `src/data/paragraphs.ts`).
+30 paragraphs covering their entire life context (see paragraph definitions in `src/data/paragraphs.ts`).
 
 ### Step 2: Gemini Converts Paragraphs to Numbered Metrics
 Every measurable, researchable preference becomes a discrete metric:
@@ -73,7 +73,7 @@ From P14 ("Technology & Connectivity"):
 - **Maximum**: ~250 metrics (from very detailed paragraphs)
 - Each metric is:
   - **Numbered** (M1, M2, M3...)
-  - **Categorized** (maps to one of 20 Human Existence Flow categories)
+  - **Categorized** (maps to one of 23 category modules (funnel order))
   - **Sourced to a paragraph** (P3, P10, P14)
   - **Researchable** (Tavily can find real data for it)
   - **Scorable** (can be measured as a number, boolean, or ranking)
@@ -111,7 +111,7 @@ If Gemini recommends Thailand:
 The Paragraphical is NOT a single Gemini call. It is a multi-step pipeline using parallel batch firing (same pattern as LifeScore to handle massive data and avoid timeouts).
 
 ### Call 1: EXTRACT (Gemini + Web Search)
-**Input**: 27 paragraphs + globe region
+**Input**: 30 paragraphs + globe region
 **Output**:
 - Numbered metrics (M1-Mn, minimum 100)
 - Demographic signals (age, gender, household, etc.)
@@ -228,7 +228,7 @@ Metrics roll up into category scores:
 - Climate Smart Score (average of M1, M2, M3...)
 - Safety Smart Score (average of M4, M5, M6...)
 - Financial Smart Score (average of M15, M16, M17...)
-- ...for all 20 categories
+- ...for all 23 categories
 
 ### Overall City Smart Score
 Category scores roll up into overall city score, weighted by user's implied priorities from paragraph content.
@@ -369,8 +369,8 @@ interface GeminiExtraction {
   metrics: {
     id: string;                      // "M1", "M2", etc.
     description: string;             // "Average winter temperature 20-25C"
-    category: string;                // "climate", "safety", "financial"... (20 categories)
-    source_paragraph: number;        // Which paragraph (1-27)
+    category: string;                // "climate", "safety", "financial"... (23 categories)
+    source_paragraph: number;        // Which paragraph (1-30)
     data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
     research_query: string;          // What Tavily should search
     user_justification: string;      // "Matches P3: User said '...' which indicates..."
@@ -413,7 +413,7 @@ interface GeminiExtraction {
   location_metrics: {
     field_id: string;                // "safety_index", "connectivity_5G", "healthcare_access"
     label: string;                   // Human-readable label
-    category: string;                // One of 20 categories
+    category: string;                // One of 23 categories
     locations: {
       name: string;                  // City/town/neighborhood name
       type: 'city' | 'town' | 'neighborhood';
@@ -517,7 +517,7 @@ Each metric in LifeScore follows the `MetricDefinition` interface:
 - `NN` = 2-digit number (`01`-`25`)
 - `name` = snake_case descriptor
 
-**CLUES Main Adaptation**: Our metric IDs will be `cl_NN_name` where NN auto-increments from M1-M250, and category maps to one of the 20 Human Existence Flow categories.
+**CLUES Main Adaptation**: Our metric IDs will be `cl_NN_name` where NN auto-increments from M1-M250, and category maps to one of the 23 category modules (funnel order).
 
 ### 15.2 DATA TYPES & SCORING CRITERIA
 
@@ -618,7 +618,7 @@ LifeScore's 6 categories with default weights:
 
 Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneur, Family, Libertarian, Investor).
 
-**CLUES Main Adaptation**: 20 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
+**CLUES Main Adaptation**: 23 categories from Human Existence Flow. Weights derived from user's paragraph emphasis + persona presets.
 
 ### 15.7 FIVE-LLM PARALLEL EVALUATION
 
@@ -771,7 +771,7 @@ LifeScore's Gamma report template:
 
 **Visual elements**: Radial gauges, horizontal bar stats, process steps, comparison tables, city imagery overlays.
 
-**CLUES Main Adaptation**: Same template structure but expanded for 20 categories and 100-250 metrics. Country section added before city comparisons. Town/neighborhood sections after city winner.
+**CLUES Main Adaptation**: Same template structure but expanded for 23 categories and 100-250 metrics. Country section added before city comparisons. Town/neighborhood sections after city winner.
 
 ### 15.13 CRISTIANO VIDEO PIPELINE (2-Stage)
 
@@ -844,7 +844,7 @@ LifeScore's Gamma report template:
 | Opus Judge | ~$13.50 |
 | **Total per comparison** | **~$22** |
 
-**CLUES Main will be higher** due to 100-250 metrics across 20 categories + country/town/neighborhood layers.
+**CLUES Main will be higher** due to 100-250 metrics across 23 categories + country/town/neighborhood layers.
 
 ---
 
@@ -855,7 +855,7 @@ LifeScore's Gamma report template:
 > and the full metric extraction + recommendation + scoring pipeline.
 
 ~~The old prompt said "You do NOT score cities" — WRONG.~~ **FIXED**: Gemini now extracts, recommends, AND scores.
-~~`module_relevance` scoring 20 modules 0-1~~ **FIXED**: Replaced with 100-250 numbered metrics.
+~~`module_relevance` scoring 23 modules 0-1~~ **FIXED**: Replaced with 100-250 numbered metrics.
 ~~Budget in USD only~~ **FIXED**: Currency detected from context, multi-currency support.
 ~~No metric extraction~~ **FIXED**: 100-250 metrics extracted with fieldId, score, justifications, sources.
 ~~No location output~~ **FIXED**: Country → City → Town → Neighborhood recommendations with per-location scoring.
@@ -876,7 +876,7 @@ tools: [{
 ### Frontend Components (Implemented)
 - `ReasoningTrace` — Displays thinking_details array from Gemini
 - `SideBySideMetricView` — Compares City vs Town vs Neighborhood metrics
-- `ReactiveJustification` — Click justification to highlight source Paragraph (P1-P27)
+- `ReactiveJustification` — Click justification to highlight source Paragraph (P1-P30)
 - `ThinkingDetailsPanel` — Full transparency UI with model info, token stats, timeline
 - `FileUpload` — 100MB upload for medical records (P8), financial spreadsheets (P11)
 

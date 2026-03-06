@@ -132,9 +132,9 @@ LifeScore is one of the 20 category modules (Category 8) but is unique:
 
 ### Per-Paragraph Metric Targets
 
-Each of the 27 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
+Each of the 30 paragraphs has a **minimum metric yield** and **coverage targets** — the key topics Gemini MUST extract from, even if the user only hints at them. If the user is detailed, more metrics emerge naturally. If they're sparse, Gemini extrapolates baseline needs from context.
 
-See `src/data/paragraphs.ts` for the canonical paragraph definitions (6 phases, 27 paragraphs).
+See `src/data/paragraphs.ts` for the canonical paragraph definitions (6 phases, 30 paragraphs).
 
 ```
 PARAGRAPH → CATEGORY MAPPING → MIN METRICS → COVERAGE TARGETS
@@ -515,7 +515,7 @@ P25: "Pets & Animals" → Pets & Animals (moduleId: pets) → 8-10 metrics
 
 ═══ PHASE 6: YOUR VISION ═══
 
-P26: "Your Dream Day" → Cross-category validation → 5-8 metrics
+P29: "Your Dream Day" → Cross-category validation → 5-8 metrics
   Coverage targets:
   - Morning routine signals (coffee culture, beach sunrise, gym)
   - Afternoon signals (work setup, lunch culture, siesta)
@@ -525,7 +525,7 @@ P26: "Your Dream Day" → Cross-category validation → 5-8 metrics
   NOTE: This paragraph validates and refines metrics from ALL other paragraphs.
   Gemini cross-references "dream day" activities against extracted metrics.
 
-P27: "Anything Else" → Wildcard / Catch-all → 5-15 metrics
+P30: "Anything Else" → Wildcard / Catch-all → 5-15 metrics
   Coverage targets:
   - Absolute dealbreakers not covered in P3
   - Niche requirements (specific hobby, rare medical need, etc.)
@@ -707,7 +707,7 @@ This is the **single source of truth** for which AI model powers each function i
 |------|-------|----------|-----|
 | **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
 | **Olivia Tutor (Paragraphical)** | Gemini 3.1 Pro (Preview) | Google | Coverage-gap detection during writing. Only fires when keyword detection isn't confident enough. |
-| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 27 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P25 Module Deep Dives, P26-P27 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
+| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 30 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P28 Module Deep Dives, P29-P30 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
 | **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
 | **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
 | **LLM Evaluator #3** | Gemini 3.1 Pro Preview | Google | Reuses extraction context for scoring |
@@ -731,7 +731,7 @@ This is the **single source of truth** for which AI model powers each function i
 
 ## Olivia Tutor Architecture (Paragraphical Writing Flow)
 
-Olivia guides users while they write each of the 27 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
+Olivia guides users while they write each of the 30 paragraphs, ensuring they cover the key topics that feed into accurate city matching. This is a 4-layer system built incrementally.
 
 ### Layer 1: Coverage Target Data (Code — Zero Cost)
 **What:** A TypeScript data file defining what each paragraph needs.

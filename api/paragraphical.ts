@@ -1,7 +1,7 @@
 /**
  * /api/paragraphical — Gemini 3.1 Pro Preview Reasoning Engine
  *
- * Receives the user's 27 paragraphs + globe region + optional file uploads.
+ * Receives the user's 30 paragraphs + globe region + optional file uploads.
  * Sends to Gemini 3.1 Pro Preview with:
  *   - thinking_level: "high" (deep multi-step reasoning)
  *   - include_thinking_details: true (returns internal reasoning chain)
@@ -45,7 +45,7 @@ interface GeminiMetricObject {
   fieldId: string;                 // Machine-readable field ID
   description: string;             // "Average winter temperature 20-25C"
   category: string;                // "climate", "safety", "financial"...
-  source_paragraph: number;        // Which paragraph (1-27)
+  source_paragraph: number;        // Which paragraph (1-30)
   score: number;                   // 0-100
   user_justification: string;      // Why this matters to the user (traced to paragraph)
   data_justification: string;      // Real-world data backing the score
@@ -194,15 +194,15 @@ Use your native Google Search grounding to verify real-world data for every metr
 The user selected globe region: "${globeRegion}"
 This is a starting preference, not a hard constraint. If their dealbreakers eliminate all cities in this region, expand the search.
 
-The 27 paragraphs follow this pipeline:
+The 30 paragraphs follow this pipeline:
 - P1-P2: User profile (demographics, income, currency, timeline)
 - P3: Dealbreakers — HARD WALLS that eliminate cities (severity-5 = instant elimination)
 - P4: Must Haves — non-negotiable requirements cities MUST meet
 - P5: Trade-offs — priority weighting when cities score differently on different metrics
-- P6-P25: Module Deep Dives — one per category in Human Existence Flow order (each has a moduleId)
+- P6-P28: Module Deep Dives — one per category module in funnel order (each has a moduleId)
 - P26-P27: Vision — dream day narrative + wildcard catch-all
 
-Here are their 27 paragraphs:
+Here are their 30 paragraphs:
 
 ${paragraphText}
 
@@ -252,7 +252,7 @@ Detect the user's home currency from their paragraph text. If they mention euros
 
 STEP 5: SIGNALS & MODULE RELEVANCE
 - Extract tradeoff_signals from P5 (priority trade-offs, e.g. "safety > cost of living")
-- Score module_relevance (0.0-1.0) for each of the 20 Human Existence Flow categories
+- Score module_relevance (0.0-1.0) for each of the 23 category modules (funnel order: survival > foundation > infrastructure > lifestyle > connection > identity)
 - Identify globe_region_preference from the user's geographic signals
 
 ═══════════════════════════════════════════════════════════════
@@ -281,8 +281,8 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
       "id": "M1",
       "fieldId": "<machine_readable_id like climate_01_humidity>",
       "description": "<human readable metric description>",
-      "category": "<one of the 20 categories>",
-      "source_paragraph": <1-27>,
+      "category": "<one of the 23 category modules>",
+      "source_paragraph": <1-30>,
       "score": <0-100>,
       "user_justification": "Matches P[N]: <specific reference to user's paragraph>",
       "data_justification": "<real-world data backing this score>",
@@ -335,7 +335,7 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
   ],
   "paragraph_summaries": [
     {
-      "id": <1-27>,
+      "id": <1-30>,
       "key_themes": ["<theme1>", "<theme2>"],
       "extracted_preferences": ["<preference1>"],
       "metrics_derived": ["M1", "M2"]
@@ -345,26 +345,29 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
   "mh_signals": ["<things user needs/wants>"],
   "tradeoff_signals": ["<priority trade-offs from P5, e.g. safety > cost of living>"],
   "module_relevance": {
-    "climate": <0.0-1.0>,
-    "safety": <0.0-1.0>,
-    "healthcare": <0.0-1.0>,
-    "housing": <0.0-1.0>,
-    "legal": <0.0-1.0>,
-    "financial": <0.0-1.0>,
-    "lifescore": <0.0-1.0>,
-    "business": <0.0-1.0>,
-    "technology": <0.0-1.0>,
-    "transportation": <0.0-1.0>,
-    "education": <0.0-1.0>,
-    "family": <0.0-1.0>,
-    "dating_social": <0.0-1.0>,
-    "food": <0.0-1.0>,
-    "sports": <0.0-1.0>,
-    "outdoor": <0.0-1.0>,
-    "arts": <0.0-1.0>,
-    "entertainment": <0.0-1.0>,
-    "spiritual": <0.0-1.0>,
-    "pets": <0.0-1.0>
+    "safety_security": <0.0-1.0>,
+    "health_wellness": <0.0-1.0>,
+    "climate_weather": <0.0-1.0>,
+    "legal_immigration": <0.0-1.0>,
+    "financial_banking": <0.0-1.0>,
+    "housing_real_estate": <0.0-1.0>,
+    "professional_career": <0.0-1.0>,
+    "technology_connectivity": <0.0-1.0>,
+    "transportation_mobility": <0.0-1.0>,
+    "education_learning": <0.0-1.0>,
+    "social_values_governance": <0.0-1.0>,
+    "food_dining": <0.0-1.0>,
+    "shopping_services": <0.0-1.0>,
+    "outdoor_recreation": <0.0-1.0>,
+    "entertainment_nightlife": <0.0-1.0>,
+    "family_children": <0.0-1.0>,
+    "neighborhood_urban_design": <0.0-1.0>,
+    "environment_community_appearance": <0.0-1.0>,
+    "religion_spirituality": <0.0-1.0>,
+    "sexual_beliefs_practices_laws": <0.0-1.0>,
+    "arts_culture": <0.0-1.0>,
+    "cultural_heritage_traditions": <0.0-1.0>,
+    "pets_animals": <0.0-1.0>
   },
   "globe_region_preference": "<user's geographic preference from globe + paragraphs>"
 }
