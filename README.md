@@ -1240,6 +1240,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 10 | Environment & Community Appearance | 83 | 5 | `ENVIRONMENT_COMMUNITY_APPEARANCE_QUESTIONS.md` |
 | 11 | Sexual Beliefs, Practices & Laws | 79 | 7 | `SEXUAL_BELIEFS_PRACTICES_LAWS_QUESTIONS.md` |
 | 12 | Outdoor & Recreation | 56 | 5 | `OUTDOOR_RECREATION_QUESTIONS.md` |
+| 13 | Food & Dining | 57 | 5 | `FOOD_DINING_QUESTIONS.md` |
 
 ---
 
