@@ -13,6 +13,7 @@ import { CookiePolicyModal } from './CookiePolicyModal';
 import { RefundPolicyModal } from './RefundPolicyModal';
 import { DoNotSellModal } from './DoNotSellModal';
 import { USStatePrivacyModal } from './USStatePrivacyModal';
+import { CookiePreferencesModal } from './CookiePreferencesModal';
 import './Footer.css';
 
 const LEGAL_LINKS = [
@@ -33,6 +34,7 @@ export function Footer() {
   const [showRefunds, setShowRefunds] = useState(false);
   const [showDoNotSell, setShowDoNotSell] = useState(false);
   const [showUSPrivacy, setShowUSPrivacy] = useState(false);
+  const [showCookiePrefs, setShowCookiePrefs] = useState(false);
 
   const handleLegalClick = (link: string) => {
     if (link === 'Privacy') setShowPrivacy(true);
@@ -41,6 +43,7 @@ export function Footer() {
     if (link === 'Refunds') setShowRefunds(true);
     if (link === 'Do Not Sell or Share My Personal Information') setShowDoNotSell(true);
     if (link === 'US State Privacy Rights') setShowUSPrivacy(true);
+    if (link === 'Cookie Settings') setShowCookiePrefs(true);
   };
 
   return (
@@ -148,6 +151,7 @@ export function Footer() {
       <RefundPolicyModal isOpen={showRefunds} onClose={() => setShowRefunds(false)} />
       <DoNotSellModal isOpen={showDoNotSell} onClose={() => setShowDoNotSell(false)} />
       <USStatePrivacyModal isOpen={showUSPrivacy} onClose={() => setShowUSPrivacy(false)} />
+      <CookiePreferencesModal isOpen={showCookiePrefs} onClose={() => setShowCookiePrefs(false)} />
     </>
   );
 }
