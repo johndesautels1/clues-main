@@ -1,7 +1,7 @@
-# Sexual Beliefs, Practices & Laws — 79 Typeform Questions Reference
+# Sexual Beliefs, Practices & Laws — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire — International Buyers' Sexual Beliefs, Practices & Laws Questionnaire Module
-> **Structure:** 7 sections, each ending with a ranking question + 1 final cross-section ranking (Q79)
+> **Structure:** 8 sections, each ending with a ranking question + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -130,4 +130,39 @@
 | 76 | What's your stance on sexual expression and identity in elderly care and senior communities? |
 | 77 | How do you feel about sexual orientation and gender identity considerations in child custody? |
 | 78 | Rank these international & special population factors from MOST (1) to LEAST (5) important: |
-| 79 | Final Priority Assessment: Rank these 7 SECTION PRIORITIES from MOST important (1) to LEAST important (7) for determining your ideal international relocation destination: |
+
+---
+
+## Section 8: Dating Culture & Social Life (Q79-Q99)
+
+| # | Question |
+|---|----------|
+| 79 | How important is the availability and popularity of dating apps and online matchmaking platforms in your destination? |
+| 80 | How easy do you need it to be for a foreigner or expat to enter the local dating scene? |
+| 81 | How important is social acceptance of interracial, interethnic, or intercultural romantic relationships in your destination? |
+| 82 | How important is it that the local culture supports autonomous partner choice rather than family-arranged or family-facilitated matchmaking? |
+| 83 | How do you feel about the local pace of dating and relationships (e.g., quick courtship culture vs. slow, extended getting-to-know-you periods)? |
+| 84 | How important is an active, accessible social and nightlife scene for meeting potential partners (bars, social clubs, meetup groups)? |
+| 85 | How do you feel about traditional gender roles in dating (who initiates, who pays, courtship expectations)? |
+| 86 | How important is social acceptance of age-gap romantic relationships in your destination? |
+| 87 | How concerned are you about social stigma or pressure around being single, unmarried, or child-free? |
+| 88 | How important is it that your destination has an active expatriate social community where you can build friendships and date? |
+| 89 | How important is social acceptance of interfaith or non-religious romantic relationships? |
+| 90 | How do you feel about the local culture's openness to casual dating and hookup culture vs. dating-for-commitment norms? |
+| 91 | How important is personal safety while dating as a foreigner (awareness of romance scams, targeting of expats, drink spiking)? |
+| 92 | How important is social acceptance of dating as a single parent in the local culture? |
+| 93 | How do you feel about social stigma around divorce and re-partnering in your destination? |
+| 94 | How important is it that social venues and community events cater to diverse age groups for meeting people (not just youth-oriented)? |
+| 95 | How important is the availability of relationship counseling, couples therapy, and dating coaching services? |
+| 96 | How do you feel about local expectations around cohabitation before marriage (socially accepted vs. taboo)? |
+| 97 | How important is it that the local culture supports maintaining friendships and social connections outside of a romantic partnership? |
+| 98 | How do you feel about the local culture's attitude toward long-distance and cross-border relationships? |
+| 99 | Rank these dating culture & social life factors from MOST (1) to LEAST (20) important: |
+
+---
+
+## Final Cross-Section Ranking (Q100)
+
+| # | Question |
+|---|----------|
+| 100 | Final Priority Assessment: Rank these 8 SECTION PRIORITIES from MOST important (1) to LEAST important (8) for determining your ideal international relocation destination: |
