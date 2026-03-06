@@ -43,7 +43,7 @@ function App() {
               }
             />
 
-            {/* Discovery Questionnaire — 27-section Olivia-enhanced flow */}
+            {/* Discovery Questionnaire — 30-paragraph Olivia-enhanced flow */}
             <Route
               path="/paragraphical"
               element={

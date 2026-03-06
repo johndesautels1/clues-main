@@ -70,7 +70,7 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             <p>Email address, name, and password (hashed) for account creation and authentication.</p>
 
             <h4>Discovery &amp; Relocation Data</h4>
-            <p>Your Paragraphical responses (27 sections), globe region selections, saved reports, module completions, metric extractions, and location preferences to provide the service.</p>
+            <p>Your Paragraphical responses (30 paragraphs), globe region selections, saved reports, module completions, metric extractions, and location preferences to provide the service.</p>
 
             <h4>AI Conversations</h4>
             <p>Your conversations with Olivia AI relocation advisor and Emilia AI assistant to provide personalized guidance and recommendations.</p>

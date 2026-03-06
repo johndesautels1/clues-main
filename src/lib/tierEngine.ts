@@ -161,7 +161,7 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
 
   steps.push({
     action: 'Complete General Questions',
-    description: 'Deep scoring across all 20 life modules',
+    description: 'Deep scoring across all 23 life modules',
     confidenceGain: CONFIDENCE_GAINS.generalQuestions,
     timeEstimate: '~30 minutes',
     questionCount: 200,
@@ -179,8 +179,8 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
 
   // Mini modules — show as a group if general questions are done
   const moduleCount = session.completedModules.length;
-  if (moduleCount < 20) {
-    const remainingModules = 20 - moduleCount;
+  if (moduleCount < 23) {
+    const remainingModules = 23 - moduleCount;
     steps.push({
       action: `Complete Mini Modules (${remainingModules} remaining)`,
       description: 'Each module narrows your recommendation further',
