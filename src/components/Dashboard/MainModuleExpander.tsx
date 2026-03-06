@@ -1,7 +1,7 @@
 /**
  * Main Module Expander
- * Collapsible panel with 4 sub-section cards in a 2x2 grid:
- * Demographics, Do Not Wants, Must Haves, General Questions
+ * Collapsible panel with 5 sub-section cards:
+ * Demographics, Do Not Wants, Must Haves, General Questions, Trade-offs
  */
 
 import type { ModuleStatus, SubSection } from '../../types';
@@ -53,9 +53,17 @@ const SUB_SECTIONS: Array<{
     id: 'general',
     title: 'General Questions',
     shortTitle: 'General',
-    description: '200 questions across 20 lifestyle dimensions',
-    questionCount: 200,
+    description: '50 rock-solid lifestyle and preference questions',
+    questionCount: 50,
     icon: '\u{1F4CB}',
+  },
+  {
+    id: 'tradeoffs',
+    title: 'Trade-offs',
+    shortTitle: 'Trade-offs',
+    description: '50 priority weighting questions for when cities score differently',
+    questionCount: 50,
+    icon: '\u{2696}\uFE0F',
   },
 ];
 
@@ -68,7 +76,7 @@ export function MainModuleExpander({
 }: Props) {
   const statusClass = `main-module--${status.replace('_', '-')}`;
   const completedCount = Object.values(subSectionStatus).filter(s => s === 'completed').length;
-  const totalSections = 4;
+  const totalSections = 5;
 
   return (
     <div className={`main-module glass ${statusClass}`}>
@@ -84,7 +92,7 @@ export function MainModuleExpander({
           <div>
             <h2 className="main-module__title">Main Module</h2>
             <p className="main-module__meta">
-              {completedCount}/{totalSections} sections complete &middot; 300 total questions
+              {completedCount}/{totalSections} sections complete &middot; 200 total questions
             </p>
           </div>
         </div>

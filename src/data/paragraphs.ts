@@ -209,9 +209,9 @@ export const PARAGRAPH_DEFS: ParagraphDef[] = [
   },
   {
     id: 11,
-    heading: 'Housing & Real Estate',
+    heading: 'Housing & Property Preferences',
     section: 'Foundation',
-    moduleId: 'housing_real_estate',
+    moduleId: 'housing_property',
     prompt:
       'What does your ideal home look like and what can you afford? Apartment, house, villa? ' +
       'How many bedrooms and bathrooms? Urban high-rise, suburban house, rural property? ' +

@@ -7,8 +7,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-5) var(--space-3);
-  min-height: 140px;
+  padding: var(--space-3);
+  aspect-ratio: 1;
   text-align: center;
   transition:
     transform var(--transition-fast),
@@ -172,8 +172,7 @@
 
 @media (max-width: 768px) {
   .module-btn {
-    min-height: 120px;
-    padding: var(--space-4) var(--space-2);
+    padding: var(--space-3) var(--space-2);
   }
 
   .module-btn__icon {
@@ -187,8 +186,7 @@
 
 @media (max-width: 480px) {
   .module-btn {
-    min-height: 110px;
-    padding: var(--space-3) var(--space-2);
+    padding: var(--space-2);
   }
 
   .module-btn__icon {

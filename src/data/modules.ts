@@ -75,17 +75,17 @@ export const MODULES: ModuleDefinition[] = [
     questionCount: 100
   },
   {
-    id: 'housing_real_estate',
-    name: 'Housing & Real Estate',
+    id: 'housing_property',
+    name: 'Housing & Property Preferences',
     shortName: 'Housing',
-    description: 'Cost, availability, quality, property rights, and neighborhoods',
+    description: 'Cost, availability, types, rental/purchase options, and neighborhoods',
     icon: '\u{1F3E0}',  // House
     status: 'not_started',
     questionCount: 100
   },
   {
     id: 'professional_career',
-    name: 'Professional & Career',
+    name: 'Professional & Career Development',
     shortName: 'Career',
     description: 'Job market, remote work infrastructure, entrepreneurship, coworking',
     icon: '\u{1F4BC}',  // Briefcase

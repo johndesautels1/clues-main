@@ -150,7 +150,7 @@ export interface GeminiExtraction {
 }
 
 // ─── Questionnaire Sub-Sections ──────────────────────────────────
-export type SubSection = 'demographics' | 'dnw' | 'mh' | 'general';
+export type SubSection = 'demographics' | 'dnw' | 'mh' | 'general' | 'tradeoffs';
 export type SubSectionStatus = Record<SubSection, ModuleStatus>;
 
 export interface DemographicAnswers {
