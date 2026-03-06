@@ -1242,6 +1242,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 12 | Outdoor & Recreation | 56 | 5 | `OUTDOOR_RECREATION_QUESTIONS.md` |
 | 13 | Food & Dining | 57 | 5 | `FOOD_DINING_QUESTIONS.md` |
 | 14 | Transportation & Mobility | 57 | 5 | `TRANSPORTATION_MOBILITY_QUESTIONS.md` |
+| 15 | Safety & Security | 100 | 10 | `SAFETY_SECURITY_QUESTIONS.md` |
 
 ---
 
