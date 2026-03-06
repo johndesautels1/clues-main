@@ -182,7 +182,7 @@ function buildExtractionPrompt(
 
   return `You are CLUES Intelligence's deep reasoning engine powered by Gemini 3.1 Pro Preview.
 
-Your job is to perform UNPRECEDENTED DEPTH analysis of a user's 27 biographical paragraphs and:
+Your job is to perform UNPRECEDENTED DEPTH analysis of a user's 30 biographical paragraphs and:
 1. EXTRACT 100-250 numbered, researchable metrics from their narrative
 2. RECOMMEND the best country (up to 3), top 3 cities, top 3 towns, top 3 neighborhoods
 3. SCORE every recommendation against every metric with justifications
@@ -200,7 +200,7 @@ The 30 paragraphs follow this pipeline:
 - P4: Must Haves — non-negotiable requirements cities MUST meet
 - P5: Trade-offs — priority weighting when cities score differently on different metrics
 - P6-P28: Module Deep Dives — one per category module in funnel order (each has a moduleId)
-- P26-P27: Vision — dream day narrative + wildcard catch-all
+- P29-P30: Vision — dream day narrative + wildcard catch-all
 
 Here are their 30 paragraphs:
 
@@ -215,8 +215,8 @@ Convert every measurable, researchable preference into a discrete metric.
 - Minimum 100 metrics, maximum 250
 - Each metric must be:
   - Numbered (M1, M2, M3...)
-  - Categorized (one of: climate, safety, healthcare, housing, transportation, legal, financial, lifescore, business, technology, education, family, dating, pets, food, sports, outdoor, arts, entertainment, spiritual)
-  - Sourced to a specific paragraph (P1-P27)
+  - Categorized (one of: safety_security, health_wellness, climate_weather, legal_immigration, financial_banking, housing_real_estate, professional_career, technology_connectivity, transportation_mobility, education_learning, social_values_governance, food_dining, shopping_services, outdoor_recreation, entertainment_nightlife, family_children, neighborhood_urban_design, environment_community_appearance, religion_spirituality, sexual_beliefs_practices_laws, arts_culture, cultural_heritage_traditions, pets_animals)
+  - Sourced to a specific paragraph (P1-P30)
   - Researchable (you can find real data for it)
   - Scorable (numeric, boolean, ranking, or index)
 - P3 dealbreakers produce ELIMINATION metrics — prefix with "ELIMINATE IF" for severity-5 hard walls.

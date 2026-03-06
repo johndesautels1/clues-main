@@ -26,7 +26,7 @@ create table if not exists public.sessions (
   -- Completion tracking (denormalized for dashboards/analytics)
   tier          text not null default 'discovery',   -- CompletionTier
   confidence    smallint not null default 0,          -- 0-100
-  paragraphs_completed smallint not null default 0,   -- 0-27
+  paragraphs_completed smallint not null default 0,   -- 0-30
 
   -- Detected currency (denormalized from Gemini extraction for analytics)
   detected_currency text,           -- ISO 4217: "EUR", "GBP", "THB", etc.
@@ -146,7 +146,7 @@ create policy "Users can read own costs"
 --     ADD COLUMN IF NOT EXISTS email text;
 --   CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON public.sessions (user_id);
 --
--- If upgrading to 27-paragraph + expanded extraction schema:
+-- If upgrading to 30-paragraph + expanded extraction schema:
 --
 --   ALTER TABLE public.sessions
 --     ADD COLUMN IF NOT EXISTS detected_currency text;

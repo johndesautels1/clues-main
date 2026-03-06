@@ -2,7 +2,7 @@
  * SideBySideMetricView — Compares City, Town, and Neighborhood metrics.
  *
  * Each row shows a metric scored across all three location levels.
- * Clicking a justification highlights the source Paragraph (P1-P27)
+ * Clicking a justification highlights the source Paragraph (P1-P30)
  * via the onParagraphClick callback.
  *
  * Blueprint requirement: "Implement a Side-by-Side Metric View where each row
@@ -24,26 +24,29 @@ interface SideBySideMetricViewProps {
 
 // Category display names
 const CATEGORY_LABELS: Record<string, string> = {
-  climate: 'Climate & Weather',
-  safety: 'Safety & Security',
-  healthcare: 'Healthcare & Medical',
-  housing: 'Housing & Real Estate',
-  transportation: 'Transportation',
-  legal: 'Legal & Immigration',
-  financial: 'Financial & Banking',
-  lifescore: 'LifeScore',
-  business: 'Business & Entrepreneurship',
-  technology: 'Technology & Connectivity',
-  education: 'Education & Learning',
-  family: 'Family & Children',
-  dating: 'Dating & Social Life',
-  pets: 'Pets & Animals',
-  food: 'Food & Cuisine',
-  sports: 'Sports & Fitness',
-  outdoor: 'Outdoor & Nature',
-  arts: 'Arts & Culture',
-  entertainment: 'Entertainment & Nightlife',
-  spiritual: 'Spiritual & Religious',
+  safety_security: 'Safety & Security',
+  health_wellness: 'Health & Wellness',
+  climate_weather: 'Climate & Weather',
+  legal_immigration: 'Legal & Immigration',
+  financial_banking: 'Financial & Banking',
+  housing_real_estate: 'Housing & Real Estate',
+  professional_career: 'Professional & Career',
+  technology_connectivity: 'Technology & Connectivity',
+  transportation_mobility: 'Transportation & Mobility',
+  education_learning: 'Education & Learning',
+  social_values_governance: 'Social Values & Governance',
+  food_dining: 'Food & Dining',
+  shopping_services: 'Shopping & Services',
+  outdoor_recreation: 'Outdoor & Recreation',
+  entertainment_nightlife: 'Entertainment & Nightlife',
+  family_children: 'Family & Children',
+  neighborhood_urban_design: 'Neighborhood & Urban Design',
+  environment_community_appearance: 'Environment & Community Appearance',
+  religion_spirituality: 'Religion & Spirituality',
+  sexual_beliefs_practices_laws: 'Sexual Beliefs, Practices & Laws',
+  arts_culture: 'Arts & Culture',
+  cultural_heritage_traditions: 'Cultural Heritage & Traditions',
+  pets_animals: 'Pets & Animals',
 };
 
 function getScoreColor(score: number): string {

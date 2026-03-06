@@ -1,6 +1,6 @@
 /**
  * Paragraphical Flow
- * 27-paragraph structured essay input following the CLUES decision pipeline.
+ * 30-paragraph structured essay input following the CLUES decision pipeline.
  * Stepped interface: one paragraph at a time with sidebar progress.
  * Auto-saves each paragraph to UserContext (→ Supabase).
  */

@@ -40,7 +40,7 @@ export function ParagraphicalButton({ status, onClick }: Props) {
         </div>
         <h2 className="paragraphical__title">The Paragraphical</h2>
         <p className="paragraphical__subtitle">
-          {status === 'not_started' && 'Tell us your story in 27 paragraphs'}
+          {status === 'not_started' && 'Tell us your story in 30 paragraphs'}
           {status === 'in_progress' && 'Continue writing your story...'}
           {status === 'completed' && 'Your biographical essay is complete'}
           {status === 'locked' && 'Complete prerequisites first'}

@@ -65,7 +65,7 @@ CLUES is designed as a progressive intelligence funnel. Users enter at any point
 
 1. **Paragraphical (Optional)** — User writes freely about their life, priorities, dreams, dealbreakers. AI extracts metrics, weights, and preferences. Generates an initial report with top 3 Cities, 3 Towns, 3 Neighborhoods. Fast, intuitive, surprisingly powerful.
 
-2. **Main Module (Optional)** — Structured questionnaire covering all 20 categories. More systematic data collection. Same output format: top 3/3/3.
+2. **Main Module (Optional)** — Structured questionnaire covering all 23 categories. More systematic data collection. Same output format: top 3/3/3.
 
 3. **Both (Best Results)** — Paragraphical + Main Module together yields the richest data and lowest margin of error. The system cross-references free-form narrative with structured answers.
 
@@ -98,7 +98,7 @@ High-confidence report identifying:
 
 ## Modules as Standalone Products
 
-Each of the 20 category modules is ALSO a **freestanding web app**. This serves three purposes:
+Each of the 23 category modules is ALSO a **freestanding web app**. This serves three purposes:
 
 1. **Brand Awareness** — Someone discovers CLUES through the Climate module or Dating module, has fun with it, discovers the full platform
 2. **Revenue** — Individual modules have value on their own and can be monetized independently
@@ -110,7 +110,7 @@ Many modules are inherently fun and educational on their own — you don't need 
 
 ## LifeScore Integration
 
-LifeScore is one of the 20 category modules (Category 8) but is unique:
+LifeScore's freedom metrics are now integrated into the Social Values & Governance category module. It is unique:
 - It has its own 100-metric system already built
 - It focuses specifically on legal freedom and personal liberty
 - **No dual legal/enforcement scoring in CLUES Main** — that's a LifeScore-specific concept for law-based analysis
@@ -230,9 +230,12 @@ P5: "Your Trade-offs" → Priority weighting signals → 5-10 signals
     W2: Nature > Nightlife (sacrifice entertainment for outdoors) [Weight]
     W3: Language learning acceptable (open to non-English) [Weight]
 
-═══ PHASE 5: MODULE DEEP DIVES (20 paragraphs, 1:1 with modules) ═══
+═══ PHASE 5: MODULE DEEP DIVES (23 paragraphs, 1:1 with category modules in funnel order) ═══
 
-P6: "Climate & Weather" → Climate & Weather (moduleId: climate_weather) → 10-15 metrics
+NOTE: Paragraph numbering follows the funnel order (Survival → Foundation → Infrastructure → Lifestyle → Connection → Identity).
+The old P6-P25 mapping from 20 modules is now P6-P28 for 23 modules. New modules added: Shopping & Services (P18), Social Values & Governance (P16), Neighborhood & Urban Design (P22), Environment & Community Appearance (P23), Sexual Beliefs Practices & Laws (P25), Cultural Heritage & Traditions (P27).
+
+P6: "Safety & Security" → Safety & Security (moduleId: safety_security) → 10-12 metrics
   Coverage targets:
   - Temperature range (summer max, winter min — in user's unit C/F)
   - Humidity tolerance (exact threshold if possible)
@@ -263,7 +266,7 @@ P7: "Safety & Security" → Safety & Security (moduleId: safety_security) → 10
     M25: Political stability index above [X] [Safety]
     M26: Safe for solo [gender] at night [Safety]
 
-P8: "Healthcare & Medical" → Healthcare & Medical (moduleId: healthcare) → 10-15 metrics
+P8: "Healthcare & Medical" → Health & Wellness (moduleId: health_wellness) → 10-15 metrics (now P7 in funnel order)
   Coverage targets:
   - Chronic conditions (specific)
   - Regular medications (exact names if mentioned)
@@ -280,7 +283,7 @@ P8: "Healthcare & Medical" → Healthcare & Medical (moduleId: healthcare) → 1
     M30: Private health insurance under EUR 300/month [Healthcare]
     M31: JCI-accredited hospital within 30 minutes [Healthcare]
 
-P9: "Housing & Real Estate" → Housing & Real Estate (moduleId: housing) → 12-15 metrics
+P9: "Housing & Real Estate" → Housing & Real Estate (moduleId: housing_real_estate) → 12-15 metrics (now P11 in funnel order)
   Coverage targets:
   - Property type (apartment, house, villa, loft)
   - Size requirements (bedrooms, sqm/sqft)
@@ -308,7 +311,7 @@ P10: "Legal & Immigration" → Legal & Immigration (moduleId: legal_immigration)
     M38: Tax treaty with [home country] [Financial]
     M39: Bureaucracy efficiency index [Legal]
 
-P11: "Financial & Banking" → Financial & Banking (moduleId: financial) → 12-18 metrics
+P11: "Financial & Banking" → Financial & Banking (moduleId: financial_banking) → 12-18 metrics
   Coverage targets:
   - Monthly income (DETECT CURRENCY — never default to USD)
   - Monthly budget tolerance
@@ -323,7 +326,7 @@ P11: "Financial & Banking" → Financial & Banking (moduleId: financial) → 12-
     M43: Grocery cost for family of [X] below EUR 600/month [Financial]
     M44: Favorable capital gains tax rate (below 20%) [Financial]
 
-P12: "Legal Independence & Freedom" → LifeScore (moduleId: lifescore) → 8-12 metrics
+P12: "Legal Independence & Freedom" → LifeScore (moduleId: social_values_governance) → 8-12 metrics
   Coverage targets:
   - Personal freedoms that matter (speech, press, religion, lifestyle)
   - Substances (alcohol, cannabis, legal status)
@@ -336,7 +339,7 @@ P12: "Legal Independence & Freedom" → LifeScore (moduleId: lifescore) → 8-12
     M47: No internet censorship / VPN not required [LifeScore]
     M48: LGBTQ+ legal protections in place [LifeScore]
 
-P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: business) → 12-15 metrics
+P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: professional_career) → 12-15 metrics
   Coverage targets:
   - Remote vs local employment
   - Startup ecosystem need
@@ -350,7 +353,7 @@ P13: "Business & Entrepreneurship" → Business & Entrepreneurship (moduleId: bu
     M51: Time zone within +/- 3 hours of [client zone] [Business]
     M52: Active [industry] professional community [Business]
 
-P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: technology) → 10-12 metrics
+P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: technology_connectivity) → 10-12 metrics
   Coverage targets:
   - Internet speed requirements (specific Mbps)
   - 5G / mobile data coverage
@@ -363,7 +366,7 @@ P14: "Technology & Connectivity" → Technology & Connectivity (moduleId: techno
     M55: Fiber optic availability in residential areas [Technology]
     M56: Reliable power grid (outages < 5 hours/year) [Technology]
 
-P15: "Transportation & Mobility" → Transportation (moduleId: transportation) → 10-15 metrics
+P15: "Transportation & Mobility" → Transportation (moduleId: transportation_mobility) → 10-15 metrics
   Coverage targets:
   - Car ownership intention (yes/no/maybe)
   - Public transit quality expectations
@@ -377,7 +380,7 @@ P15: "Transportation & Mobility" → Transportation (moduleId: transportation) �
     M59: International airport within 45 minutes [Transport]
     M60: Bike lane network throughout city center [Transport]
 
-P16: "Education & Learning" → Education & Learning (moduleId: education) → 8-12 metrics
+P16: "Education & Learning" → Education & Learning (moduleId: education_learning) → 8-12 metrics
   Coverage targets:
   - Children's education needs (international schools, curricula)
   - Personal education goals (language, degree, skills)
@@ -388,7 +391,7 @@ P16: "Education & Learning" → Education & Learning (moduleId: education) → 8
     M62: Language schools for [target language] [Education]
     M63: University ranked in global top 500 [Education]
 
-P17: "Family & Children" → Family & Children (moduleId: family) → 10-15 metrics
+P17: "Family & Children" → Family & Children (moduleId: family_children) → 10-15 metrics
   Coverage targets:
   - Who is relocating (partner, kids ages, parents)
   - Partner's career needs
@@ -402,7 +405,7 @@ P17: "Family & Children" → Family & Children (moduleId: family) → 10-15 metr
     M66: English-medium schooling K-12 [Family]
     M67: Family-oriented neighborhood culture [Family]
 
-P18: "Dating & Social Life" → Dating & Social Life (moduleId: dating_social) → 10-12 metrics
+P18: "Dating & Social Life" → Dating & Social Life (moduleId: cultural_heritage_traditions) → 10-12 metrics
   Coverage targets:
   - Expat community size and activity
   - Dating scene (if single)
@@ -415,7 +418,7 @@ P18: "Dating & Social Life" → Dating & Social Life (moduleId: dating_social) �
     M70: English widely spoken in social settings [Social]
     M71: Regular social events / meetups weekly [Social]
 
-P19: "Food & Cuisine" → Food & Cuisine (moduleId: food_cuisine) → 10-12 metrics
+P19: "Food & Cuisine" → Food & Cuisine (moduleId: food_dining) → 10-12 metrics
   Coverage targets:
   - Dietary restrictions (vegan, halal, kosher, gluten-free, allergies)
   - Cuisine preferences (specific cuisines loved)
@@ -430,7 +433,7 @@ P19: "Food & Cuisine" → Food & Cuisine (moduleId: food_cuisine) → 10-12 metr
     M74: Average restaurant meal under EUR 15 [Food]
     M75: Food delivery apps with 30-min delivery [Food]
 
-P20: "Sports & Fitness" → Sports & Fitness (moduleId: sports_fitness) → 8-12 metrics
+P20: "Sports & Fitness" → Sports & Fitness (moduleId: outdoor_recreation) → 8-12 metrics
   Coverage targets:
   - Gym/fitness center access and cost
   - Specific sports (tennis, surfing, yoga, CrossFit, martial arts)
@@ -444,7 +447,7 @@ P20: "Sports & Fitness" → Sports & Fitness (moduleId: sports_fitness) → 8-12
     M78: Running/cycling paths along waterfront or parks [Fitness]
     M79: Year-round outdoor exercise climate [Fitness]
 
-P21: "Outdoor & Nature" → Outdoor & Nature (moduleId: outdoor_nature) → 8-12 metrics
+P21: "Outdoor & Nature" → Outdoor & Nature (moduleId: outdoor_recreation) → 8-12 metrics
   Coverage targets:
   - Mountain vs beach preference (or both)
   - Hiking trail accessibility
@@ -472,7 +475,7 @@ P22: "Arts & Culture" → Arts & Culture (moduleId: arts_culture) → 8-10 metri
     M86: Cultural heritage UNESCO sites nearby [Culture]
     M87: Active creative/artist community [Culture]
 
-P23: "Entertainment & Nightlife" → Entertainment & Nightlife (moduleId: entertainment) → 8-10 metrics
+P23: "Entertainment & Nightlife" → Entertainment & Nightlife (moduleId: entertainment_nightlife) → 8-10 metrics
   Coverage targets:
   - Nightlife style (clubs, bars, lounges, none)
   - Festival / event calendar
@@ -486,7 +489,7 @@ P23: "Entertainment & Nightlife" → Entertainment & Nightlife (moduleId: entert
     M90: Cinema showing English-language films [Entertainment]
     M91: Weekend activities variety score [Entertainment]
 
-P24: "Spiritual & Religious" → Spiritual & Religious (moduleId: spiritual) → 6-8 metrics
+P24: "Spiritual & Religious" → Spiritual & Religious (moduleId: religion_spirituality) → 6-8 metrics
   Coverage targets:
   - Specific religion / denomination
   - Place of worship proximity
@@ -499,7 +502,7 @@ P24: "Spiritual & Religious" → Spiritual & Religious (moduleId: spiritual) →
     M93: Religious tolerance index above 70/100 [Spiritual]
     M94: Meditation / retreat centers accessible [Spiritual]
 
-P25: "Pets & Animals" → Pets & Animals (moduleId: pets) → 8-10 metrics
+P25: "Pets & Animals" → Pets & Animals (moduleId: pets_animals) → 8-10 metrics
   Coverage targets:
   - Pet type and breed (affects import regulations)
   - Pet-friendly housing availability
@@ -805,7 +808,7 @@ Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 o
 ### Layer 4: Cross-Paragraph Intelligence (API — Future)
 **What:** After multiple paragraphs are written, Olivia detects conflicts, gaps, and opportunities across the full narrative.
 
-- Fires after paragraphs 5, 12, 18, 25, and 27 (phase boundaries)
+- Fires after paragraphs 5, 12, 16, 20, 23, 28, and 30 (phase boundaries)
 - Checks for contradictions (P3 vs P6, P9 vs P11, P4 vs module paragraphs)
 - Identifies completely unaddressed categories
 - Suggests which remaining paragraphs to focus on
