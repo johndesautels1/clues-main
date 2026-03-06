@@ -1243,6 +1243,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 13 | Food & Dining | 57 | 5 | `FOOD_DINING_QUESTIONS.md` |
 | 14 | Transportation & Mobility | 57 | 5 | `TRANSPORTATION_MOBILITY_QUESTIONS.md` |
 | 15 | Safety & Security | 100 | 10 | `SAFETY_SECURITY_QUESTIONS.md` |
+| 16 | Cultural Heritage & Traditions | 107 | 5 | `CULTURAL_HERITAGE_TRADITIONS_QUESTIONS.md` |
 
 ---
 
