@@ -1,7 +1,7 @@
-# Transportation & Mobility — 57 Typeform Questions Reference
+# Transportation & Mobility — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire — International Buyers' Transportation & Mobility Questionnaire Module
-> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q57)
+> **Structure:** 9 sections, each ending with a ranking question + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -94,4 +94,82 @@
 | 54 | Which of the following potential transportation challenges are you most concerned about? (select up to 2) |
 | 55 | How important is transportation affordability relative to your income? |
 | 56 | Drag and rank future transport factors (1 = most important to 10 = least important) |
-| 57 | Rank all 5 sections by overall importance to your relocation decision (1 = most important to 5 = least important) |
+| 57 | Rank all 5 original sections by overall importance to your relocation decision (1 = most important to 5 = least important) |
+
+---
+
+## Section 6: Cycling, Walking & Micromobility (Q58-Q69)
+
+| # | Question |
+|---|----------|
+| 58 | How important is dedicated cycling infrastructure (protected bike lanes, bike paths, bike parking) in your ideal location? |
+| 59 | Would you use cycling as a primary mode of daily transportation if safe infrastructure existed? |
+| 60 | How important is access to bike-sharing or e-scooter-sharing programs in your neighborhood? |
+| 61 | How important is pedestrian infrastructure quality (wide sidewalks, safe crosswalks, pedestrian zones, car-free streets) to your daily life? |
+| 62 | How comfortable are you cycling in mixed traffic with cars and buses? |
+| 63 | How important is flat or gentle terrain for cycling and walking as daily transportation? |
+| 64 | How do you feel about the safety of cycling and walking at night in an urban environment? |
+| 65 | How important is pedestrian and cyclist priority at intersections and traffic signals? |
+| 66 | Would you use ride-hailing apps (Uber, Bolt, Grab, Lyft) as a regular transportation option? |
+| 67 | How important is the availability and affordability of ride-hailing and taxi services in your new location? |
+| 68 | How concerned are you about theft and security for personal bicycles, e-bikes, or scooters? |
+| 69 | SECTION 6 PRIORITY RANKING (Drag and rank these cycling/walking/micromobility factors by importance - 1 = most important, 10 = least important) |
+
+---
+
+## Section 7: Road Conditions & Driving Culture (Q70-Q80)
+
+| # | Question |
+|---|----------|
+| 70 | How important is overall road surface quality and maintenance in your ideal location? |
+| 71 | How comfortable are you driving on the opposite side of the road from what you are used to (left-hand vs. right-hand traffic)? |
+| 72 | How concerned are you about aggressive driving culture, road rage, and driver behavior in a new country? |
+| 73 | How important is the enforcement of traffic laws and road safety regulations in your destination? |
+| 74 | How do you feel about locations where motorcycles, tuk-tuks, or informal transport dominate the roads? |
+| 75 | How important is the availability of roadside assistance and emergency services on highways? |
+| 76 | How concerned are you about the cost of fuel, tolls, and vehicle insurance in your new location? |
+| 77 | How important is access to EV charging infrastructure if you plan to drive an electric vehicle? |
+| 78 | How do extreme weather conditions (snow, ice, flooding, sandstorms) affecting roads influence your location preference? |
+| 79 | How important is the availability of adequate street parking and public parking garages near your daily destinations? |
+| 80 | SECTION 7 PRIORITY RANKING (Drag and rank these driving/road factors by importance - 1 = most important, 10 = least important) |
+
+---
+
+## Section 8: Intercity, Regional & International Travel (Q81-Q90)
+
+| # | Question |
+|---|----------|
+| 81 | How often do you expect to travel between cities or regions within your new country? |
+| 82 | How important is access to high-speed rail or efficient intercity train networks? |
+| 83 | How important is proximity to an international airport with direct flights to your home country or key destinations? |
+| 84 | How frequently do you expect to travel internationally from your new location? |
+| 85 | How important is easy access to neighboring countries by land, sea, or short flights? |
+| 86 | How important is the availability of long-distance bus or coach services for budget regional travel? |
+| 87 | How do you feel about ferry or boat services as a regular mode of intercity or island transport? |
+| 88 | How important is seamless border-crossing infrastructure (e.g., EU Schengen, ASEAN agreements) for your travel lifestyle? |
+| 89 | How important is the availability of car rental services for weekend or holiday road trips? |
+| 90 | SECTION 8 PRIORITY RANKING (Drag and rank these intercity/international travel factors by importance - 1 = most important, 10 = least important) |
+
+---
+
+## Section 9: Transport Technology & Sustainability (Q91-Q99)
+
+| # | Question |
+|---|----------|
+| 91 | How important is real-time transit tracking and mobile app integration for public transport in your ideal location? |
+| 92 | How important is contactless or mobile payment acceptance across all transportation modes? |
+| 93 | How important is a unified transit card or payment system that works across buses, trains, ferries, and ride-hailing? |
+| 94 | How do you feel about autonomous vehicles and self-driving transport options becoming available in your area? |
+| 95 | How important is it that your city actively invests in reducing transportation carbon emissions (electric buses, congestion pricing, car-free zones)? |
+| 96 | How important is real-time traffic and navigation data quality (Google Maps, Waze accuracy) in your new location? |
+| 97 | How do you feel about congestion pricing, low-emission zones, or car-restriction policies in city centers? |
+| 98 | How important is the city's long-term transportation master plan and investment in future infrastructure improvements? |
+| 99 | SECTION 9 PRIORITY RANKING (Drag and rank these technology/sustainability factors by importance - 1 = most important, 8 = least important) |
+
+---
+
+## Final Cross-Section Ranking (Q100)
+
+| # | Question |
+|---|----------|
+| 100 | FINAL MODULE RANKING: Drag and rank all 9 MAIN SECTIONS in order of overall importance to your transportation and relocation decision (1 = most important, 9 = least important): Daily Mobility & Commute, Transit Access & Household, Infrastructure & Transit Quality, Vehicle Ownership & Alternatives, Accessibility Safety & Future, Cycling Walking & Micromobility, Road Conditions & Driving Culture, Intercity Regional & International Travel, Transport Technology & Sustainability |
