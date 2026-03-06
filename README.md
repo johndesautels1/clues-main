@@ -1228,26 +1228,31 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 | # | Module | Questions | Sections | File |
 |---|--------|-----------|----------|------|
-| 1 | Shopping & Services | 101 | 10 | `SHOPPING_SERVICES_QUESTIONS.md` |
-| 2 | Technology & Connectivity | 105 | 5 | `TECHNOLOGY_CONNECTIVITY_QUESTIONS.md` |
-| 3 | Climate & Weather | 106 | 5 | `CLIMATE_WEATHER_QUESTIONS.md` |
-| 4 | Housing & Property | 122 | 6 | `HOUSING_PROPERTY_QUESTIONS.md` |
-| 5 | Professional & Career | 106 | 5 | `PROFESSIONAL_CAREER_QUESTIONS.md` |
-| 6 | Religion & Spirituality | 106 | 5 | `RELIGION_SPIRITUALITY_QUESTIONS.md` |
-| 7 | Health & Wellness | 106 | 5 | `HEALTH_WELLNESS_QUESTIONS.md` |
-| 8 | Arts & Culture | 97 | 5 | `ARTS_CULTURE_QUESTIONS.md` |
-| 9 | Legal & Immigration | 102 | 5 | `LEGAL_IMMIGRATION_QUESTIONS.md` |
-| 10 | Environment & Community Appearance | 83 | 5 | `ENVIRONMENT_COMMUNITY_APPEARANCE_QUESTIONS.md` |
-| 11 | Sexual Beliefs, Practices & Laws | 79 | 7 | `SEXUAL_BELIEFS_PRACTICES_LAWS_QUESTIONS.md` |
-| 12 | Outdoor & Recreation | 56 | 5 | `OUTDOOR_RECREATION_QUESTIONS.md` |
-| 13 | Food & Dining | 57 | 5 | `FOOD_DINING_QUESTIONS.md` |
-| 14 | Transportation & Mobility | 57 | 5 | `TRANSPORTATION_MOBILITY_QUESTIONS.md` |
-| 15 | Safety & Security | 100 | 10 | `SAFETY_SECURITY_QUESTIONS.md` |
-| 16 | Cultural Heritage & Traditions | 107 | 5 | `CULTURAL_HERITAGE_TRADITIONS_QUESTIONS.md` |
-| 17 | Social Values & Governance | 100 | 10 | `SOCIAL_VALUES_GOVERNANCE_QUESTIONS.md` |
-| 18 | Neighborhood & Urban Design | 100 | 10 | `NEIGHBORHOOD_URBAN_DESIGN_QUESTIONS.md` |
-| 19 | Core Module (INCOMPLETE DRAFT) | 130 | — | `CORE_MODULE_QUESTIONS.md` |
-| 20 | General Questions (FINAL) | 50 | 8 | `GENERAL_QUESTIONS_REFERENCE.md` |
+| — | **Main Module (Demographics, DNW, Must Haves)** | **100** | **3** | `MAIN_MODULE_QUESTIONS.md` |
+| — | **General Questions** | **50** | **8** | `GENERAL_QUESTIONS_REFERENCE.md` |
+| 1 | Climate & Weather | 100 | 10 | `CLIMATE_WEATHER_QUESTIONS.md` |
+| 2 | Safety & Security | 100 | 10 | `SAFETY_SECURITY_QUESTIONS.md` |
+| 3 | Financial & Banking | 100 | 10 | `FINANCIAL_BANKING_QUESTIONS.md` |
+| 4 | Housing & Property | 100 | 6 | `HOUSING_PROPERTY_QUESTIONS.md` |
+| 5 | Education & Learning | 100 | 10 | `EDUCATION_LEARNING_QUESTIONS.md` |
+| 6 | Health & Wellness | 100 | 5 | `HEALTH_WELLNESS_QUESTIONS.md` |
+| 7 | Social Values & Governance | 100 | 10 | `SOCIAL_VALUES_GOVERNANCE_QUESTIONS.md` |
+| 8 | Professional & Career | 100 | 5 | `PROFESSIONAL_CAREER_QUESTIONS.md` |
+| 9 | Technology & Connectivity | 100 | 5 | `TECHNOLOGY_CONNECTIVITY_QUESTIONS.md` |
+| 10 | Entertainment & Nightlife | 100 | 10 | `ENTERTAINMENT_NIGHTLIFE_QUESTIONS.md` |
+| 11 | Outdoor & Recreation | 100 | 8 | `OUTDOOR_RECREATION_QUESTIONS.md` |
+| 12 | Family & Children | 100 | 10 | `FAMILY_CHILDREN_QUESTIONS.md` |
+| 13 | Sexual Beliefs, Practices & Laws | 100 | 8 | `SEXUAL_BELIEFS_PRACTICES_LAWS_QUESTIONS.md` |
+| 14 | Food & Dining | 100 | 9 | `FOOD_DINING_QUESTIONS.md` |
+| 15 | Legal & Immigration | 100 | 5 | `LEGAL_IMMIGRATION_QUESTIONS.md` |
+| 16 | Pets & Animals | 100 | 10 | `PETS_ANIMALS_QUESTIONS.md` |
+| 17 | Religion & Spirituality | 100 | 5 | `RELIGION_SPIRITUALITY_QUESTIONS.md` |
+| 18 | Arts & Culture | 100 | 5 | `ARTS_CULTURE_QUESTIONS.md` |
+| 19 | Transportation & Mobility | 100 | 9 | `TRANSPORTATION_MOBILITY_QUESTIONS.md` |
+| 20 | Shopping & Services | 100 | 10 | `SHOPPING_SERVICES_QUESTIONS.md` |
+| 21 | Environment & Community Appearance | 100 | 6 | `ENVIRONMENT_COMMUNITY_APPEARANCE_QUESTIONS.md` |
+| 22 | Neighborhood & Urban Design | 100 | 10 | `NEIGHBORHOOD_URBAN_DESIGN_QUESTIONS.md` |
+| 23 | Cultural Heritage & Traditions | 100 | 5 | `CULTURAL_HERITAGE_TRADITIONS_QUESTIONS.md` |
 
 ---
 
