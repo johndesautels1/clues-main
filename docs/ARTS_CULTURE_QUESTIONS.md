@@ -1,7 +1,7 @@
-# Arts & Culture — 97 Typeform Questions Reference
+# Arts & Culture — 100 Typeform Questions Reference
 
 > **Source:** Typeform questionnaire — International Buyers' Arts & Culture Module
-> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q97)
+> **Structure:** 5 sections, each ending with a ranking question + 1 final cross-section ranking (Q100)
 > **Purpose:** Reference table for Paragraphical paragraph design and Gemini prompt engineering
 
 ---
@@ -67,7 +67,7 @@
 
 ---
 
-## Section 3: Creative Community (Q48-Q56)
+## Section 3: Creative Community (Q48-Q59)
 
 | # | Question |
 |---|----------|
@@ -79,59 +79,62 @@
 | 53 | How important are cultural mentorship and apprenticeship opportunities? |
 | 54 | What type of cultural activism and social engagement appeals to you? |
 | 55 | How important are intergenerational creative communities? |
-| 56 | Please drag and rank these Creative Community priorities in order of importance: |
+| 56 | How important is access to public funding, grants, or residency programs that support local artists and creative projects? |
+| 57 | How important is the presence of independent bookstores, art-house cinemas, and alternative cultural spaces in your neighborhood? |
+| 58 | How important is a thriving street art, public art installation, and open-air cultural scene in your ideal city? |
+| 59 | Please drag and rank these Creative Community priorities in order of importance: |
 
 ---
 
-## Section 4: Cultural Events & Festivals (Q57-Q77)
+## Section 4: Cultural Events & Festivals (Q60-Q80)
 
 | # | Question |
 |---|----------|
-| 57 | How important are annual cultural festivals in your ideal location? |
-| 58 | What types of cultural festivals interest you most? (Select all that apply) |
-| 59 | What scale of cultural events appeals to you most? |
-| 60 | How often do you want major cultural events in your area? |
-| 61 | What type of festival atmosphere do you prefer? |
-| 62 | How important is international cultural programming? |
-| 63 | What role should food play in cultural events? |
-| 64 | How important are free and accessible cultural events? |
-| 65 | What types of cultural workshops and participatory events interest you? |
-| 66 | How important are outdoor cultural events and venues? |
-| 67 | What type of cultural tourism and visitor programming appeals to you? |
-| 68 | How important are cultural events that celebrate local history? |
-| 69 | What role should technology play in cultural events? |
-| 70 | How important are cultural events for different age groups? |
-| 71 | What type of cultural competition and awards interest you? |
-| 72 | How important are cultural events that address contemporary issues? |
-| 73 | What type of cultural volunteering and community involvement appeals to you? |
-| 74 | How important are cultural events that build community connections? |
-| 75 | What type of cultural event scheduling works best for you? |
-| 76 | How important are cultural events that connect urban and rural areas? |
-| 77 | Please drag and rank these Cultural Events priorities in order of importance: |
+| 60 | How important are annual cultural festivals in your ideal location? |
+| 61 | What types of cultural festivals interest you most? (Select all that apply) |
+| 62 | What scale of cultural events appeals to you most? |
+| 63 | How often do you want major cultural events in your area? |
+| 64 | What type of festival atmosphere do you prefer? |
+| 65 | How important is international cultural programming? |
+| 66 | What role should food play in cultural events? |
+| 67 | How important are free and accessible cultural events? |
+| 68 | What types of cultural workshops and participatory events interest you? |
+| 69 | How important are outdoor cultural events and venues? |
+| 70 | What type of cultural tourism and visitor programming appeals to you? |
+| 71 | How important are cultural events that celebrate local history? |
+| 72 | What role should technology play in cultural events? |
+| 73 | How important are cultural events for different age groups? |
+| 74 | What type of cultural competition and awards interest you? |
+| 75 | How important are cultural events that address contemporary issues? |
+| 76 | What type of cultural volunteering and community involvement appeals to you? |
+| 77 | How important are cultural events that build community connections? |
+| 78 | What type of cultural event scheduling works best for you? |
+| 79 | How important are cultural events that connect urban and rural areas? |
+| 80 | Please drag and rank these Cultural Events priorities in order of importance: |
 
 ---
 
-## Section 5: Cultural Integration (Q78-Q97)
+## Section 5: Cultural Integration (Q81-Q100)
 
 | # | Question |
 |---|----------|
-| 78 | How important is cultural integration for your relocation success? |
-| 79 | What types of cultural learning opportunities interest you? (Select all that apply) |
-| 80 | How important is maintaining your own cultural traditions? |
-| 81 | What type of cultural mentorship appeals to you? |
-| 82 | How important are cultural institutions that serve expatriate communities? |
-| 83 | What role should cultural differences play in daily life? |
-| 84 | How important are multilingual cultural resources? |
-| 85 | What type of cultural workplace integration interests you? |
-| 86 | How important are cultural resources for children and families? |
-| 87 | What type of cultural healthcare and wellness integration appeals to you? |
-| 88 | How important is cultural education for personal growth? |
-| 89 | What type of cultural documentation and sharing interests you? |
-| 90 | What type of cultural gift-giving and hospitality customs matter to you? |
-| 91 | How important are cultural approaches to work-life balance? |
-| 92 | What type of cultural environmental and sustainability engagement appeals to you? |
-| 93 | How important are cultural approaches to aging and life transitions? |
-| 94 | What type of cultural legacy and contribution interests you? |
-| 95 | What represents successful cultural integration for you? |
-| 96 | Please drag and rank these Cultural Integration priorities in order of importance: |
-| 97 | FINAL MODULE RANKING: Please drag and rank these 5 Arts & Culture sections in order of importance |
+| 81 | How important is cultural integration for your relocation success? |
+| 82 | What types of cultural learning opportunities interest you? (Select all that apply) |
+| 83 | How important is maintaining your own cultural traditions? |
+| 84 | What type of cultural mentorship appeals to you? |
+| 85 | How important are cultural institutions that serve expatriate communities? |
+| 86 | What role should cultural differences play in daily life? |
+| 87 | How important are multilingual cultural resources? |
+| 88 | What type of cultural workplace integration interests you? |
+| 89 | How important are cultural resources for children and families? |
+| 90 | What type of cultural healthcare and wellness integration appeals to you? |
+| 91 | How important is cultural education for personal growth? |
+| 92 | What type of cultural documentation and sharing interests you? |
+| 93 | What type of cultural gift-giving and hospitality customs matter to you? |
+| 94 | How important are cultural approaches to work-life balance? |
+| 95 | What type of cultural environmental and sustainability engagement appeals to you? |
+| 96 | How important are cultural approaches to aging and life transitions? |
+| 97 | What type of cultural legacy and contribution interests you? |
+| 98 | What represents successful cultural integration for you? |
+| 99 | Please drag and rank these Cultural Integration priorities in order of importance: |
+| 100 | FINAL MODULE RANKING: Please drag and rank these 5 Arts & Culture sections in order of importance |
