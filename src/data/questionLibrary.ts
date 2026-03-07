@@ -9,6 +9,7 @@ export interface QuestionItem {
 
 export interface QuestionSection {
   title: string;
+  questionRange?: string;
   questions: QuestionItem[];
 }
 
