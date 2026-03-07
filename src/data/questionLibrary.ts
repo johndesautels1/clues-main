@@ -18,6 +18,7 @@ export interface QuestionModule {
   moduleName: string;
   fileName?: string;
   structure?: string;
+  totalQuestions?: number;
   sections: QuestionSection[];
 }
 
