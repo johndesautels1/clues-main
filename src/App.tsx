@@ -57,7 +57,7 @@ function App() {
             <Route
               path="/admin/questions"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowAnonymous>
                   <QuestionLibrary />
                 </ProtectedRoute>
               }

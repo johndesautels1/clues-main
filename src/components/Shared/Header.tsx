@@ -34,13 +34,10 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
   { id: 'results',       label: 'Results',         icon: '\u{1F4CB}' },
   { id: 'judges-report', label: 'Judges Report',   icon: '\u{1F4C8}' },
   { id: 'visuals',       label: 'Visuals',         icon: '\u{1F3A8}' },
+  { id: 'questions',     label: 'Questions',       icon: '\u{1F4DD}' },
   { id: 'ask-olivia',    label: 'Ask Olivia',      icon: '\u{1F399}' },
   { id: 'saved',         label: 'Saved',           icon: '\u{1F4BE}' },
   { id: 'about',         label: 'About',           icon: '\u{2139}\uFE0F' },
-];
-
-const ADMIN_TOOLBAR_ITEMS: ToolbarItem[] = [
-  { id: 'questions',     label: 'Questions',       icon: '\u{1F4DD}' },
 ];
 
 export function Header() {
@@ -88,17 +85,6 @@ export function Header() {
           {/* Toolbar Navigation */}
           <nav className="header__toolbar" aria-label="Main navigation">
             {TOOLBAR_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                className={`header__toolbar-btn${activeTab === item.id ? ' header__toolbar-btn--active' : ''}`}
-                onClick={() => handleTabClick(item.id)}
-                type="button"
-              >
-                <span className="header__toolbar-icon" aria-hidden="true">{item.icon}</span>
-                <span className="header__toolbar-label">{item.label}</span>
-              </button>
-            ))}
-            {isAdmin && ADMIN_TOOLBAR_ITEMS.map((item) => (
               <button
                 key={item.id}
                 className={`header__toolbar-btn${activeTab === item.id ? ' header__toolbar-btn--active' : ''}`}
