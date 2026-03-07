@@ -36,6 +36,8 @@ export interface QuestionLibraryData {
     totalModules: number;
     totalQuestions: number;
     responseTypes: Record<string, ResponseTypeMeta>;
+    brand?: Record<string, string>;
+    moduleStructure?: string;
   };
   modules: QuestionModule[];
 }

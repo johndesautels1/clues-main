@@ -203,7 +203,7 @@ export function QuestionLibrary() {
 
   // Toast
   const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
