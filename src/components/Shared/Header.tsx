@@ -39,6 +39,10 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
   { id: 'about',         label: 'About',           icon: '\u{2139}\uFE0F' },
 ];
 
+const ADMIN_TOOLBAR_ITEMS: ToolbarItem[] = [
+  { id: 'questions',     label: 'Questions',       icon: '\u{1F4DD}' },
+];
+
 export function Header() {
   const navigate = useNavigate();
   const { user, isAuthenticated, signOut } = useAuth();
@@ -57,7 +61,11 @@ export function Header() {
 
   const handleTabClick = (id: string) => {
     setActiveTab(id);
-    // Future: navigate to sub-routes or open modals per tab
+    const routeMap: Record<string, string> = {
+      questions: '/admin/questions',
+      paragraphical: '/paragraphical',
+    };
+    if (routeMap[id]) navigate(routeMap[id]);
   };
 
   return (
@@ -80,6 +88,17 @@ export function Header() {
           {/* Toolbar Navigation */}
           <nav className="header__toolbar" aria-label="Main navigation">
             {TOOLBAR_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                className={`header__toolbar-btn${activeTab === item.id ? ' header__toolbar-btn--active' : ''}`}
+                onClick={() => handleTabClick(item.id)}
+                type="button"
+              >
+                <span className="header__toolbar-icon" aria-hidden="true">{item.icon}</span>
+                <span className="header__toolbar-label">{item.label}</span>
+              </button>
+            ))}
+            {isAdmin && ADMIN_TOOLBAR_ITEMS.map((item) => (
               <button
                 key={item.id}
                 className={`header__toolbar-btn${activeTab === item.id ? ' header__toolbar-btn--active' : ''}`}
