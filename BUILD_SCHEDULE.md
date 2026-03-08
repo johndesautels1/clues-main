@@ -67,7 +67,7 @@
 | **Data: Modules** | `data/modules.ts` | 260 | Complete — 23 module definitions |
 | **Data: Paragraph Targets** | `data/paragraphTargets.ts` | 567 | Complete — extraction targets per paragraph |
 | **Types** | `types/index.ts` | 317 | Partial — needs expansion for evaluation pipeline |
-| **Supabase Schema** | `supabase/schema.sql` | 153 | Partial — needs evaluation + report tables |
+| **Supabase Schema** | `supabase/schema.sql` | ~700 | Complete — 20 tables, 2 views, RLS, indexes |
 | **Styles** | 18 CSS files | ~5,152 | Working — dark glassmorphic, WCAG compliant |
 
 ### What DOES NOT EXIST Yet
@@ -544,6 +544,29 @@ Target: < 10KB. Everything else lives in specialized docs.
   3. Fixed DNW sync: flat `q35: 3` → `DNWAnswer{ questionId, value, severity }` array
   4. Fixed MH sync: flat `q68: 4` → `MHAnswer{ questionId, value, importance }` array
   5. Fixed key collisions: `tq{n}` for tradeoffs, `gq{n}` for general (avoids overlap with `q{n}` demographics)
+- **Built comprehensive Supabase schema: 2 tables → 20 tables + 2 views:**
+  - `user_profiles` — extended user data beyond auth
+  - `paragraphs` — individual paragraph entries (1-30) with word counts
+  - `gemini_extractions` — extraction metadata from Gemini reasoning engine
+  - `gemini_metrics` — individual metrics (100-250 per extraction)
+  - `questionnaire_answers` — normalized per-answer rows for all 5 sections
+  - `module_progress` — per-module status tracking (main + mini)
+  - `location_recommendations` — Gemini-recommended locations
+  - `evaluations` — evaluation run metadata
+  - `llm_evaluations` — per-LLM evaluation outputs
+  - `evaluation_metrics` — per-metric per-LLM scores with sources
+  - `judge_reports` — Opus judge verdicts
+  - `judge_overrides` — individual metric overrides by Opus
+  - `tavily_cache` — cached web search results (30-min TTL)
+  - `reports` — generated report metadata (Gamma, PDF, video)
+  - `subscriptions` — Stripe subscription tracking
+  - `question_performance` — question effectiveness analytics
+  - `paragraph_summaries` — Gemini per-paragraph analysis
+  - `thinking_steps` — Gemini reasoning chain transparency
+  - `session_overview` view — admin dashboard aggregation
+  - `question_effectiveness` view — question health leaderboard
+  - `supabasePersistence.ts` — dual-write service (JSONB + normalized)
+  - RLS on every table, indexes on all FKs + query patterns
 
 **Current build position:**
 - Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
