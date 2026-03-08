@@ -68,6 +68,7 @@ const INITIAL_STATE: UserSession = {
       dnw: 'locked',
       mh: 'locked',
       general: 'locked',
+      tradeoffs: 'locked',
     },
   },
   completedModules: [],

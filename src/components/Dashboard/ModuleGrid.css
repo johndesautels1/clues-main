@@ -1,9 +1,10 @@
-/* Module Grid - 5 column responsive layout */
+/* Module Grid - Uniform tabular layout, all cells identical size */
 
 .module-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: var(--space-4);
+  width: 100%;
 }
 
 .module-grid__item {

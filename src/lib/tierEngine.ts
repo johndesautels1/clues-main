@@ -164,7 +164,7 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
     description: 'Deep scoring across all 23 life modules',
     confidenceGain: CONFIDENCE_GAINS.generalQuestions,
     timeEstimate: '~30 minutes',
-    questionCount: 200,
+    questionCount: 50,
     completed: !!hasGeneral,
   });
 

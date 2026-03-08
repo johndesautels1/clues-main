@@ -34,6 +34,7 @@ const TOOLBAR_ITEMS: ToolbarItem[] = [
   { id: 'results',       label: 'Results',         icon: '\u{1F4CB}' },
   { id: 'judges-report', label: 'Judges Report',   icon: '\u{1F4C8}' },
   { id: 'visuals',       label: 'Visuals',         icon: '\u{1F3A8}' },
+  { id: 'questions',     label: 'Questions',       icon: '\u{1F4DD}' },
   { id: 'ask-olivia',    label: 'Ask Olivia',      icon: '\u{1F399}' },
   { id: 'saved',         label: 'Saved',           icon: '\u{1F4BE}' },
   { id: 'about',         label: 'About',           icon: '\u{2139}\uFE0F' },
@@ -57,7 +58,11 @@ export function Header() {
 
   const handleTabClick = (id: string) => {
     setActiveTab(id);
-    // Future: navigate to sub-routes or open modals per tab
+    const routeMap: Record<string, string> = {
+      questions: '/admin/questions',
+      paragraphical: '/paragraphical',
+    };
+    if (routeMap[id]) navigate(routeMap[id]);
   };
 
   return (

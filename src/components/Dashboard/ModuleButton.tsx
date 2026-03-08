@@ -39,8 +39,8 @@ export function ModuleButton({ module }: Props) {
       {/* Icon */}
       <div className="module-btn__icon">{module.icon}</div>
 
-      {/* Name */}
-      <h3 className="module-btn__name">{module.shortName}</h3>
+      {/* Full module name */}
+      <h3 className="module-btn__name">{module.name}</h3>
 
       {/* Score meter (only for completed) */}
       {module.status === 'completed' && module.score !== undefined && (

@@ -23,6 +23,7 @@ import { Dashboard } from './components/Dashboard/Dashboard';
 import { DiscoveryFlow } from './components/Discovery';
 import { LoginPage } from './components/Auth/LoginPage';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
+import { QuestionLibrary } from './components/Admin/QuestionLibrary';
 
 function App() {
   return (
@@ -49,6 +50,15 @@ function App() {
               element={
                 <ProtectedRoute allowAnonymous>
                   <DiscoveryFlow />
+                </ProtectedRoute>
+              }
+            />
+            {/* Admin — Question Library Dashboard */}
+            <Route
+              path="/admin/questions"
+              element={
+                <ProtectedRoute allowAnonymous>
+                  <QuestionLibrary />
                 </ProtectedRoute>
               }
             />
