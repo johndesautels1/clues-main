@@ -151,13 +151,13 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 28,
-          "question": "What specific medical conditions require ongoing treatment or specialist access? (Select all that apply: cardiovascular, respiratory, diabetes, autoimmune, neurological, orthopedic, mental health, cancer/oncology, none)",
+          "question": "What specific medical conditions require ongoing treatment or specialist access? (Select all that apply: allergies/immunology, arthritis/rheumatology, asthma, autoimmune disorders, blood disorders/hematology, cancer/oncology, cardiovascular/heart disease, cerebral palsy, chronic fatigue syndrome, chronic pain, Crohn's disease/IBD, cystic fibrosis, dementia/Alzheimer's, dermatology/skin conditions, diabetes (Type 1), diabetes (Type 2), eating disorders, endocrine/hormonal disorders, epilepsy/seizure disorders, fibromyalgia, gastrointestinal/digestive, genetic/hereditary conditions, hearing loss/audiology, hepatitis/liver disease, HIV/AIDS, hypertension, infectious disease, kidney/renal disease, lupus, Lyme disease, mental health - anxiety, mental health - bipolar disorder, mental health - depression, mental health - PTSD, mental health - schizophrenia, mental health - other, migraines/headache disorders, multiple sclerosis, muscular dystrophy, neurological disorders, obesity/metabolic, obstetrics/gynecology, ophthalmology/vision, organ transplant care, orthopedic/musculoskeletal, osteoporosis, Parkinson's disease, pediatric specialty care, pulmonary/respiratory, rare diseases, reproductive health/fertility, sickle cell disease, sleep disorders, speech/language therapy, spinal cord conditions, stroke recovery, substance use/addiction, thyroid disorders, tuberculosis, urology, vascular disease, none of the above)",
           "type": "Multi-select"
         },
         {
           "number": 29,
-          "question": "What is your primary mode of daily transportation today? (Select one: personal car, public transit, bicycle, walking, ride-hailing, motorcycle, combination)",
-          "type": "Single-select"
+          "question": "What are your regular modes of daily transportation? (Select all that apply: personal car, public transit/bus, subway/metro, commuter rail/train, bicycle, e-bike/e-scooter, walking, ride-hailing (Uber/Lyft), taxi, motorcycle/moped, carpool/vanpool, ferry/water taxi, company shuttle, electric vehicle, none/work from home)",
+          "type": "Multi-select"
         },
         {
           "number": 30,
@@ -176,7 +176,7 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 33,
-          "question": "Which languages do you speak fluently? (Select all that apply: English, Spanish, French, German, Portuguese, Italian, Dutch, Mandarin, Japanese, Korean, Arabic, Hindi, Russian, Turkish, Swedish, Polish, Thai, Vietnamese, Hebrew, Other)",
+          "question": "Which languages do you speak fluently? (Select all that apply)",
           "type": "Multi-select"
         },
         {

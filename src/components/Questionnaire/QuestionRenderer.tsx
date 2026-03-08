@@ -18,6 +18,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { RESPONSE_TYPES } from '../../data/questions/meta';
 import { COUNTRIES } from '../../data/countries';
+import { LANGUAGES } from '../../data/languages';
 import {
   extractInlineOptions,
   C,
@@ -31,6 +32,12 @@ function isCountryQuestion(questionText: string): boolean {
     (q.includes('citizenship') || q.includes('country of residence') || q.includes('nationality')) &&
     (q.includes('select one') || q.includes('select all'))
   );
+}
+
+/** Detect if a question is about languages spoken */
+function isLanguageQuestion(questionText: string): boolean {
+  const q = questionText.toLowerCase();
+  return q.includes('languages') && (q.includes('speak') || q.includes('fluent'));
 }
 
 interface QuestionRendererProps {
@@ -157,14 +164,15 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
   // Multi-select (checkbox list)
   if (type === 'Multi-select') {
     const useCountries = isCountryQuestion(question.question);
-    const options = useCountries ? COUNTRIES : extractInlineOptions(question.question);
+    const useLanguages = isLanguageQuestion(question.question);
+    const options = useCountries ? COUNTRIES : useLanguages ? LANGUAGES : extractInlineOptions(question.question);
     const selected = Array.isArray(value) ? value : [];
 
     if (options.length === 0) {
       return <TextInput value={selected.join(', ')} onChange={(v) => onChange(v.split(',').map(s => s.trim()).filter(Boolean))} accent={accent} placeholder="Enter options separated by commas..." />;
     }
 
-    // For very long lists (countries), use searchable multi-select
+    // For very long lists (countries, languages), use searchable multi-select
     if (options.length > 30) {
       return (
         <SearchableMultiSelect
@@ -172,7 +180,7 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
           selected={selected}
           onChange={(next) => onChange(next)}
           accent={accent}
-          placeholder={useCountries ? 'Search countries...' : 'Search options...'}
+          placeholder={useCountries ? 'Search countries...' : useLanguages ? 'Search languages...' : 'Search options...'}
         />
       );
     }
