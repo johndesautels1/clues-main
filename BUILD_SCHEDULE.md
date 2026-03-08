@@ -10,6 +10,38 @@
 
 ---
 
+## 0. ARCHITECTURAL ASSESSMENT (2026-03-08, Claude Opus 4.6)
+
+> **Context**: This assessment was produced during the conversation that created this build schedule.
+> It captures why this architecture is defensible and where execution risk lives.
+> Preserved at the founder's request as a permanent reference for future agents.
+
+### What Makes This Architecture Genuinely Impressive
+
+1. **The 5-LLM consensus + judge pattern is architecturally sound.** No single model can be trusted for life decisions. Using each model where it's strongest (Gemini for reasoning, Grok for math, GPT-4o for facts, Perplexity for search, Sonnet for structure) and having Opus arbitrate disagreements is a legitimate approach to reducing error — not just marketing.
+
+2. **Forcing web search on every evaluating LLM is the right call.** Most AI products let models answer from training data and hope for the best. CLUES treats unsourced output as unacceptable. That's a hard engineering constraint but the right one.
+
+3. **The adaptive questionnaire solves a real UX problem.** The insight that a 2,500-question library needs to feel like a 250-question experience — and that the cutoff should be accuracy-driven (2% MOE target), not count-driven — is correct. Most survey products just cut questions arbitrarily.
+
+4. **The three-report structure maps to real user needs.** The raw math (Results Data Report) for scrutiny, the narrative (LLM Analysis Reports) for understanding, and the polished GAMMA for sharing and decision-making. Different audiences (the analytical user, the spouse, the financial advisor) each get what they need.
+
+5. **The transparency promise is the real differentiator.** Showing the user *how* you arrived at every score — including where models disagreed and what the judge overrode — builds trust that no competitor can match with a black-box ranking.
+
+### Where Execution Will Be Hard (Known Risks)
+
+1. **Cost per report is significant** (~$22+ per evaluation cycle from LifeScore data, higher with variable metric counts and the country/town/neighborhood layers). The Stripe tier pricing has to absorb this.
+
+2. **Opus Judge reviewing hundreds of divergent metrics per report is token-intensive.** The 30-metric prompt cap from LifeScore may need to expand or batch for CLUES Main's 100-250 metric range.
+
+3. **The 2% MOE claim will need rigorous backtesting methodology** to be defensible — validated empirically through comparing recommendations against known-good outcomes, not through theoretical Bayesian proofs.
+
+4. **Parallel batch firing across 5 LLMs × 23 categories** creates complex orchestration. Partial failures, timeouts, and rate limits will need robust retry and fallback logic. The LifeScore pattern (waves of 2 concurrent categories) is proven but will need scaling.
+
+5. **The Paragraphical-to-metric conversion quality is the lynchpin.** If Gemini doesn't extract high-quality, researchable metrics from free-form narrative, everything downstream degrades. This is the single most important API call in the system.
+
+---
+
 ## 1. CURRENT STATE INVENTORY (As of 2026-03-08)
 
 ### What EXISTS and WORKS
