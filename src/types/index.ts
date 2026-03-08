@@ -218,6 +218,7 @@ export interface EvaluationResult {
 
 // ─── Cost Tracking ──────────────────────────────────────────
 export type CostProvider =
+  | 'claude-sonnet-4-6'
   | 'claude-sonnet-4-5'
   | 'gpt-4o'
   | 'gemini-3.1-pro-preview'
@@ -226,7 +227,6 @@ export type CostProvider =
   | 'claude-opus-4-5'
   | 'tavily'
   | 'gamma'
-  | 'olivia'
   | 'tts-elevenlabs'
   | 'tts-openai'
   | 'avatar-heygen'
