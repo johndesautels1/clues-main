@@ -19,9 +19,9 @@ const STATUS_CONFIG: Record<ModuleStatus, { label: string; icon: string }> = {
   recommended: { label: 'Recommended', icon: '\u2B50' },
 };
 
-export function StatusBadge({ status, size = 'md' }: Props) {
-  const config = STATUS_CONFIG[status];
-  const className = `status-badge status-badge--${status.replace('_', '-')} status-badge--${size}`;
+export function StatusBadge({ status = 'not_started', size = 'md' }: Props) {
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.not_started;
+  const className = `status-badge status-badge--${(status ?? 'not-started').replace('_', '-')} status-badge--${size}`;
 
   return (
     <span className={className} aria-label={config.label}>
