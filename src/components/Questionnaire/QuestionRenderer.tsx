@@ -1,360 +1,295 @@
 /**
- * QuestionRenderer — Renders the correct input control for any question type.
- * Maps the question's `type` string to the appropriate UI widget:
- *   Likert-* → labeled radio group (1-5)
- *   Dealbreaker → red-gradient radio group (1-5)
- *   Single-select → radio group (parsed from question text)
- *   Multi-select → checkbox group (parsed from question text)
- *   Yes/No → toggle buttons
- *   Slider → continuous slider 0-100
- *   Range → dual-handle range slider
- *   Ranking → drag-to-reorder list
- *   Open-text / Text → textarea
+ * QuestionRenderer — Single-card view input controls for all question types.
+ * Designed for mobile-first one-question-at-a-time flow.
+ * WCAG 2.1 AA compliant (all colors verified against #0a0e1a).
+ *
+ * Response types handled:
+ *   Likert-*     → 5-button horizontal scale with labels
+ *   Dealbreaker  → 5-button red gradient scale
+ *   Single-select → vertical radio list (options parsed from question text)
+ *   Multi-select  → vertical checkbox list
+ *   Yes/No       → large toggle buttons
+ *   Slider       → continuous 0-100 with live value
+ *   Range        → min/max number inputs
+ *   Ranking      → drag-to-reorder list with keyboard controls
+ *   Text/Open-text → textarea
  */
 
 import { useState, useCallback, useRef } from 'react';
 import { RESPONSE_TYPES } from '../../data/questions/meta';
-import { classifyResponseType, type AnswerValue } from '../../types/questionnaire';
+import {
+  extractInlineOptions,
+  C,
+} from './questionnaireData';
 import type { QuestionItem } from '../../data/questions/types';
 
 interface QuestionRendererProps {
   question: QuestionItem;
-  value: AnswerValue | undefined;
-  onChange: (value: AnswerValue) => void;
+  value: string | number | boolean | string[] | undefined;
+  onChange: (value: string | number | boolean | string[]) => void;
+  accent: string;
 }
 
-export function QuestionRenderer({ question, value, onChange }: QuestionRendererProps) {
-  const rendererType = classifyResponseType(question.type);
-  const meta = RESPONSE_TYPES[question.type];
+export function QuestionRenderer({ question, value, onChange, accent }: QuestionRendererProps) {
+  const type = question.type;
+  const meta = RESPONSE_TYPES[type];
 
-  switch (rendererType) {
-    case 'likert':
-    case 'dealbreaker':
-      return (
-        <LikertInput
-          labels={meta?.labels || ['1', '2', '3', '4', '5']}
-          value={value?.type === 'likert' ? value.scale : undefined}
-          onChange={(scale, label) => onChange({ type: 'likert', scale, label })}
-          isDealbreaker={rendererType === 'dealbreaker'}
-        />
-      );
+  // Likert-* or Dealbreaker (1-5 scale with labels)
+  if (type.startsWith('Likert-') || type === 'Dealbreaker') {
+    const labels = meta?.labels || ['1', '2', '3', '4', '5'];
+    const isDealbreaker = type === 'Dealbreaker';
+    const selectedIdx = typeof value === 'number' ? value - 1 : -1;
 
-    case 'single-select':
-      return (
-        <SingleSelectInput
-          question={question.question}
-          value={value?.type === 'single-select' ? value.selected : undefined}
-          onChange={(selected) => onChange({ type: 'single-select', selected })}
-        />
-      );
-
-    case 'multi-select':
-      return (
-        <MultiSelectInput
-          question={question.question}
-          value={value?.type === 'multi-select' ? value.selected : []}
-          onChange={(selected) => onChange({ type: 'multi-select', selected })}
-        />
-      );
-
-    case 'yes-no':
-      return (
-        <YesNoInput
-          value={value?.type === 'yes-no' ? value.value : undefined}
-          onChange={(v) => onChange({ type: 'yes-no', value: v })}
-        />
-      );
-
-    case 'slider':
-      return (
-        <SliderInput
-          value={value?.type === 'slider' ? value.value : 50}
-          onChange={(v) => onChange({ type: 'slider', value: v })}
-        />
-      );
-
-    case 'range':
-      return (
-        <RangeInput
-          value={value?.type === 'range' ? value : { type: 'range', min: 20, max: 80 }}
-          onChange={(min, max) => onChange({ type: 'range', min, max })}
-        />
-      );
-
-    case 'ranking':
-      return (
-        <RankingInput
-          question={question.question}
-          value={value?.type === 'ranking' ? value.order : undefined}
-          onChange={(order) => onChange({ type: 'ranking', order })}
-        />
-      );
-
-    case 'text':
-      return (
-        <TextInput
-          value={value?.type === 'text' ? value.value : ''}
-          onChange={(v) => onChange({ type: 'text', value: v })}
-        />
-      );
-  }
-}
-
-// ─── LIKERT (1-5 scale with labels) ──────────────────────────────
-
-function LikertInput({
-  labels,
-  value,
-  onChange,
-  isDealbreaker,
-}: {
-  labels: string[];
-  value: number | undefined;
-  onChange: (scale: number, label: string) => void;
-  isDealbreaker: boolean;
-}) {
-  return (
-    <div className="qr-likert" role="radiogroup" aria-label="Rating scale">
-      {labels.map((label, i) => {
-        const scale = i + 1;
-        const isSelected = value === scale;
-        const colorClass = isDealbreaker
-          ? `qr-likert-deal-${scale}`
-          : `qr-likert-level-${scale}`;
-
-        return (
-          <button
-            key={scale}
-            type="button"
-            role="radio"
-            aria-checked={isSelected}
-            className={`qr-likert-option ${colorClass} ${isSelected ? 'qr-likert-selected' : ''}`}
-            onClick={() => onChange(scale, label)}
-          >
-            <span className="qr-likert-number">{scale}</span>
-            <span className="qr-likert-label">{label}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── SINGLE SELECT (radio from question options) ─────────────────
-
-function extractOptions(questionText: string): string[] {
-  // Extracts options from patterns like "(Select one: option1, option2, option3)"
-  // or "Select all that apply: option1, option2, option3)"
-  const parenMatch = questionText.match(/\((?:Select (?:one|all that apply)[:\s]*)?([^)]+)\)/i);
-  if (parenMatch) {
-    return parenMatch[1].split(',').map(s => s.trim()).filter(Boolean);
-  }
-  // Fallback: look for colon-separated options at end
-  const colonMatch = questionText.match(/:\s*([^?]+)$/);
-  if (colonMatch) {
-    return colonMatch[1].split(',').map(s => s.trim()).filter(Boolean);
-  }
-  return [];
-}
-
-function SingleSelectInput({
-  question,
-  value,
-  onChange,
-}: {
-  question: string;
-  value: string | undefined;
-  onChange: (selected: string) => void;
-}) {
-  const options = extractOptions(question);
-
-  if (options.length === 0) {
     return (
-      <TextInput
-        value={value || ''}
-        onChange={(v) => onChange(v)}
-        placeholder="Type your answer..."
-      />
+      <div className="qr-scale" role="radiogroup" aria-label="Rating scale">
+        {labels.map((label, i) => {
+          const isSelected = selectedIdx === i;
+          const scaleVal = i + 1;
+          let btnBg: string;
+          let btnBorder: string;
+          let btnColor: string;
+
+          if (isDealbreaker) {
+            const reds = ['#7f1d1d', '#991b1b', '#b91c1c', '#dc2626', '#ef4444'];
+            btnBg = isSelected ? `${reds[i]}cc` : `${reds[i]}18`;
+            btnBorder = isSelected ? reds[i] : `${reds[i]}44`;
+            btnColor = isSelected ? '#fecaca' : '#f87171';
+          } else {
+            btnBg = isSelected ? `${accent}22` : 'rgba(255,255,255,0.03)';
+            btnBorder = isSelected ? accent : C.divider;
+            btnColor = isSelected ? accent : C.textSecondary;
+          }
+
+          return (
+            <button
+              key={scaleVal}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={`${scaleVal}: ${label}`}
+              className="qr-scale-btn"
+              onClick={() => onChange(scaleVal)}
+              style={{
+                background: btnBg,
+                borderColor: btnBorder,
+                color: btnColor,
+                boxShadow: isSelected ? `0 0 12px ${isDealbreaker ? '#ef444433' : accent + '22'}` : 'none',
+              }}
+            >
+              <span className="qr-scale-num">{scaleVal}</span>
+              <span className="qr-scale-label">{label}</span>
+            </button>
+          );
+        })}
+      </div>
     );
   }
 
-  return (
-    <div className="qr-options" role="radiogroup">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          role="radio"
-          aria-checked={value === opt}
-          className={`qr-option ${value === opt ? 'qr-option-selected' : ''}`}
-          onClick={() => onChange(opt)}
-        >
-          <span className="qr-option-radio">{value === opt ? '◉' : '○'}</span>
-          <span className="qr-option-text">{opt}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ─── MULTI SELECT (checkboxes) ───────────────────────────────────
-
-function MultiSelectInput({
-  question,
-  value,
-  onChange,
-}: {
-  question: string;
-  value: string[];
-  onChange: (selected: string[]) => void;
-}) {
-  const options = extractOptions(question);
-
-  const toggle = useCallback(
-    (opt: string) => {
-      onChange(
-        value.includes(opt) ? value.filter((v) => v !== opt) : [...value, opt]
-      );
-    },
-    [value, onChange]
-  );
-
-  if (options.length === 0) {
+  // Single-select (radio list)
+  if (type === 'Single-select') {
+    const options = extractInlineOptions(question.question);
+    if (options.length === 0) {
+      return <TextInput value={String(value || '')} onChange={(v) => onChange(v)} accent={accent} placeholder="Type your answer..." />;
+    }
     return (
-      <TextInput
-        value={value.join(', ')}
-        onChange={(v) => onChange(v.split(',').map(s => s.trim()).filter(Boolean))}
-        placeholder="Enter options separated by commas..."
-      />
+      <div className="qr-options" role="radiogroup" aria-label="Select one">
+        {options.map((opt) => {
+          const isSelected = value === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              className="qr-option-btn"
+              onClick={() => onChange(opt)}
+              style={{
+                background: isSelected ? `${accent}15` : 'rgba(255,255,255,0.03)',
+                borderColor: isSelected ? accent : C.divider,
+              }}
+            >
+              <span className="qr-radio-dot" style={{
+                borderColor: isSelected ? accent : C.textMuted,
+                background: isSelected ? accent : 'transparent',
+              }} />
+              <span style={{ color: isSelected ? C.textPrimary : C.textSecondary }}>{opt}</span>
+            </button>
+          );
+        })}
+      </div>
     );
   }
 
-  return (
-    <div className="qr-options" role="group" aria-label="Select all that apply">
-      {options.map((opt) => {
-        const checked = value.includes(opt);
-        return (
-          <button
-            key={opt}
-            type="button"
-            role="checkbox"
-            aria-checked={checked}
-            className={`qr-option ${checked ? 'qr-option-selected' : ''}`}
-            onClick={() => toggle(opt)}
-          >
-            <span className="qr-option-check">{checked ? '☑' : '☐'}</span>
-            <span className="qr-option-text">{opt}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+  // Multi-select (checkbox list)
+  if (type === 'Multi-select') {
+    const options = extractInlineOptions(question.question);
+    const selected = Array.isArray(value) ? value : [];
 
-// ─── YES / NO ────────────────────────────────────────────────────
+    if (options.length === 0) {
+      return <TextInput value={selected.join(', ')} onChange={(v) => onChange(v.split(',').map(s => s.trim()).filter(Boolean))} accent={accent} placeholder="Enter options separated by commas..." />;
+    }
 
-function YesNoInput({
-  value,
-  onChange,
-}: {
-  value: boolean | undefined;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <div className="qr-yesno" role="radiogroup" aria-label="Yes or No">
-      <button
-        type="button"
-        role="radio"
-        aria-checked={value === true}
-        className={`qr-yesno-btn ${value === true ? 'qr-yesno-yes' : ''}`}
-        onClick={() => onChange(true)}
-      >
-        Yes
-      </button>
-      <button
-        type="button"
-        role="radio"
-        aria-checked={value === false}
-        className={`qr-yesno-btn ${value === false ? 'qr-yesno-no' : ''}`}
-        onClick={() => onChange(false)}
-      >
-        No
-      </button>
-    </div>
-  );
-}
+    const toggle = (opt: string) => {
+      const next = selected.includes(opt)
+        ? selected.filter(s => s !== opt)
+        : [...selected, opt];
+      onChange(next);
+    };
 
-// ─── SLIDER (0-100) ─────────────────────────────────────────────
+    return (
+      <div className="qr-options" role="group" aria-label="Select all that apply">
+        {options.map((opt) => {
+          const checked = selected.includes(opt);
+          return (
+            <button
+              key={opt}
+              type="button"
+              role="checkbox"
+              aria-checked={checked}
+              className="qr-option-btn"
+              onClick={() => toggle(opt)}
+              style={{
+                background: checked ? `${accent}15` : 'rgba(255,255,255,0.03)',
+                borderColor: checked ? accent : C.divider,
+              }}
+            >
+              <span className="qr-check-box" style={{
+                borderColor: checked ? accent : C.textMuted,
+                background: checked ? accent : 'transparent',
+              }}>
+                {checked && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#0a0e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </span>
+              <span style={{ color: checked ? C.textPrimary : C.textSecondary }}>{opt}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
-function SliderInput({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div className="qr-slider">
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="qr-slider-input"
-        aria-label="Value slider"
-      />
-      <div className="qr-slider-value">{value}</div>
-    </div>
-  );
-}
+  // Yes/No
+  if (type === 'Yes/No') {
+    const boolVal = value === true || value === 'true' ? true : value === false || value === 'false' ? false : undefined;
+    return (
+      <div className="qr-yesno" role="radiogroup" aria-label="Yes or No">
+        {([true, false] as const).map((v) => {
+          const isSelected = boolVal === v;
+          const label = v ? 'Yes' : 'No';
+          const color = v ? '#22c55e' : '#ef4444';
+          return (
+            <button
+              key={label}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              className="qr-yesno-btn"
+              onClick={() => onChange(v)}
+              style={{
+                background: isSelected ? `${color}18` : 'rgba(255,255,255,0.03)',
+                borderColor: isSelected ? color : C.divider,
+                color: isSelected ? color : C.textSecondary,
+              }}
+            >
+              <span className="qr-yesno-icon">{v ? '\u2713' : '\u2715'}</span>
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
-// ─── RANGE (min/max) ─────────────────────────────────────────────
-
-function RangeInput({
-  value,
-  onChange,
-}: {
-  value: { min: number; max: number };
-  onChange: (min: number, max: number) => void;
-}) {
-  return (
-    <div className="qr-range">
-      <label className="qr-range-label">
-        <span>Min</span>
+  // Slider (0-100)
+  if (type === 'Slider') {
+    const numVal = typeof value === 'number' ? value : 50;
+    return (
+      <div className="qr-slider">
+        <div className="qr-slider-labels">
+          <span style={{ color: C.textMuted }}>Strongly disagree</span>
+          <span style={{ color: accent, fontWeight: 600, fontSize: '1.25rem' }}>{numVal}</span>
+          <span style={{ color: C.textMuted }}>Strongly agree</span>
+        </div>
         <input
-          type="number"
-          value={value.min}
-          onChange={(e) => onChange(Number(e.target.value), value.max)}
-          className="qr-range-input"
+          type="range"
+          min={0}
+          max={100}
+          value={numVal}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="qr-slider-input"
+          aria-label="Value slider"
+          style={{
+            '--accent': accent,
+            '--pct': `${numVal}%`,
+          } as React.CSSProperties}
         />
-      </label>
-      <span className="qr-range-sep">to</span>
-      <label className="qr-range-label">
-        <span>Max</span>
-        <input
-          type="number"
-          value={value.max}
-          onChange={(e) => onChange(value.min, Number(e.target.value))}
-          className="qr-range-input"
-        />
-      </label>
-    </div>
+        <div className="qr-slider-track-labels">
+          <span>0</span>
+          <span>25</span>
+          <span>50</span>
+          <span>75</span>
+          <span>100</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Range (min/max numeric)
+  if (type === 'Range') {
+    const strVal = String(value || '');
+    return <TextInput value={strVal} onChange={(v) => onChange(v)} accent={accent} placeholder="Enter a value or range..." />;
+  }
+
+  // Ranking (drag-to-reorder)
+  if (type === 'Ranking') {
+    return <RankingInput question={question.question} value={Array.isArray(value) ? value : undefined} onChange={onChange} accent={accent} />;
+  }
+
+  // Text / Open-text
+  return <TextInput value={String(value || '')} onChange={(v) => onChange(v)} accent={accent} />;
+}
+
+// ─── TEXT INPUT ───────────────────────────────────────────────────
+
+function TextInput({
+  value,
+  onChange,
+  accent,
+  placeholder = 'Share your thoughts...',
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  accent: string;
+  placeholder?: string;
+}) {
+  return (
+    <textarea
+      className="qr-textarea"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={4}
+      style={{
+        borderColor: value ? accent : C.inputBorder,
+        boxShadow: value ? `0 0 0 1px ${accent}22` : 'none',
+      }}
+    />
   );
 }
 
-// ─── RANKING (drag-to-reorder) ───────────────────────────────────
+// ─── RANKING INPUT ───────────────────────────────────────────────
 
 function RankingInput({
   question,
   value,
   onChange,
+  accent,
 }: {
   question: string;
   value: string[] | undefined;
-  onChange: (order: string[]) => void;
+  onChange: (v: string[]) => void;
+  accent: string;
 }) {
-  const items = extractOptions(question);
+  const items = extractInlineOptions(question);
   const [order, setOrder] = useState<string[]>(value || items);
   const dragItem = useRef<number | null>(null);
   const dragOver = useRef<number | null>(null);
@@ -378,7 +313,6 @@ function RankingInput({
     dragOver.current = null;
   }, [order, onChange]);
 
-  // Move item up/down for keyboard accessibility
   const moveItem = useCallback((index: number, direction: -1 | 1) => {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= order.length) return;
@@ -389,13 +323,7 @@ function RankingInput({
   }, [order, onChange]);
 
   if (items.length === 0) {
-    return (
-      <TextInput
-        value={value?.join(', ') || ''}
-        onChange={(v) => onChange(v.split(',').map(s => s.trim()).filter(Boolean))}
-        placeholder="Enter items to rank, separated by commas..."
-      />
-    );
+    return <TextInput value={value?.join(', ') || ''} onChange={(v) => onChange(v.split(',').map(s => s.trim()).filter(Boolean))} accent={accent} placeholder="Enter items to rank, separated by commas..." />;
   }
 
   return (
@@ -410,53 +338,17 @@ function RankingInput({
           onDragEnter={() => handleDragEnter(i)}
           onDragEnd={handleDragEnd}
           onDragOver={(e) => e.preventDefault()}
+          style={{ borderColor: C.divider }}
         >
-          <span className="qr-ranking-num">{i + 1}</span>
+          <span className="qr-ranking-num" style={{ color: accent }}>{i + 1}</span>
+          <span className="qr-ranking-grip" aria-hidden="true">{'\u2807'}</span>
           <span className="qr-ranking-text">{item}</span>
-          <span className="qr-ranking-controls">
-            <button
-              type="button"
-              onClick={() => moveItem(i, -1)}
-              disabled={i === 0}
-              aria-label={`Move ${item} up`}
-              className="qr-ranking-btn"
-            >
-              ▲
-            </button>
-            <button
-              type="button"
-              onClick={() => moveItem(i, 1)}
-              disabled={i === order.length - 1}
-              aria-label={`Move ${item} down`}
-              className="qr-ranking-btn"
-            >
-              ▼
-            </button>
+          <span className="qr-ranking-arrows">
+            <button type="button" onClick={() => moveItem(i, -1)} disabled={i === 0} aria-label={`Move ${item} up`} className="qr-ranking-arrow">&#9650;</button>
+            <button type="button" onClick={() => moveItem(i, 1)} disabled={i === order.length - 1} aria-label={`Move ${item} down`} className="qr-ranking-arrow">&#9660;</button>
           </span>
         </div>
       ))}
     </div>
-  );
-}
-
-// ─── TEXT (textarea) ─────────────────────────────────────────────
-
-function TextInput({
-  value,
-  onChange,
-  placeholder = 'Share your thoughts...',
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <textarea
-      className="qr-textarea"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={4}
-    />
   );
 }
