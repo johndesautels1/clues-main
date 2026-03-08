@@ -4,9 +4,11 @@
  * Determines the user's completion tier and confidence percentage
  * based on what data they've provided. This drives:
  * - How many LLMs fire
- * - Whether the Opus Judge is invoked
  * - How many Tavily searches run
  * - The report depth and format
+ *
+ * NOTE: Opus/Cristiano judges EVERY tier (useJudge: true on all 6).
+ * See PARAGRAPHICAL_ARCHITECTURE.md Section 6.
  *
  * See CLUES_MAIN_BUILD_REFERENCE.md sections 6, 16, 17, 20.
  */
@@ -313,7 +315,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
         tier,
         llmCount: 1,
         llmModels: ['gemini-3.1-pro-preview'],
-        useJudge: false,
+        useJudge: true,
         tavilySearches: 5,
       };
     case 'exploratory':
@@ -321,7 +323,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
         tier,
         llmCount: 2,
         llmModels: ['gemini-3.1-pro-preview', 'claude-sonnet-4-6'],
-        useJudge: false,
+        useJudge: true,
         tavilySearches: 10,
       };
     case 'filtered':
@@ -329,7 +331,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
         tier,
         llmCount: 3,
         llmModels: ['gemini-3.1-pro-preview', 'claude-sonnet-4-6', 'gpt-4o'],
-        useJudge: false,
+        useJudge: true,
         tavilySearches: 15,
       };
     case 'evaluated':
@@ -337,7 +339,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
         tier,
         llmCount: 4,
         llmModels: ['gemini-3.1-pro-preview', 'claude-sonnet-4-6', 'gpt-4o', 'grok-4-1-fast-reasoning'],
-        useJudge: false,
+        useJudge: true,
         tavilySearches: 20,
       };
     case 'validated':
