@@ -5,6 +5,7 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HeroHeading } from './HeroHeading';
 import { GlobeExplorer } from './GlobeExplorer';
 import { ParagraphicalButton } from './ParagraphicalButton';
@@ -25,6 +26,7 @@ export type SubSectionStatus = Record<SubSection, ModuleStatus>;
 
 export function Dashboard() {
   const { session, dispatch, isLoading } = useUser();
+  const navigate = useNavigate();
 
   const { globe, paragraphical, mainModule } = session;
 
@@ -45,12 +47,13 @@ export function Dashboard() {
     }
   };
 
-  // Sub-section click
+  // Sub-section click → navigate to questionnaire at that section
   const handleSubSectionClick = (section: SubSection) => {
     if (mainModule.subSectionStatus[section] === 'locked') return;
     if (mainModule.subSectionStatus[section] === 'not_started') {
       dispatch({ type: 'SET_SUBSECTION_STATUS', payload: { section, status: 'in_progress' } });
     }
+    navigate(`/questionnaire?section=${section}`);
   };
 
   // Main module overall status

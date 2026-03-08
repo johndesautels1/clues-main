@@ -13,7 +13,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { useQuestionnaireState } from '../../hooks/useQuestionnaireState';
@@ -28,6 +28,7 @@ import './Questionnaire.css';
 
 export function MainQuestionnaire() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { session } = useUser();
 
   // ─── Phase State ───────────────────────────────────────────────
@@ -43,6 +44,18 @@ export function MainQuestionnaire() {
 
   // ─── Questionnaire State (answers, nav, persistence) ──────────
   const qs = useQuestionnaireState();
+
+  // Jump to section from URL query param (e.g. /questionnaire?section=dnw)
+  useEffect(() => {
+    const sectionParam = searchParams.get('section');
+    if (sectionParam) {
+      const sectionIndex = QUESTIONNAIRE_SECTIONS.findIndex(s => s.id === sectionParam);
+      if (sectionIndex >= 0) {
+        qs.goToSection(sectionIndex);
+        setPhase('active');
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-detect returning user
   useEffect(() => {
