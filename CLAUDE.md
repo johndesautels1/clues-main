@@ -63,10 +63,11 @@ These rules are **non-negotiable**. Every developer and every AI session must fo
 ---
 
 ## Build Rules
-- **MANDATORY FIRST READ**: Read ALL THREE of these files before starting ANY work:
-  1. `CLUES_MAIN_BUILD_REFERENCE.md` — overall system architecture and build state
-  2. `PARAGRAPHICAL_ARCHITECTURE.md` — Paragraphical pipeline, Gemini prompt, metrics, Smart Scores, Cristiano judge, report structure. **This file supersedes any conflicting Paragraphical info in the build reference.**
-  3. This file (`CLAUDE.md`) — WCAG rules, dev rules
+- **MANDATORY FIRST READ**: Read ALL FOUR of these files before starting ANY work:
+  1. `CLUES_MISSION.md` — company mission, architecture vision, WHY everything exists. **Read this first to understand the product.**
+  2. `CLUES_MAIN_BUILD_REFERENCE.md` — overall system architecture and build state
+  3. `PARAGRAPHICAL_ARCHITECTURE.md` — Paragraphical pipeline, Gemini prompt, metrics, Smart Scores, Cristiano judge, report structure. **This file supersedes any conflicting Paragraphical info in the build reference.**
+  4. This file (`CLAUDE.md`) — WCAG rules, dev rules
 - Commit after each component
 - Update the build reference checklist after each commit
 - Supabase is the heart of the backend — `supabase` export is always a valid `SupabaseClient`, never null
