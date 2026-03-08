@@ -169,7 +169,7 @@ Opus/Cristiano JUDGES Gemini's work:
 ### At Main Module Tier (when user completes questionnaires):
 ```
 All 5 LLMs complete their evaluations:
-    Gemini (web search) + Sonnet 4.6 + GPT-4o + Grok 4.1 Fast Reasoning + Sonar Reasoning Pro High
+    Gemini (web search) + Sonnet 4.6 + GPT-5.4 + Grok 4.1 Fast Reasoning + Sonar Reasoning Pro High
     |
     v
 Opus/Cristiano JUDGES ALL of them:
@@ -194,7 +194,7 @@ Opus/Cristiano JUDGES ALL of them:
 Every evaluating LLM uses web search in API calls PLUS Tavily:
 - **Gemini**: Google Search grounding (native) + Tavily
 - **Claude Sonnet 4.6**: Web search tool + Tavily
-- **GPT-4o**: Bing search integration + Tavily
+- **GPT-5.4**: Bing search integration + Tavily
 - **Grok 4.1 Fast Reasoning**: X/Twitter real-time data + Tavily
 - **Perplexity Sonar Reasoning Pro High**: Native web search (built-in) + Tavily
 
@@ -332,7 +332,7 @@ The 23 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragrap
 - When completed, they ADD precision to the Paragraphical's metrics
 - They can ADD new metrics the paragraphs didn't cover
 - They can REFINE metric weights and priorities
-- They trigger additional LLMs (Sonnet 4.6, GPT-4o, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High)
+- They trigger additional LLMs (Sonnet 4.6, GPT-5.4, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High)
 - They do NOT replace the Paragraphical — they enhance it
 
 The Paragraphical must stand alone as a complete evaluation. Modules make it better, not make it work.
@@ -604,7 +604,7 @@ Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneu
 | LLM | Web Search Method | Tavily Use |
 |-----|------------------|------------|
 | Claude Sonnet 4.6 | Native (Anthropic API tool) | Supplemental |
-| GPT-4o | Tavily injected into prompt context | Primary |
+| GPT-5.4 | Tavily injected into prompt context | Primary |
 | Gemini | Google Search grounding (native) | Supplemental |
 | Grok 4.1 Fast Reasoning | Tavily injected into prompt context | Primary |
 | Sonar Reasoning Pro High | Native (built-in search) | Supplemental |
@@ -814,7 +814,7 @@ LifeScore's Gamma report template:
 | Component | Cost |
 |-----------|------|
 | Claude Sonnet 4.6 (90 metrics) | ~$0.90 |
-| GPT-4o (90 metrics + Tavily) | ~$2.70 |
+| GPT-5.4 (90 metrics + Tavily) | ~$5.00 |
 | Gemini (90 metrics) | ~$0.45 |
 | Grok 4.1 Fast Reasoning (90 metrics + Tavily) | ~$0.06 |
 | Sonar Reasoning Pro High (90 metrics) | ~$0.90 |

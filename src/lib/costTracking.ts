@@ -23,7 +23,7 @@ export const PROVIDER_RATES: Record<
   { input: number; output: number; label: string; icon: string }
 > = {
   'claude-sonnet-4-6':   { input: 3.00,  output: 15.00,  label: 'Claude Sonnet 4.6',       icon: '\u{1F3B5}' },
-  'gpt-4o':              { input: 2.50,  output: 10.00,  label: 'GPT-4o',                  icon: '\u{1F916}' },
+  'gpt-5.4':             { input: 5.00,  output: 20.00,  label: 'GPT-5.4',                  icon: '\u{1F916}' },
   'gemini-3.1-pro-preview': { input: 1.25, output: 10.00, label: 'Gemini 3.1 Pro Preview',  icon: '\u{1F48E}' },
   'grok-4-1-fast-reasoning': { input: 0.20, output: 0.50, label: 'Grok 4.1 Fast Reasoning',  icon: '\u{1F680}' },
   'sonar-reasoning-pro-high': { input: 1.00, output: 1.00, label: 'Perplexity Sonar Reasoning Pro High', icon: '\u{1F50D}' },
@@ -39,14 +39,13 @@ export const PROVIDER_RATES: Record<
   'avatar-replicate':    { input: 0,     output: 0,      label: 'Avatar (Replicate)',        icon: '\u{1F3A5}' },
   'kling-ai':            { input: 0,     output: 0,      label: 'Kling AI (Image Gen)',      icon: '\u{1F5BC}\uFE0F' },
   'gpt-realtime-1.5':    { input: 5.00,  output: 20.00,  label: 'GPT Realtime 1.5 (Olivia Voice/Video)', icon: '\u{1F399}\uFE0F' },
-  'gpt-5.4':             { input: 5.00,  output: 20.00,  label: 'GPT-5.4 (Advanced Reasoning)', icon: '\u{1F9E0}' },
 };
 
 // Grouped labels for the dashboard (aggregate sub-providers)
 export const PROVIDER_GROUPS: { key: string; label: string; icon: string; providers: CostProvider[] }[] = [
   { key: 'tavily',     label: 'Tavily (Research + Search)',  icon: '\u{1F50E}', providers: ['tavily'] },
   { key: 'sonnet',     label: 'Claude Sonnet 4.6',          icon: '\u{1F3B5}', providers: ['claude-sonnet-4-6'] },
-  { key: 'gpt4o',      label: 'GPT-4o',                     icon: '\u{1F916}', providers: ['gpt-4o'] },
+  { key: 'gpt54',      label: 'GPT-5.4',                     icon: '\u{1F916}', providers: ['gpt-5.4'] },
   { key: 'gemini',     label: 'Gemini 3.1 Pro Preview',     icon: '\u{1F48E}', providers: ['gemini-3.1-pro-preview'] },
   { key: 'grok',       label: 'Grok 4.1 Fast Reasoning',    icon: '\u{1F680}', providers: ['grok-4-1-fast-reasoning'] },
   { key: 'perplexity', label: 'Perplexity Sonar Reasoning Pro High', icon: '\u{1F50D}', providers: ['sonar-reasoning-pro-high'] },
@@ -57,7 +56,6 @@ export const PROVIDER_GROUPS: { key: string; label: string; icon: string; provid
   { key: 'avatar',     label: 'Avatar (HeyGen + D-ID + Simli + Replicate)', icon: '\u{1F3A5}', providers: ['avatar-heygen', 'avatar-d-id', 'avatar-simli', 'avatar-replicate'] },
   { key: 'kling',      label: 'Kling AI (Image Generation)', icon: '\u{1F5BC}\uFE0F', providers: ['kling-ai'] },
   { key: 'gpt-realtime', label: 'GPT Realtime 1.5 (Olivia Voice/Video)', icon: '\u{1F399}\uFE0F', providers: ['gpt-realtime-1.5'] },
-  { key: 'gpt54',     label: 'GPT-5.4 (Advanced Reasoning)', icon: '\u{1F9E0}', providers: ['gpt-5.4'] },
 ];
 
 // ─── Calculate Cost from Tokens ────────────────────────────────

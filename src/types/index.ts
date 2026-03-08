@@ -219,7 +219,7 @@ export interface EvaluationResult {
 // ─── Cost Tracking ──────────────────────────────────────────
 export type CostProvider =
   | 'claude-sonnet-4-6'
-  | 'gpt-4o'
+  | 'gpt-5.4'
   | 'gemini-3.1-pro-preview'
   | 'grok-4-1-fast-reasoning'
   | 'sonar-reasoning-pro-high'
@@ -234,8 +234,7 @@ export type CostProvider =
   | 'avatar-simli'
   | 'avatar-replicate'
   | 'kling-ai'
-  | 'gpt-realtime-1.5'
-  | 'gpt-5.4';
+  | 'gpt-realtime-1.5';
 
 export interface CostEntry {
   id: string;

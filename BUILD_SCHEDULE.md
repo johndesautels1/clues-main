@@ -18,7 +18,7 @@
 
 ### What Makes This Architecture Genuinely Impressive
 
-1. **The 5-LLM consensus + judge pattern is architecturally sound.** No single model can be trusted for life decisions. Using each model where it's strongest (Gemini for reasoning, Grok 4.1 Fast Reasoning for math, GPT-4o for facts, Sonar Reasoning Pro High for search, Sonnet 4.6 for structure) and having Opus arbitrate disagreements is a legitimate approach to reducing error — not just marketing.
+1. **The 5-LLM consensus + judge pattern is architecturally sound.** No single model can be trusted for life decisions. Using each model where it's strongest (Gemini for reasoning, Grok 4.1 Fast Reasoning for math, GPT-5.4 for facts, Sonar Reasoning Pro High for search, Sonnet 4.6 for structure) and having Opus arbitrate disagreements is a legitimate approach to reducing error — not just marketing.
 
 2. **Forcing web search on every evaluating LLM is the right call.** Most AI products let models answer from training data and hope for the best. CLUES treats unsourced output as unacceptable. That's a hard engineering constraint but the right one.
 
@@ -78,7 +78,7 @@
 | **Adaptive Skip Logic** | Bayesian-like system to skip/pre-fill based on prior answers | VERY HIGH |
 | **Coverage Tracker** | Real-time dimensional coverage + MOE meter | HIGH |
 | **Tavily Research Pipeline** | Metric → Tavily search → sourced data with URLs | HIGH |
-| **5-LLM Parallel Evaluator** | Sonnet 4.6 + GPT-4o + Gemini + Grok 4.1 Fast Reasoning + Sonar Reasoning Pro High batch firing | VERY HIGH |
+| **5-LLM Parallel Evaluator** | Sonnet 4.6 + GPT-5.4 + Gemini + Grok 4.1 Fast Reasoning + Sonar Reasoning Pro High batch firing | VERY HIGH |
 | **Opus Judge System** | Cristiano judge reviewing all LLM outputs, rendering verdicts | HIGH |
 | **Smart Score Engine** | Metric normalization, category rollup, city comparison scoring | HIGH |
 | **Report Data Pipeline** | Structured report data from evaluation results | HIGH |
@@ -152,12 +152,11 @@
 
 #### Conv 11-12: 5-LLM Parallel Evaluator
 - [ ] `api/evaluate-sonnet.ts` — Claude Sonnet 4.6 evaluation endpoint
-- [ ] `api/evaluate-gpt4o.ts` — GPT-4o evaluation endpoint
+- [ ] `api/evaluate-gpt54.ts` — GPT-5.4 evaluation endpoint
 - [ ] `api/evaluate-gemini.ts` — Gemini evaluation (reuses existing pattern)
 - [ ] `api/evaluate-grok.ts` — Grok 4.1 Fast Reasoning evaluation endpoint
 - [ ] `api/evaluate-perplexity.ts` — Sonar Reasoning Pro High evaluation endpoint
 - [ ] `api/gpt-realtime.ts` — GPT Realtime 1.5 endpoint (Olivia live voice/video interaction)
-- [ ] `api/evaluate-gpt54.ts` — GPT-5.4 endpoint (advanced reasoning, report interpretation, high-stakes logic)
 - [ ] `src/lib/evaluationOrchestrator.ts` — parallel batch firing (waves of 2 categories)
 - [ ] `src/types/evaluation.ts` — per-LLM response types, MetricConsensus, batch results
 - [ ] Dynamic timeout: 120s + 5s per metric (max 300s)

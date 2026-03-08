@@ -23,7 +23,7 @@
 | Frontend | React 19 + TypeScript + Vite 7 | Dark glassmorphic UI, Montserrat font |
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
-| LLM Evaluators | Claude Sonnet 4.6, GPT-4o, Gemini 3.1 Pro Preview, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High | 5 parallel evaluators |
+| LLM Evaluators | Claude Sonnet 4.6, GPT-5.4, Gemini 3.1 Pro Preview, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High | 5 parallel evaluators |
 | Judge | Claude Opus 4.6 | Consensus builder, reviews stdDev > 15 disagreements |
 | Reasoning Engine | Gemini 3.1 Pro Preview | Paragraphical extraction, metric scoring, location recommendations (with thinking_level: high, Google Search grounding). Opus judges afterward. |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
@@ -823,7 +823,7 @@ The system scales AI spend proportionally to data completeness. A busy executive
 |------|-----------|-----|
 | Discovery (1) | Gemini only | It already did the extraction — reuse that context for a quick-scan recommendation |
 | Exploratory (2) | Gemini + Claude Sonnet 4.6 | Sonnet 4.6 adds structured reasoning on top of Gemini's narrative context |
-| Filtered (3) | + GPT-4o | GPT-4o excels at elimination/classification tasks (DNW hard walls) |
+| Filtered (3) | + GPT-5.4 | GPT-5.4 excels at elimination/classification, advanced reasoning, high-stakes logic |
 | Evaluated (4) | + Grok 4.1 Fast Reasoning | Grok 4.1 Fast Reasoning adds real-time web context for MH scoring (transit, internet, etc.) |
 | Validated (5+Judge) | + Sonar Reasoning Pro High + Opus Judge | Full panel. Sonar Reasoning Pro High adds research-backed citations. Opus arbitrates. |
 | Precision (5+Judge) | Same panel, deeper prompts | Each completed mini module adds domain-specific scoring context |
@@ -872,7 +872,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ## 19. COST TRACKING SYSTEM (Built)
 
 ### Architecture
-- **Types**: `CostProvider` (18 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
+- **Types**: `CostProvider` (17 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
 - **Service**: `src/lib/costTracking.ts` — rate table, `logCost()`, `fetchAllCosts()`, `buildCostSummary()`, CSV export
 - **UI**: `src/components/Shared/CostTrackingModal.tsx` — admin-only modal
 - **Access**: Header toolbar (money bag icon) + Emilia help panel → "Cost Tracking" category
@@ -881,16 +881,15 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ### Provider Rate Table (per 1M tokens, March 2026)
 ```
 claude-sonnet-4-6     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
-gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
+gpt-5.4               Input: $5.00    Output: $20.00   (LLM Evaluator #2)
 gemini-3.1-pro-preview Input: $1.25   Output: $10.00   (Reasoning Engine + LLM Evaluator #3)
 grok-4-1-fast-reasoning Input: $0.20   Output: $0.50    (LLM Evaluator #4)
 sonar-reasoning-pro-high Input: $1.00  Output: $1.00    (LLM Evaluator #5)
 claude-opus-4-6       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
-gpt-5.4               Input: $5.00    Output: $20.00   (Advanced Reasoning, Report Interpretation)
 gpt-realtime-1.5      Input: $5.00    Output: $20.00   (Olivia Live Voice/Video Interaction)
-olivia (gpt-4o)       Input: $2.50    Output: $10.00   (Chat Assistant — GPT-4o company-wide)
+olivia                Input: $3.00    Output: $15.00   (Chat Assistant — Claude Sonnet 4.6)
 olivia-tutor          Input: $1.25    Output: $10.00   (Paragraphical tutor — Gemini 3.1 Pro Preview)
 tts-elevenlabs        Per character                     (Voice narration)
 tts-openai            Per character                     (Voice narration)
@@ -1015,7 +1014,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 5. **Tavily searches scale with tier.** Discovery gets 5 basic searches (top candidate regions). Validated gets 200+ searches (every metric for every candidate city). This is the biggest cost driver — more expensive than the LLMs at higher tiers.
 
-6. **Partial success is acceptable.** If GPT-4o times out but 4 other LLMs return, the evaluation proceeds with 4 results. The confidence score adjusts slightly downward but the user still gets their report.
+6. **Partial success is acceptable.** If GPT-5.4 times out but 4 other LLMs return, the evaluation proceeds with 4 results. The confidence score adjusts slightly downward but the user still gets their report.
 
 7. **Mini modules narrow, never expand.** Each completed mini module can only move the recommendation from 3→2→1 city, never introduce new candidates. The narrowing is monotonic.
 

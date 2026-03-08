@@ -771,57 +771,56 @@ The 100-page blueprint above is the **Validated/Precision tier** (full data). Fo
 
 ---
 
-## LLM & API Provider Registry (Canonical — All 18 Providers)
+## LLM & API Provider Registry (Canonical — All 17 Providers)
 
-This is the **single source of truth** for which AI model or API service powers each function in the CLUES ecosystem. Every developer and every AI session must reference this table. Do not guess models — check here. This table matches all 18 providers tracked in `src/lib/costTracking.ts`.
+This is the **single source of truth** for which AI model or API service powers each function in the CLUES ecosystem. Every developer and every AI session must reference this table. Do not guess models — check here. This table matches all 17 providers tracked in `src/lib/costTracking.ts`.
 
-### LLM Models (8)
+### LLM Models (7)
 
 | # | Role | Cost Tracking Key | Model | Provider | Why |
 |---|------|-------------------|-------|----------|-----|
 | 1 | **Claude Sonnet 4.6** | `claude-sonnet-4-6` | Claude Sonnet 4.6 | Anthropic | LLM Evaluator #1 — structured reasoning, category scoring, report narrative |
-| 2 | **GPT-4o** | `gpt-4o` | GPT-4o | OpenAI | LLM Evaluator #2 — elimination/classification tasks (DNW hard walls) |
+| 2 | **GPT-5.4** | `gpt-5.4` | GPT-5.4 | OpenAI | LLM Evaluator #2 — elimination/classification, advanced reasoning, report interpretation, high-stakes logic |
 | 3 | **Gemini 3.1 Pro Preview** | `gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview | Google | Paragraphical extraction engine, Olivia tutor escalation, LLM Evaluator #3 |
 | 4 | **Grok 4.1 Fast Reasoning** | `grok-4-1-fast-reasoning` | Grok 4.1 Fast Reasoning | xAI | LLM Evaluator #4 — real-time web context for MH scoring |
 | 5 | **Perplexity Sonar Reasoning Pro High** | `sonar-reasoning-pro-high` | Sonar Reasoning Pro High | Perplexity | LLM Evaluator #5 — research-backed citations |
 | 6 | **Claude Opus 4.6 (Judge)** | `claude-opus-4-6` | Claude Opus 4.6 | Anthropic | Cristiano Judge — consensus builder, reviews stdDev > 15 disagreements |
-| 7 | **GPT-5.4** | `gpt-5.4` | GPT-5.4 | OpenAI | Advanced reasoning, report interpretation, high-stakes logic |
-| 8 | **GPT Realtime 1.5** | `gpt-realtime-1.5` | GPT Realtime 1.5 | OpenAI | Olivia's live voice/video interaction |
+| 7 | **GPT Realtime 1.5** | `gpt-realtime-1.5` | GPT Realtime 1.5 | OpenAI | Olivia's live voice/video interaction |
 
 ### Chat & Assistant (1)
 
 | # | Role | Cost Tracking Key | Model | Provider | Why |
 |---|------|-------------------|-------|----------|-----|
-| 9 | **Olivia (Chat Assistant)** | `olivia` | Claude Sonnet 4.6 | Anthropic | Company-wide assistant across all CLUES products |
+| 8 | **Olivia (Chat Assistant)** | `olivia` | Claude Sonnet 4.6 | Anthropic | Company-wide assistant across all CLUES products |
 
 ### Research & Search (1)
 
 | # | Role | Cost Tracking Key | Service | Provider | Why |
 |---|------|-------------------|---------|----------|-----|
-| 10 | **Tavily (Research + Search)** | `tavily` | Tavily Search + Research APIs | Tavily | Web research, source gathering, citation retrieval for all tiers |
+| 9 | **Tavily (Research + Search)** | `tavily` | Tavily Search + Research APIs | Tavily | Web research, source gathering, citation retrieval for all tiers |
 
 ### Reports & Presentations (2)
 
 | # | Role | Cost Tracking Key | Service | Provider | Why |
 |---|------|-------------------|---------|----------|-----|
-| 11 | **Gamma (Reports)** | `gamma` | Gamma API | Gamma | 100-page visual report generation |
-| 12 | **Kling AI (Image Gen)** | `kling-ai` | Kling AI | Kling | Image generation for reports and presentations |
+| 10 | **Gamma (Reports)** | `gamma` | Gamma API | Gamma | 100-page visual report generation |
+| 11 | **Kling AI (Image Gen)** | `kling-ai` | Kling AI | Kling | Image generation for reports and presentations |
 
 ### Text-to-Speech (2)
 
 | # | Role | Cost Tracking Key | Service | Provider | Why |
 |---|------|-------------------|---------|----------|-----|
-| 13 | **TTS (ElevenLabs)** | `tts-elevenlabs` | ElevenLabs API | ElevenLabs | Voice narration — Cristiano Judge narration for films |
-| 14 | **TTS (OpenAI)** | `tts-openai` | OpenAI TTS API | OpenAI | Alternate voice narration engine |
+| 12 | **TTS (ElevenLabs)** | `tts-elevenlabs` | ElevenLabs API | ElevenLabs | Voice narration — Cristiano Judge narration for films |
+| 13 | **TTS (OpenAI)** | `tts-openai` | OpenAI TTS API | OpenAI | Alternate voice narration engine |
 
 ### Avatar & Video (4)
 
 | # | Role | Cost Tracking Key | Service | Provider | Why |
 |---|------|-------------------|---------|----------|-----|
-| 15 | **Avatar (HeyGen)** | `avatar-heygen` | HeyGen Streaming API | HeyGen | Olivia video avatar presentation |
-| 16 | **Avatar (D-ID)** | `avatar-d-id` | D-ID API | D-ID | Alternate avatar generation |
-| 17 | **Avatar (Simli)** | `avatar-simli` | Simli API | Simli | Alternate avatar generation |
-| 18 | **Avatar (Replicate)** | `avatar-replicate` | Replicate API | Replicate | Alternate avatar generation |
+| 14 | **Avatar (HeyGen)** | `avatar-heygen` | HeyGen Streaming API | HeyGen | Olivia video avatar presentation |
+| 15 | **Avatar (D-ID)** | `avatar-d-id` | D-ID API | D-ID | Alternate avatar generation |
+| 16 | **Avatar (Simli)** | `avatar-simli` | Simli API | Simli | Alternate avatar generation |
+| 17 | **Avatar (Replicate)** | `avatar-replicate` | Replicate API | Replicate | Alternate avatar generation |
 
 ### Non-LLM Functions
 
@@ -838,7 +837,7 @@ The tier engine (`src/lib/tierEngine.ts`) progressively adds LLMs as confidence 
 |------|-------------|----------|
 | Discovery | Gemini only | Tavily basic |
 | Exploratory | Gemini + Claude Sonnet 4.6 | Tavily basic |
-| Filtered | + GPT-4o | Tavily standard |
+| Filtered | + GPT-5.4 | Tavily standard |
 | Evaluated | + Grok 4.1 Fast Reasoning | Tavily deep |
 | Validated | + Sonar Reasoning Pro High + Cristiano Judge | Tavily comprehensive |
 | Precision | All 5 evaluators + Judge | Tavily maximum |
@@ -848,7 +847,7 @@ The tier engine (`src/lib/tierEngine.ts`) progressively adds LLMs as confidence 
 2. **Gemini 3.1 Pro Preview for tutor escalation** — Olivia's tutor interjections during writing when keyword detection is insufficient.
 3. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
 4. **Cost tracking must match these models.** The `costTracking.ts` rate table must align with this registry.
-5. **All 18 providers must be tracked.** Every API call must log to cost tracking via `logCost()`.
+5. **All 17 providers must be tracked.** Every API call must log to cost tracking via `logCost()`.
 
 ---
 
