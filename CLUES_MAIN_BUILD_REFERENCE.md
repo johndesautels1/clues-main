@@ -24,7 +24,7 @@
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
 | LLM Evaluators | Claude Sonnet 4.6, GPT-4o, Gemini 3.1 Pro Preview, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High | 5 parallel evaluators |
-| Judge | Claude Opus 4.5 | Consensus builder, reviews stdDev > 15 disagreements |
+| Judge | Claude Opus 4.6 | Consensus builder, reviews stdDev > 15 disagreements |
 | Reasoning Engine | Gemini 3.1 Pro Preview | Paragraphical extraction, metric scoring, location recommendations (with thinking_level: high, Google Search grounding). Opus judges afterward. |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
 | Payments | Stripe | Tiered subscriptions |
@@ -885,7 +885,7 @@ gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
 gemini-3.1-pro-preview Input: $1.25   Output: $10.00   (Reasoning Engine + LLM Evaluator #3)
 grok-4-1-fast-reasoning Input: $0.20   Output: $0.50    (LLM Evaluator #4)
 sonar-reasoning-pro-high Input: $1.00  Output: $1.00    (LLM Evaluator #5)
-claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
+claude-opus-4-6       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
 gpt-5.4               Input: $5.00    Output: $20.00   (Advanced Reasoning, Report Interpretation)

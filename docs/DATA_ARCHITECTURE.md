@@ -792,7 +792,7 @@ Distributed across all 30 paragraphs. Each target has:
 ║  │  Sonnet 4.6 | GPT-4o | Gemini   │                               ║
 ║  │  Grok 4.1 | Sonar Reasoning Pro │                               ║
 ║  │            ↓                     │                               ║
-║  │  CRISTIANO JUDGE (Opus 4.5)     │                               ║
+║  │  CRISTIANO JUDGE (Opus 4.6)     │                               ║
 ║  │  Consensus on stdDev > 15       │                               ║
 ║  └─────────┬────────────────────────┘                               ║
 ║            │                                                         ║
@@ -828,7 +828,7 @@ Every paragraph's text is:
 2. **Prompted by Olivia** when targets are missed (max 2 interjections per paragraph)
 3. **Extracted by Gemini 3.1 Pro Preview** into numbered metrics
 4. **Scored by 5 LLMs** against candidate locations
-5. **Judged by Cristiano** (Opus 4.5) for consensus
+5. **Judged by Cristiano** (Opus 4.6) for consensus
 
 ### Main Module Questions (Q1-Q100, TQ1-TQ50, GQ1-GQ50)
 

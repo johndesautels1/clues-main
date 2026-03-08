@@ -223,7 +223,7 @@ export type CostProvider =
   | 'gemini-3.1-pro-preview'
   | 'grok-4-1-fast-reasoning'
   | 'sonar-reasoning-pro-high'
-  | 'claude-opus-4-5'
+  | 'claude-opus-4-6'
   | 'tavily'
   | 'gamma'
   | 'olivia'

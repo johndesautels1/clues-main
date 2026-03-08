@@ -784,7 +784,7 @@ This is the **single source of truth** for which AI model or API service powers 
 | 3 | **Gemini 3.1 Pro Preview** | `gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview | Google | Paragraphical extraction engine, Olivia tutor escalation, LLM Evaluator #3 |
 | 4 | **Grok 4.1 Fast Reasoning** | `grok-4-1-fast-reasoning` | Grok 4.1 Fast Reasoning | xAI | LLM Evaluator #4 — real-time web context for MH scoring |
 | 5 | **Perplexity Sonar Reasoning Pro High** | `sonar-reasoning-pro-high` | Sonar Reasoning Pro High | Perplexity | LLM Evaluator #5 — research-backed citations |
-| 6 | **Claude Opus 4.5 (Judge)** | `claude-opus-4-5` | Claude Opus 4.5 | Anthropic | Cristiano Judge — consensus builder, reviews stdDev > 15 disagreements |
+| 6 | **Claude Opus 4.6 (Judge)** | `claude-opus-4-6` | Claude Opus 4.6 | Anthropic | Cristiano Judge — consensus builder, reviews stdDev > 15 disagreements |
 | 7 | **GPT-5.4** | `gpt-5.4` | GPT-5.4 | OpenAI | Advanced reasoning, report interpretation, high-stakes logic |
 | 8 | **GPT Realtime 1.5** | `gpt-realtime-1.5` | GPT Realtime 1.5 | OpenAI | Olivia's live voice/video interaction |
 
