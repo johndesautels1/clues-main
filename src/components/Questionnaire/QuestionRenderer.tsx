@@ -255,14 +255,15 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
     );
   }
 
-  // Slider (0-100)
+  // Slider (0-100) — color-coded by range
   if (type === 'Slider') {
     const numVal = typeof value === 'number' ? value : 50;
+    const sliderColor = numVal <= 20 ? '#ef4444' : numVal <= 40 ? '#f97316' : numVal <= 60 ? '#eab308' : numVal <= 80 ? '#60a5fa' : '#22c55e';
     return (
       <div className="qr-slider">
         <div className="qr-slider-labels">
           <span style={{ color: C.textMuted }}>Strongly disagree</span>
-          <span style={{ color: accent, fontWeight: 600, fontSize: '1.25rem' }}>{numVal}</span>
+          <span style={{ color: sliderColor, fontWeight: 600, fontSize: '1.25rem' }}>{numVal}</span>
           <span style={{ color: C.textMuted }}>Strongly agree</span>
         </div>
         <input
@@ -274,16 +275,16 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
           className="qr-slider-input"
           aria-label="Value slider"
           style={{
-            '--accent': accent,
+            '--accent': sliderColor,
             '--pct': `${numVal}%`,
           } as React.CSSProperties}
         />
         <div className="qr-slider-track-labels">
-          <span>0</span>
-          <span>25</span>
-          <span>50</span>
-          <span>75</span>
-          <span>100</span>
+          <span style={{ color: '#ef4444' }}>0</span>
+          <span style={{ color: '#f97316' }}>25</span>
+          <span style={{ color: '#eab308' }}>50</span>
+          <span style={{ color: '#60a5fa' }}>75</span>
+          <span style={{ color: '#22c55e' }}>100</span>
         </div>
       </div>
     );
