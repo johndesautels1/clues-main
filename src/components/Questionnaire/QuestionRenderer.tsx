@@ -85,12 +85,33 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
     );
   }
 
-  // Single-select (radio list)
+  // Single-select (radio list or dropdown for many options)
   if (type === 'Single-select') {
     const options = extractInlineOptions(question.question);
     if (options.length === 0) {
       return <TextInput value={String(value || '')} onChange={(v) => onChange(v)} accent={accent} placeholder="Type your answer..." />;
     }
+
+    // Use dropdown for 8+ options (better UX for long lists like countries, income)
+    if (options.length >= 8) {
+      return (
+        <div className="qr-dropdown">
+          <select
+            className="qr-dropdown-select"
+            value={String(value || '')}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label="Select one"
+            style={{ '--accent': accent, borderColor: value ? accent : C.inputBorder } as React.CSSProperties}
+          >
+            <option value="">— Select an option —</option>
+            {options.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+
     return (
       <div className="qr-options" role="radiogroup" aria-label="Select one">
         {options.map((opt) => {

@@ -16,23 +16,23 @@ export const mainModuleQuestions: QuestionModule = {
       "questions": [
         {
           "number": 1,
-          "question": "What is your nationality or primary citizenship?",
+          "question": "What is your nationality or primary citizenship? (Select one: United States, United Kingdom, Canada, Australia, Germany, France, Italy, Spain, Portugal, Ireland, Netherlands, Sweden, Switzerland, Mexico, Brazil, Argentina, Israel, South Africa, New Zealand, India, Japan, South Korea, Singapore, Other)",
           "type": "Single-select"
         },
         {
           "number": 2,
-          "question": "Do you hold dual or multiple citizenships? If so, which countries?",
-          "type": "Yes/No"
+          "question": "Do you hold dual or multiple citizenships? If yes, which countries? (Select all that apply: United States, United Kingdom, Canada, Australia, Germany, France, Italy, Spain, Portugal, Ireland, Netherlands, Sweden, Switzerland, Mexico, Brazil, Argentina, Israel, South Africa, New Zealand, India, Japan, South Korea, Singapore, Other)",
+          "type": "Multi-select"
         },
         {
           "number": 3,
-          "question": "What is your current country of residence?",
+          "question": "What is your current country of residence? (Select one: United States, United Kingdom, Canada, Australia, Germany, France, Italy, Spain, Portugal, Ireland, Netherlands, Sweden, Switzerland, Mexico, Brazil, Argentina, Israel, South Africa, New Zealand, India, Japan, South Korea, Singapore, Other)",
           "type": "Single-select"
         },
         {
           "number": 4,
-          "question": "What is your age range?",
-          "type": "Range"
+          "question": "What is your age range? (Select one: 18-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75+)",
+          "type": "Single-select"
         },
         {
           "number": 5,
@@ -76,8 +76,8 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 13,
-          "question": "Are you involved in a skilled trade? If so, what specific trade certification do you hold?",
-          "type": "Yes/No"
+          "question": "Are you involved in a skilled trade? If so, select your trade area. (Select all that apply: electrician, plumber, carpenter, welder, HVAC, automotive, machinist, construction, culinary/chef, cosmetology, medical technician, not applicable)",
+          "type": "Multi-select"
         },
         {
           "number": 14,
@@ -91,17 +91,17 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 16,
-          "question": "What is your current employment status? (Select one: employed full-time, employed part-time, self-employed, business owner, retired, unemployed, student)",
-          "type": "Single-select"
+          "question": "What is your current employment status? (Select all that apply: employed full-time, employed part-time, self-employed, business owner, retired, unemployed, student)",
+          "type": "Multi-select"
         },
         {
           "number": 17,
-          "question": "Are you seeking employment in your new location, or will you work remotely/be self-employed? (Select one: seeking local employment, remote work, self-employed, business owner, retired, undecided)",
-          "type": "Single-select"
+          "question": "What is your employment plan in your new location? (Select all that apply: seeking local employment, remote work, self-employed, business owner, retired, undecided)",
+          "type": "Multi-select"
         },
         {
           "number": 18,
-          "question": "What is your primary industry or professional field?",
+          "question": "What is your primary industry or professional field? (Select one: technology/IT, finance/banking, healthcare/medical, education, legal, engineering, real estate, hospitality/tourism, media/entertainment, marketing/advertising, consulting, manufacturing, retail/e-commerce, agriculture, government/public sector, non-profit, construction, transportation/logistics, energy/utilities, arts/creative, other)",
           "type": "Single-select"
         },
         {
@@ -111,13 +111,13 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 20,
-          "question": "What is your annual household income (USD equivalent)?",
-          "type": "Range"
+          "question": "What is your annual household income (USD equivalent)? (Select one: under $25k, $25k-$50k, $50k-$75k, $75k-$100k, $100k-$150k, $150k-$200k, $200k-$300k, $300k-$500k, $500k+, prefer not to say)",
+          "type": "Single-select"
         },
         {
           "number": 21,
-          "question": "What percentage of your current income could you maintain if you relocated internationally?",
-          "type": "Range"
+          "question": "What percentage of your current income could you maintain if you relocated internationally? (Select one: 0-25%, 25-50%, 50-75%, 75-100%, 100%+, unsure)",
+          "type": "Single-select"
         },
         {
           "number": 22,
@@ -126,13 +126,13 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 23,
-          "question": "What is your current monthly housing cost (USD equivalent)?",
-          "type": "Range"
+          "question": "What is your current monthly housing cost (USD equivalent)? (Select one: under $500, $500-$1000, $1000-$1500, $1500-$2000, $2000-$3000, $3000-$5000, $5000-$7500, $7500-$10000, $10000+)",
+          "type": "Single-select"
         },
         {
           "number": 24,
-          "question": "How many bedrooms do you need in your new home?",
-          "type": "Range"
+          "question": "How many bedrooms do you need in your new home? (Select one: studio, 1, 2, 3, 4, 5+)",
+          "type": "Single-select"
         },
         {
           "number": 25,
@@ -141,8 +141,8 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 26,
-          "question": "What is the approximate population of your current city or town?",
-          "type": "Range"
+          "question": "What is the approximate population of your current city or town? (Select one: under 10k, 10k-50k, 50k-100k, 100k-250k, 250k-500k, 500k-1 million, 1-5 million, 5 million+)",
+          "type": "Single-select"
         },
         {
           "number": 27,
@@ -176,7 +176,7 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 33,
-          "question": "How many languages do you speak fluently, and which ones?",
+          "question": "Which languages do you speak fluently? (Select all that apply: English, Spanish, French, German, Portuguese, Italian, Dutch, Mandarin, Japanese, Korean, Arabic, Hindi, Russian, Turkish, Swedish, Polish, Thai, Vietnamese, Hebrew, Other)",
           "type": "Multi-select"
         },
         {

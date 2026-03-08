@@ -42,6 +42,9 @@ export function MainQuestionnaire() {
   const [oliviaChatOpen, setOliviaChatOpen] = useState(false);
   const [oliviaVideoOpen, setOliviaVideoOpen] = useState(false);
 
+  // ─── Question Navigator State ────────────────────────────────
+  const [questionNavOpen, setQuestionNavOpen] = useState(false);
+
   // ─── Questionnaire State (answers, nav, persistence) ──────────
   const qs = useQuestionnaireState();
 
@@ -391,20 +394,22 @@ export function MainQuestionnaire() {
           const sp = qs.progress.sectionProgress[i];
           const pct = sp.total > 0 ? Math.round((sp.answered / sp.total) * 100) : 0;
           const isActive = i === qs.nav.sectionIndex;
+          const isComplete = sp.answered === sp.total && sp.total > 0;
+          const tabClass = `mq-section-tab${isActive ? ' active' : ''}${isComplete ? ' completed' : ''}`;
           return (
             <button
               key={s.id}
               role="tab"
               aria-selected={isActive}
-              aria-label={`${s.title}: ${sp.answered} of ${sp.total} answered`}
-              className={`mq-section-tab${isActive ? ' active' : ''}`}
+              aria-label={`${s.title}: ${sp.answered} of ${sp.total} answered${isComplete ? ' (complete)' : ''}`}
+              className={tabClass}
               style={{ '--tab-accent': s.accent } as React.CSSProperties}
               onClick={() => handleSectionClick(i)}
             >
-              <span className="mq-tab-icon">{s.icon}</span>
+              <span className="mq-tab-icon">{isComplete ? '\u2713' : s.icon}</span>
               <span className="mq-tab-label">{s.title}</span>
               <div className="mq-tab-progress">
-                <div className="mq-tab-progress-fill" style={{ width: `${pct}%`, background: s.accent }} />
+                <div className="mq-tab-progress-fill" style={{ width: `${pct}%`, background: isComplete ? '#22c55e' : s.accent }} />
               </div>
             </button>
           );
@@ -436,8 +441,39 @@ export function MainQuestionnaire() {
       <HeyGenVideoModal open={oliviaVideoOpen} onClose={() => setOliviaVideoOpen(false)} section={oliviaSection} currentAnswer={currentAnswer} sessionId={session.id} />
       <OliviaPanel open={oliviaChatOpen} onClose={() => setOliviaChatOpen(false)} section={oliviaSection} currentAnswer={currentAnswer} accent={accent} sessionId={session.id} />
 
+      {/* ─── QUESTION NAVIGATOR (left sidebar) ─── */}
+      <button
+        className="mq-qnav-toggle"
+        onClick={() => setQuestionNavOpen(!questionNavOpen)}
+        aria-label={questionNavOpen ? 'Close question navigator' : 'Open question navigator'}
+        aria-expanded={questionNavOpen}
+      >
+        {questionNavOpen ? '\u25C0' : '\u2630'}
+      </button>
+      <nav className={`mq-question-nav${questionNavOpen ? ' open' : ''}`} aria-label="Question navigator">
+        <div className="mq-qnav-header">
+          <span className="mq-qnav-title">Questions</span>
+          <button className="mq-qnav-close" onClick={() => setQuestionNavOpen(false)} aria-label="Close navigator">&times;</button>
+        </div>
+        {qs.visibleQuestions.map((q, idx) => {
+          const isActive = idx === qs.nav.questionIndex;
+          const hasAnswer = qs.getAnswer(q.number) !== undefined;
+          const shortText = getCleanQuestion(q.question).slice(0, 60) + (q.question.length > 60 ? '...' : '');
+          return (
+            <button
+              key={q.number}
+              className={`mq-qnav-item${isActive ? ' active' : ''}${hasAnswer ? ' answered' : ''}`}
+              onClick={() => { qs.goToQuestion(qs.nav.sectionIndex, idx); setQuestionNavOpen(false); }}
+            >
+              <span className="mq-qnav-num">Q{idx + 1}</span>
+              <span className="mq-qnav-text">{shortText}</span>
+            </button>
+          );
+        })}
+      </nav>
+
       {/* ─── MAIN CONTENT ─── */}
-      <div className="mq-content" style={{ paddingRight: oliviaChatOpen ? 'clamp(420px,36vw,460px)' : 'clamp(20px,5vw,68px)' }}>
+      <div className={`mq-content${questionNavOpen ? ' nav-open' : ''}`} style={{ paddingRight: oliviaChatOpen ? 'clamp(420px,36vw,460px)' : 'clamp(20px,5vw,68px)' }}>
         <div className={`mq-card-wrapper${contentVisible ? '' : ' hidden'}`} style={{
           transform: contentVisible ? 'translateY(0)' : `translateY(${direction > 0 ? '20px' : '-20px'})`,
         }}>
