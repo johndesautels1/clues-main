@@ -156,7 +156,21 @@ export function MainQuestionnaire() {
       ['q8', 'Has children'], ['q16', 'Employment status'], ['q20', 'Household income'],
       ['q30', 'Has pets'],
     ];
+    // Extract GQ lifestyle/values signals for Olivia context
+    const gqSignalKeys: [string, string][] = [
+      ['gq14', 'Religion importance'], ['gq41', 'Food culture importance'],
+      ['gq44', 'Dwelling preference'], ['gq45', 'Setting preference'],
+      ['gq46', 'Gun law importance'], ['gq47', 'Entertainment importance'],
+      ['gq48', 'Sports/fitness importance'], ['gq49', 'LGBTQ+ acceptance importance'],
+      ['gq50', 'Values alignment importance'],
+    ];
     for (const [key, label] of demoKeys) {
+      const val = qs.answers[key];
+      if (val !== undefined) {
+        relevantAnswers[label] = Array.isArray(val) ? val.join(', ') : String(val);
+      }
+    }
+    for (const [key, label] of gqSignalKeys) {
       const val = qs.answers[key];
       if (val !== undefined) {
         relevantAnswers[label] = Array.isArray(val) ? val.join(', ') : String(val);

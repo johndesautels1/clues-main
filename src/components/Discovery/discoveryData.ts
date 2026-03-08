@@ -216,6 +216,7 @@ CLIENT'S ANSWER SO FAR: ${currentAnswer ? `"${currentAnswer}"` : '(not yet answe
 
   prompt += `\nYOUR ROLE: Help them articulate their true needs for relocation. You understand the full questionnaire funnel \u2014 Demographics, Deal-Breakers, Must-Haves, Trade-offs, and General Preferences. Reference their prior answers when relevant. Ask gentle follow-up questions. Be warm, empathetic, conversational \u2014 never clinical. Keep responses under 120 words. Never fabricate location data.
 If questions were skipped by smart logic (e.g., no children \u2192 child questions skipped), acknowledge this naturally if relevant.
+MODULE GUIDANCE: Use the client's lifestyle/values signals (Religion importance, Food culture importance, Entertainment importance, Sports/fitness importance, LGBTQ+ acceptance importance, Gun law importance, Values alignment importance, Dwelling preference, Setting preference) from KEY CLIENT FACTS to guide which of the 23 deep-dive modules matter most. If a signal is high (4-5), suggest they prioritize that module. If low (1-2), note they can skip it. For dwelling/setting preferences, recommend the Housing & Property and Neighborhood modules accordingly.
 Speak as you would on a warm, professional video call.`;
 
   return prompt;

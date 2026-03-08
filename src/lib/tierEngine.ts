@@ -197,6 +197,103 @@ export function calculateNextSteps(session: UserSession): NextStep[] {
   });
 }
 
+// ─── GQ Signal → Module Relevance Mapping ───────────────────────
+// Maps General Question answers to downstream module relevance boosts.
+// Likert-Importance answers are 1-5 scale; Single-select answers are strings.
+// Returns a Record<moduleId, relevance 0.0-1.0> for modules signaled by GQ answers.
+// This supplements (not replaces) the Paragraphical's module_relevance.
+
+/** GQ keys that map to specific downstream modules */
+const GQ_MODULE_SIGNALS: Record<string, { modules: string[]; type: 'likert' | 'select' }> = {
+  // gq14: Religion/spirituality importance → religion_spirituality module
+  gq14: { modules: ['religion_spirituality', 'cultural_heritage_traditions'], type: 'likert' },
+  // gq41: Food/cuisine importance → food_dining module
+  gq41: { modules: ['food_dining', 'shopping_services'], type: 'likert' },
+  // gq44: Dwelling type preference → housing_property, neighborhood modules
+  gq44: { modules: ['housing_property', 'neighborhood_urban_design'], type: 'select' },
+  // gq45: Urban/suburban/rural preference → neighborhood, transportation, housing
+  gq45: { modules: ['neighborhood_urban_design', 'transportation_mobility', 'housing_property'], type: 'select' },
+  // gq46: Firearm/weapon law importance → safety_security, social_values_governance
+  gq46: { modules: ['safety_security', 'social_values_governance', 'legal_immigration'], type: 'likert' },
+  // gq47: Music/arts/entertainment importance → entertainment_nightlife, arts_culture
+  gq47: { modules: ['entertainment_nightlife', 'arts_culture'], type: 'likert' },
+  // gq48: Sports/fitness/recreation importance → outdoor_recreation, health_wellness
+  gq48: { modules: ['outdoor_recreation', 'health_wellness'], type: 'likert' },
+  // gq49: LGBTQ+ acceptance importance → sexual_beliefs_practices_laws, social_values
+  gq49: { modules: ['sexual_beliefs_practices_laws', 'social_values_governance', 'safety_security'], type: 'likert' },
+  // gq50: Political/social values alignment → social_values_governance
+  gq50: { modules: ['social_values_governance', 'legal_immigration'], type: 'likert' },
+};
+
+/** Convert a Likert-Importance answer (1-5) to a relevance score (0.0-1.0) */
+function likertToRelevance(value: string | number | boolean | string[]): number {
+  const num = typeof value === 'number' ? value : parseInt(String(value), 10);
+  if (isNaN(num)) return 0.5; // default to moderate if unparseable
+  // 1=not important → 0.2, 2→0.4, 3→0.6, 4→0.8, 5=extremely important → 1.0
+  return Math.min(1.0, Math.max(0.2, num * 0.2));
+}
+
+/**
+ * Derive module relevance signals from General Question answers.
+ * Returns a map of moduleId → relevance (0.0-1.0).
+ * Modules not signaled by any GQ answer are omitted (not 0).
+ */
+export function deriveModuleRelevanceFromGQ(
+  gqAnswers: Record<string, string | number | boolean | string[]>
+): Record<string, number> {
+  const relevance: Record<string, number> = {};
+
+  for (const [gqKey, config] of Object.entries(GQ_MODULE_SIGNALS)) {
+    const val = gqAnswers[gqKey];
+    if (val === undefined) continue;
+
+    let score: number;
+    if (config.type === 'likert') {
+      score = likertToRelevance(val);
+    } else {
+      // Single-select: any answer means the module is relevant (0.7 baseline)
+      score = 0.7;
+    }
+
+    for (const moduleId of config.modules) {
+      // Take the higher score if multiple GQs signal the same module
+      relevance[moduleId] = Math.max(relevance[moduleId] ?? 0, score);
+    }
+  }
+
+  return relevance;
+}
+
+/**
+ * Merge Paragraphical module_relevance with GQ-derived signals.
+ * GQ signals boost relevance but never reduce it.
+ * Final score = max(paragraphical_score, gq_score) for each module.
+ */
+export function mergeModuleRelevance(
+  paragraphicalRelevance: Record<string, number>,
+  gqRelevance: Record<string, number>
+): Record<string, number> {
+  const merged = { ...paragraphicalRelevance };
+  for (const [moduleId, gqScore] of Object.entries(gqRelevance)) {
+    merged[moduleId] = Math.max(merged[moduleId] ?? 0, gqScore);
+  }
+  return merged;
+}
+
+/**
+ * Get recommended modules sorted by relevance (highest first).
+ * Modules below the threshold are excluded (not recommended).
+ */
+export function getRecommendedModules(
+  relevance: Record<string, number>,
+  threshold = 0.5
+): { moduleId: string; relevance: number }[] {
+  return Object.entries(relevance)
+    .filter(([, score]) => score >= threshold)
+    .map(([moduleId, score]) => ({ moduleId, relevance: score }))
+    .sort((a, b) => b.relevance - a.relevance);
+}
+
 // ─── LLM Count by Tier ──────────────────────────────────────────
 // How many LLMs should fire at each tier.
 // Used by the evaluation endpoint to determine which models to call.

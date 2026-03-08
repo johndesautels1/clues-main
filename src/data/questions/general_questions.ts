@@ -89,7 +89,7 @@ export const generalQuestionsQuestions: QuestionModule = {
       ]
     },
     {
-      "title": "Relocation Readiness",
+      "title": "Readiness & Key Priorities",
       "questionRange": "Q13-Q17",
       "questions": [
         {
@@ -99,8 +99,8 @@ export const generalQuestionsQuestions: QuestionModule = {
         },
         {
           "number": 14,
-          "question": "Which cities or countries have you visited or lived in that you LOVED, and which did you hate — and specifically WHY?",
-          "type": "Text"
+          "question": "How important is your religious or spiritual practice to your daily life?",
+          "type": "Likert-Importance"
         },
         {
           "number": 15,
@@ -253,7 +253,7 @@ export const generalQuestionsQuestions: QuestionModule = {
       ]
     },
     {
-      "title": "Long-term Vision & Planning",
+      "title": "Vision, Planning & Living Preferences",
       "questionRange": "Q37-Q44",
       "questions": [
         {
@@ -278,8 +278,8 @@ export const generalQuestionsQuestions: QuestionModule = {
         },
         {
           "number": 41,
-          "question": "How would you define success after 2 years in your new location?",
-          "type": "Text"
+          "question": "How important is access to cuisine and food culture that matches your preferences?",
+          "type": "Likert-Importance"
         },
         {
           "number": 42,
@@ -293,44 +293,44 @@ export const generalQuestionsQuestions: QuestionModule = {
         },
         {
           "number": 44,
-          "question": "What is your biggest hope for your new life?",
-          "type": "Text"
+          "question": "What type of dwelling do you prefer to live in? (Select one: detached house, townhouse/row house, apartment/condo, villa/estate, tiny home/alternative, no strong preference)",
+          "type": "Single-select"
         }
       ]
     },
     {
-      "title": "Open Narratives",
+      "title": "Lifestyle & Values Preferences",
       "questionRange": "Q45-Q50",
       "questions": [
         {
           "number": 45,
-          "question": "Tell us your relocation story: What's driving your desire to move, and what would \"success\" look like for you?",
-          "type": "Text"
+          "question": "What setting do you prefer to live in? (Select one: urban core/city center, inner suburb, outer suburb, small town/rural, remote/off-grid)",
+          "type": "Single-select"
         },
         {
           "number": 46,
-          "question": "Describe your perfect ordinary Tuesday in your ideal new location — morning to evening, where do you live, work, eat, and spend your time?",
-          "type": "Text"
+          "question": "How important is it that local firearm and weapon laws align with your personal views?",
+          "type": "Likert-Importance"
         },
         {
           "number": 47,
-          "question": "What specific communities, interests, or activities are absolutely central to your identity and happiness that we haven't asked about?",
-          "type": "Text"
+          "question": "How important is access to live music, performing arts, and entertainment or nightlife?",
+          "type": "Likert-Importance"
         },
         {
           "number": 48,
-          "question": "What are your biggest fears or concerns about relocating, and what past experiences (positive or negative) with places you've lived should we know about?",
-          "type": "Text"
+          "question": "How important is access to sports, fitness facilities, and outdoor recreation?",
+          "type": "Likert-Importance"
         },
         {
           "number": 49,
-          "question": "What would make you feel \"at home\" in your new location?",
-          "type": "Text"
+          "question": "How important is LGBTQ+ acceptance and legal protections in your destination?",
+          "type": "Likert-Importance"
         },
         {
           "number": 50,
-          "question": "If you had to explain to a close friend why certain places would be absolutely wrong for you, and others would be perfect, what would you tell them that our questionnaire might have missed?",
-          "type": "Text"
+          "question": "How important is it that your destination's political and social values broadly align with your own?",
+          "type": "Likert-Importance"
         }
       ]
     }
