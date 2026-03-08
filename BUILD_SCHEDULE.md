@@ -521,30 +521,45 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-08
+### Latest Update: 2026-03-08 (Phase 1, Conv 1-2 COMPLETE)
 
 **What was done this conversation:**
-- Created BUILD_SCHEDULE.md (this file) — complete build roadmap
-- Archived CODEBASE_AUDIT_TABLE.md to docs/archive/
-- Updated CLAUDE.md mandatory read list to include BUILD_SCHEDULE.md
+- Split `questionLibrary.ts` (14,415 lines) into 26 per-module files in `src/data/questions/`
+  - `types.ts`, `meta.ts`, one file per module, `index.ts` barrel with backward compat
+  - Added `getModuleById()` and `getModuleQuestions()` utility functions
+- Built full Main Module Questionnaire (`/questionnaire` route):
+  - `MainQuestionnaire.tsx` — Phase-based orchestrator (welcome/active/complete)
+  - `QuestionRenderer.tsx` — All 15 response types as interactive single-card controls
+  - `Questionnaire.css` — Mobile-first, WCAG AA, glassmorphic dark theme
+  - `questionnaireData.ts` — 5 sections, logic jumps, color tokens, option extraction
+  - `useQuestionnaireState.ts` — Answers, nav, 3-layer persistence, smart skipping
+  - `src/types/questionnaire.ts` — Full type definitions
+- Wired `/questionnaire` route in App.tsx with ProtectedRoute (allowAnonymous)
+- Full Olivia integration (chat, voice, video) via existing Discovery components
+- 5 sections: Demographics (34Q) → DNW (33Q) → MH (33Q) → Trade-offs (50Q) → General (50Q)
+- Logic jumps: partner Qs skip if single, children Qs skip if no kids, pet Qs skip if no pets, etc.
 
 **Current build position:**
-- Phase 1, Conv 1-2 (Questionnaire Renderer) is NEXT
-- All data collection infrastructure (paragraphs, questions, modules) exists
+- Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
+- Phase 1, Conv 3-4 (Main + Mini Module Flows) is NEXT
+- The Main Module questionnaire UI is complete and functional
+- Mini Module flows (23 category modules × 100Q each) need similar treatment
 - No evaluation pipeline code exists yet
 - Results components exist as shells but are not wired to routes or data
 
 **Next agent should:**
 1. Read mandatory files (CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md, PARAGRAPHICAL_ARCHITECTURE.md)
-2. Begin Phase 1, Conv 1-2: Build the Questionnaire Renderer
-3. Split `questionLibrary.ts` into per-module files FIRST (it's 14,415 lines)
-4. Then build QuestionRenderer, QuestionCard, ProgressBar, QuestionnaireShell
-5. Wire `/questionnaire/:moduleId` route
+2. Begin Phase 1, Conv 3-4: Build Main + Mini Module Flows
+3. Mini modules use the same `QuestionRenderer` but load from individual module files
+4. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
+5. Build module unlock/recommendation logic based on Gemini extraction `module_relevance`
+6. Build the Dashboard module cards that link to each questionnaire
 
 **Known issues:**
-- `questionLibrary.ts` at 14,415 lines is a context window hazard — split before working with it
+- `questionLibrary.ts` (original monolith) still exists — can be deleted once all consumers migrated
 - `README.md` at 46KB needs trimming (not urgent, do during Phase 4 polish)
 - `CLUES_MAIN_BUILD_REFERENCE.md` has some overlap with this file — not harmful but could be trimmed
+- Olivia's logic-jump behavior in MainQuestionnaire is currently passive (Olivia doesn't yet proactively suggest skips or follow-ups based on answers — that's a Conv 3-4 enhancement)
 
 ---
 
