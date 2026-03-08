@@ -149,27 +149,44 @@ export interface LogicJump {
 }
 
 export const LOGIC_JUMPS: LogicJump[] = [
-  // No partner → skip partner questions
-  { triggerKey: 'q5', triggerValue: 'single', skipKeys: ['q6', 'q7'] },
-
-  // No children → skip ALL child-related questions across ALL sections
-  { triggerKey: 'q8', triggerValue: 'false', skipKeys: [
-    'q9', 'q10', 'q11',          // Demographics: children ages, relocating, special needs
-    'q64',                         // DNW: avoid limited education for children
-    'q91',                         // MH: good education system (for children)
-    'q93',                         // MH: family-friendly environment with child resources
-    'tq16',                        // Tradeoff: harsh winters for best education for children
+  // ── Partner gating ──────────────────────────────────────────────
+  // Single → skip all partner-specific questions across sections
+  { triggerKey: 'q5', triggerValue: 'single', skipKeys: [
+    'q6', 'q7',                    // Demographics: partner relocate, partner work auth
+    'gq2',                         // General: partner/household alignment on priorities
   ]},
 
+  // Partner NOT relocating → skip partner work authorization
+  { triggerKey: 'q6', triggerValue: 'false', skipKeys: ['q7'] },
+
+  // ── Children gating ─────────────────────────────────────────────
+  // No children → skip ALL child-specific questions across ALL sections
+  // NOTE: Q91 ("education for you OR your children") is intentionally NOT
+  // skipped — the "(for you)" clause makes it relevant to childless users.
+  { triggerKey: 'q8', triggerValue: 'false', skipKeys: [
+    'q9', 'q10', 'q11',           // Demographics: children ages, relocating, special needs
+    'q64',                         // DNW: avoid limited education for your CHILDREN
+    'q93',                         // MH: family-friendly with CHILD-oriented resources
+    'tq16',                        // Tradeoff: harsh winters for CHILDREN's education
+  ]},
+
+  // ── Military gating ─────────────────────────────────────────────
   // Not military → skip veteran services
   { triggerKey: 'q14', triggerValue: 'false', skipKeys: ['q15'] },
 
-  // No chronic conditions → skip medical specifics
+  // ── Health gating ───────────────────────────────────────────────
+  // No chronic conditions → skip medical condition specifics
   { triggerKey: 'q27', triggerValue: 'false', skipKeys: ['q28'] },
 
-  // No pets → skip pet questions across sections
-  { triggerKey: 'q30', triggerValue: 'false', skipKeys: ['q31', 'q32', 'q96'] },
+  // ── Pet gating ──────────────────────────────────────────────────
+  // No pets → skip ALL pet-specific questions across ALL sections
+  { triggerKey: 'q30', triggerValue: 'false', skipKeys: [
+    'q31', 'q32',                  // Demographics: pet types, breed restrictions
+    'q96',                         // MH: pet-friendly environment
+    'tq48',                        // Tradeoff: accept limited pet-friendliness
+  ]},
 
+  // ── Family obligations gating ───────────────────────────────────
   // No family obligations → skip obligation details
   { triggerKey: 'gq4', triggerValue: 'false', skipKeys: ['gq5'] },
 ];
