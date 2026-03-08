@@ -521,7 +521,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-08 (Phase 1, Conv 1-2 COMPLETE)
+### Latest Update: 2026-03-08 (Phase 1, Conv 1-2 COMPLETE + Persistence Fixes)
 
 **What was done this conversation:**
 - Split `questionLibrary.ts` (14,415 lines) into 26 per-module files in `src/data/questions/`
@@ -538,6 +538,12 @@ Target: < 10KB. Everything else lives in specialized docs.
 - Full Olivia integration (chat, voice, video) via existing Discovery components
 - 5 sections: Demographics (34Q) → DNW (33Q) → MH (33Q) → Trade-offs (50Q) → General (50Q)
 - Logic jumps: partner Qs skip if single, children Qs skip if no kids, pet Qs skip if no pets, etc.
+- **Fixed 5 Supabase persistence bugs:**
+  1. Added `TradeoffAnswers` type + `tradeoffAnswers` field to `UserSession.mainModule`
+  2. Added `SET_TRADEOFFS` action + reducer case to `UserContext`
+  3. Fixed DNW sync: flat `q35: 3` → `DNWAnswer{ questionId, value, severity }` array
+  4. Fixed MH sync: flat `q68: 4` → `MHAnswer{ questionId, value, importance }` array
+  5. Fixed key collisions: `tq{n}` for tradeoffs, `gq{n}` for general (avoids overlap with `q{n}` demographics)
 
 **Current build position:**
 - Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
