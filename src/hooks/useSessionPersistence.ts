@@ -11,6 +11,7 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { saveNormalizedData } from '../lib/supabasePersistence';
 import type { UserSession } from '../types';
 
 const STORAGE_KEY = 'clues_session';
@@ -167,6 +168,8 @@ export function useSessionPersistence({ session, onSessionLoaded }: UsePersisten
     saveTimerRef.current = setTimeout(() => {
       saveToLocalStorage(data);
       saveToSupabase(data);
+      // Dual-write: also save to normalized tables for analytics/queries
+      saveNormalizedData(data);
     }, SAVE_DEBOUNCE_MS);
   }, []);
 
