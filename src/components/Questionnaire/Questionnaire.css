@@ -1016,6 +1016,104 @@
   }
 }
 
+/* ─── SEARCHABLE MULTI-SELECT (countries, long lists) ─── */
+.qr-searchable-multi {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qr-sm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.qr-sm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid;
+  border-radius: 16px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.qr-sm-tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.qr-sm-search {
+  width: 100%;
+  padding: 12px 16px;
+  background: #0d1222;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  color: #f9fafb;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-height: 44px;
+}
+
+.qr-sm-search::placeholder {
+  color: #8b95a5;
+}
+
+.qr-sm-search:focus {
+  border-color: var(--accent, #60a5fa);
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.12);
+}
+
+.qr-sm-list {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.qr-sm-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.875rem;
+  text-align: left;
+  transition: background 0.12s ease;
+  min-height: 40px;
+}
+
+.qr-sm-option:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.qr-sm-option:last-child {
+  border-bottom: none;
+}
+
+.qr-sm-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
 /* ─── FOCUS VISIBLE (WCAG 2.4.7) ─── */
 .mq-universe :focus-visible {
   outline: 2px solid #C4A87A;

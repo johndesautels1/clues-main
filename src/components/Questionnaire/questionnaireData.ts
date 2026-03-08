@@ -84,20 +84,34 @@ export function getResponseLabels(type: string): string[] | undefined {
 
 /** Extract inline options from question text: "(Select one: a, b, c)" */
 export function extractInlineOptions(questionText: string): string[] {
-  const parenMatch = questionText.match(
-    /\((?:Select (?:one|all that apply)[:\s]*)?([^)]+)\)/i
+  // First try to match the explicit "Select one/all" parenthetical
+  const selectMatch = questionText.match(
+    /\(Select (?:one|all that apply)[:\s]*([^)]+)\)/i
   );
-  if (parenMatch) {
-    return parenMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+  if (selectMatch) {
+    return selectMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+  }
+  // Fallback: match the last parenthetical (skip descriptive ones like "(USD equivalent)")
+  const allParens = [...questionText.matchAll(/\(([^)]+)\)/g)];
+  if (allParens.length > 0) {
+    const last = allParens[allParens.length - 1][1];
+    // Only treat as options if it contains commas (multiple choices)
+    if (last.includes(',')) {
+      return last.split(',').map(s => s.trim()).filter(Boolean);
+    }
   }
   return [];
 }
 
 /** Get the clean question text (without the options parenthetical) */
 export function getCleanQuestion(questionText: string): string {
-  return questionText
-    .replace(/\s*\((?:Select (?:one|all that apply)[:\s]*)?[^)]+\)\s*$/, '')
-    .trim();
+  // Remove the "Select one/all: ..." parenthetical specifically
+  let cleaned = questionText.replace(/\s*\(Select (?:one|all that apply)[:\s]*[^)]+\)\s*$/i, '');
+  // If no Select pattern was found, remove trailing parenthetical with commas (option lists)
+  if (cleaned === questionText) {
+    cleaned = questionText.replace(/\s*\([^)]*,[^)]+\)\s*$/, '');
+  }
+  return cleaned.trim();
 }
 
 // ─── WCAG-Verified Color Tokens ──────────────────────────────────

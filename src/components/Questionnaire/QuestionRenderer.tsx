@@ -17,11 +17,21 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { RESPONSE_TYPES } from '../../data/questions/meta';
+import { COUNTRIES } from '../../data/countries';
 import {
   extractInlineOptions,
   C,
 } from './questionnaireData';
 import type { QuestionItem } from '../../data/questions/types';
+
+/** Detect if a question is about countries (citizenship, residence, etc.) */
+function isCountryQuestion(questionText: string): boolean {
+  const q = questionText.toLowerCase();
+  return (
+    (q.includes('citizenship') || q.includes('country of residence') || q.includes('nationality')) &&
+    (q.includes('select one') || q.includes('select all'))
+  );
+}
 
 interface QuestionRendererProps {
   question: QuestionItem;
@@ -87,7 +97,10 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
 
   // Single-select (radio list or dropdown for many options)
   if (type === 'Single-select') {
-    const options = extractInlineOptions(question.question);
+    // Use full COUNTRIES list for country-type questions
+    const useCountries = isCountryQuestion(question.question);
+    const options = useCountries ? COUNTRIES : extractInlineOptions(question.question);
+
     if (options.length === 0) {
       return <TextInput value={String(value || '')} onChange={(v) => onChange(v)} accent={accent} placeholder="Type your answer..." />;
     }
@@ -103,7 +116,7 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
             aria-label="Select one"
             style={{ '--accent': accent, borderColor: value ? accent : C.inputBorder } as React.CSSProperties}
           >
-            <option value="">— Select an option —</option>
+            <option value="">{useCountries ? '— Select a country —' : '— Select an option —'}</option>
             {options.map((opt) => (
               <option key={opt} value={opt}>{opt}</option>
             ))}
@@ -143,11 +156,25 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
 
   // Multi-select (checkbox list)
   if (type === 'Multi-select') {
-    const options = extractInlineOptions(question.question);
+    const useCountries = isCountryQuestion(question.question);
+    const options = useCountries ? COUNTRIES : extractInlineOptions(question.question);
     const selected = Array.isArray(value) ? value : [];
 
     if (options.length === 0) {
       return <TextInput value={selected.join(', ')} onChange={(v) => onChange(v.split(',').map(s => s.trim()).filter(Boolean))} accent={accent} placeholder="Enter options separated by commas..." />;
+    }
+
+    // For very long lists (countries), use searchable multi-select
+    if (options.length > 30) {
+      return (
+        <SearchableMultiSelect
+          options={options}
+          selected={selected}
+          onChange={(next) => onChange(next)}
+          accent={accent}
+          placeholder={useCountries ? 'Search countries...' : 'Search options...'}
+        />
+      );
     }
 
     const toggle = (opt: string) => {
@@ -370,6 +397,103 @@ function RankingInput({
           </span>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ─── SEARCHABLE MULTI-SELECT (for countries and long lists) ─────
+
+function SearchableMultiSelect({
+  options,
+  selected,
+  onChange,
+  accent,
+  placeholder = 'Search...',
+}: {
+  options: string[];
+  selected: string[];
+  onChange: (v: string[]) => void;
+  accent: string;
+  placeholder?: string;
+}) {
+  const [search, setSearch] = useState('');
+  const filtered = search
+    ? options.filter(o => o.toLowerCase().includes(search.toLowerCase()))
+    : options;
+
+  const toggle = (opt: string) => {
+    const next = selected.includes(opt)
+      ? selected.filter(s => s !== opt)
+      : [...selected, opt];
+    onChange(next);
+  };
+
+  return (
+    <div className="qr-searchable-multi">
+      {/* Selected tags */}
+      {selected.length > 0 && (
+        <div className="qr-sm-tags">
+          {selected.map(s => (
+            <span key={s} className="qr-sm-tag" style={{ borderColor: accent, color: accent }}>
+              {s}
+              <button
+                type="button"
+                className="qr-sm-tag-remove"
+                onClick={() => toggle(s)}
+                aria-label={`Remove ${s}`}
+                style={{ color: accent }}
+              >
+                &times;
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Search input */}
+      <input
+        type="text"
+        className="qr-sm-search"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder={placeholder}
+        aria-label="Search options"
+        style={{ borderColor: search ? accent : C.inputBorder }}
+      />
+
+      {/* Options list (scrollable) */}
+      <div className="qr-sm-list" role="group" aria-label="Select all that apply">
+        {filtered.length === 0 && (
+          <div className="qr-sm-empty" style={{ color: C.textMuted }}>No matches found</div>
+        )}
+        {filtered.map(opt => {
+          const checked = selected.includes(opt);
+          return (
+            <button
+              key={opt}
+              type="button"
+              role="checkbox"
+              aria-checked={checked}
+              className="qr-sm-option"
+              onClick={() => toggle(opt)}
+              style={{
+                background: checked ? `${accent}15` : 'transparent',
+                borderColor: checked ? accent : 'transparent',
+              }}
+            >
+              <span className="qr-check-box" style={{
+                borderColor: checked ? accent : C.textMuted,
+                background: checked ? accent : 'transparent',
+                width: '18px', height: '18px', borderRadius: '4px', border: '2px solid',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                {checked && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 6L5 8.5L9.5 3.5" stroke="#0a0e1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </span>
+              <span style={{ color: checked ? C.textPrimary : C.textSecondary }}>{opt}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

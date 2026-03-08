@@ -111,7 +111,7 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 20,
-          "question": "What is your annual household income (USD equivalent)? (Select one: under $25k, $25k-$50k, $50k-$75k, $75k-$100k, $100k-$150k, $150k-$200k, $200k-$300k, $300k-$500k, $500k+, prefer not to say)",
+          "question": "What is your annual household income in USD? (Select one: under $25k, $25k-$50k, $50k-$75k, $75k-$100k, $100k-$150k, $150k-$200k, $200k-$300k, $300k-$500k, $500k+, prefer not to say)",
           "type": "Single-select"
         },
         {
@@ -126,7 +126,7 @@ export const mainModuleQuestions: QuestionModule = {
         },
         {
           "number": 23,
-          "question": "What is your current monthly housing cost (USD equivalent)? (Select one: under $500, $500-$1000, $1000-$1500, $1500-$2000, $2000-$3000, $3000-$5000, $5000-$7500, $7500-$10000, $10000+)",
+          "question": "What is your current monthly housing cost in USD? (Select one: under $500, $500-$1000, $1000-$1500, $1500-$2000, $2000-$3000, $3000-$5000, $5000-$7500, $7500-$10000, $10000+)",
           "type": "Single-select"
         },
         {
