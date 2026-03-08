@@ -303,7 +303,6 @@ export function MainQuestionnaire() {
   // ═══════════════════════════════════════════════════════════════
   // ACTIVE PHASE — One-Question-At-A-Time
   // ═══════════════════════════════════════════════════════════════
-  const currentSectionProgress = qs.progress.sectionProgress[qs.nav.sectionIndex];
   const qNumInSection = qs.nav.questionIndex + 1;
   const qTotalInSection = qs.visibleQuestions.length;
   const cleanQuestion = getCleanQuestion(qs.currentQuestion.question);
