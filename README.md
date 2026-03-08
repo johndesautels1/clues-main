@@ -926,3 +926,4 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 See `CLAUDE.md` for WCAG 2.1 AA compliance rules, build rules, and development guidelines.
 See `CLUES_MAIN_BUILD_REFERENCE.md` for overall system architecture and build state.
 See `PARAGRAPHICAL_ARCHITECTURE.md` for the Paragraphical pipeline, Gemini prompt, metrics, Smart Scores, Cristiano judge, and report structure.
+See `docs/DATA_ARCHITECTURE.md` for the **complete data architecture flowchart** — all 200 questions listed individually, all 7 logic jump rules, Olivia's 19-answer context builder, GQ→module relevance engine, 3-layer persistence, tier/confidence calculation, and proof that every question is evaluated.
