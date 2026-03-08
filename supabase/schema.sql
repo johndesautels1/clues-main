@@ -703,7 +703,7 @@ create index if not exists idx_tavily_cache_expires on public.tavily_cache (expi
 create table if not exists public.reports (
   id            uuid primary key default gen_random_uuid(),
   session_id    uuid not null references public.sessions(id) on delete cascade,
-  evaluation_id uuid not null references public.evaluations(id) on delete cascade,
+  evaluation_id uuid references public.evaluations(id) on delete cascade,
 
   report_type   text not null,             -- results_data, llm_analysis, gamma
   version       integer not null default 1,
@@ -947,6 +947,46 @@ order by qp.information_gain desc;
 
 
 -- ═══════════════════════════════════════════════════════════════
+-- SAFE RE-RUN: Add missing columns if tables were partially created
+-- Run this section if you get "column does not exist" errors
+-- after a partial initial run of this schema.
+-- ═══════════════════════════════════════════════════════════════
+
+-- Reports: evaluation_id may be missing from partial run
+alter table if exists public.reports
+  add column if not exists evaluation_id uuid references public.evaluations(id) on delete cascade;
+
+-- LLM evaluations: ensure all columns exist
+alter table if exists public.llm_evaluations
+  add column if not exists evaluation_id uuid references public.evaluations(id) on delete cascade;
+alter table if exists public.llm_evaluations
+  add column if not exists session_id uuid references public.sessions(id) on delete cascade;
+
+-- Evaluation metrics: ensure FK columns exist
+alter table if exists public.evaluation_metrics
+  add column if not exists evaluation_id uuid references public.evaluations(id) on delete cascade;
+alter table if exists public.evaluation_metrics
+  add column if not exists llm_evaluation_id uuid references public.llm_evaluations(id) on delete cascade;
+
+-- Judge overrides: ensure FK columns exist
+alter table if exists public.judge_overrides
+  add column if not exists evaluation_id uuid references public.evaluations(id) on delete cascade;
+alter table if exists public.judge_overrides
+  add column if not exists judge_report_id uuid references public.judge_reports(id) on delete cascade;
+
+-- Judge reports: ensure FK columns exist
+alter table if exists public.judge_reports
+  add column if not exists evaluation_id uuid references public.evaluations(id) on delete cascade;
+alter table if exists public.judge_reports
+  add column if not exists session_id uuid references public.sessions(id) on delete cascade;
+
+-- Gemini extractions: ensure unique constraint
+alter table if exists public.gemini_extractions
+  drop constraint if exists uq_extraction_session;
+alter table if exists public.gemini_extractions
+  add constraint uq_extraction_session unique (session_id);
+
+-- ═══════════════════════════════════════════════════════════════
 -- MIGRATION HELPER: If upgrading from the 2-table schema
 -- ═══════════════════════════════════════════════════════════════
 -- The sessions table and cost_tracking table remain unchanged.
@@ -957,7 +997,6 @@ order by qp.information_gain desc;
 --
 -- To migrate existing session_data into normalized tables, run:
 --
---   -- Extract paragraphs from session_data
 --   INSERT INTO public.paragraphs (session_id, paragraph_number, heading, content)
 --   SELECT
 --     s.id,
