@@ -1,5 +1,15 @@
 # CLUES Intelligence — Main Platform
 
+> **⛔ MANDATORY RULE FOR ALL AI AGENTS ⛔**
+>
+> **You are FORBIDDEN from changing ANY code without a DIRECT, EXPLICIT command from the user.**
+> Do not modify source files, API endpoints, model IDs, configuration, types, or any other code
+> unless the user specifically tells you to make that exact change. Documentation-only edits
+> (README, .md files) are permitted when requested. If you are unsure whether you have permission
+> to change code — you do NOT. Ask first.
+
+---
+
 ## Overview
 
 CLUES Intelligence is a relocation and lifestyle intelligence platform that helps users find their **Best City, Best Town, and Best Neighborhood** anywhere in the world. The system uses AI-powered analysis across 23 life categories to deliver personalized, data-driven recommendations.
@@ -761,33 +771,84 @@ The 100-page blueprint above is the **Validated/Precision tier** (full data). Fo
 
 ---
 
-## LLM Model Registry (Canonical)
+## LLM & API Provider Registry (Canonical — All 16 Providers)
 
-This is the **single source of truth** for which AI model powers each function in the CLUES ecosystem. Every developer and every AI session must reference this table. Do not guess models — check here.
+This is the **single source of truth** for which AI model or API service powers each function in the CLUES ecosystem. Every developer and every AI session must reference this table. Do not guess models — check here. This table matches all 16 providers tracked in `src/lib/costTracking.ts`.
 
-| Role | Model | Provider | Why |
-|------|-------|----------|-----|
-| **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
-| **Olivia Tutor (Paragraphical)** | Gemini 3.1 Pro (Preview) | Google | Coverage-gap detection during writing. Only fires when keyword detection isn't confident enough. |
-| **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 30 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P28 Module Deep Dives, P29-P30 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
-| **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
-| **LLM Evaluator #2** | GPT-4o | OpenAI | Elimination/classification tasks (DNW hard walls) |
-| **LLM Evaluator #3** | Gemini 3.1 Pro Preview | Google | Reuses extraction context for scoring |
-| **LLM Evaluator #4** | Grok 4 | xAI | Real-time web context for MH scoring |
-| **LLM Evaluator #5** | Perplexity Sonar | Perplexity | Research-backed citations |
-| **Cristiano Judge** | Claude Opus 4.5 | Anthropic | Consensus builder, reviews stdDev > 15 disagreements |
-| **Emilia (Help Panel)** | N/A (static content) | — | Pre-written help topics, no LLM calls |
-| **Report Narrative** | Claude Sonnet 4.5 | Anthropic | Long-form report writing from scored data |
-| **HeyGen Avatar** | HeyGen API | HeyGen | Olivia video presentation |
-| **InVideo Movie** | InVideo API | InVideo | Cinematic "Before and After" movie |
-| **Voice Narration** | ElevenLabs / OpenAI TTS | — | Cristiano Judge narration for films |
+### LLM Models (6)
+
+| # | Role | Cost Tracking Key | Model | Provider | Why |
+|---|------|-------------------|-------|----------|-----|
+| 1 | **Claude Sonnet 4.5** | `claude-sonnet-4-5` | Claude Sonnet 4.5 | Anthropic | LLM Evaluator #1 — structured reasoning, category scoring, report narrative |
+| 2 | **GPT-4o** | `gpt-4o` | GPT-4o | OpenAI | LLM Evaluator #2 — elimination/classification tasks (DNW hard walls) |
+| 3 | **Gemini 3.1 Pro Preview** | `gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview | Google | Paragraphical extraction engine, Olivia tutor escalation, LLM Evaluator #3 |
+| 4 | **Grok 4** | `grok-4` | Grok 4 | xAI | LLM Evaluator #4 — real-time web context for MH scoring |
+| 5 | **Perplexity Sonar** | `perplexity-sonar` | Perplexity Sonar | Perplexity | LLM Evaluator #5 — research-backed citations |
+| 6 | **Claude Opus 4.5 (Judge)** | `claude-opus-4-5` | Claude Opus 4.5 | Anthropic | Cristiano Judge — consensus builder, reviews stdDev > 15 disagreements |
+
+### Chat & Assistant (1)
+
+| # | Role | Cost Tracking Key | Model | Provider | Why |
+|---|------|-------------------|-------|----------|-----|
+| 7 | **Olivia (Chat Assistant)** | `olivia` | GPT-4o (per README) / claude-sonnet-4 (per code) | ⚠️ DISCREPANCY — see note | Company-wide assistant across all CLUES products |
+
+> **⚠️ Olivia Model Discrepancy:** README historically said GPT-4o. Code (`api/olivia-chat.ts:104`) currently uses `claude-sonnet-4-20250514`. Cost tracking label says `claude-sonnet-4-5`. User states the intended model is Sonnet 4.6. **Awaiting direct command to resolve.**
+
+### Research & Search (1)
+
+| # | Role | Cost Tracking Key | Service | Provider | Why |
+|---|------|-------------------|---------|----------|-----|
+| 8 | **Tavily (Research + Search)** | `tavily` | Tavily Search + Research APIs | Tavily | Web research, source gathering, citation retrieval for all tiers |
+
+### Reports & Presentations (2)
+
+| # | Role | Cost Tracking Key | Service | Provider | Why |
+|---|------|-------------------|---------|----------|-----|
+| 9 | **Gamma (Reports)** | `gamma` | Gamma API | Gamma | 100-page visual report generation |
+| 10 | **Kling AI (Image Gen)** | `kling-ai` | Kling AI | Kling | Image generation for reports and presentations |
+
+### Text-to-Speech (2)
+
+| # | Role | Cost Tracking Key | Service | Provider | Why |
+|---|------|-------------------|---------|----------|-----|
+| 11 | **TTS (ElevenLabs)** | `tts-elevenlabs` | ElevenLabs API | ElevenLabs | Voice narration — Cristiano Judge narration for films |
+| 12 | **TTS (OpenAI)** | `tts-openai` | OpenAI TTS API | OpenAI | Alternate voice narration engine |
+
+### Avatar & Video (4)
+
+| # | Role | Cost Tracking Key | Service | Provider | Why |
+|---|------|-------------------|---------|----------|-----|
+| 13 | **Avatar (HeyGen)** | `avatar-heygen` | HeyGen Streaming API | HeyGen | Olivia video avatar presentation |
+| 14 | **Avatar (D-ID)** | `avatar-d-id` | D-ID API | D-ID | Alternate avatar generation |
+| 15 | **Avatar (Simli)** | `avatar-simli` | Simli API | Simli | Alternate avatar generation |
+| 16 | **Avatar (Replicate)** | `avatar-replicate` | Replicate API | Replicate | Alternate avatar generation |
+
+### Non-LLM Functions
+
+| Role | Model | Notes |
+|------|-------|-------|
+| **Emilia (Help Panel)** | N/A (static content) | Pre-written help topics, no LLM calls |
+| **InVideo Movie** | InVideo API | Cinematic "Before and After" movie (not in cost tracking) |
+
+### Tier Engine LLM Allocation
+
+The tier engine (`src/lib/tierEngine.ts`) progressively adds LLMs as confidence tier increases:
+
+| Tier | LLMs Active | Research |
+|------|-------------|----------|
+| Discovery | Gemini only | Tavily basic |
+| Exploratory | Gemini + Claude Sonnet | Tavily basic |
+| Filtered | + GPT-4o | Tavily standard |
+| Evaluated | + Grok 4 | Tavily deep |
+| Validated | + Perplexity Sonar + Cristiano Judge | Tavily comprehensive |
+| Precision | All 5 evaluators + Judge | Tavily maximum |
 
 ### Key Rules
-1. **Olivia = GPT-4o everywhere** — chat bubble, help modal, all products. This is a company architecture decision, not per-feature.
-2. **Gemini 3.1 Pro (Preview) for heavy extraction** — the Paragraphical pipeline's main brain.
-3. **Gemini 3.1 Pro (Preview) for tutor escalation** — Olivia's tutor interjections during writing when keyword detection is insufficient.
-4. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
-5. **Cost tracking must match these models.** The `costTracking.ts` rate table must align with this registry.
+1. **Gemini 3.1 Pro Preview for heavy extraction** — the Paragraphical pipeline's main brain.
+2. **Gemini 3.1 Pro Preview for tutor escalation** — Olivia's tutor interjections during writing when keyword detection is insufficient.
+3. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
+4. **Cost tracking must match these models.** The `costTracking.ts` rate table must align with this registry.
+5. **All 16 providers must be tracked.** Every API call must log to cost tracking via `logCost()`.
 
 ---
 
@@ -882,7 +943,7 @@ Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 o
 - Interjections appear in the existing `OliviaBubble.tsx` chat bubble
 - Bubble pulses gently when Olivia has something to say (not intrusive)
 - User can dismiss ("Got it") or expand ("Tell me more")
-- "Tell me more" escalates to GPT-4o (Olivia's full brain) for a detailed explanation
+- "Tell me more" escalates to Olivia's full LLM brain for a detailed explanation (see LLM Registry for current model)
 - Interjection count badge on bubble: "Olivia has 1 suggestion"
 
 ---
