@@ -136,7 +136,7 @@ Hundreds of hours of testing across the LifeScore and CLUES platforms taught us 
 | Model | Strengths | Weaknesses |
 |-------|-----------|------------|
 | **Gemini 3.1 Pro Preview** | Best at plain-language extraction and inferential reasoning from written text. Excellent at understanding what a user *means* from what they *wrote*. | Not strong at pure mathematics. |
-| **Grok 4** | Very strong at mathematical calculations and quantitative analysis. | Far more likely to hallucinate than other models. |
+| **Grok 4.1 Fast Reasoning** | Very strong at mathematical calculations and quantitative analysis. 2M context window, ~99 tokens/sec. | Far more likely to hallucinate than other models. |
 | **GPT-4o** | Enormous factual knowledge base. Strong on facts and figures. | Can hallucinate. Poor at nuanced verbal observations — misses subtlety in human language. |
 | **Perplexity Sonar** | Best web search of all models (built-in, native). Excels at finding current, relevant data. | Context window limitations and internal use of other models can introduce bias. |
 | **Claude Sonnet 4.6** | Fast, efficient, affordable. Reliable for structured evaluation. | Can miss subtle temporal differences — may not properly weigh a 2023 article against a contradicting late-2025 article. |

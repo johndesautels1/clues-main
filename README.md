@@ -782,7 +782,7 @@ This is the **single source of truth** for which AI model or API service powers 
 | 1 | **Claude Sonnet 4.6** | `claude-sonnet-4-6` | Claude Sonnet 4.6 | Anthropic | LLM Evaluator #1 — structured reasoning, category scoring, report narrative |
 | 2 | **GPT-4o** | `gpt-4o` | GPT-4o | OpenAI | LLM Evaluator #2 — elimination/classification tasks (DNW hard walls) |
 | 3 | **Gemini 3.1 Pro Preview** | `gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview | Google | Paragraphical extraction engine, Olivia tutor escalation, LLM Evaluator #3 |
-| 4 | **Grok 4** | `grok-4` | Grok 4 | xAI | LLM Evaluator #4 — real-time web context for MH scoring |
+| 4 | **Grok 4.1 Fast Reasoning** | `grok-4-1-fast-reasoning` | Grok 4.1 Fast Reasoning | xAI | LLM Evaluator #4 — real-time web context for MH scoring |
 | 5 | **Perplexity Sonar** | `perplexity-sonar` | Perplexity Sonar | Perplexity | LLM Evaluator #5 — research-backed citations |
 | 6 | **Claude Opus 4.5 (Judge)** | `claude-opus-4-5` | Claude Opus 4.5 | Anthropic | Cristiano Judge — consensus builder, reviews stdDev > 15 disagreements |
 
@@ -837,7 +837,7 @@ The tier engine (`src/lib/tierEngine.ts`) progressively adds LLMs as confidence 
 | Discovery | Gemini only | Tavily basic |
 | Exploratory | Gemini + Claude Sonnet 4.6 | Tavily basic |
 | Filtered | + GPT-4o | Tavily standard |
-| Evaluated | + Grok 4 | Tavily deep |
+| Evaluated | + Grok 4.1 Fast Reasoning | Tavily deep |
 | Validated | + Perplexity Sonar + Cristiano Judge | Tavily comprehensive |
 | Precision | All 5 evaluators + Judge | Tavily maximum |
 

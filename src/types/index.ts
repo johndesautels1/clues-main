@@ -221,7 +221,7 @@ export type CostProvider =
   | 'claude-sonnet-4-6'
   | 'gpt-4o'
   | 'gemini-3.1-pro-preview'
-  | 'grok-4'
+  | 'grok-4-1-fast-reasoning'
   | 'perplexity-sonar'
   | 'claude-opus-4-5'
   | 'tavily'

@@ -169,7 +169,7 @@ Opus/Cristiano JUDGES Gemini's work:
 ### At Main Module Tier (when user completes questionnaires):
 ```
 All 5 LLMs complete their evaluations:
-    Gemini (web search) + Sonnet 4.6 + GPT-4o + Grok + Perplexity
+    Gemini (web search) + Sonnet 4.6 + GPT-4o + Grok 4.1 Fast Reasoning + Perplexity
     |
     v
 Opus/Cristiano JUDGES ALL of them:
@@ -195,7 +195,7 @@ Every evaluating LLM uses web search in API calls PLUS Tavily:
 - **Gemini**: Google Search grounding (native) + Tavily
 - **Claude Sonnet 4.6**: Web search tool + Tavily
 - **GPT-4o**: Bing search integration + Tavily
-- **Grok**: X/Twitter real-time data + Tavily
+- **Grok 4.1 Fast Reasoning**: X/Twitter real-time data + Tavily
 - **Perplexity Sonar**: Native web search (built-in) + Tavily
 
 ### Tavily's Role
@@ -332,7 +332,7 @@ The 23 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragrap
 - When completed, they ADD precision to the Paragraphical's metrics
 - They can ADD new metrics the paragraphs didn't cover
 - They can REFINE metric weights and priorities
-- They trigger additional LLMs (Sonnet 4.6, GPT-4o, Grok, Perplexity)
+- They trigger additional LLMs (Sonnet 4.6, GPT-4o, Grok 4.1 Fast Reasoning, Perplexity)
 - They do NOT replace the Paragraphical — they enhance it
 
 The Paragraphical must stand alone as a complete evaluation. Modules make it better, not make it work.
@@ -606,7 +606,7 @@ Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneu
 | Claude Sonnet 4.6 | Native (Anthropic API tool) | Supplemental |
 | GPT-4o | Tavily injected into prompt context | Primary |
 | Gemini | Google Search grounding (native) | Supplemental |
-| Grok | Tavily injected into prompt context | Primary |
+| Grok 4.1 Fast Reasoning | Tavily injected into prompt context | Primary |
 | Perplexity Sonar | Native (built-in search) | Supplemental |
 
 **Batch Firing Pattern**:
@@ -816,7 +816,7 @@ LifeScore's Gamma report template:
 | Claude Sonnet 4.6 (90 metrics) | ~$0.90 |
 | GPT-4o (90 metrics + Tavily) | ~$2.70 |
 | Gemini (90 metrics) | ~$0.45 |
-| Grok (90 metrics + Tavily) | ~$0.90 |
+| Grok 4.1 Fast Reasoning (90 metrics + Tavily) | ~$0.06 |
 | Perplexity (90 metrics) | ~$0.90 |
 | Tavily searches (540 calls) | ~$2.70 |
 | Opus Judge | ~$13.50 |
