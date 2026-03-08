@@ -218,7 +218,7 @@ export interface EvaluationResult {
 
 // ─── Cost Tracking ──────────────────────────────────────────
 export type CostProvider =
-  | 'claude-sonnet-4-5'
+  | 'claude-sonnet-4-6'
   | 'gpt-4o'
   | 'gemini-3.1-pro-preview'
   | 'grok-4'

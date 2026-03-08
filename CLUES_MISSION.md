@@ -139,7 +139,7 @@ Hundreds of hours of testing across the LifeScore and CLUES platforms taught us 
 | **Grok 4** | Very strong at mathematical calculations and quantitative analysis. | Far more likely to hallucinate than other models. |
 | **GPT-4o** | Enormous factual knowledge base. Strong on facts and figures. | Can hallucinate. Poor at nuanced verbal observations — misses subtlety in human language. |
 | **Perplexity Sonar** | Best web search of all models (built-in, native). Excels at finding current, relevant data. | Context window limitations and internal use of other models can introduce bias. |
-| **Claude Sonnet 4.5** | Fast, efficient, affordable. Reliable for structured evaluation. | Can miss subtle temporal differences — may not properly weigh a 2023 article against a contradicting late-2025 article. |
+| **Claude Sonnet 4.6** | Fast, efficient, affordable. Reliable for structured evaluation. | Can miss subtle temporal differences — may not properly weigh a 2023 article against a contradicting late-2025 article. |
 | **Claude Opus 4.6** | The most powerful reasoning and mathematical brain. Unmatched ability to weigh evidence, detect inconsistencies, and render judgment. | No built-in web search (by design — he is the judge, not the investigator). |
 
 ### The Hallucination Problem

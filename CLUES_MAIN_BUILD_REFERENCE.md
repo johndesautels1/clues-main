@@ -23,7 +23,7 @@
 | Frontend | React 19 + TypeScript + Vite 7 | Dark glassmorphic UI, Montserrat font |
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
-| LLM Evaluators | Claude Sonnet 4.5, GPT-4o, Gemini 3.1 Pro Preview, Grok 4, Perplexity Sonar | 5 parallel evaluators |
+| LLM Evaluators | Claude Sonnet 4.6, GPT-4o, Gemini 3.1 Pro Preview, Grok 4, Perplexity Sonar | 5 parallel evaluators |
 | Judge | Claude Opus 4.5 | Consensus builder, reviews stdDev > 15 disagreements |
 | Reasoning Engine | Gemini 3.1 Pro Preview | Paragraphical extraction, metric scoring, location recommendations (with thinking_level: high, Google Search grounding). Opus judges afterward. |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
@@ -880,7 +880,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 
 ### Provider Rate Table (per 1M tokens, March 2026)
 ```
-claude-sonnet-4-5     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
+claude-sonnet-4-6     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
 gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
 gemini-3.1-pro-preview Input: $1.25   Output: $10.00   (Reasoning Engine + LLM Evaluator #3)
 grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)

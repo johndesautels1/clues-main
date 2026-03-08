@@ -151,7 +151,7 @@
 - [ ] Supabase: `tavily_cache` table (query_hash, response, expires_at)
 
 #### Conv 11-12: 5-LLM Parallel Evaluator
-- [ ] `api/evaluate-sonnet.ts` — Claude Sonnet 4.5 evaluation endpoint
+- [ ] `api/evaluate-sonnet.ts` — Claude Sonnet 4.6 evaluation endpoint
 - [ ] `api/evaluate-gpt4o.ts` — GPT-4o evaluation endpoint
 - [ ] `api/evaluate-gemini.ts` — Gemini evaluation (reuses existing pattern)
 - [ ] `api/evaluate-grok.ts` — Grok 4 evaluation endpoint

@@ -22,7 +22,7 @@ export const PROVIDER_RATES: Record<
   CostProvider,
   { input: number; output: number; label: string; icon: string }
 > = {
-  'claude-sonnet-4-5':   { input: 3.00,  output: 15.00,  label: 'Claude Sonnet 4.5',       icon: '\u{1F3B5}' },
+  'claude-sonnet-4-6':   { input: 3.00,  output: 15.00,  label: 'Claude Sonnet 4.6',       icon: '\u{1F3B5}' },
   'gpt-4o':              { input: 2.50,  output: 10.00,  label: 'GPT-4o',                  icon: '\u{1F916}' },
   'gemini-3.1-pro-preview': { input: 1.25, output: 10.00, label: 'Gemini 3.1 Pro Preview',  icon: '\u{1F48E}' },
   'grok-4':              { input: 3.00,  output: 15.00,  label: 'Grok 4',                   icon: '\u{1F680}' },
@@ -30,7 +30,7 @@ export const PROVIDER_RATES: Record<
   'claude-opus-4-5':     { input: 15.00, output: 75.00,  label: 'Claude Opus 4.5 (Judge)',   icon: '\u{1F9E0}' },
   'tavily':              { input: 0,     output: 0,      label: 'Tavily (Research + Search)', icon: '\u{1F50E}' },
   'gamma':               { input: 0,     output: 0,      label: 'Gamma (Reports)',           icon: '\u{1F4CA}' },
-  'olivia':              { input: 2.50,  output: 10.00,  label: 'Olivia (GPT-4o Chat)',      icon: '\u{1F4AC}' },
+  'olivia':              { input: 3.00,  output: 15.00,  label: 'Olivia (Claude Sonnet 4.6)', icon: '\u{1F4AC}' },
   'tts-elevenlabs':      { input: 0,     output: 0,      label: 'TTS (ElevenLabs)',          icon: '\u{1F50A}' },
   'tts-openai':          { input: 0,     output: 0,      label: 'TTS (OpenAI)',              icon: '\u{1F50A}' },
   'avatar-heygen':       { input: 0,     output: 0,      label: 'Avatar (HeyGen)',           icon: '\u{1F3A5}' },
@@ -43,7 +43,7 @@ export const PROVIDER_RATES: Record<
 // Grouped labels for the dashboard (aggregate sub-providers)
 export const PROVIDER_GROUPS: { key: string; label: string; icon: string; providers: CostProvider[] }[] = [
   { key: 'tavily',     label: 'Tavily (Research + Search)',  icon: '\u{1F50E}', providers: ['tavily'] },
-  { key: 'sonnet',     label: 'Claude Sonnet 4.5',          icon: '\u{1F3B5}', providers: ['claude-sonnet-4-5'] },
+  { key: 'sonnet',     label: 'Claude Sonnet 4.6',          icon: '\u{1F3B5}', providers: ['claude-sonnet-4-6'] },
   { key: 'gpt4o',      label: 'GPT-4o',                     icon: '\u{1F916}', providers: ['gpt-4o'] },
   { key: 'gemini',     label: 'Gemini 3.1 Pro Preview',     icon: '\u{1F48E}', providers: ['gemini-3.1-pro-preview'] },
   { key: 'grok',       label: 'Grok 4',                     icon: '\u{1F680}', providers: ['grok-4'] },

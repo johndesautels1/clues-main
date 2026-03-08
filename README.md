@@ -779,7 +779,7 @@ This is the **single source of truth** for which AI model or API service powers 
 
 | # | Role | Cost Tracking Key | Model | Provider | Why |
 |---|------|-------------------|-------|----------|-----|
-| 1 | **Claude Sonnet 4.5** | `claude-sonnet-4-5` | Claude Sonnet 4.5 | Anthropic | LLM Evaluator #1 — structured reasoning, category scoring, report narrative |
+| 1 | **Claude Sonnet 4.6** | `claude-sonnet-4-6` | Claude Sonnet 4.6 | Anthropic | LLM Evaluator #1 — structured reasoning, category scoring, report narrative |
 | 2 | **GPT-4o** | `gpt-4o` | GPT-4o | OpenAI | LLM Evaluator #2 — elimination/classification tasks (DNW hard walls) |
 | 3 | **Gemini 3.1 Pro Preview** | `gemini-3.1-pro-preview` | Gemini 3.1 Pro Preview | Google | Paragraphical extraction engine, Olivia tutor escalation, LLM Evaluator #3 |
 | 4 | **Grok 4** | `grok-4` | Grok 4 | xAI | LLM Evaluator #4 — real-time web context for MH scoring |
@@ -790,9 +790,7 @@ This is the **single source of truth** for which AI model or API service powers 
 
 | # | Role | Cost Tracking Key | Model | Provider | Why |
 |---|------|-------------------|-------|----------|-----|
-| 7 | **Olivia (Chat Assistant)** | `olivia` | GPT-4o (per README) / claude-sonnet-4 (per code) | ⚠️ DISCREPANCY — see note | Company-wide assistant across all CLUES products |
-
-> **⚠️ Olivia Model Discrepancy:** README historically said GPT-4o. Code (`api/olivia-chat.ts:104`) currently uses `claude-sonnet-4-20250514`. Cost tracking label says `claude-sonnet-4-5`. User states the intended model is Sonnet 4.6. **Awaiting direct command to resolve.**
+| 7 | **Olivia (Chat Assistant)** | `olivia` | Claude Sonnet 4.6 | Anthropic | Company-wide assistant across all CLUES products |
 
 ### Research & Search (1)
 
