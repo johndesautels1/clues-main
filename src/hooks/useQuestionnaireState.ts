@@ -45,7 +45,7 @@ export interface UseQuestionnaireReturn {
   currentSection: typeof QUESTIONNAIRE_SECTIONS[number];
   currentQuestion: typeof QUESTIONNAIRE_SECTIONS[number]['questions'][number];
   visibleQuestions: typeof QUESTIONNAIRE_SECTIONS[number]['questions'];
-  skippedQuestions: Set<number>;
+  skippedQuestions: Set<string>;
 
   // Navigation
   goNext: () => boolean;  // returns false if at end
@@ -75,16 +75,24 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
   const hasLoadedRef = useRef(false);
 
   // ─── Derived: skipped questions based on current answers ───────
+  // Returns Set<string> of section-prefixed keys like "q8", "tq16", "gq5"
   const skippedQuestions = getSkippedQuestions(answers);
+
+  // Build the correct section-prefixed key for a question number in a given section
+  const buildKey = useCallback((sectionId: SectionId, questionNumber: number): string => {
+    if (sectionId === 'tradeoffs') return `tq${questionNumber}`;
+    if (sectionId === 'general') return `gq${questionNumber}`;
+    return `q${questionNumber}`;
+  }, []);
 
   // Visible questions for a given section (filtered by logic jumps)
   const getVisibleQuestions = useCallback(
     (sectionIndex: number) => {
       const section = QUESTIONNAIRE_SECTIONS[sectionIndex];
       if (!section) return [];
-      return section.questions.filter(q => !skippedQuestions.has(q.number));
+      return section.questions.filter(q => !skippedQuestions.has(buildKey(section.id, q.number)));
     },
-    [skippedQuestions]
+    [skippedQuestions, buildKey]
   );
 
   const currentSection = QUESTIONNAIRE_SECTIONS[nav.sectionIndex];
@@ -152,11 +160,12 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
     if (hasData) {
       setAnswers(loaded);
       // Find first unanswered question to resume from
+      const skipped = getSkippedQuestions(loaded);
       for (let si = 0; si < QUESTIONNAIRE_SECTIONS.length; si++) {
         const section = QUESTIONNAIRE_SECTIONS[si];
-        const skipped = getSkippedQuestions(loaded);
-        const visible = section.questions.filter(q => !skipped.has(q.number));
-        const firstUnanswered = visible.findIndex(q => loaded[`q${q.number}`] === undefined);
+        const prefix = section.id === 'tradeoffs' ? 'tq' : section.id === 'general' ? 'gq' : 'q';
+        const visible = section.questions.filter(q => !skipped.has(`${prefix}${q.number}`));
+        const firstUnanswered = visible.findIndex(q => loaded[`${prefix}${q.number}`] === undefined);
         if (firstUnanswered >= 0) {
           setNav({ sectionIndex: si, questionIndex: firstUnanswered });
           break;

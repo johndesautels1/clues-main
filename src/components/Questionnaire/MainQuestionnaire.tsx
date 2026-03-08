@@ -334,7 +334,8 @@ export function MainQuestionnaire() {
 
             {/* Section-by-section review tables */}
             {QUESTIONNAIRE_SECTIONS.map((section, si) => {
-              const visible = section.questions.filter(q => !skipped.has(q.number));
+              const prefix = section.id === 'tradeoffs' ? 'tq' : section.id === 'general' ? 'gq' : 'q';
+              const visible = section.questions.filter(q => !skipped.has(`${prefix}${q.number}`));
               const sp = qs.progress.sectionProgress[si];
               if (visible.length === 0) return null;
 

@@ -136,35 +136,56 @@ export const C = {
 // ─── Logic Jump Rules ────────────────────────────────────────────
 // Returns questions to SKIP based on a given answer.
 // E.g., if "Do you have children?" = No, skip children-related follow-ups.
+//
+// skipKeys use section-prefixed keys to avoid cross-section collisions:
+//   "q16"  = demographics Q16 (employment status)
+//   "tq16" = tradeoff Q16 (education for children)
+//   "gq5"  = general Q5 (family obligations detail)
 
 export interface LogicJump {
-  triggerQuestion: number; // question number
+  triggerKey: string;      // answer key, e.g. "q8" (demographics Q8: Do you have children?)
   triggerValue: string;    // answer value that triggers the skip
-  skipQuestions: number[]; // question numbers to skip
+  skipKeys: string[];      // section-prefixed keys to skip
 }
 
 export const LOGIC_JUMPS: LogicJump[] = [
-  // Demographics logic jumps
-  { triggerQuestion: 5, triggerValue: 'single', skipQuestions: [6, 7] }, // No partner → skip partner Qs
-  { triggerQuestion: 8, triggerValue: 'false', skipQuestions: [9, 10, 11, 64, 91, 93] }, // No children → skip child Qs + child dealbreakers/must-haves
-  { triggerQuestion: 14, triggerValue: 'false', skipQuestions: [15] }, // Not military → skip veteran services Q
-  { triggerQuestion: 27, triggerValue: 'false', skipQuestions: [28] }, // No chronic conditions → skip specifics
-  { triggerQuestion: 30, triggerValue: 'false', skipQuestions: [31, 32, 96] }, // No pets → skip pet Qs + pet must-have
+  // No partner → skip partner questions
+  { triggerKey: 'q5', triggerValue: 'single', skipKeys: ['q6', 'q7'] },
+
+  // No children → skip ALL child-related questions across ALL sections
+  { triggerKey: 'q8', triggerValue: 'false', skipKeys: [
+    'q9', 'q10', 'q11',          // Demographics: children ages, relocating, special needs
+    'q64',                         // DNW: avoid limited education for children
+    'q91',                         // MH: good education system (for children)
+    'q93',                         // MH: family-friendly environment with child resources
+    'tq16',                        // Tradeoff: harsh winters for best education for children
+  ]},
+
+  // Not military → skip veteran services
+  { triggerKey: 'q14', triggerValue: 'false', skipKeys: ['q15'] },
+
+  // No chronic conditions → skip medical specifics
+  { triggerKey: 'q27', triggerValue: 'false', skipKeys: ['q28'] },
+
+  // No pets → skip pet questions across sections
+  { triggerKey: 'q30', triggerValue: 'false', skipKeys: ['q31', 'q32', 'q96'] },
+
+  // No family obligations → skip obligation details
+  { triggerKey: 'gq4', triggerValue: 'false', skipKeys: ['gq5'] },
 ];
 
-/** Given current answers, return set of question numbers to skip */
+/** Given current answers, return set of section-prefixed keys to skip */
 export function getSkippedQuestions(
   answers: Record<string, string | number | boolean | string[]>
-): Set<number> {
-  const skipped = new Set<number>();
+): Set<string> {
+  const skipped = new Set<string>();
   for (const jump of LOGIC_JUMPS) {
-    const key = `q${jump.triggerQuestion}`;
-    const val = answers[key];
+    const val = answers[jump.triggerKey];
     if (val === undefined) continue;
 
     const strVal = String(val).toLowerCase();
     if (strVal === jump.triggerValue.toLowerCase()) {
-      jump.skipQuestions.forEach(q => skipped.add(q));
+      jump.skipKeys.forEach(k => skipped.add(k));
     }
   }
   return skipped;
