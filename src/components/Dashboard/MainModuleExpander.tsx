@@ -114,7 +114,7 @@ export function MainModuleExpander({
       >
         <div className="main-module__grid">
           {SUB_SECTIONS.map((section) => {
-            const sectionStatus = subSectionStatus[section.id];
+            const sectionStatus = subSectionStatus[section.id] ?? 'locked';
             const isLocked = sectionStatus === 'locked';
             const sectionClass = `sub-section--${sectionStatus.replace('_', '-')}`;
 

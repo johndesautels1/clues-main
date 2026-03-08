@@ -185,7 +185,22 @@ function sessionReducer(state: UserSession, action: Action): UserSession {
       };
 
     case 'LOAD_SESSION':
-      return action.payload;
+      return {
+        ...INITIAL_STATE,
+        ...action.payload,
+        mainModule: {
+          ...INITIAL_STATE.mainModule,
+          ...action.payload.mainModule,
+          subSectionStatus: {
+            ...INITIAL_STATE.mainModule.subSectionStatus,
+            ...action.payload.mainModule?.subSectionStatus,
+          },
+        },
+        paragraphical: {
+          ...INITIAL_STATE.paragraphical,
+          ...action.payload.paragraphical,
+        },
+      };
 
     case 'RESET':
       return { ...INITIAL_STATE, id: crypto.randomUUID(), createdAt: now, updatedAt: now };

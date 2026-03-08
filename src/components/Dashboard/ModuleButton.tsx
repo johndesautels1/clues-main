@@ -16,8 +16,9 @@ interface Props {
 }
 
 export function ModuleButton({ module }: Props) {
-  const statusClass = `module-btn--${module.status.replace('_', '-')}`;
-  const isInteractive = module.status !== 'locked';
+  const status = module.status ?? 'not_started';
+  const statusClass = `module-btn--${status.replace('_', '-')}`;
+  const isInteractive = status !== 'locked';
 
   const handleClick = () => {
     if (!isInteractive) return;
@@ -31,7 +32,7 @@ export function ModuleButton({ module }: Props) {
       className={`module-btn glass ${statusClass}`}
       onClick={handleClick}
       disabled={!isInteractive}
-      aria-label={`${module.name} - ${module.status.replace('_', ' ')}`}
+      aria-label={`${module.name} - ${status.replace('_', ' ')}`}
     >
       {/* Status indicator dot */}
       <div className="module-btn__indicator" />
@@ -43,7 +44,7 @@ export function ModuleButton({ module }: Props) {
       <h3 className="module-btn__name">{module.name}</h3>
 
       {/* Score meter (only for completed) */}
-      {module.status === 'completed' && module.score !== undefined && (
+      {status === 'completed' && module.score !== undefined && (
         <div className="module-btn__meter">
           <div
             className="module-btn__meter-fill"
@@ -58,13 +59,13 @@ export function ModuleButton({ module }: Props) {
       </span>
 
       {/* Status badges */}
-      {module.status === 'completed' && (
+      {status === 'completed' && (
         <span className="module-btn__badge module-btn__badge--completed">{'\u2705'}</span>
       )}
-      {module.status === 'recommended' && (
+      {status === 'recommended' && (
         <span className="module-btn__badge module-btn__badge--recommended">{'\u2B50'}</span>
       )}
-      {module.status === 'locked' && (
+      {status === 'locked' && (
         <span className="module-btn__badge module-btn__badge--locked">{'\u{1F512}'}</span>
       )}
     </button>
