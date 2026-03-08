@@ -47,15 +47,43 @@ CLUES Intelligence delivers the **world's most advanced, most detailed, most acc
 
 Every claim is sourced. Every score is provable. Every recommendation is defensible. The user can click through to the actual articles, data sets, and indices that back every single number in their report.
 
-The report covers:
+The number of personalized metrics varies per user — it might be 28 for a minimalist with simple needs, or 310 for someone with a complex life situation. The user's unique persona and the LLMs' needs for calculation accuracy dictate the final count. There is no fixed range; the system generates exactly as many metrics as the user's data warrants.
+
+### The Three Reports
+
+CLUES produces **three distinct reports**, each serving a different purpose:
+
+#### Report 1: Results Data Report (The Raw Math)
+The raw, per-metric, per-LLM data grid showing:
+- Every metric's score from each of the 5 evaluating LLMs
+- Opus Judge's adjustments to each metric
+- Color-coded scoring (red/yellow/green)
+- Standard deviation from the mean for each metric
+- Mean, median, mode calculations
+- Divergence highlights where LLMs disagreed significantly
+- Full statistical transparency — this is the "show your work" report
+
+#### Report 2: LLM Analysis Reports (The Narrative Intelligence)
+Each LLM's own synthesized analysis with:
+- Their interpretation of the data
+- Their own visuals, charts, and comparative displays
+- Category-by-category breakdowns with narrative explanations
+- Trend analysis and forward-looking assessments
+- The "intelligence layer" — what the numbers mean in human terms
+
+#### Report 3: CLUES GAMMA Report (The WOW Deliverable)
+Everything from Reports 1 and 2 is pushed into **Gamma**, which polishes it all into the final, beautifully designed, shareable report. This is the report the user shares with their spouse, their family, their financial advisor. It includes:
 - The best country (1 primary, up to 3 alternatives)
-- The top 3 cities in the winning country, scored against 100-250 personalized metrics
+- The top 3 cities in the winning country, scored against all personalized metrics
 - The top 3 towns in the winning city
 - The top 3 neighborhoods in the winning town
 - Full Smart Score breakdowns across 23 life dimensions
 - Source citations with direct URLs for every data point
-- Cristiano's judicial verdict (Opus Judge avatar) with cinematic video presentation
-- Olivia (AI assistant) available for follow-up Q&A on every aspect of the report
+- Cristiano's judicial verdict with cinematic HeyGen avatar video presentation
+- 100+ pages of polished, visual, professional content
+- Designed to be printed, shared, and referenced during the relocation process
+
+Olivia (AI assistant) is available for follow-up Q&A on every aspect of all three reports.
 
 ---
 
