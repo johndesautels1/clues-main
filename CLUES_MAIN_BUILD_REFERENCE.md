@@ -822,7 +822,7 @@ The system scales AI spend proportionally to data completeness. A busy executive
 | Tier | Which LLMs | Why |
 |------|-----------|-----|
 | Discovery (1) | Gemini only | It already did the extraction — reuse that context for a quick-scan recommendation |
-| Exploratory (2) | Gemini + Claude Sonnet | Sonnet adds structured reasoning on top of Gemini's narrative context |
+| Exploratory (2) | Gemini + Claude Sonnet 4.6 | Sonnet 4.6 adds structured reasoning on top of Gemini's narrative context |
 | Filtered (3) | + GPT-4o | GPT-4o excels at elimination/classification tasks (DNW hard walls) |
 | Evaluated (4) | + Grok | Grok adds real-time web context for MH scoring (transit, internet, etc.) |
 | Validated (5+Judge) | + Perplexity Sonar + Opus Judge | Full panel. Perplexity adds research-backed citations. Opus arbitrates. |

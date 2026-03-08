@@ -835,7 +835,7 @@ The tier engine (`src/lib/tierEngine.ts`) progressively adds LLMs as confidence 
 | Tier | LLMs Active | Research |
 |------|-------------|----------|
 | Discovery | Gemini only | Tavily basic |
-| Exploratory | Gemini + Claude Sonnet | Tavily basic |
+| Exploratory | Gemini + Claude Sonnet 4.6 | Tavily basic |
 | Filtered | + GPT-4o | Tavily standard |
 | Evaluated | + Grok 4 | Tavily deep |
 | Validated | + Perplexity Sonar + Cristiano Judge | Tavily comprehensive |

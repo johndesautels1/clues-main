@@ -18,7 +18,7 @@
 
 ### What Makes This Architecture Genuinely Impressive
 
-1. **The 5-LLM consensus + judge pattern is architecturally sound.** No single model can be trusted for life decisions. Using each model where it's strongest (Gemini for reasoning, Grok for math, GPT-4o for facts, Perplexity for search, Sonnet for structure) and having Opus arbitrate disagreements is a legitimate approach to reducing error — not just marketing.
+1. **The 5-LLM consensus + judge pattern is architecturally sound.** No single model can be trusted for life decisions. Using each model where it's strongest (Gemini for reasoning, Grok for math, GPT-4o for facts, Perplexity for search, Sonnet 4.6 for structure) and having Opus arbitrate disagreements is a legitimate approach to reducing error — not just marketing.
 
 2. **Forcing web search on every evaluating LLM is the right call.** Most AI products let models answer from training data and hope for the best. CLUES treats unsourced output as unacceptable. That's a hard engineering constraint but the right one.
 
@@ -78,7 +78,7 @@
 | **Adaptive Skip Logic** | Bayesian-like system to skip/pre-fill based on prior answers | VERY HIGH |
 | **Coverage Tracker** | Real-time dimensional coverage + MOE meter | HIGH |
 | **Tavily Research Pipeline** | Metric → Tavily search → sourced data with URLs | HIGH |
-| **5-LLM Parallel Evaluator** | Sonnet + GPT-4o + Gemini + Grok + Perplexity batch firing | VERY HIGH |
+| **5-LLM Parallel Evaluator** | Sonnet 4.6 + GPT-4o + Gemini + Grok + Perplexity batch firing | VERY HIGH |
 | **Opus Judge System** | Cristiano judge reviewing all LLM outputs, rendering verdicts | HIGH |
 | **Smart Score Engine** | Metric normalization, category rollup, city comparison scoring | HIGH |
 | **Report Data Pipeline** | Structured report data from evaluation results | HIGH |
@@ -199,7 +199,7 @@
 - [ ] `src/components/Results/JudgeVerdict.tsx` — MI6 Briefing Room styled verdict display
 - [ ] `src/components/Results/CourtOrder.tsx` — per-category judicial analysis with real-world examples
 - [ ] `src/components/Results/SimliQuickVerdict.tsx` — real-time avatar narration
-- [ ] `api/cristiano-storyboard.ts` — Sonnet generates 7-scene storyboard
+- [ ] `api/cristiano-storyboard.ts` — Sonnet 4.6 generates 7-scene storyboard
 - [ ] `api/heygen-render.ts` — HeyGen Video Agent V2 cinematic render
 - [ ] Video polling + Supabase Storage save
 - [ ] Cristiano avatar integration

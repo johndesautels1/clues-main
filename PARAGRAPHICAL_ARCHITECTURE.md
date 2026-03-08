@@ -169,7 +169,7 @@ Opus/Cristiano JUDGES Gemini's work:
 ### At Main Module Tier (when user completes questionnaires):
 ```
 All 5 LLMs complete their evaluations:
-    Gemini (web search) + Sonnet + GPT-4o + Grok + Perplexity
+    Gemini (web search) + Sonnet 4.6 + GPT-4o + Grok + Perplexity
     |
     v
 Opus/Cristiano JUDGES ALL of them:
@@ -193,7 +193,7 @@ Opus/Cristiano JUDGES ALL of them:
 ### All LLMs Use Web Search (Except Opus)
 Every evaluating LLM uses web search in API calls PLUS Tavily:
 - **Gemini**: Google Search grounding (native) + Tavily
-- **Claude Sonnet**: Web search tool + Tavily
+- **Claude Sonnet 4.6**: Web search tool + Tavily
 - **GPT-4o**: Bing search integration + Tavily
 - **Grok**: X/Twitter real-time data + Tavily
 - **Perplexity Sonar**: Native web search (built-in) + Tavily
@@ -332,7 +332,7 @@ The 23 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragrap
 - When completed, they ADD precision to the Paragraphical's metrics
 - They can ADD new metrics the paragraphs didn't cover
 - They can REFINE metric weights and priorities
-- They trigger additional LLMs (Sonnet, GPT-4o, Grok, Perplexity)
+- They trigger additional LLMs (Sonnet 4.6, GPT-4o, Grok, Perplexity)
 - They do NOT replace the Paragraphical — they enhance it
 
 The Paragraphical must stand alone as a complete evaluation. Modules make it better, not make it work.
@@ -603,7 +603,7 @@ Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneu
 **LLM Roster**:
 | LLM | Web Search Method | Tavily Use |
 |-----|------------------|------------|
-| Claude Sonnet | Native (Anthropic API tool) | Supplemental |
+| Claude Sonnet 4.6 | Native (Anthropic API tool) | Supplemental |
 | GPT-4o | Tavily injected into prompt context | Primary |
 | Gemini | Google Search grounding (native) | Supplemental |
 | Grok | Tavily injected into prompt context | Primary |
@@ -753,7 +753,7 @@ LifeScore's Gamma report template:
 
 ### 15.13 CRISTIANO VIDEO PIPELINE (2-Stage)
 
-**Stage 1: Storyboard** (Claude Sonnet generates)
+**Stage 1: Storyboard** (Claude Sonnet 4.6 generates)
 - 7 scenes, 105-120s total, 200-250 words
 - Scene 1 & 7: A-ROLL (avatar talking)
 - Scenes 2-6: B-ROLL (city footage)
@@ -813,7 +813,7 @@ LifeScore's Gamma report template:
 
 | Component | Cost |
 |-----------|------|
-| Claude Sonnet (90 metrics) | ~$0.90 |
+| Claude Sonnet 4.6 (90 metrics) | ~$0.90 |
 | GPT-4o (90 metrics + Tavily) | ~$2.70 |
 | Gemini (90 metrics) | ~$0.45 |
 | Grok (90 metrics + Tavily) | ~$0.90 |
