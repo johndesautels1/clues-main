@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { OliviaAvatar } from './OliviaAvatar';
-import { C, buildOliviaPrompt, type DiscoverySection } from './discoveryData';
+import { C, buildOliviaPrompt, type DiscoverySection, type OliviaContext } from './discoveryData';
 import { sendOliviaMessage } from '../../lib/oliviaApi';
 
 // Pinned HeyGen SDK version — do not use @latest in production
@@ -110,7 +110,7 @@ export function HeyGenVideoModal({ open, onClose, section, currentAnswer, sessio
     setIsSpeaking(true);
     try {
       const { TaskType } = await import(/* @vite-ignore */ HEYGEN_SDK_URL);
-      const system = buildOliviaPrompt(section.title, section.cat, section.prompt, currentAnswer);
+      const system = buildOliviaPrompt(section.title, section.cat, section.prompt, currentAnswer, (section as { oliviaContext?: OliviaContext }).oliviaContext);
 
       const reply = await sendOliviaMessage({
         messages: [{ role: 'user', content: text }],

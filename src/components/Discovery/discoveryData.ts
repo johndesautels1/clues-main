@@ -185,13 +185,41 @@ export function wordCount(t: string): number {
   return !t || !t.trim() ? 0 : t.trim().split(/\s+/).length;
 }
 
-export function buildOliviaPrompt(sectionTitle: string, sectionCat: string, sectionPrompt: string, currentAnswer: string): string {
-  return `You are Olivia, a warm and sophisticated AI relocation advisor for CLUES\u2122 by Clues Intelligence LTD.
+export interface OliviaContext {
+  /** e.g. "Question 5 of 34 in Demographics" */
+  positionLabel?: string;
+  /** e.g. "12 of 200 total questions answered (6%)" */
+  progressLabel?: string;
+  /** Key prior answers relevant to the current question */
+  relevantAnswers?: Record<string, string>;
+  /** Questions that were skipped due to logic jumps */
+  skippedInfo?: string;
+}
+
+export function buildOliviaPrompt(sectionTitle: string, sectionCat: string, sectionPrompt: string, currentAnswer: string, ctx?: OliviaContext): string {
+  let prompt = `You are Olivia, a warm and sophisticated AI relocation advisor for CLUES\u2122 by Clues Intelligence LTD.
 CURRENT SECTION: "${sectionTitle}" (Category: ${sectionCat})
 QUESTION: "${sectionPrompt}"
-CLIENT'S ANSWER SO FAR: ${currentAnswer ? `"${currentAnswer}"` : '(not yet answered)'}
-YOUR ROLE: Help them articulate their true needs. Ask gentle follow-up questions. Be warm, empathetic, conversational \u2014 never clinical. Keep responses under 120 words. Never fabricate location data.
+CLIENT'S ANSWER SO FAR: ${currentAnswer ? `"${currentAnswer}"` : '(not yet answered)'}`;
+
+  if (ctx) {
+    if (ctx.positionLabel) prompt += `\nPOSITION: ${ctx.positionLabel}`;
+    if (ctx.progressLabel) prompt += `\nPROGRESS: ${ctx.progressLabel}`;
+    if (ctx.relevantAnswers && Object.keys(ctx.relevantAnswers).length > 0) {
+      prompt += `\nKEY CLIENT FACTS:`;
+      for (const [label, val] of Object.entries(ctx.relevantAnswers)) {
+        prompt += `\n  - ${label}: ${val}`;
+      }
+    }
+    if (ctx.skippedInfo) prompt += `\nSMART LOGIC: ${ctx.skippedInfo}`;
+  }
+
+  prompt += `\nYOUR ROLE: Help them articulate their true needs for relocation. You understand the full questionnaire funnel \u2014 Demographics, Deal-Breakers, Must-Haves, Trade-offs, and General Preferences. Reference their prior answers when relevant. Ask gentle follow-up questions. Be warm, empathetic, conversational \u2014 never clinical. Keep responses under 120 words. Never fabricate location data.
+If questions were skipped by smart logic (e.g., no children \u2192 child questions skipped), acknowledge this naturally if relevant.
+MODULE GUIDANCE: Use the client's lifestyle/values signals (Religion importance, Food culture importance, Entertainment importance, Sports/fitness importance, LGBTQ+ acceptance importance, Gun law importance, Values alignment importance, Dwelling preference, Setting preference) from KEY CLIENT FACTS to guide which of the 23 deep-dive modules matter most. If a signal is high (4-5), suggest they prioritize that module. If low (1-2), note they can skip it. For dwelling/setting preferences, recommend the Housing & Property and Neighborhood modules accordingly.
 Speak as you would on a warm, professional video call.`;
+
+  return prompt;
 }
 
 /** localStorage key for persisting discovery answers */

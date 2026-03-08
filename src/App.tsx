@@ -24,6 +24,7 @@ import { DiscoveryFlow } from './components/Discovery';
 import { LoginPage } from './components/Auth/LoginPage';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { QuestionLibrary } from './components/Admin/QuestionLibrary';
+import { MainQuestionnaire } from './components/Questionnaire';
 
 function App() {
   return (
@@ -53,6 +54,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Main Module Questionnaire — Demographics, DNW, MH, Trade-offs, General */}
+            <Route
+              path="/questionnaire"
+              element={
+                <ProtectedRoute allowAnonymous>
+                  <MainQuestionnaire />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Admin — Question Library Dashboard */}
             <Route
               path="/admin/questions"
