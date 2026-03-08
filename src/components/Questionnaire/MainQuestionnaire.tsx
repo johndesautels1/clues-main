@@ -12,18 +12,19 @@
  *  - WCAG 2.1 AA compliant throughout
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { useQuestionnaireState } from '../../hooks/useQuestionnaireState';
-import { QUESTIONNAIRE_SECTIONS, getCleanQuestion, C } from './questionnaireData';
+import { QUESTIONNAIRE_SECTIONS, getCleanQuestion, getSkippedQuestions, C } from './questionnaireData';
 import { QuestionRenderer } from './QuestionRenderer';
 import { ParticleField } from '../Discovery/ParticleField';
 import { OliviaChoiceModal } from '../Discovery/OliviaChoiceModal';
 import { OliviaPanel } from '../Discovery/OliviaPanel';
 import { HeyGenVideoModal } from '../Discovery/HeyGenVideoModal';
 import { OliviaAvatar } from '../Discovery/OliviaAvatar';
+import type { OliviaContext } from '../Discovery/discoveryData';
 import './Questionnaire.css';
 
 export function MainQuestionnaire() {
@@ -144,6 +145,43 @@ export function MainQuestionnaire() {
   }, [qs.progress, navigate]);
 
   // ─── Build Olivia section context (for chat prompts) ──────────
+  const oliviaContext: OliviaContext = useMemo(() => {
+    const qNum = qs.nav.questionIndex + 1;
+    const qTotal = qs.visibleQuestions.length;
+    const relevantAnswers: Record<string, string> = {};
+
+    // Extract key demographic answers for context
+    const demoKeys: [string, string][] = [
+      ['q1', 'Country of residence'], ['q4', 'Age range'], ['q5', 'Relationship status'],
+      ['q8', 'Has children'], ['q16', 'Employment status'], ['q20', 'Household income'],
+      ['q30', 'Has pets'],
+    ];
+    for (const [key, label] of demoKeys) {
+      const val = qs.answers[key];
+      if (val !== undefined) {
+        relevantAnswers[label] = Array.isArray(val) ? val.join(', ') : String(val);
+      }
+    }
+
+    const skippedCount = qs.skippedQuestions.size;
+    let skippedInfo: string | undefined;
+    if (skippedCount > 0) {
+      const parts: string[] = [];
+      if (qs.answers['q8'] === false || qs.answers['q8'] === 'false') parts.push('no children (child questions skipped)');
+      if (qs.answers['q5'] === 'single') parts.push('single (partner questions skipped)');
+      if (qs.answers['q30'] === false || qs.answers['q30'] === 'false') parts.push('no pets (pet questions skipped)');
+      if (qs.answers['q27'] === false || qs.answers['q27'] === 'false') parts.push('no chronic conditions (medical detail skipped)');
+      skippedInfo = `${skippedCount} questions auto-skipped: ${parts.join('; ')}`;
+    }
+
+    return {
+      positionLabel: `Question ${qNum} of ${qTotal} in ${qs.currentSection.title}`,
+      progressLabel: `${qs.progress.answeredCount} of ${qs.progress.totalVisible} total questions answered (${qs.progress.percentage}%)`,
+      relevantAnswers: Object.keys(relevantAnswers).length > 0 ? relevantAnswers : undefined,
+      skippedInfo,
+    };
+  }, [qs.nav.questionIndex, qs.visibleQuestions.length, qs.currentSection.title, qs.progress, qs.answers, qs.skippedQuestions.size]);
+
   const oliviaSection = {
     id: qs.nav.sectionIndex,
     title: qs.currentSection.title,
@@ -152,6 +190,7 @@ export function MainQuestionnaire() {
     accent: qs.currentSection.accent,
     icon: qs.currentSection.icon,
     hint: '',
+    oliviaContext,
   };
 
   const currentAnswer = String(qs.getAnswer(qs.currentQuestion.number) || '');
@@ -247,40 +286,118 @@ export function MainQuestionnaire() {
   // COMPLETE PHASE
   // ═══════════════════════════════════════════════════════════════
   if (phase === 'complete') {
+    // Build answer key helper for review table
+    const getReviewKey = (sectionId: string, qNum: number) => {
+      if (sectionId === 'tradeoffs') return `tq${qNum}`;
+      if (sectionId === 'general') return `gq${qNum}`;
+      return `q${qNum}`;
+    };
+
+    const formatAnswer = (val: string | number | boolean | string[] | undefined): string => {
+      if (val === undefined) return '\u2014';
+      if (Array.isArray(val)) return val.length > 0 ? val.join(', ') : '\u2014';
+      if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+      if (val === 'true') return 'Yes';
+      if (val === 'false') return 'No';
+      return String(val);
+    };
+
+    const handleEditQuestion = (sectionIndex: number, questionIndex: number) => {
+      qs.goToQuestion(sectionIndex, questionIndex);
+      setPhase('active');
+      setContentVisible(true);
+    };
+
+    const skipped = getSkippedQuestions(qs.answers);
+
     return (
       <div className="mq-universe" role="main">
         <ParticleField accent="#22c55e" />
         <div className="mq-grain" aria-hidden="true" />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '40px 20px', zIndex: 10, position: 'relative' }}>
-          <div className="mq-complete-card">
-            <div style={{ fontSize: 38, marginBottom: 24, color: '#22c55e' }}>{'\u2726'}</div>
-            <h1 style={{ fontFamily: "'Cormorant',serif", fontSize: 'clamp(26px,3.5vw,34px)', fontWeight: 300, color: C.textPrimary, margin: '0 0 16px' }}>
-              Profile Complete
-            </h1>
-            <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 17, color: C.textSecondary, lineHeight: 1.8, margin: '0 0 8px' }}>
-              You answered <strong style={{ color: '#22c55e' }}>{qs.progress.answeredCount}</strong> of {qs.progress.totalVisible} questions.
-            </p>
-            <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 15, color: C.textMuted, lineHeight: 1.7, margin: '0 auto 28px', maxWidth: 440 }}>
-              Your relocation profile is now significantly stronger. This data feeds directly into our AI evaluation engine for country, city, and neighborhood recommendations.
-            </p>
-
-            {/* Section summary */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28, maxWidth: 400, margin: '0 auto 28px' }}>
-              {QUESTIONNAIRE_SECTIONS.map((s, i) => {
-                const sp = qs.progress.sectionProgress[i];
-                const pct = sp.total > 0 ? Math.round((sp.answered / sp.total) * 100) : 0;
-                return (
-                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 16 }}>{s.icon}</span>
-                    <span style={{ flex: 1, fontFamily: "'Outfit',sans-serif", fontSize: 13, color: C.textSecondary }}>{s.title}</span>
-                    <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: 12, color: pct === 100 ? '#22c55e' : s.accent, fontWeight: 600 }}>{sp.answered}/{sp.total}</span>
-                  </div>
-                );
-              })}
+        <div style={{ minHeight: '100vh', padding: '40px 20px', zIndex: 10, position: 'relative' }}>
+          <div className="mq-review-container">
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <div style={{ fontSize: 38, marginBottom: 16, color: '#22c55e' }}>{'\u2726'}</div>
+              <h1 style={{ fontFamily: "'Cormorant',serif", fontSize: 'clamp(26px,3.5vw,34px)', fontWeight: 300, color: C.textPrimary, margin: '0 0 12px' }}>
+                Review Your Answers
+              </h1>
+              <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 16, color: C.textSecondary, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 500 }}>
+                You answered <strong style={{ color: '#22c55e' }}>{qs.progress.answeredCount}</strong> of {qs.progress.totalVisible} questions.
+                Click any answer to edit it.
+              </p>
+              <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 14, color: C.textMuted, lineHeight: 1.6 }}>
+                Changing an answer may show or hide follow-up questions automatically.
+              </p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {/* Section-by-section review tables */}
+            {QUESTIONNAIRE_SECTIONS.map((section, si) => {
+              const visible = section.questions.filter(q => !skipped.has(q.number));
+              const sp = qs.progress.sectionProgress[si];
+              if (visible.length === 0) return null;
+
+              return (
+                <div key={section.id} className="mq-review-section">
+                  <div className="mq-review-section-header" style={{ borderLeftColor: section.accent }}>
+                    <span style={{ fontSize: 18 }}>{section.icon}</span>
+                    <span style={{ fontFamily: "'Outfit',sans-serif", fontSize: 15, fontWeight: 600, color: C.textPrimary, letterSpacing: '0.03em' }}>
+                      {section.title}
+                    </span>
+                    <span style={{
+                      fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 600,
+                      color: sp.answered === sp.total ? '#22c55e' : section.accent,
+                      marginLeft: 'auto',
+                    }}>
+                      {sp.answered}/{sp.total}
+                    </span>
+                  </div>
+
+                  <table className="mq-review-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: 40 }}>#</th>
+                        <th>Question</th>
+                        <th style={{ width: '35%' }}>Your Answer</th>
+                        <th style={{ width: 60 }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visible.map((q, qi) => {
+                        const key = getReviewKey(section.id, q.number);
+                        const rawVal = qs.answers[key];
+                        const display = formatAnswer(rawVal);
+                        const hasAnswer = rawVal !== undefined;
+
+                        return (
+                          <tr key={q.number} className={hasAnswer ? '' : 'unanswered'}>
+                            <td className="mq-review-num" style={{ color: section.accent }}>{qi + 1}</td>
+                            <td className="mq-review-question">{getCleanQuestion(q.question)}</td>
+                            <td className="mq-review-answer" style={{ color: hasAnswer ? C.textPrimary : C.textMuted }}>
+                              {display}
+                            </td>
+                            <td>
+                              <button
+                                className="mq-review-edit-btn"
+                                onClick={() => handleEditQuestion(si, qi)}
+                                aria-label={`Edit question ${qi + 1}`}
+                                style={{ color: section.accent }}
+                              >
+                                Edit
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })}
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 32, marginBottom: 40 }}>
               <button
                 onClick={() => { setPhase('active'); setContentVisible(true); }}
                 style={{
@@ -290,7 +407,7 @@ export function MainQuestionnaire() {
                   color: C.textSecondary, cursor: 'pointer',
                 }}
               >
-                Review Answers
+                Back to Questionnaire
               </button>
               <button
                 onClick={() => navigate('/')}
@@ -303,13 +420,9 @@ export function MainQuestionnaire() {
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}
               >
-                Continue to Dashboard <span aria-hidden="true">&rarr;</span>
+                Submit &amp; Continue to Dashboard <span aria-hidden="true">&rarr;</span>
               </button>
             </div>
-
-            <p style={{ marginTop: 32, fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.textMuted }}>
-              Clues Intelligence LTD
-            </p>
           </div>
         </div>
       </div>

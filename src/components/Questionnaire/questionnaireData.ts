@@ -146,10 +146,10 @@ export interface LogicJump {
 export const LOGIC_JUMPS: LogicJump[] = [
   // Demographics logic jumps
   { triggerQuestion: 5, triggerValue: 'single', skipQuestions: [6, 7] }, // No partner → skip partner Qs
-  { triggerQuestion: 8, triggerValue: 'false', skipQuestions: [9, 10, 11] }, // No children → skip child Qs
+  { triggerQuestion: 8, triggerValue: 'false', skipQuestions: [9, 10, 11, 64, 91, 93] }, // No children → skip child Qs + child dealbreakers/must-haves
   { triggerQuestion: 14, triggerValue: 'false', skipQuestions: [15] }, // Not military → skip veteran services Q
   { triggerQuestion: 27, triggerValue: 'false', skipQuestions: [28] }, // No chronic conditions → skip specifics
-  { triggerQuestion: 30, triggerValue: 'false', skipQuestions: [31, 32] }, // No pets → skip pet Qs
+  { triggerQuestion: 30, triggerValue: 'false', skipQuestions: [31, 32, 96] }, // No pets → skip pet Qs + pet must-have
 ];
 
 /** Given current answers, return set of question numbers to skip */

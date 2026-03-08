@@ -6,13 +6,13 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { OliviaAvatar } from './OliviaAvatar';
-import { C, buildOliviaPrompt, type DiscoverySection } from './discoveryData';
+import { C, buildOliviaPrompt, type DiscoverySection, type OliviaContext } from './discoveryData';
 import { sendOliviaMessage } from '../../lib/oliviaApi';
 
 interface OliviaPanelProps {
   open: boolean;
   onClose: () => void;
-  section: DiscoverySection;
+  section: DiscoverySection & { oliviaContext?: OliviaContext };
   currentAnswer: string;
   accent: string;
   sessionId?: string;
@@ -71,7 +71,7 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
 
       setLoading(true);
       try {
-        const system = buildOliviaPrompt(section.title, section.cat, section.prompt, currentAnswer);
+        const system = buildOliviaPrompt(section.title, section.cat, section.prompt, currentAnswer, (section as { oliviaContext?: OliviaContext }).oliviaContext);
         const apiMessages = isGreeting
           ? [{ role: 'user' as const, content: `Greet me warmly as Olivia and invite me to talk about: "${section.title}". 2-3 sentences.` }]
           : historyWithNew.map((m) => ({ role: m.role, content: m.content }));
