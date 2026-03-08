@@ -1,0 +1,312 @@
+import type { QuestionModule } from './types';
+
+// General Questions — 50 questions
+// Module ID: general_questions
+
+export const generalQuestionsQuestions: QuestionModule = {
+  "moduleId": "general_questions",
+  "moduleName": "General Questions",
+  "fileName": "GENERAL_QUESTIONS_REFERENCE.md",
+  "structure": "",
+  "totalQuestions": 50,
+  "sections": [
+    {
+      "title": "Household & Decision Dynamics",
+      "questionRange": "Q1-Q5",
+      "questions": [
+        {
+          "number": 1,
+          "question": "Who is the primary decision-maker for this relocation? (Select one: myself alone, myself and partner equally, primarily my partner, family consensus, other)",
+          "type": "Single-select"
+        },
+        {
+          "number": 2,
+          "question": "How aligned is your partner/household on relocation priorities?",
+          "type": "Slider"
+        },
+        {
+          "number": 3,
+          "question": "What regions, countries, or cities are you most drawn to — and which have you already visited or lived in?",
+          "type": "Text"
+        },
+        {
+          "number": 4,
+          "question": "Do you have family obligations that affect where you can relocate?",
+          "type": "Yes/No"
+        },
+        {
+          "number": 5,
+          "question": "What type of family obligations do you have, and how often must you travel for them?",
+          "type": "Text"
+        }
+      ]
+    },
+    {
+      "title": "Personality & Psychology",
+      "questionRange": "Q6-Q12",
+      "questions": [
+        {
+          "number": 6,
+          "question": "How do you approach risk in life decisions? (Select one: very cautious, somewhat cautious, balanced, somewhat adventurous, very adventurous)",
+          "type": "Single-select"
+        },
+        {
+          "number": 7,
+          "question": "How do you handle uncertainty and change? (Select one: need stability, prefer predictability, adaptable, thrive on change, seek disruption)",
+          "type": "Single-select"
+        },
+        {
+          "number": 8,
+          "question": "What is the PRIMARY reason driving your relocation? (Select one: career opportunity, lifestyle change, retirement, cost savings, family reunification, escape/fresh start, adventure, relationship, health/climate, safety)",
+          "type": "Single-select"
+        },
+        {
+          "number": 9,
+          "question": "What is your overall risk tolerance for major life changes?",
+          "type": "Slider"
+        },
+        {
+          "number": 10,
+          "question": "What is your openness to lifestyle experimentation?",
+          "type": "Slider"
+        },
+        {
+          "number": 11,
+          "question": "What pace of life do you prefer? (Select one: very slow/relaxed, slow/easygoing, moderate, fast-paced, intense/high-energy)",
+          "type": "Single-select"
+        },
+        {
+          "number": 12,
+          "question": "What is your preferred social style? (Select one: mostly solitary, small intimate circle, moderate social life, very social/outgoing, extroverted/always connecting)",
+          "type": "Single-select"
+        }
+      ]
+    },
+    {
+      "title": "Relocation Readiness",
+      "questionRange": "Q13-Q17",
+      "questions": [
+        {
+          "number": 13,
+          "question": "What is your international living experience? (Select one: never lived abroad, short stays only <6 months, lived abroad 1-3 years, lived abroad 3+ years, serial expat/multiple countries)",
+          "type": "Single-select"
+        },
+        {
+          "number": 14,
+          "question": "Which cities or countries have you visited or lived in that you LOVED, and which did you hate — and specifically WHY?",
+          "type": "Text"
+        },
+        {
+          "number": 15,
+          "question": "If you could split your monthly budget any way you wanted, what percentage would go to housing, food, entertainment, travel, savings, and healthcare?",
+          "type": "Text"
+        },
+        {
+          "number": 16,
+          "question": "What are your biggest relocation fears? (Select all that apply: loneliness/isolation, language barriers, career setback, financial loss, culture shock, safety concerns, healthcare access, missing family, bureaucracy, failure/regret)",
+          "type": "Multi-select"
+        },
+        {
+          "number": 17,
+          "question": "Do you prefer the familiar or the adventurous?",
+          "type": "Slider"
+        }
+      ]
+    },
+    {
+      "title": "Cultural Adaptation & Integration",
+      "questionRange": "Q18-Q23",
+      "questions": [
+        {
+          "number": 18,
+          "question": "What is your tolerance for cultural differences?",
+          "type": "Slider"
+        },
+        {
+          "number": 19,
+          "question": "What is your comfort level with language barriers?",
+          "type": "Slider"
+        },
+        {
+          "number": 20,
+          "question": "Do you prefer expat communities or full local integration?",
+          "type": "Slider"
+        },
+        {
+          "number": 21,
+          "question": "What is your expected timeline for feeling socially integrated? (Select one: 1-3 months, 3-6 months, 6-12 months, 1-2 years, 2+ years)",
+          "type": "Single-select"
+        },
+        {
+          "number": 22,
+          "question": "How interested are you in cultural bridge-building and exchange?",
+          "type": "Slider"
+        },
+        {
+          "number": 23,
+          "question": "How willing are you to adapt to different social norms?",
+          "type": "Slider"
+        }
+      ]
+    },
+    {
+      "title": "Social Identity & Community",
+      "questionRange": "Q24-Q30",
+      "questions": [
+        {
+          "number": 24,
+          "question": "How would you describe your ideal social environment? (Select one: quiet/private, small close-knit community, active neighborhood, bustling urban life, cosmopolitan hub)",
+          "type": "Single-select"
+        },
+        {
+          "number": 25,
+          "question": "How comfortable are you attending large social events versus intimate gatherings?",
+          "type": "Slider"
+        },
+        {
+          "number": 26,
+          "question": "What specific communities, hobbies, or subcultures do you NEED access to in order to feel fulfilled?",
+          "type": "Text"
+        },
+        {
+          "number": 27,
+          "question": "How important is it that your neighborhood has people in a similar life stage to yours (young professionals, families, retirees)?",
+          "type": "Likert-Importance"
+        },
+        {
+          "number": 28,
+          "question": "How private or open do you prefer to be within your community?",
+          "type": "Slider"
+        },
+        {
+          "number": 29,
+          "question": "What social support systems do you need to thrive? (Select all that apply: religious community, professional network, parent groups, hobby/interest clubs, expat community, mental health support, volunteer organizations, none specific)",
+          "type": "Multi-select"
+        },
+        {
+          "number": 30,
+          "question": "How important is building local community roots versus maintaining a transient/flexible lifestyle?",
+          "type": "Likert-Importance"
+        }
+      ]
+    },
+    {
+      "title": "Lifestyle Philosophy",
+      "questionRange": "Q31-Q36",
+      "questions": [
+        {
+          "number": 31,
+          "question": "What is your stance on work-life balance?",
+          "type": "Slider"
+        },
+        {
+          "number": 32,
+          "question": "How do you prefer to spend your weekends? (Select one: relaxing at home, outdoor activities, social events, cultural exploration, travel/day trips, mix of everything)",
+          "type": "Single-select"
+        },
+        {
+          "number": 33,
+          "question": "What is your ideal noise level environment?",
+          "type": "Slider"
+        },
+        {
+          "number": 34,
+          "question": "What is your ideal community size? (Select one: village <5,000, small town 5K-50K, mid-size city 50K-500K, large city 500K-2M, mega city 2M+)",
+          "type": "Single-select"
+        },
+        {
+          "number": 35,
+          "question": "How do seasonal changes affect your mood and activity level?",
+          "type": "Likert-Concern"
+        },
+        {
+          "number": 36,
+          "question": "How important is environmental sustainability to your lifestyle?",
+          "type": "Likert-Importance"
+        }
+      ]
+    },
+    {
+      "title": "Long-term Vision & Planning",
+      "questionRange": "Q37-Q44",
+      "questions": [
+        {
+          "number": 37,
+          "question": "What are your long-term settlement plans? (Select one: permanent relocation, 5-10 years, 2-5 years, 1-2 years, exploring/undecided)",
+          "type": "Single-select"
+        },
+        {
+          "number": 38,
+          "question": "Are your intentions temporary or permanent? (Select one: definitely permanent, leaning permanent, truly undecided, leaning temporary, definitely temporary)",
+          "type": "Single-select"
+        },
+        {
+          "number": 39,
+          "question": "How important is having an exit strategy or reversible plan?",
+          "type": "Likert-Importance"
+        },
+        {
+          "number": 40,
+          "question": "What is your retirement timeline consideration? (Select one: already retired, retiring within 5 years, 5-15 years, 15+ years, not a factor)",
+          "type": "Single-select"
+        },
+        {
+          "number": 41,
+          "question": "How would you define success after 2 years in your new location?",
+          "type": "Text"
+        },
+        {
+          "number": 42,
+          "question": "What is your settling period tolerance — how long before you expect to feel at home? (Select one: 1-3 months, 3-6 months, 6-12 months, 1-2 years, 2+ years)",
+          "type": "Single-select"
+        },
+        {
+          "number": 43,
+          "question": "What is your backup plan approach if things don't work out? (Select one: return home, try another country, move to a different city, adapt and stay, no backup plan)",
+          "type": "Single-select"
+        },
+        {
+          "number": 44,
+          "question": "What is your biggest hope for your new life?",
+          "type": "Text"
+        }
+      ]
+    },
+    {
+      "title": "Open Narratives",
+      "questionRange": "Q45-Q50",
+      "questions": [
+        {
+          "number": 45,
+          "question": "Tell us your relocation story: What's driving your desire to move, and what would \"success\" look like for you?",
+          "type": "Text"
+        },
+        {
+          "number": 46,
+          "question": "Describe your perfect ordinary Tuesday in your ideal new location — morning to evening, where do you live, work, eat, and spend your time?",
+          "type": "Text"
+        },
+        {
+          "number": 47,
+          "question": "What specific communities, interests, or activities are absolutely central to your identity and happiness that we haven't asked about?",
+          "type": "Text"
+        },
+        {
+          "number": 48,
+          "question": "What are your biggest fears or concerns about relocating, and what past experiences (positive or negative) with places you've lived should we know about?",
+          "type": "Text"
+        },
+        {
+          "number": 49,
+          "question": "What would make you feel \"at home\" in your new location?",
+          "type": "Text"
+        },
+        {
+          "number": 50,
+          "question": "If you had to explain to a close friend why certain places would be absolutely wrong for you, and others would be perfect, what would you tell them that our questionnaire might have missed?",
+          "type": "Text"
+        }
+      ]
+    }
+  ]
+};

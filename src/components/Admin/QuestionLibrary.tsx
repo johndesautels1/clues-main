@@ -12,7 +12,7 @@ import {
   type QuestionLibraryData,
   type QuestionModule,
   type QuestionItem,
-} from '../../data/questionLibrary';
+} from '../../data/questions';
 import './QuestionLibrary.css';
 
 // ─── MODULE ICONS ───
