@@ -34,12 +34,12 @@
 
 ---
 
-## Section 3: Relocation Readiness (Q13-Q17)
+## Section 3: Readiness & Key Priorities (Q13-Q17)
 
 | # | Question | Type |
 |---|----------|------|
 | 13 | What is your international living experience? (Select one: never lived abroad, short stays only <6 months, lived abroad 1-3 years, lived abroad 3+ years, serial expat/multiple countries) | Single-select |
-| 14 | Which cities or countries have you visited or lived in that you LOVED, and which did you hate — and specifically WHY? | Text |
+| 14 | How important is your religious or spiritual practice to your daily life? | Likert-Importance |
 | 15 | If you could split your monthly budget any way you wanted, what percentage would go to housing, food, entertainment, travel, savings, and healthcare? | Text |
 | 16 | What are your biggest relocation fears? (Select all that apply: loneliness/isolation, language barriers, career setback, financial loss, culture shock, safety concerns, healthcare access, missing family, bureaucracy, failure/regret) | Multi-select |
 | 17 | Do you prefer the familiar or the adventurous? | Slider |
@@ -86,7 +86,7 @@
 
 ---
 
-## Section 7: Long-term Vision & Planning (Q37-Q44)
+## Section 7: Vision, Planning & Living Preferences (Q37-Q44)
 
 | # | Question | Type |
 |---|----------|------|
@@ -94,20 +94,20 @@
 | 38 | Are your intentions temporary or permanent? (Select one: definitely permanent, leaning permanent, truly undecided, leaning temporary, definitely temporary) | Single-select |
 | 39 | How important is having an exit strategy or reversible plan? | Likert-Importance |
 | 40 | What is your retirement timeline consideration? (Select one: already retired, retiring within 5 years, 5-15 years, 15+ years, not a factor) | Single-select |
-| 41 | How would you define success after 2 years in your new location? | Text |
+| 41 | How important is access to cuisine and food culture that matches your preferences? | Likert-Importance |
 | 42 | What is your settling period tolerance — how long before you expect to feel at home? (Select one: 1-3 months, 3-6 months, 6-12 months, 1-2 years, 2+ years) | Single-select |
 | 43 | What is your backup plan approach if things don't work out? (Select one: return home, try another country, move to a different city, adapt and stay, no backup plan) | Single-select |
-| 44 | What is your biggest hope for your new life? | Text |
+| 44 | What type of dwelling do you prefer to live in? (Select one: detached house, townhouse/row house, apartment/condo, villa/estate, tiny home/alternative, no strong preference) | Single-select |
 
 ---
 
-## Section 8: Open Narratives (Q45-Q50)
+## Section 8: Lifestyle & Values Preferences (Q45-Q50)
 
 | # | Question | Type |
 |---|----------|------|
-| 45 | Tell us your relocation story: What's driving your desire to move, and what would "success" look like for you? | Text |
-| 46 | Describe your perfect ordinary Tuesday in your ideal new location — morning to evening, where do you live, work, eat, and spend your time? | Text |
-| 47 | What specific communities, interests, or activities are absolutely central to your identity and happiness that we haven't asked about? | Text |
-| 48 | What are your biggest fears or concerns about relocating, and what past experiences (positive or negative) with places you've lived should we know about? | Text |
-| 49 | What would make you feel "at home" in your new location? | Text |
-| 50 | If you had to explain to a close friend why certain places would be absolutely wrong for you, and others would be perfect, what would you tell them that our questionnaire might have missed? | Text |
+| 45 | What setting do you prefer to live in? (Select one: urban core/city center, inner suburb, outer suburb, small town/rural, remote/off-grid) | Single-select |
+| 46 | How important is it that local firearm and weapon laws align with your personal views? | Likert-Importance |
+| 47 | How important is access to live music, performing arts, and entertainment or nightlife? | Likert-Importance |
+| 48 | How important is access to sports, fitness facilities, and outdoor recreation? | Likert-Importance |
+| 49 | How important is LGBTQ+ acceptance and legal protections in your destination? | Likert-Importance |
+| 50 | How important is it that your destination's political and social values broadly align with your own? | Likert-Importance |
