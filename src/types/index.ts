@@ -222,7 +222,7 @@ export type CostProvider =
   | 'gpt-4o'
   | 'gemini-3.1-pro-preview'
   | 'grok-4-1-fast-reasoning'
-  | 'perplexity-sonar'
+  | 'sonar-reasoning-pro-high'
   | 'claude-opus-4-5'
   | 'tavily'
   | 'gamma'

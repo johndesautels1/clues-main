@@ -516,7 +516,7 @@ create table if not exists public.llm_evaluations (
   evaluation_id uuid not null references public.evaluations(id) on delete cascade,
   session_id    uuid not null references public.sessions(id) on delete cascade,
 
-  llm_model     text not null,             -- claude-sonnet-4-6, gpt-4o, gemini-3.1-pro-preview, grok-4-1-fast-reasoning, perplexity-sonar
+  llm_model     text not null,             -- claude-sonnet-4-6, gpt-4o, gemini-3.1-pro-preview, grok-4-1-fast-reasoning, sonar-reasoning-pro-high
   category      text not null,             -- one of 23 categories
   status        text not null default 'pending',  -- pending, running, completed, failed, timeout
 

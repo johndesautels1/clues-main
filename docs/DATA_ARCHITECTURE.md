@@ -790,7 +790,7 @@ Distributed across all 30 paragraphs. Each target has:
 ║  ┌──────────────────────────────────┐                               ║
 ║  │     5-LLM SCORING PANEL         │                               ║
 ║  │  Sonnet 4.6 | GPT-4o | Gemini   │                               ║
-║  │  Grok 4.1 | Perplexity Sonar    │                               ║
+║  │  Grok 4.1 | Sonar Reasoning Pro │                               ║
 ║  │            ↓                     │                               ║
 ║  │  CRISTIANO JUDGE (Opus 4.5)     │                               ║
 ║  │  Consensus on stdDev > 15       │                               ║
