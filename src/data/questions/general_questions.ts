@@ -22,7 +22,9 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 2,
           "question": "How aligned is your partner/household on relocation priorities?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Not at all aligned",
+          "sliderRight": "Perfectly aligned"
         },
         {
           "number": 3,
@@ -57,18 +59,22 @@ export const generalQuestionsQuestions: QuestionModule = {
         },
         {
           "number": 8,
-          "question": "What is the PRIMARY reason driving your relocation? (Select one: career opportunity, lifestyle change, retirement, cost savings, family reunification, escape/fresh start, adventure, relationship, health/climate, safety)",
+          "question": "What is the PRIMARY reason driving your relocation? (Select one: career opportunity, lifestyle change, retirement, cost savings, family reunification, escape/fresh start, adventure, relationship, health/climate, safety, political instability, religious/cultural freedom, education, tax optimization, digital nomad lifestyle, other)",
           "type": "Single-select"
         },
         {
           "number": 9,
           "question": "What is your overall risk tolerance for major life changes?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Very risk-averse",
+          "sliderRight": "Very risk-tolerant"
         },
         {
           "number": 10,
           "question": "What is your openness to lifestyle experimentation?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Not open at all",
+          "sliderRight": "Completely open"
         },
         {
           "number": 11,
@@ -109,7 +115,9 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 17,
           "question": "Do you prefer the familiar or the adventurous?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Strongly prefer familiar",
+          "sliderRight": "Strongly prefer adventurous"
         }
       ]
     },
@@ -120,17 +128,23 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 18,
           "question": "What is your tolerance for cultural differences?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Low tolerance",
+          "sliderRight": "Very high tolerance"
         },
         {
           "number": 19,
           "question": "What is your comfort level with language barriers?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Very uncomfortable",
+          "sliderRight": "Very comfortable"
         },
         {
           "number": 20,
           "question": "Do you prefer expat communities or full local integration?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Expat community",
+          "sliderRight": "Full local integration"
         },
         {
           "number": 21,
@@ -140,12 +154,16 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 22,
           "question": "How interested are you in cultural bridge-building and exchange?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Not interested",
+          "sliderRight": "Extremely interested"
         },
         {
           "number": 23,
           "question": "How willing are you to adapt to different social norms?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Not willing at all",
+          "sliderRight": "Completely willing"
         }
       ]
     },
@@ -161,7 +179,9 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 25,
           "question": "How comfortable are you attending large social events versus intimate gatherings?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Prefer intimate gatherings",
+          "sliderRight": "Prefer large social events"
         },
         {
           "number": 26,
@@ -176,7 +196,9 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 28,
           "question": "How private or open do you prefer to be within your community?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Very private",
+          "sliderRight": "Very open"
         },
         {
           "number": 29,
@@ -197,7 +219,9 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 31,
           "question": "What is your stance on work-life balance?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Work-focused",
+          "sliderRight": "Life-focused"
         },
         {
           "number": 32,
@@ -207,7 +231,9 @@ export const generalQuestionsQuestions: QuestionModule = {
         {
           "number": 33,
           "question": "What is your ideal noise level environment?",
-          "type": "Slider"
+          "type": "Slider",
+          "sliderLeft": "Very quiet",
+          "sliderRight": "Very lively"
         },
         {
           "number": 34,

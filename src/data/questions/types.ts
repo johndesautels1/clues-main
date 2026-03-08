@@ -5,6 +5,10 @@ export interface QuestionItem {
   number: number;
   question: string;
   type: string;
+  /** Left (low) label for Slider questions — e.g. "Very private" */
+  sliderLeft?: string;
+  /** Right (high) label for Slider questions — e.g. "Very open" */
+  sliderRight?: string;
 }
 
 export interface QuestionSection {

@@ -262,9 +262,9 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
     return (
       <div className="qr-slider">
         <div className="qr-slider-labels">
-          <span style={{ color: C.textMuted }}>Strongly disagree</span>
+          <span style={{ color: C.textMuted }}>{question.sliderLeft || 'Strongly disagree'}</span>
           <span style={{ color: sliderColor, fontWeight: 600, fontSize: '1.25rem' }}>{numVal}</span>
-          <span style={{ color: C.textMuted }}>Strongly agree</span>
+          <span style={{ color: C.textMuted }}>{question.sliderRight || 'Strongly agree'}</span>
         </div>
         <input
           type="range"
