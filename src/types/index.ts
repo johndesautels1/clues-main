@@ -172,6 +172,7 @@ export interface MHAnswer {
 export type DNWAnswers = DNWAnswer[];
 export type MHAnswers = MHAnswer[];
 export type GeneralAnswers = Record<string, string | number>;
+export type TradeoffAnswers = Record<string, number>;  // question key → slider value 0-100
 
 // ─── Evaluation Context (fed to LLMs) ───────────────────────────
 export interface EvaluationContext {
@@ -306,6 +307,7 @@ export interface UserSession {
     demographics?: DemographicAnswers;
     dnw?: DNWAnswers;
     mh?: MHAnswers;
+    tradeoffAnswers?: TradeoffAnswers;
     generalAnswers?: GeneralAnswers;
   };
   completedModules: string[];

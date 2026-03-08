@@ -13,9 +13,10 @@ import { useUser } from '../context/UserContext';
 import {
   QUESTIONNAIRE_SECTIONS,
   getSkippedQuestions,
+  getResponseLabels,
   type SectionId,
 } from '../components/Questionnaire/questionnaireData';
-import type { SubSection } from '../types';
+import type { SubSection, DNWAnswer, MHAnswer } from '../types';
 
 const STORAGE_KEY = 'clues-main-questionnaire';
 
@@ -106,20 +107,28 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
       });
     }
     if (session.mainModule.dnw) {
+      // DNWAnswer[] → flat q{number} keys with severity as the value (1-5 Dealbreaker scale)
       session.mainModule.dnw.forEach(a => {
-        loaded[`q${a.questionId}`] = a.value;
-        loaded[`q${a.questionId}_severity`] = a.severity;
+        loaded[`q${a.questionId}`] = a.severity;
         hasData = true;
       });
     }
     if (session.mainModule.mh) {
+      // MHAnswer[] → flat q{number} keys with importance as the value (1-5 Likert scale)
       session.mainModule.mh.forEach(a => {
-        loaded[`q${a.questionId}`] = a.value;
-        loaded[`q${a.questionId}_importance`] = a.importance;
+        loaded[`q${a.questionId}`] = a.importance;
+        hasData = true;
+      });
+    }
+    if (session.mainModule.tradeoffAnswers) {
+      // Keys already stored with "tq" prefix — load as-is
+      Object.entries(session.mainModule.tradeoffAnswers).forEach(([k, v]) => {
+        loaded[k] = v;
         hasData = true;
       });
     }
     if (session.mainModule.generalAnswers) {
+      // Keys already stored with "gq" prefix — load as-is
       Object.entries(session.mainModule.generalAnswers).forEach(([k, v]) => {
         loaded[k] = v;
         hasData = true;
@@ -164,13 +173,14 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
     } catch { /* quota exceeded */ }
   }, [answers]);
 
-  // ─── Sync to UserContext (debounced 1500ms) ────────────────────
+  // ─── Sync to UserContext (debounced 1500ms) → Supabase ──────────
   useEffect(() => {
     if (Object.keys(answers).length === 0) return;
     setSaveStatus('saving');
 
     const timer = setTimeout(() => {
-      // Demographics (section 0, Q1-Q34)
+      // ── Section 0: Demographics (Q1-Q34) ──
+      // Stored as flat Record<string, string|number|boolean> — matches DemographicAnswers
       const demoAnswers: Record<string, string | number | boolean> = {};
       QUESTIONNAIRE_SECTIONS[0].questions.forEach(q => {
         const key = `q${q.number}`;
@@ -185,16 +195,85 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
         }
       }
 
-      // General answers (section 4)
+      // ── Section 1: Do Not Wants (Q35-Q67) ──
+      // Must convert flat q35: 3 → DNWAnswer{ questionId, value, severity }
+      const dnwAnswers: DNWAnswer[] = [];
+      const dealLabels = getResponseLabels('Dealbreaker') || [];
+      QUESTIONNAIRE_SECTIONS[1].questions.forEach(q => {
+        const key = `q${q.number}`;
+        const val = answers[key];
+        if (val !== undefined && typeof val === 'number') {
+          dnwAnswers.push({
+            questionId: String(q.number),
+            value: dealLabels[val - 1] || String(val),
+            severity: val as 1 | 2 | 3 | 4 | 5,
+          });
+        }
+      });
+      if (dnwAnswers.length > 0) {
+        dispatch({ type: 'SET_DNW', payload: dnwAnswers });
+        if (session.mainModule.subSectionStatus.dnw !== 'completed' &&
+            session.mainModule.subSectionStatus.dnw !== 'in_progress') {
+          dispatch({ type: 'SET_SUBSECTION_STATUS', payload: { section: 'dnw', status: 'in_progress' } });
+        }
+      }
+
+      // ── Section 2: Must Haves (Q68-Q100) ──
+      // Must convert flat q68: 4 → MHAnswer{ questionId, value, importance }
+      const mhAnswers: MHAnswer[] = [];
+      const importLabels = getResponseLabels('Likert-Importance') || [];
+      QUESTIONNAIRE_SECTIONS[2].questions.forEach(q => {
+        const key = `q${q.number}`;
+        const val = answers[key];
+        if (val !== undefined && typeof val === 'number') {
+          mhAnswers.push({
+            questionId: String(q.number),
+            value: importLabels[val - 1] || String(val),
+            importance: val as 1 | 2 | 3 | 4 | 5,
+          });
+        }
+      });
+      if (mhAnswers.length > 0) {
+        dispatch({ type: 'SET_MH', payload: mhAnswers });
+        if (session.mainModule.subSectionStatus.mh !== 'completed' &&
+            session.mainModule.subSectionStatus.mh !== 'in_progress') {
+          dispatch({ type: 'SET_SUBSECTION_STATUS', payload: { section: 'mh', status: 'in_progress' } });
+        }
+      }
+
+      // ── Section 3: Trade-offs (Q1-Q50 from tradeoff module) ──
+      // Stored with "tq" prefix to avoid collision with demographics Q1-Q34
+      const tradeoffAnswers: Record<string, number> = {};
+      QUESTIONNAIRE_SECTIONS[3].questions.forEach(q => {
+        const key = `tq${q.number}`;
+        const val = answers[key];
+        if (val !== undefined && typeof val === 'number') {
+          tradeoffAnswers[key] = val;
+        }
+      });
+      if (Object.keys(tradeoffAnswers).length > 0) {
+        dispatch({ type: 'SET_TRADEOFFS', payload: tradeoffAnswers });
+        if (session.mainModule.subSectionStatus.tradeoffs !== 'completed' &&
+            session.mainModule.subSectionStatus.tradeoffs !== 'in_progress') {
+          dispatch({ type: 'SET_SUBSECTION_STATUS', payload: { section: 'tradeoffs', status: 'in_progress' } });
+        }
+      }
+
+      // ── Section 4: General Questions (Q1-Q50 from general module) ──
+      // Stored with "gq" prefix to avoid collision with demographics Q1-Q34
       const genAnswers: Record<string, string | number> = {};
       QUESTIONNAIRE_SECTIONS[4].questions.forEach(q => {
-        const key = `q${q.number}_gen`;
+        const key = `gq${q.number}`;
         if (answers[key] !== undefined) {
           genAnswers[key] = answers[key] as string | number;
         }
       });
       if (Object.keys(genAnswers).length > 0) {
         dispatch({ type: 'SET_GENERAL_ANSWERS', payload: genAnswers });
+        if (session.mainModule.subSectionStatus.general !== 'completed' &&
+            session.mainModule.subSectionStatus.general !== 'in_progress') {
+          dispatch({ type: 'SET_SUBSECTION_STATUS', payload: { section: 'general', status: 'in_progress' } });
+        }
       }
 
       setSaveStatus('saved');
@@ -202,16 +281,35 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [answers, dispatch, session.mainModule.subSectionStatus.demographics]);
+  }, [answers, dispatch, session.mainModule.subSectionStatus]);
 
   // ─── Answer Management ─────────────────────────────────────────
-  const setAnswer = useCallback((questionNumber: number, value: string | number | boolean | string[]) => {
-    setAnswers(prev => ({ ...prev, [`q${questionNumber}`]: value }));
+  // Keys are namespaced by section to avoid collisions:
+  //   main_module questions (Q1-Q100): "q1" through "q100" (unique range)
+  //   tradeoff questions (Q1-Q50): "tq1" through "tq50"
+  //   general questions (Q1-Q50): "gq1" through "gq50"
+  const getKey = useCallback((questionNumber: number) => {
+    const sectionId = QUESTIONNAIRE_SECTIONS[nav.sectionIndex]?.id;
+    if (sectionId === 'tradeoffs') return `tq${questionNumber}`;
+    if (sectionId === 'general') return `gq${questionNumber}`;
+    return `q${questionNumber}`;
+  }, [nav.sectionIndex]);
+
+  const getKeyForSection = useCallback((sectionId: SectionId, questionNumber: number) => {
+    if (sectionId === 'tradeoffs') return `tq${questionNumber}`;
+    if (sectionId === 'general') return `gq${questionNumber}`;
+    return `q${questionNumber}`;
   }, []);
 
+  const setAnswer = useCallback((questionNumber: number, value: string | number | boolean | string[]) => {
+    const key = getKey(questionNumber);
+    setAnswers(prev => ({ ...prev, [key]: value }));
+  }, [getKey]);
+
   const getAnswer = useCallback((questionNumber: number) => {
-    return answers[`q${questionNumber}`];
-  }, [answers]);
+    const key = getKey(questionNumber);
+    return answers[key];
+  }, [answers, getKey]);
 
   // ─── Navigation ────────────────────────────────────────────────
   const goNext = useCallback((): boolean => {
@@ -268,7 +366,10 @@ export function useQuestionnaireState(): UseQuestionnaireReturn {
   // ─── Progress Computation ──────────────────────────────────────
   const sectionProgress = QUESTIONNAIRE_SECTIONS.map((s, si) => {
     const visible = getVisibleQuestions(si);
-    const answered = visible.filter(q => answers[`q${q.number}`] !== undefined).length;
+    const answered = visible.filter(q => {
+      const key = getKeyForSection(s.id, q.number);
+      return answers[key] !== undefined;
+    }).length;
     return { id: s.id, answered, total: visible.length };
   });
 

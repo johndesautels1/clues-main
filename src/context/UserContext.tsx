@@ -31,6 +31,7 @@ import type {
   DemographicAnswers,
   DNWAnswers,
   MHAnswers,
+  TradeoffAnswers,
   GeneralAnswers,
   EvaluationResult,
 } from '../types';
@@ -46,6 +47,7 @@ type Action =
   | { type: 'SET_DEMOGRAPHICS'; payload: DemographicAnswers }
   | { type: 'SET_DNW'; payload: DNWAnswers }
   | { type: 'SET_MH'; payload: MHAnswers }
+  | { type: 'SET_TRADEOFFS'; payload: TradeoffAnswers }
   | { type: 'SET_GENERAL_ANSWERS'; payload: GeneralAnswers }
   | { type: 'COMPLETE_MODULE'; payload: string }
   | { type: 'SET_EVALUATION'; payload: EvaluationResult }
@@ -147,6 +149,13 @@ function sessionReducer(state: UserSession, action: Action): UserSession {
       return {
         ...state,
         mainModule: { ...state.mainModule, mh: action.payload },
+        updatedAt: now,
+      };
+
+    case 'SET_TRADEOFFS':
+      return {
+        ...state,
+        mainModule: { ...state.mainModule, tradeoffAnswers: action.payload },
         updatedAt: now,
       };
 
