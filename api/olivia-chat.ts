@@ -54,7 +54,7 @@ async function trackCost(entry: {
   }
 }
 
-// ─── Claude Token Rates (per 1M tokens, Sonnet 4.6) ────────────
+// ─── Claude Token Rates (per 1M tokens, Sonnet 4) ─────────────
 const CLAUDE_INPUT_RATE = 3.0;
 const CLAUDE_OUTPUT_RATE = 15.0;
 
@@ -101,7 +101,7 @@ export default async function handler(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
         system: body.system,
         messages: body.messages,
@@ -127,7 +127,7 @@ export default async function handler(
     if (body.sessionId) {
       trackCost({
         sessionId: body.sessionId,
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-5',
         endpoint: '/api/olivia-chat',
         inputTokens,
         outputTokens,

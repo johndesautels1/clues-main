@@ -767,7 +767,7 @@ This is the **single source of truth** for which AI model powers each function i
 
 | Role | Model | Provider | Why |
 |------|-------|----------|-----|
-| **Olivia (Chat Assistant)** | Claude Sonnet 4.6 | Anthropic | Company-wide assistant across all CLUES products. Conversational, intelligent, cost-effective for chat. |
+| **Olivia (Chat Assistant)** | GPT-4o | OpenAI | Company-wide assistant across all CLUES products. Conversational, fast, cost-effective for chat. |
 | **Olivia Tutor (Paragraphical)** | Gemini 3.1 Pro (Preview) | Google | Coverage-gap detection during writing. Only fires when keyword detection isn't confident enough. |
 | **Paragraphical Extraction** | Gemini 3.1 Pro (Preview) | Google | Heavy narrative-to-data extraction. Reads all 30 paragraphs (P1-P2 Profile, P3 DNW, P4 MH, P5 Trade-offs, P6-P28 Module Deep Dives, P29-P30 Vision), converts to 100-250 numbered metrics, recommends locations, scores with sourced data. |
 | **LLM Evaluator #1** | Claude Sonnet 4.5 | Anthropic | Structured reasoning, category scoring |
@@ -783,7 +783,7 @@ This is the **single source of truth** for which AI model powers each function i
 | **Voice Narration** | ElevenLabs / OpenAI TTS | — | Cristiano Judge narration for films |
 
 ### Key Rules
-1. **Olivia = Claude Sonnet 4.6 everywhere** — chat bubble, help modal, all products. This is a company architecture decision, not per-feature.
+1. **Olivia = GPT-4o everywhere** — chat bubble, help modal, all products. This is a company architecture decision, not per-feature.
 2. **Gemini 3.1 Pro (Preview) for heavy extraction** — the Paragraphical pipeline's main brain.
 3. **Gemini 3.1 Pro (Preview) for tutor escalation** — Olivia's tutor interjections during writing when keyword detection is insufficient.
 4. **Never substitute models without updating this table.** If a model changes, update here FIRST, then update code.
@@ -882,7 +882,7 @@ Most paragraphs are handled by Layer 2 (keyword detection, zero cost). Layer 3 o
 - Interjections appear in the existing `OliviaBubble.tsx` chat bubble
 - Bubble pulses gently when Olivia has something to say (not intrusive)
 - User can dismiss ("Got it") or expand ("Tell me more")
-- "Tell me more" escalates to Claude Sonnet 4.6 (Olivia's full brain) for a detailed explanation
+- "Tell me more" escalates to GPT-4o (Olivia's full brain) for a detailed explanation
 - Interjection count badge on bubble: "Olivia has 1 suggestion"
 
 ---

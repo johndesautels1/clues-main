@@ -43,7 +43,7 @@ DOWNSTREAM
  ├── Tier Calculation (discovery → exploratory → filtered → evaluated → validated → precision)
  ├── Module Relevance (GQ answers determine which of 23 modules matter)
  ├── Report Generation (Gemini extracts, 5 LLMs score, Cristiano judges)
- └── Olivia Chat (Claude Sonnet 4.6 with 19-answer context + position/progress)
+ └── Olivia Chat (GPT-4o with 19-answer context + position/progress)
 ```
 
 ---
@@ -512,7 +512,7 @@ Passes to discoveryData.buildOliviaPrompt()
     ↓
 Olivia system prompt includes all 19 answers + position + progress + skip reasons
     ↓
-Claude Sonnet 4.6 responds with contextually-aware guidance
+GPT-4o responds with contextually-aware guidance
 ```
 
 ---
@@ -762,7 +762,7 @@ Distributed across all 30 paragraphs. Each target has:
 ║            │       PROCESSING LAYER         │                       ║
 ║            ▼                                ▼                       ║
 ║  ┌─────────────────────┐    ┌──────────────────────────────────┐   ║
-║  │ Gemini 3.1 Pro      │    │       OLIVIA (Claude Sonnet 4.6)            │   ║
+║  │ Gemini 3.1 Pro      │    │       OLIVIA (GPT-4o)            │   ║
 ║  │ Preview             │    │                                  │   ║
 ║  │ - Extract metrics   │    │  Receives:                       │   ║
 ║  │ - Score locations   │    │  - 7 demographic keys            │   ║
@@ -789,7 +789,7 @@ Distributed across all 30 paragraphs. Each target has:
 ║            ▼                                                         ║
 ║  ┌──────────────────────────────────┐                               ║
 ║  │     5-LLM SCORING PANEL         │                               ║
-║  │  Sonnet 4.6 | GPT-4o | Gemini   │                               ║
+║  │  Sonnet 4.5 | GPT-4o | Gemini   │                               ║
 ║  │  Grok 4 | Perplexity Sonar      │                               ║
 ║  │            ↓                     │                               ║
 ║  │  CRISTIANO JUDGE (Opus 4.5)     │                               ║
