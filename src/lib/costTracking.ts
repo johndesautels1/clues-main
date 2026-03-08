@@ -38,6 +38,8 @@ export const PROVIDER_RATES: Record<
   'avatar-simli':        { input: 0,     output: 0,      label: 'Avatar (Simli)',            icon: '\u{1F3A5}' },
   'avatar-replicate':    { input: 0,     output: 0,      label: 'Avatar (Replicate)',        icon: '\u{1F3A5}' },
   'kling-ai':            { input: 0,     output: 0,      label: 'Kling AI (Image Gen)',      icon: '\u{1F5BC}\uFE0F' },
+  'gpt-realtime-1.5':    { input: 5.00,  output: 20.00,  label: 'GPT Realtime 1.5 (Olivia Voice/Video)', icon: '\u{1F399}\uFE0F' },
+  'gpt-5.4':             { input: 5.00,  output: 20.00,  label: 'GPT-5.4 (Advanced Reasoning)', icon: '\u{1F9E0}' },
 };
 
 // Grouped labels for the dashboard (aggregate sub-providers)
@@ -54,6 +56,8 @@ export const PROVIDER_GROUPS: { key: string; label: string; icon: string; provid
   { key: 'tts',        label: 'TTS (ElevenLabs + OpenAI)', icon: '\u{1F50A}', providers: ['tts-elevenlabs', 'tts-openai'] },
   { key: 'avatar',     label: 'Avatar (HeyGen + D-ID + Simli + Replicate)', icon: '\u{1F3A5}', providers: ['avatar-heygen', 'avatar-d-id', 'avatar-simli', 'avatar-replicate'] },
   { key: 'kling',      label: 'Kling AI (Image Generation)', icon: '\u{1F5BC}\uFE0F', providers: ['kling-ai'] },
+  { key: 'gpt-realtime', label: 'GPT Realtime 1.5 (Olivia Voice/Video)', icon: '\u{1F399}\uFE0F', providers: ['gpt-realtime-1.5'] },
+  { key: 'gpt54',     label: 'GPT-5.4 (Advanced Reasoning)', icon: '\u{1F9E0}', providers: ['gpt-5.4'] },
 ];
 
 // ─── Calculate Cost from Tokens ────────────────────────────────

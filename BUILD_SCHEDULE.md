@@ -156,6 +156,8 @@
 - [ ] `api/evaluate-gemini.ts` — Gemini evaluation (reuses existing pattern)
 - [ ] `api/evaluate-grok.ts` — Grok 4.1 Fast Reasoning evaluation endpoint
 - [ ] `api/evaluate-perplexity.ts` — Sonar Reasoning Pro High evaluation endpoint
+- [ ] `api/gpt-realtime.ts` — GPT Realtime 1.5 endpoint (Olivia live voice/video interaction)
+- [ ] `api/evaluate-gpt54.ts` — GPT-5.4 endpoint (advanced reasoning, report interpretation, high-stakes logic)
 - [ ] `src/lib/evaluationOrchestrator.ts` — parallel batch firing (waves of 2 categories)
 - [ ] `src/types/evaluation.ts` — per-LLM response types, MetricConsensus, batch results
 - [ ] Dynamic timeout: 120s + 5s per metric (max 300s)

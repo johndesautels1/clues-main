@@ -796,6 +796,16 @@ Distributed across all 30 paragraphs. Each target has:
 ║  │  Consensus on stdDev > 15       │                               ║
 ║  └─────────┬────────────────────────┘                               ║
 ║            │                                                         ║
+║  ┌──────────────────────────────────┐                               ║
+║  │  GPT-5.4: Advanced Reasoning    │                               ║
+║  │  Report interp + high-stakes    │                               ║
+║  └─────────┬────────────────────────┘                               ║
+║            │                                                         ║
+║  ┌──────────────────────────────────┐                               ║
+║  │  GPT Realtime 1.5: Olivia       │                               ║
+║  │  Live voice/video interaction   │                               ║
+║  └─────────┬────────────────────────┘                               ║
+║            │                                                         ║
 ║            ▼                                                         ║
 ║  ┌──────────────────────────────────┐                               ║
 ║  │     FINAL REPORT                 │                               ║

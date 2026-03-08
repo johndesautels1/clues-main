@@ -233,7 +233,9 @@ export type CostProvider =
   | 'avatar-d-id'
   | 'avatar-simli'
   | 'avatar-replicate'
-  | 'kling-ai';
+  | 'kling-ai'
+  | 'gpt-realtime-1.5'
+  | 'gpt-5.4';
 
 export interface CostEntry {
   id: string;

@@ -872,7 +872,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ## 19. COST TRACKING SYSTEM (Built)
 
 ### Architecture
-- **Types**: `CostProvider` (16 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
+- **Types**: `CostProvider` (18 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
 - **Service**: `src/lib/costTracking.ts` — rate table, `logCost()`, `fetchAllCosts()`, `buildCostSummary()`, CSV export
 - **UI**: `src/components/Shared/CostTrackingModal.tsx` — admin-only modal
 - **Access**: Header toolbar (money bag icon) + Emilia help panel → "Cost Tracking" category
@@ -888,6 +888,8 @@ sonar-reasoning-pro-high Input: $1.00  Output: $1.00    (LLM Evaluator #5)
 claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
+gpt-5.4               Input: $5.00    Output: $20.00   (Advanced Reasoning, Report Interpretation)
+gpt-realtime-1.5      Input: $5.00    Output: $20.00   (Olivia Live Voice/Video Interaction)
 olivia (gpt-4o)       Input: $2.50    Output: $10.00   (Chat Assistant — GPT-4o company-wide)
 olivia-tutor          Input: $1.25    Output: $10.00   (Paragraphical tutor — Gemini 3.1 Pro Preview)
 tts-elevenlabs        Per character                     (Voice narration)

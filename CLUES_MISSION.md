@@ -141,6 +141,8 @@ Hundreds of hours of testing across the LifeScore and CLUES platforms taught us 
 | **Perplexity Sonar Reasoning Pro High** | Best web search of all models (built-in, native). Excels at finding current, relevant data with deep reasoning. | Context window limitations and internal use of other models can introduce bias. |
 | **Claude Sonnet 4.6** | Fast, efficient, affordable. Reliable for structured evaluation. | Can miss subtle temporal differences — may not properly weigh a 2023 article against a contradicting late-2025 article. |
 | **Claude Opus 4.6** | The most powerful reasoning and mathematical brain. Unmatched ability to weigh evidence, detect inconsistencies, and render judgment. | No built-in web search (by design — he is the judge, not the investigator). |
+| **GPT-5.4** | Advanced reasoning, report interpretation, and high-stakes logic. Next-generation OpenAI reasoning model. | Pricing TBD — positioned for tasks requiring deep analytical judgment. |
+| **GPT Realtime 1.5** | Powers Olivia's live voice and video interaction. Real-time multimodal streaming. | Requires WebSocket/streaming infrastructure; latency-sensitive. |
 
 ### The Hallucination Problem
 
