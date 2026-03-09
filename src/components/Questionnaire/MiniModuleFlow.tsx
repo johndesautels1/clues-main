@@ -21,6 +21,7 @@ import { useModuleState } from '../../hooks/useModuleState';
 import { useCoverageState } from '../../hooks/useCoverageState';
 import { useRelevanceState } from '../../hooks/useRelevanceState';
 import { useAdaptiveState } from '../../hooks/useAdaptiveState';
+import { useAdaptivePriority } from '../../hooks/useAdaptivePriority';
 import { useSkipLogic } from '../../hooks/useSkipLogic';
 import { getCleanQuestion, C } from './questionnaireData';
 import { QuestionRenderer } from './QuestionRenderer';
@@ -65,6 +66,9 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
   const { relevance } = useRelevanceState();
   const adaptive = useAdaptiveState(relevance, coverage);
 
+  // ─── Adaptive Priority (EIG-driven question ordering) ────────
+  const priority = useAdaptivePriority(moduleData, ms, adaptive);
+
   // ─── Skip Logic (cross-module pre-fill detection) ────────────
   const questionModules = useMemo(() => {
     const map = new Map<number, string[]>();
@@ -91,11 +95,13 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
     if (adaptive.isAvailable) {
       adaptive.markAdaptivePreFilled(moduleData.moduleId, questionNumber, true);
     }
-    // Advance to next question
-    if (!ms.isLastQuestion) {
+    // Advance: use EIG-priority nav when available, else sequential
+    if (priority.isAdaptivePriority) {
+      priority.goNextAdaptive();
+    } else if (!ms.isLastQuestion) {
       ms.goNext();
     }
-  }, [adaptive, moduleData.moduleId, ms]);
+  }, [adaptive, moduleData.moduleId, ms, priority]);
 
   // ─── Phase State ───────────────────────────────────────────────
   const [phase, setPhase] = useState<'welcome' | 'active' | 'complete'>('welcome');
@@ -124,6 +130,11 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ─── Completion detection (adaptive or sequential) ──────────
+  const isComplete = priority.isAdaptivePriority
+    ? priority.isAdaptiveComplete
+    : ms.isLastQuestion;
+
   // ─── Navigation with Transitions ──────────────────────────────
   const navigateQuestion = useCallback(
     (goFn: () => void, dir: number) => {
@@ -132,7 +143,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
       setContentVisible(false);
       setTransitioning(true);
       setTimeout(() => {
-        if (dir > 0 && ms.isLastQuestion) {
+        if (dir > 0 && isComplete) {
           setPhase('complete');
         } else {
           goFn();
@@ -143,11 +154,15 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
         }, 80);
       }, 300);
     },
-    [transitioning, ms.isLastQuestion]
+    [transitioning, isComplete]
   );
 
-  const handleNext = useCallback(() => navigateQuestion(ms.goNext, 1), [navigateQuestion, ms.goNext]);
-  const handlePrev = useCallback(() => navigateQuestion(ms.goPrev, -1), [navigateQuestion, ms.goPrev]);
+  // Use EIG-priority navigation when available, else sequential
+  const goNext = priority.isAdaptivePriority ? priority.goNextAdaptive : ms.goNext;
+  const goPrev = priority.isAdaptivePriority ? priority.goPrevAdaptive : ms.goPrev;
+
+  const handleNext = useCallback(() => navigateQuestion(goNext, 1), [navigateQuestion, goNext]);
+  const handlePrev = useCallback(() => navigateQuestion(goPrev, -1), [navigateQuestion, goPrev]);
 
   const handleSectionClick = useCallback(
     (sectionIndex: number) => {
@@ -560,13 +575,32 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
           background: 'rgba(10,14,26,0.85)', backdropFilter: 'blur(8px)',
           borderBottom: '1px solid rgba(96,165,250,0.12)',
         }}>
+          {/* EIG priority badge */}
+          {priority.eigRank !== null && (
+            <span style={{
+              fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
+              letterSpacing: '0.05em', padding: '2px 8px', borderRadius: 10,
+              background: 'rgba(96,165,250,0.12)', color: C.textAccent,
+              border: '1px solid rgba(96,165,250,0.2)', flexShrink: 0,
+            }}>
+              EIG #{priority.eigRank}
+            </span>
+          )}
           <span style={{
             fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted,
-            letterSpacing: '0.04em', maxWidth: 500, overflow: 'hidden',
+            letterSpacing: '0.04em', maxWidth: 420, overflow: 'hidden',
             textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {adaptive.nextQuestion.selectionReason}
           </span>
+          {priority.isAdaptivePriority && (
+            <span style={{
+              fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted,
+              letterSpacing: '0.03em', flexShrink: 0,
+            }}>
+              {priority.answeredPrioritized}/{priority.totalPrioritized}
+            </span>
+          )}
           <span style={{
             fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
             color: adaptive.overallMOE <= 0.02 ? '#22c55e' : adaptive.overallMOE <= 0.10 ? '#f59e0b' : C.textMuted,
@@ -684,7 +718,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
           <nav className="mq-nav" aria-label="Question navigation">
             <button
               onClick={handlePrev}
-              disabled={ms.isFirstQuestion}
+              disabled={priority.isFirstInHistory}
               className="mq-nav-btn"
               aria-label="Previous question"
             >
@@ -714,7 +748,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               })}
             </div>
 
-            {!ms.isLastQuestion ? (
+            {!isComplete ? (
               <button onClick={handleNext} className="mq-nav-btn" aria-label="Next question">
                 Next <span>&rarr;</span>
               </button>
