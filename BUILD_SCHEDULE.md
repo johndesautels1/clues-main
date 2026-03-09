@@ -151,17 +151,17 @@
 - [x] Supabase: `tavily_cache` table (query_hash, response, expires_at)
 
 #### Conv 11-12: 5-LLM Parallel Evaluator
-- [ ] `api/evaluate-sonnet.ts` — Claude Sonnet 4.6 evaluation endpoint
-- [ ] `api/evaluate-gpt54.ts` — GPT-5.4 evaluation endpoint
-- [ ] `api/evaluate-gemini.ts` — Gemini evaluation (reuses existing pattern)
-- [ ] `api/evaluate-grok.ts` — Grok 4.1 Fast Reasoning evaluation endpoint
-- [ ] `api/evaluate-perplexity.ts` — Sonar Reasoning Pro High evaluation endpoint
-- [ ] `api/gpt-realtime.ts` — GPT Realtime 1.5 endpoint (Olivia live voice/video interaction)
-- [ ] `src/lib/evaluationOrchestrator.ts` — parallel batch firing (waves of 2 categories)
-- [ ] `src/types/evaluation.ts` — per-LLM response types, MetricConsensus, batch results
-- [ ] Dynamic timeout: 120s + 5s per metric (max 300s)
-- [ ] Partial success handling: 3/5 LLMs responding = usable result
-- [ ] Supabase: `llm_evaluations` table (user_id, llm_model, category, metrics_json, created_at)
+- [x] `api/evaluate-sonnet.ts` — Claude Sonnet 4.6 evaluation endpoint
+- [x] `api/evaluate-gpt54.ts` — GPT-5.4 evaluation endpoint
+- [x] `api/evaluate-gemini.ts` — Gemini evaluation (reuses existing pattern)
+- [x] `api/evaluate-grok.ts` — Grok 4.1 Fast Reasoning evaluation endpoint (pre-existing)
+- [x] `api/evaluate-perplexity.ts` — Sonar Reasoning Pro High evaluation endpoint
+- [x] `api/gpt-realtime.ts` — GPT Realtime 1.5 endpoint (Olivia live voice/video interaction)
+- [x] `src/lib/evaluationOrchestrator.ts` — parallel batch firing (waves of 2 categories)
+- [x] `src/types/evaluation.ts` — per-LLM response types, MetricConsensus, batch results
+- [x] Dynamic timeout: 120s + 5s per metric (max 300s)
+- [x] Partial success handling: 3/5 LLMs responding = usable result
+- [x] Supabase: `llm_evaluations` table (user_id, llm_model, category, metrics_json, created_at)
 
 #### Conv 13-14: Opus Judge System
 - [ ] `api/judge-opus.ts` — Opus 4.6 judge endpoint
@@ -522,7 +522,25 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 7 (Conv 7-8 Answer Aggregation — PHASE 1 COMPLETE)
+### Latest Update: 2026-03-09 — Session 8 (Conv 11-12 — 5-LLM Parallel Evaluator — COMPLETE)
+
+**What was done this conversation:**
+- **Conv 11-12: 5-LLM Parallel Evaluator** (ALL items):
+  - **src/types/evaluation.ts** (~175 lines): Shared types for entire evaluation pipeline. EvaluationMetric, CityCandidate, TavilyResult (shared request types). MetricScore, CityEvaluation, LLMEvaluationResponse, EvaluationMetadata, EvaluateResponse (shared response types). EvaluatorModel union, EvaluatorResult, CategoryBatchResult with isUsable flag (≥3/5 LLMs). MetricConsensus with mean/median/stdDev per metric per location, confidenceLevel (unanimous/strong/moderate/split), needsJudgeReview (σ>15). LocationConsensus, EvaluationWave, OrchestrationResult, LLMEvaluationRow (Supabase shape).
+  - **api/evaluate-sonnet.ts** (~230 lines): Claude Sonnet 4.6 via Anthropic Messages API. anthropic-version header, text block extraction, input_tokens/output_tokens from usage. $3.00/$15.00 per 1M. Strengths: structured scoring, qualitative nuance.
+  - **api/evaluate-gpt54.ts** (~230 lines): GPT-5.4 via OpenAI Chat Completions API. response_format: json_object, reasoning_tokens extraction. $5.00/$20.00 per 1M. Strengths: factual knowledge, edge case detection.
+  - **api/evaluate-gemini.ts** (~240 lines): Gemini 3.1 Pro Preview via generateContent API. google_search tool, responseMimeType: application/json, usageMetadata extraction. $1.25/$10.00 per 1M. Strengths: inferential reasoning, Google Search grounding.
+  - **api/evaluate-perplexity.ts** (~230 lines): Perplexity Sonar Reasoning Pro High via OpenAI-compatible API. Native web search, URL citation emphasis. $1.00/$1.00 per 1M. Strengths: best native search, fact-checking.
+  - **api/evaluate-grok.ts**: Already existed from previous session. Grok 4.1 Fast Reasoning via xAI API. $0.20/$0.50 per 1M. Verified compatible with shared types.
+  - **api/gpt-realtime.ts** (~160 lines): GPT Realtime 1.5 ephemeral session token endpoint. Creates WebRTC session via OpenAI Realtime Sessions API. Voice presets, Olivia persona instructions, server VAD turn detection. Returns ephemeral token (60s expiry) + realtimeSessionId. Session creation free; audio tokens billed separately.
+  - **src/lib/evaluationOrchestrator.ts** (~280 lines): Full parallel batch firing system. CATEGORY_WAVES: 13 waves of 1-2 categories ordered by tier (Survival→Identity). runEvaluation() accepts metricsByCategory + cities + tavilyByMetric. Per-wave: fires all categories in parallel, each category → 5 LLMs via Promise.all with AbortController timeout. Dynamic timeout: 120s + 5s per metric (max 300s). MIN_USABLE_LLMS = 3. Consensus builder: mean/median/stdDev per metric per location. σ > 15 → needsJudgeReview. confidenceLevel thresholds: ≤5 unanimous, ≤10 strong, ≤15 moderate, >15 split. Inter-wave 1s delay. persistEvaluationResults() writes to Supabase llm_evaluations table. onWaveComplete callback for UI progress.
+  - All 5 evaluation endpoints follow identical pattern: POST, validation, prompt construction, API call, JSON parse with fallback cleanup, field validation, token/cost tracking, metadata response.
+  - Build verified: tsc 0 errors, Vite 0 errors, 669 modules transformed.
+  - **Conv 11-12 is now COMPLETE.**
+- **Also done**: Audited Conv 7-8 files (answerAggregator, qualityScorer, useAggregatedProfile, ReadinessIndicator, green light trigger) — all clean, no bugs.
+- **What's next**: Conv 13-14 — Opus Judge System (api/judge-opus.ts, src/lib/judgeOrchestrator.ts, src/types/judge.ts, σ>15 detection, anti-hallucination safeguard, judge_reports table).
+
+### Previous Update: 2026-03-09 — Session 7 (Conv 7-8 Answer Aggregation — PHASE 1 COMPLETE)
 
 **What was done this conversation:**
 - **Conv 7-8: Answer Aggregation + Quality** (ALL 6 items):
