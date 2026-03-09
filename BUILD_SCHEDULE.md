@@ -131,12 +131,12 @@
 - [x] Olivia integration: "You can skip this section — your paragraphs covered it"
 
 #### Conv 7-8: Answer Aggregation + Quality
-- [ ] `src/lib/answerAggregator.ts` — merge Paragraphical + Main + Modules into unified user profile
-- [ ] `src/lib/qualityScorer.ts` — answer completeness and depth scoring
-- [ ] Dashboard: completion status per module (not started / in progress / complete)
-- [ ] Dashboard: overall readiness indicator (% toward report-ready)
-- [ ] Supabase: `user_profiles_computed` table (aggregated profile from all answers)
-- [ ] Green light trigger: Olivia congratulates when MOE target reached
+- [x] `src/lib/answerAggregator.ts` — merge Paragraphical + Main + Modules into unified user profile
+- [x] `src/lib/qualityScorer.ts` — answer completeness and depth scoring
+- [x] Dashboard: completion status per module (not started / in progress / complete)
+- [x] Dashboard: overall readiness indicator (% toward report-ready)
+- [x] Supabase: `user_profiles_computed` table (aggregated profile from all answers)
+- [x] Green light trigger: Olivia congratulates when MOE target reached
 
 ### PHASE 2: EVALUATION PIPELINE (Conversations 9-16)
 *The AI evaluation engine. Depends on Phase 1 data collection being functional.*
@@ -522,9 +522,25 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 7 (EIG Question Prioritization — Conv 5-6 COMPLETE)
+### Latest Update: 2026-03-09 — Session 7 (Conv 7-8 Answer Aggregation — PHASE 1 COMPLETE)
 
 **What was done this conversation:**
+- **Conv 7-8: Answer Aggregation + Quality** (ALL 6 items):
+  - **answerAggregator.ts** (~350 lines): Merges all 7 data sources into unified `AggregatedProfile`. Per-source extractors: Paragraphical (metrics + module_relevance + dnw/mh signals → module keyword matching), Demographics (rule-based field→module mapping + baseline), DNW (severity → modules via question `.modules[]` lookup), MH (importance → modules), Tradeoffs (slider strength → modules), General (normalized → modules), Mini Modules (localStorage → per-module signals). All values normalized 0-1 with confidence weights. Module-level aggregation with source breakdown.
+  - **qualityScorer.ts** (~250 lines): Weighted readiness formula: 40% source completeness (X/7 sources) + 30% average module depth (signal count × source diversity × coverage signal) + 20% MOE-based coverage + 10% completed module bonus. Per-module quality: empty/sparse/adequate/good/excellent. Gap detection: weight > 0.03 and status ≤ sparse. Next steps generator: missing sources (highest impact, Paragraphical=15), gap modules (5 impact), low-depth polish (3 impact), sorted by impact with priority ranks.
+  - **useAggregatedProfile.ts** (~130 lines): Reactive hook composing aggregateProfile + scoreQuality. Memoized on session answer changes. Auto-persists to Supabase `user_profiles_computed` table via upsert (3s debounce, fingerprint dedup). Returns readiness, quality, profile, activeSourceCount, totalSignals, hasData.
+  - **ReadinessIndicator.tsx + CSS** (~230 lines): Dashboard widget. Readiness % with animated progress bar, source/module/signal/gap counts, top 3 next steps with priority badges and impact estimates, celebration state at ≥80%. WCAG verified: all text ≥11px, C.textPrimary (18.4:1), C.textAccent (7.6:1), C.textMuted (6.4:1), C.scoreGreen (8.5:1), C.gold (9.0:1). Light mode @media query. Color never sole indicator.
+  - **Dashboard.tsx**: ReadinessIndicator wired between CoverageMeter (400ms) and ModuleGrid (550ms) at 450ms stagger. Module status (not_started/in_progress/completed/recommended) already existed via enrichedModules.
+  - **MiniModuleFlow.tsx green light trigger**: Toast celebration when coverage.isReportReady becomes true during active answering. useRef prevents duplicate. Duration 8s, sparkle icon.
+  - **Supabase**: user_profiles_computed table upsert with session_id, tier, confidence, readiness, source_counts, completed_modules, gap/adequate counts, next_steps, globe_region, timestamps.
+  - Build verified: 0 errors, 669 modules transformed.
+  - **Conv 7-8 is now COMPLETE. PHASE 1 (Data Collection Engine) is COMPLETE** — all Conv 1-8 items done.
+- **Also completed earlier in session**: Conv 5-6 final item (EIG question prioritization), 4 pre-existing build errors fixed.
+- **What's next**: PHASE 2 — Conv 9-10 Tavily Research Pipeline (tavily-research.ts, tavily-search.ts, tavilyClient.ts, cache layer, tavily_cache table).
+
+### Previous Update: 2026-03-09 — Session 7 (EIG Question Prioritization — Conv 5-6 COMPLETE)
+
+**What was done that conversation:**
 - **Engine Wiring, Bite 8**: EIG-driven question prioritization — the final Conv 5-6 item
   - **useAdaptivePriority.ts** (~170 lines): Bridge hook between adaptive engine (EIG-sorted beliefs) and useModuleState (section/question navigation grid). Builds `locationMap` (questionNumber → {sectionIndex, questionIndex}) and `eigSequence` (questions sorted by EIG descending, skipping pre-filled). `goNextAdaptive()` jumps to highest-EIG unanswered question. `goPrevAdaptive()` retraces visited-question history stack (not sequential). Returns `eigRank`, `totalPrioritized`, `answeredPrioritized`, `isAdaptiveComplete`, `isFirstInHistory`. Graceful fallback to sequential when adaptive unavailable.
   - **MiniModuleFlow.tsx**: Replaced sequential `ms.goNext()`/`ms.goPrev()` with EIG-priority navigation when adaptive active. Completion detection uses `priority.isAdaptiveComplete` (all questions answered or MOE target reached). Prev button disabled by `priority.isFirstInHistory` (history stack). Skip handler uses EIG-priority nav. Adaptive insight bar enhanced with EIG rank badge and answered/total counter.
