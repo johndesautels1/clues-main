@@ -7,6 +7,7 @@
  *  /login           → Login / Sign-up / Forgot password
  *  /paragraphical   → 30-paragraph input flow
  *  /questionnaire/* → Demographics, DNW, MH, General questions
+ *  /module/:moduleId → Mini module questionnaire (23 modules × 100 Q)
  *  /results         → Evaluation results (future)
  *  /reports         → Report viewer (future)
  *
@@ -24,7 +25,7 @@ import { DiscoveryFlow } from './components/Discovery';
 import { LoginPage } from './components/Auth/LoginPage';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { QuestionLibrary } from './components/Admin/QuestionLibrary';
-import { MainQuestionnaire } from './components/Questionnaire';
+import { MainQuestionnaire, ModuleLauncher } from './components/Questionnaire';
 
 function App() {
   return (
@@ -60,6 +61,16 @@ function App() {
               element={
                 <ProtectedRoute allowAnonymous>
                   <MainQuestionnaire />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Mini Module Questionnaire — 23 individual modules × 100 questions */}
+            <Route
+              path="/module/:moduleId"
+              element={
+                <ProtectedRoute allowAnonymous>
+                  <ModuleLauncher />
                 </ProtectedRoute>
               }
             />
