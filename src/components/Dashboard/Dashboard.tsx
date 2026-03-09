@@ -17,6 +17,7 @@ import { OliviaBubble } from '../Shared/OliviaBubble';
 import { EmiliaBubble } from '../Shared/EmiliaBubble';
 import { useUser } from '../../context/UserContext';
 import { useRelevanceState } from '../../hooks/useRelevanceState';
+import { CoverageMeter } from '../Questionnaire/CoverageMeter';
 import { MODULES } from '../../data/modules';
 import type { ModuleDefinition, ModuleStatus } from '../../data/modules';
 import type { SubSection } from '../../types';
@@ -173,10 +174,18 @@ export function Dashboard() {
           />
         </section>
 
+        {/* Coverage Meter */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '400ms' }}
+        >
+          <CoverageMeter variant="full" />
+        </section>
+
         {/* 23 Module Grid */}
         <section
           className="dashboard__section"
-          style={{ animationDelay: '450ms' }}
+          style={{ animationDelay: '500ms' }}
         >
           <h2 className="dashboard__section-title">Exploration Modules</h2>
           <p className="dashboard__section-subtitle">
