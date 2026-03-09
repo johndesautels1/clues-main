@@ -534,8 +534,12 @@ Target: < 10KB. Everything else lives in specialized docs.
 - **Engine Wiring, Bite 1**: Coverage tracker → React layer
   - **useCoverageState.ts** (~130 lines): Reactive hook computing CoverageState from ALL 7 data sources (paragraphical extraction, demographics, DNW, MH, tradeoffs, general, mini module localStorage). Derived state — no new reducer actions. Returns coverage, recommendedModules (gap analysis), isReportReady flag, overallPercentage.
   - Audit: all 7 `applyCoverage*` signatures verified against `coverageTracker.ts`, localStorage key patterns match `useModuleState`, TypeScript clean.
+- **Engine Wiring, Bite 2**: Module relevance engine → React layer
+  - **useRelevanceState.ts** (~110 lines): Reactive hook computing which modules to recommend. Chains all 6 `apply*` functions from moduleRelevanceEngine.ts (paragraphical, demographics, DNW, MH, tradeoffs, general). Returns recommendedModules sorted by priority, `isRecommended(moduleId)` lookup, `getRelevance(moduleId)` score, estimated question count.
+  - Recommendation logic: `relevance >= 0.35 AND confidence < 0.75`, priority = `relevance × (1 - confidence)`.
+  - Audit: all 6 `apply*` signatures verified, all imports confirmed exported, argument types match UserSession fields, TypeScript clean.
 - TypeScript compilation verified clean — zero errors
-- **What's next**: Bite 2 — moduleRelevanceEngine → Dashboard (module recommendation badges). Bite 3 — adaptiveEngine → useModuleState (smart question ordering).
+- **What's next**: Bite 3 — adaptiveEngine → useModuleState (smart question ordering within mini modules).
 
 **Previous conversation (2026-03-09, Session 4) completed:**
 - COMPLETED Section 10, Steps 3-6: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables
