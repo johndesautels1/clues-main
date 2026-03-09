@@ -459,6 +459,7 @@ export function applyCoverageFromMiniModule(
   const dim = updated.dimensions.find(d => d.moduleId === moduleId);
   if (!dim) return updated;
 
+  if (totalQuestions === 0) return updated;
   const completionRatio = answeredCount / totalQuestions;
   dim.dataPoints += answeredCount;
   dim.signalStrength = Math.min(1, dim.signalStrength + completionRatio * 0.8);
@@ -490,7 +491,7 @@ export function analyzeGaps(state: CoverageState): CoverageGap[] {
         moduleName: dim.moduleName,
         severity: 'critical',
         reason: `High weight (${(dim.weight * 100).toFixed(0)}%) but very low signal (${(dim.signalStrength * 100).toFixed(0)}%)`,
-        estimatedQuestionsToResolve: Math.ceil((0.8 - dim.signalStrength) / 0.05),
+        estimatedQuestionsToResolve: Math.max(1, Math.ceil((0.8 - dim.signalStrength) / 0.05)),
       });
     } else if (adequacy < 0.6) {
       gaps.push({
@@ -498,7 +499,7 @@ export function analyzeGaps(state: CoverageState): CoverageGap[] {
         moduleName: dim.moduleName,
         severity: 'moderate',
         reason: `Weight (${(dim.weight * 100).toFixed(0)}%) exceeds signal confidence (${(dim.signalStrength * 100).toFixed(0)}%)`,
-        estimatedQuestionsToResolve: Math.ceil((0.7 - dim.signalStrength) / 0.05),
+        estimatedQuestionsToResolve: Math.max(1, Math.ceil((0.7 - dim.signalStrength) / 0.05)),
       });
     } else if (adequacy < 0.8 && dim.weight > 0.05) {
       gaps.push({
@@ -506,7 +507,7 @@ export function analyzeGaps(state: CoverageState): CoverageGap[] {
         moduleName: dim.moduleName,
         severity: 'minor',
         reason: `Could benefit from more data (signal: ${(dim.signalStrength * 100).toFixed(0)}%)`,
-        estimatedQuestionsToResolve: Math.ceil((0.6 - dim.signalStrength) / 0.05),
+        estimatedQuestionsToResolve: Math.max(1, Math.ceil((0.6 - dim.signalStrength) / 0.05)),
       });
     }
   }
@@ -559,8 +560,10 @@ function addOrUpdateSource(
 ): void {
   const existing = dim.sources.find(s => s.type === type);
   if (existing) {
+    const prevTotal = existing.dataPoints;
     existing.dataPoints += dataPoints;
-    existing.avgStrength = (existing.avgStrength + strength) / 2;
+    // Weighted running average: preserves contribution of all prior data points
+    existing.avgStrength = (existing.avgStrength * prevTotal + strength * dataPoints) / existing.dataPoints;
   } else {
     dim.sources.push({ type, dataPoints, avgStrength: strength });
   }
