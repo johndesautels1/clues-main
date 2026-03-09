@@ -522,26 +522,38 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued)
+### Latest Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued + Build Fix)
 
-**What was done this conversation:**
-- **WCAG Opacity Violations Fixed (4 files):**
-  - `ParagraphicalFlow.css`: `.para-flow__btn:disabled` opacity 0.4 → 0.6 + grayscale filter
-  - `Questionnaire.css`: `.qr-ranking-arrow:disabled` opacity 0.3 → 0.6 + grayscale filter
-  - `QuestionLibrary.css`: `.ql-empty-state .ql-icon` opacity 0.4 → 0.6
-  - `OliviaPanel.tsx`: Loading placeholder opacity 0.5 → 0.6
-- **Hardcoded Dark rgba → CSS Custom Properties (2 files):**
-  - `OliviaPanel.tsx`: All `rgba(10,14,26,...)` and `rgba(255,255,255,0.04)` → `var(--bg-secondary)`, `var(--bg-card)`, `var(--border-glass)`
-  - `NavOverlay.tsx`: Overlay background `rgba(10,14,26,0.92)` → `var(--bg-glass-heavy)`, buttons → `var(--bg-card)`, `var(--bg-glass)`
-- **Light-Mode Overrides Added (6 CSS files):**
-  - `Questionnaire.css`: textarea, dropdown, search inputs
-  - `QuestionLibrary.css`: Full variable overrides for admin panel (bg, text, surfaces, modals)
-  - `Discovery.css`: textarea background
-  - `MapOverlay.css`: Leaflet controls, back button, layer toggle
-  - `PrivacyPolicyModal.css`: Hardcoded dark gradient → `var(--bg-secondary)`
-- **Accessibility Fix:**
-  - `SideBySideMetricView.tsx`: Added `aria-label` to user justification button
-- **tsc: 0 errors** after all changes.
+**What was done this conversation (4 commits):**
+
+**Commit 1 — WCAG opacity + hardcoded rgba (5 files):**
+- `ParagraphicalFlow.css`: `.para-flow__btn:disabled` opacity 0.4 → 0.6 + grayscale filter
+- `Questionnaire.css`: `.qr-ranking-arrow:disabled` opacity 0.3 → 0.6 + grayscale filter
+- `QuestionLibrary.css`: `.ql-empty-state .ql-icon` opacity 0.4 → 0.6
+- `OliviaPanel.tsx`: Loading placeholder opacity 0.5 → 0.6; all `rgba(10,14,26,...)` and `rgba(255,255,255,0.04)` → CSS custom properties
+- `NavOverlay.tsx`: Overlay background → `var(--bg-glass-heavy)`, buttons → `var(--bg-card)`, `var(--bg-glass)`
+
+**Commit 2 — Light-mode overrides + aria (6 files):**
+- `Questionnaire.css`: light-mode overrides for textarea, dropdown, search inputs
+- `QuestionLibrary.css`: Full light-mode variable overrides for admin panel
+- `Discovery.css`: textarea background light-mode override
+- `MapOverlay.css`: Leaflet controls, back button, layer toggle light-mode overrides
+- `PrivacyPolicyModal.css`: Hardcoded dark gradient → `var(--bg-secondary)`
+- `SideBySideMetricView.tsx`: Added `aria-label` to user justification button
+
+**Commit 3 — Documentation:**
+- README.md audit fix status updated with all Session 12 fixes
+- BUILD_SCHEDULE.md handoff updated
+
+**Commit 4 — Build fix (5 files):**
+- `relativeScoring.ts`: Removed import statements for types not referenced in that file (types still exist in their source files and are used elsewhere — `JudgeReport` in `judgeOrchestrator.ts`, `CategoryWeights` in `categoryRollup.ts`, etc.)
+- `categoryRollup.ts`: Removed unused `ConfidenceLevel` import (type still exists in `smartScore.ts`)
+- `smartScoreEngine.ts`: Prefixed unused function param `_locationConsensus` (placeholder function that returns `[]`)
+- `evaluationOrchestrator.ts`: `process.env.VERCEL_URL` → `import.meta.env.VITE_VERCEL_URL` (Vite browser build has no `process`)
+- `judgeOrchestrator.ts`: Same `process.env` → `import.meta.env` fix
+- **`npm run build` (tsc -b && vite build): PASSES CLEAN**
+
+**IMPORTANT NOTE FOR NEXT AGENT:** The removed imports in Commit 4 were ONLY `import` statements at the top of files that didn't reference those types. The types themselves (`JudgeReport`, `CategoryWeights`, `OrchestrationResult`, etc.) are NOT deleted — they still exist in `src/types/judge.ts`, `src/types/smartScore.ts`, `src/types/evaluation.ts` and are used by other files. When `relativeScoring.ts` grows to need them, re-add the imports.
 
 **What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
 
