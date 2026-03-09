@@ -19,8 +19,6 @@ import type {
   TavilyMetricSearchResponse,
   MetricResearch,
   RegionResearch,
-  MemoryCacheEntry,
-  TavilySearchResponse,
 } from '../types/tavily';
 
 // ─── Configuration ───────────────────────────────────────────────
@@ -30,9 +28,15 @@ const MAX_MEMORY_ENTRIES = 50;
 
 // ─── In-Memory Cache (LRU, max 50 entries) ──────────────────────
 
-const memoryCache = new Map<string, MemoryCacheEntry>();
+interface CacheEntry<T = unknown> {
+  data: T;
+  cachedAt: number;
+  expiresAt: number;
+}
 
-function getFromMemory(queryHash: string): TavilySearchResponse | null {
+const memoryCache = new Map<string, CacheEntry>();
+
+function getFromMemory<T>(queryHash: string): T | null {
   const entry = memoryCache.get(queryHash);
   if (!entry) return null;
 
@@ -45,10 +49,10 @@ function getFromMemory(queryHash: string): TavilySearchResponse | null {
   // Move to end (LRU touch)
   memoryCache.delete(queryHash);
   memoryCache.set(queryHash, entry);
-  return entry.response;
+  return entry.data as T;
 }
 
-function setInMemory(queryHash: string, response: TavilySearchResponse): void {
+function setInMemory<T>(queryHash: string, data: T): void {
   // Evict oldest if at capacity
   if (memoryCache.size >= MAX_MEMORY_ENTRIES) {
     const oldest = memoryCache.keys().next().value;
@@ -58,8 +62,7 @@ function setInMemory(queryHash: string, response: TavilySearchResponse): void {
   }
 
   memoryCache.set(queryHash, {
-    queryHash,
-    response,
+    data,
     cachedAt: Date.now(),
     expiresAt: Date.now() + CACHE_TTL_MS,
   });
@@ -105,18 +108,9 @@ export async function researchRegion(
   const cacheKey = `region_${region}_${(topics ?? []).join(',')}`;
   const queryHash = await hashQuery(cacheKey);
 
-  // Check memory cache
-  const cached = getFromMemory(queryHash);
-  if (cached) {
-    return {
-      region,
-      queries: [],
-      topics: [],
-      sources: [],
-      researchedAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + CACHE_TTL_MS).toISOString(),
-    };
-  }
+  // Check memory cache — returns full RegionResearch
+  const cached = getFromMemory<RegionResearch>(queryHash);
+  if (cached) return cached;
 
   // Deduplicated API call
   const result = await dedupedFetch<TavilyResearchResponse>(cacheKey, async () => {
@@ -134,12 +128,8 @@ export async function researchRegion(
     return response.json() as Promise<TavilyResearchResponse>;
   });
 
-  // Cache the response in memory
-  setInMemory(queryHash, {
-    query: cacheKey,
-    results: [],
-    response_time: result.usage.durationMs / 1000,
-  });
+  // Cache the full RegionResearch in memory
+  setInMemory(queryHash, result.research);
 
   return result.research;
 }
@@ -175,15 +165,10 @@ export async function searchMetrics(
     return response.json() as Promise<TavilyMetricSearchResponse>;
   });
 
-  // Cache individual metric results in memory
+  // Cache individual metric results in memory (keyed by metric query + location)
   for (const metricResult of result.results) {
     const metricHash = await hashQuery(`${metricResult.query}_${city}_${country}`);
-    setInMemory(metricHash, {
-      query: metricResult.query,
-      answer: metricResult.answer,
-      results: metricResult.results,
-      response_time: metricResult.responseTimeMs / 1000,
-    });
+    setInMemory<MetricResearch>(metricHash, metricResult);
   }
 
   return result.results;
@@ -197,14 +182,9 @@ export function getCacheStats(): {
   maxEntries: number;
   oldestEntryAge: number | null;
 } {
-  let oldestAge: number | null = null;
-  for (const entry of memoryCache.values()) {
-    const age = Date.now() - entry.cachedAt;
-    if (oldestAge === null || age > oldestAge) {
-      oldestAge = age;
-    }
-    break; // LRU: first entry is oldest
-  }
+  // LRU: first entry in Map insertion order is the oldest
+  const firstEntry = memoryCache.values().next().value;
+  const oldestAge = firstEntry ? Date.now() - firstEntry.cachedAt : null;
 
   return {
     memoryEntries: memoryCache.size,
