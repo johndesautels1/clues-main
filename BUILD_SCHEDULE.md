@@ -522,65 +522,63 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 (LLM Provider Architecture + Adaptive Engine Scaffold)
+### Latest Update: 2026-03-09 — Session 2 (Question Changeability Architecture)
 
 **What was done this conversation:**
-- Created `LLM_PROVIDER_ARCHITECTURE.md` — complete LLM assignment document:
-  - Defines which LLM handles which task (Gemini=Paragraphical, GPT-5.4=refinement, Opus=judge)
-  - **KEY DECISION**: Module/question selection is PURE MATH (not LLM) — deterministic engine
-  - **KEY DECISION**: GPT-5.4 fires ONE refinement call per completed Main Module section (~$0.50 total)
-  - **KEY DECISION**: Adaptive engine uses Computerized Adaptive Testing (CAT) — same math as GRE/GMAT
-  - Olivia delivers questions conversationally but does NOT select them
-  - Documents full pipeline: Paragraphical → Main Module → Adaptive Modules → 5-LLM Eval → Opus Judge → SMART Scores → GAMMA Report
-- Built `src/lib/coverageTracker.ts` (~400 lines) — 23-dimension coverage state:
-  - `DimensionCoverage` per module: dataPoints, signalStrength, signalConsistency, weight, moeContribution
-  - Functions to apply coverage from: Paragraphical, Demographics, DNW, MH, Trade-offs, General, Mini Modules
-  - Gap analysis: identifies critical/moderate/minor coverage gaps
-  - MOE decomposition: overall MOE broken down per-module
-  - Keyword maps: DNW/MH text → module relevance (deterministic, no LLM)
-- Built `src/lib/moduleRelevanceEngine.ts` (~380 lines) — deterministic module recommendation:
-  - `ModuleRelevance` per module: relevance (0-1), confidence (0-1), recommended flag, reasons
-  - `DEMOGRAPHIC_RULES` array: 15+ rules mapping demographic facts to module boosts
-  - `MODULE_KEYWORDS` map: text keywords → module IDs for DNW/MH answer matching
-  - Recommendation logic: priority = relevance × (1 - confidence). High relevance + low confidence = recommend
-  - Functions to apply relevance from: Paragraphical, Demographics, DNW, MH, Trade-offs, General
-- Built `src/lib/adaptiveEngine.ts` (~380 lines) — CAT question selection engine:
-  - `QuestionBelief` per question: predictionUncertainty, smartScoreImpact, EIG (Expected Information Gain)
-  - `initializeAdaptiveEngine()` — creates belief states for all questions in recommended modules
-  - `selectNextQuestion()` — returns highest-EIG unanswered question + selection reason for Olivia
-  - `recordAnswer()` — updates beliefs, recalculates EIG, checks stopping criterion (MOE ≤ 2%)
-  - `markPreFilled()` — skip questions answerable from upstream data
-  - Information overlap detection: answering Q reduces EIG of nearby/same-section questions
-  - Typical result: 8-15 questions per module (not 100), 40-60 total across 3-5 modules (not 2,300)
+- **KEY ARCHITECTURE DECISION**: `modules: string[]` field added to QuestionItem type definition
+  - Question-to-module mapping now lives ON the question, not in separate lookup tables
+  - Founder's wife audits all questions — when she changes a question, the module mapping
+    is right there next to the question text, impossible to forget
+  - This replaces: `DNW_MODULE_MAP`, `MH_MODULE_MAP` (coverageTracker.ts), `MODULE_KEYWORDS` (moduleRelevanceEngine.ts)
+  - Full architecture documented in Section 10 of this file (PERMANENT — survives compression)
+- Documented the complete funnel architecture in Section 10:
+  - Paragraphical (30 paragraphs) → Main Module (5 sections) → System-selected Mini Modules (3-8 of 23)
+  - Step-off/step-on at ANY point — system always produces valid report at current confidence level
+  - CAT/EIG adaptive logic within modules: 8-15 questions per module, not 100
+  - ~250 answers out of ~2,500 → MOE ≤ 2%
+  - Bayesian-like learning: deduces, induces, logic-jumps, funnels
+- Audited ALL markdown docs for contradictions with this architecture — NONE found
+- All docs are consistent: no separate mapping files documented as canonical
+
+**Previous conversation (2026-03-09, Session 1) built:**
+- Created `LLM_PROVIDER_ARCHITECTURE.md` — complete LLM assignment document
+- Built `src/lib/coverageTracker.ts` (~400 lines) — 23-dimension coverage state
+- Built `src/lib/moduleRelevanceEngine.ts` (~380 lines) — deterministic module recommendation
+- Built `src/lib/adaptiveEngine.ts` (~380 lines) — CAT question selection engine
 
 **Previous conversation (2026-03-08) built:**
 - Questionnaire Renderer (Phase 1, Conv 1-2): MainQuestionnaire, QuestionRenderer, 5 sections, logic jumps
 - Question library split: 14,415 lines → 26 per-module files
 - Supabase schema: 20 tables + 2 views with RLS
 - 5 Supabase persistence bug fixes
-- (See git log for full details)
 
 **Current build position:**
 - Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
-- Phase 1, Conv 5-6 (Adaptive Intelligence) is SCAFFOLDED — core engines exist, need UI + integration
-- Phase 1, Conv 3-4 (Main + Mini Module Flows) is NEXT — needed to wire adaptive engine to UI
-- No evaluation pipeline code exists yet (Phase 2)
-- Results components exist as shells but are not wired to routes or data (Phase 3)
+- Phase 1, Conv 5-6 (Adaptive Intelligence) is SCAFFOLDED — core engines exist, need refactoring
+- **BEFORE Conv 3-4**: Must add `modules: string[]` to all 28 question files (Section 10 steps 1-2)
+- **BEFORE Conv 3-4**: Must refactor coverageTracker + moduleRelevanceEngine to read from question `modules` field
+- Phase 1, Conv 3-4 (Main + Mini Module Flows) is NEXT after question tagging is complete
 
 **Next agent should:**
-1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md, PARAGRAPHICAL_ARCHITECTURE.md, **LLM_PROVIDER_ARCHITECTURE.md** (NEW)
-2. Begin Phase 1, Conv 3-4: Build Mini Module Flows
-3. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
-4. Build `CoverageMeter.tsx` — real-time MOE/coverage UI component
-5. Build `ModuleLauncher.tsx` — Dashboard integration using `moduleRelevanceEngine` scores
-6. Wire adaptive engine into questionnaire flow: `adaptiveEngine.selectNextQuestion()` → QuestionRenderer
-7. Build GPT-5.4 refinement endpoint: `api/refinement-gpt.ts` (1 call per section, catches emergent patterns)
+1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md (especially **Section 10**), PARAGRAPHICAL_ARCHITECTURE.md, LLM_PROVIDER_ARCHITECTURE.md
+2. **FIRST**: Execute Section 10 implementation steps:
+   - Step 1: Add `modules: string[]` to QuestionItem in `src/data/questions/types.ts`
+   - Step 2: Tag every question in all 28 question files with correct `modules` values (READ each question, do NOT fabricate)
+   - Step 3: Refactor `coverageTracker.ts` — delete `DNW_MODULE_MAP`, `MH_MODULE_MAP`, read from questions
+   - Step 4: Refactor `moduleRelevanceEngine.ts` — delete `MODULE_KEYWORDS`, read from questions
+   - Step 5: Verify with grep: zero remaining hardcoded keyword-to-module lookup tables
+3. **THEN**: Begin Phase 1, Conv 3-4: Build Mini Module Flows
+4. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
+5. Build `CoverageMeter.tsx` — real-time MOE/coverage UI component
+6. Build `ModuleLauncher.tsx` — Dashboard integration using `moduleRelevanceEngine` scores
+7. Wire adaptive engine into questionnaire flow: `adaptiveEngine.selectNextQuestion()` → QuestionRenderer
 
 **Known issues:**
 - `questionLibrary.ts` (original monolith) still exists — can be deleted once all consumers migrated
 - `README.md` at 46KB needs trimming (not urgent, do during Phase 4 polish)
 - Trade-off pairs in `coverageTracker.ts` and `moduleRelevanceEngine.ts` use placeholder mappings (tq1-tq15) — need to verify against actual tradeoff question data
 - Olivia's logic-jump behavior in MainQuestionnaire is currently passive (needs Conv 3-4 enhancement)
+- `coverageTracker.ts` and `moduleRelevanceEngine.ts` still have hardcoded keyword maps — MUST be refactored per Section 10
 
 ---
 
@@ -623,6 +621,135 @@ Phase 4: Monetization & Polish
 - Stripe (Phase 4) can be built anytime after Phase 1
 - Light Mode (Phase 4) can be built anytime
 - Tavily pipeline (Phase 2 start) can begin as soon as Paragraphical data exists (already does)
+
+---
+
+## 10. QUESTION CHANGEABILITY ARCHITECTURE (PERMANENT — DO NOT REMOVE)
+
+> **WHY THIS EXISTS**: The founder's wife audits every question in the platform. She may change
+> ANY question — in ANY module, in ANY section — at ANY time. When she changes a question,
+> the system MUST NOT break. This section documents the architectural decision that makes
+> question changes safe.
+>
+> **Date**: 2026-03-09
+> **Status**: MANDATORY ARCHITECTURE — Every agent must follow this
+
+### The Problem
+
+Question-to-module mappings currently live in SEPARATE files from the questions themselves:
+- `coverageTracker.ts` has `DNW_MODULE_MAP` and `MH_MODULE_MAP` (keyword → module lookup tables)
+- `moduleRelevanceEngine.ts` has `MODULE_KEYWORDS` (keyword → module lookup tables)
+- `adaptiveEngine.ts` reads from `moduleRelevanceEngine.ts` for relevance data
+- `tierEngine.ts` has `GQ_MODULE_SIGNALS` (GQ key → module mapping)
+
+When someone changes a question's text, wording, or intent, NOBODY remembers to update
+the keyword maps in 2-3 other files. The system silently miscategorizes questions.
+This is a ticking time bomb.
+
+### The Solution: `modules: string[]` ON Each Question
+
+Every `QuestionItem` in `src/data/questions/types.ts` gets a `modules` field:
+
+```typescript
+export interface QuestionItem {
+  number: number;
+  question: string;
+  type: string;
+  sliderLeft?: string;
+  sliderRight?: string;
+  modules: string[];  // ← THE FIX: which of the 23 modules this question maps to
+}
+```
+
+**The mapping travels WITH the question.** When the auditor changes Q47 from
+"How important is healthcare access?" to "How important is specialist medical care
+for chronic conditions?", she sees `modules: ['health_wellness']` right there and
+can update it to `modules: ['health_wellness', 'family_children']` in the same edit.
+
+### What This Replaces
+
+Once `modules: string[]` is on every question:
+1. **DELETE** `DNW_MODULE_MAP` from `coverageTracker.ts` — read from question's `modules` field instead
+2. **DELETE** `MH_MODULE_MAP` from `coverageTracker.ts` — read from question's `modules` field instead
+3. **DELETE** `MODULE_KEYWORDS` from `moduleRelevanceEngine.ts` — read from question's `modules` field instead
+4. **KEEP** `GQ_MODULE_SIGNALS` in `tierEngine.ts` — this maps GQ answer KEYS (gq14, gq41, etc.) to modules,
+   which is different from mapping question TEXT to modules. But add `modules` to GQ questions too for consistency.
+5. **KEEP** `DEMOGRAPHIC_RULES` in `moduleRelevanceEngine.ts` — these map DEMOGRAPHIC FACTS (has_children, retired, etc.)
+   to module relevance boosts. These are about user attributes, not question text.
+6. **KEEP** `TRADEOFF_PAIRS` — tradeoff sliders inherently map to module pairs by design.
+   But add `modules` to tradeoff questions too for self-documentation.
+
+### Rules for Every Agent (NON-NEGOTIABLE)
+
+1. **NEVER** create a separate question-to-module mapping table. The mapping is ON the question.
+2. **NEVER** use keyword matching on question text to determine module relevance.
+   The `modules` field is explicit. Keywords are fragile and break when questions are reworded.
+3. When adding a new question to ANY module file, you MUST include the `modules: string[]` field.
+4. When changing a question's wording, CHECK if the `modules` field still makes sense.
+5. The `coverageTracker.ts` and `moduleRelevanceEngine.ts` engines must read `modules`
+   from the question definitions, not from internal lookup tables.
+
+### The Full Funnel (For Context)
+
+This is the CLUES user journey. The user can **step off at ANY point** and receive a valid
+report. The user can **step back on at ANY point** and improve their report's accuracy.
+
+```
+STEP 1: Paragraphical (30 free-form paragraphs, P1-P30)
+  → Gemini extracts 100-250 metrics, module_relevance scores
+  → Confidence: ~35%, MOE: high but valid report generated
+  → User CAN STOP HERE → Discovery tier report
+
+STEP 2: Main Module (5 sections, strict order)
+  2a. Demographics (34 questions) → +10% confidence
+      → Deterministic rules: has_children → family_children UP, retired → professional_career DOWN
+  2b. Do Not Wants (33 questions) → +15% confidence
+      → Severity 4-5 dealbreakers ELIMINATE cities, boost module weights
+  2c. Must Haves (33 questions) → +10% confidence
+      → Importance 4-5 requirements BOOST cities, boost module weights
+  2d. Trade-offs (15 sliders) → weights categories AGAINST each other
+      → Slider at 80/20 = 80% left category, 20% right category
+  2e. General Questions (50 questions) → +20% confidence
+      → Broad coverage, GQ answers map to module relevance via GQ_MODULE_SIGNALS
+  → User CAN STOP after any section → system recalculates tier + confidence
+
+STEP 3: System-Selected Mini Modules (23 available, system picks 3-8)
+  → getRecommendedModules() filters by relevance threshold (default 0.5)
+  → Only modules with relevance ≥ 0.5 AND confidence < 0.75 get recommended
+  → Priority = relevance × (1 - confidence) — high relevance + low confidence = ask first
+  → Within each module: CAT/EIG selects highest-value questions
+      → EIG = predictionUncertainty × smartScoreImpact × moduleWeight
+      → After each answer: nearby questions get uncertainty reduced (information overlap)
+      → Module stops when moduleMOE ≤ 2% (remaining questions auto-skipped)
+  → Typical: 8-15 questions per module, NOT all 100
+  → User CAN STOP after any module → system recalculates overall MOE
+
+CONVERGENCE: ~250 total answers → MOE ≤ 2% → Olivia congratulates → GAMMA Report generated
+  30 paragraphs + 34 demographics + 33 DNW + 33 MH + 15 tradeoffs + 50 general = 195 structured
+  + ~55 adaptive module questions (across 3-8 modules, heavily skipped)
+  ≈ 250 total → MOE ≤ 2%
+```
+
+### The Bayesian-Like Learning
+
+The system LEARNS as data arrives:
+- **Deduces**: DNW severity 5 on "crime" → safety_security is critical for this user
+- **Induces**: demographics "has children" + MH "schools" → family_children AND education_learning both boosted
+- **Logic-jumps**: upstream data already answered most education questions → adaptive engine
+  sees LOW EIG on those questions → SKIPS them → jumps to questions with actual gaps
+- **Funnels**: each answer narrows the possibility space. Country candidates shrink.
+  City rankings tighten. By module completion, the recommendation is precise.
+
+### Implementation Steps (When Ready)
+
+1. Add `modules: string[]` to `QuestionItem` type in `src/data/questions/types.ts`
+2. Tag every question in all 28 question files with correct `modules` values
+   — READ each question carefully, do NOT fabricate module assignments
+3. Update `coverageTracker.ts` to read `modules` from questions, delete `DNW_MODULE_MAP` and `MH_MODULE_MAP`
+4. Update `moduleRelevanceEngine.ts` to read `modules` from questions, delete `MODULE_KEYWORDS`
+5. Update `adaptiveEngine.ts` to use question-level `modules` for prediction uncertainty
+6. Verify with grep: zero remaining hardcoded keyword-to-module lookup tables
+7. Commit after each step
 
 ---
 
