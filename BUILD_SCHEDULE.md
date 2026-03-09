@@ -126,7 +126,7 @@
 - [ ] `src/lib/coverageTracker.ts` — 23-dimension coverage state
 - [x] `src/components/Questionnaire/CoverageMeter.tsx` — real-time MOE/coverage UI
 - [x] `src/components/Questionnaire/SkipLogic.tsx` — pre-fill and skip display
-- [ ] Question prioritization: most information-gain questions surface first
+- [x] Question prioritization: most information-gain questions surface first
 - [x] Cross-module inference: answer in Paragraphical → pre-fill in module
 - [x] Olivia integration: "You can skip this section — your paragraphs covered it"
 
@@ -522,9 +522,21 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 6 (CoverageMeter + Engine Wiring cont.)
+### Latest Update: 2026-03-09 — Session 7 (EIG Question Prioritization — Conv 5-6 COMPLETE)
 
 **What was done this conversation:**
+- **Engine Wiring, Bite 8**: EIG-driven question prioritization — the final Conv 5-6 item
+  - **useAdaptivePriority.ts** (~170 lines): Bridge hook between adaptive engine (EIG-sorted beliefs) and useModuleState (section/question navigation grid). Builds `locationMap` (questionNumber → {sectionIndex, questionIndex}) and `eigSequence` (questions sorted by EIG descending, skipping pre-filled). `goNextAdaptive()` jumps to highest-EIG unanswered question. `goPrevAdaptive()` retraces visited-question history stack (not sequential). Returns `eigRank`, `totalPrioritized`, `answeredPrioritized`, `isAdaptiveComplete`, `isFirstInHistory`. Graceful fallback to sequential when adaptive unavailable.
+  - **MiniModuleFlow.tsx**: Replaced sequential `ms.goNext()`/`ms.goPrev()` with EIG-priority navigation when adaptive active. Completion detection uses `priority.isAdaptiveComplete` (all questions answered or MOE target reached). Prev button disabled by `priority.isFirstInHistory` (history stack). Skip handler uses EIG-priority nav. Adaptive insight bar enhanced with EIG rank badge and answered/total counter.
+  - WCAG verified: EIG badge uses C.textAccent (7.6:1 vs #0a0e1a), 11px min font, color never sole indicator (text labels on all badges). All interactive elements ≥44px.
+  - Build verified: 0 errors, 664 modules transformed.
+  - **Conv 5-6 (Adaptive Intelligence Layer) is now COMPLETE** — all 6 checklist items done.
+- **Also fixed**: 4 pre-existing build errors (QuestionLibrary.tsx missing `modules` prop, useModuleState.ts useRef arg, moduleRelevanceEngine.ts unused import).
+- **What's next**: Conv 7-8 Answer Aggregation + Quality — `answerAggregator.ts`, `qualityScorer.ts`, dashboard completion status, readiness indicator, `user_profiles_computed` table, Olivia green light trigger.
+
+### Previous Update: 2026-03-09 — Session 6 (CoverageMeter + Engine Wiring cont.)
+
+**What was done that conversation:**
 - **Engine Wiring, Bite 6**: CoverageMeter.tsx — real-time MOE/coverage visualization
   - **CoverageMeter.tsx** (~330 lines): Two-variant component (compact + full). Compact: SVG MOE ring (r=18, circumference 113.1) + stats + gap count badge. Full: larger SVG ring (r=23, circumference 144.51) + overall progress bar + critical/moderate gap alert badges + expandable 23-dimension breakdown with per-module signal strength bars sorted weakest-first.
   - **Compact variant**: role="status" for screen readers, MOE ring with animated stroke-dasharray, coverage % + data point count, gap count badge with severity color.
