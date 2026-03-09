@@ -19,17 +19,10 @@
  * CLUES predicts: best country → top 3 cities → top 3 towns → top 3 neighborhoods
  */
 
-import { MODULES } from '../data/modules';
 import { getModuleById } from '../data/questions';
 import type { QuestionItem, QuestionSection } from '../data/questions/types';
-import type {
-  CoverageState,
-  DimensionCoverage,
-} from './coverageTracker';
-import type {
-  RelevanceResult,
-  ModuleRelevance,
-} from './moduleRelevanceEngine';
+import type { CoverageState } from './coverageTracker';
+import type { RelevanceResult } from './moduleRelevanceEngine';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -144,7 +137,7 @@ export interface NextQuestionResult {
  * Yes/No are lower (binary, less nuance).
  * Open-text is lowest (requires LLM to interpret, uncertain value).
  */
-function calculateSmartScoreImpact(question: QuestionItem, sectionTitle: string): number {
+function calculateSmartScoreImpact(question: QuestionItem, _sectionTitle: string): number {
   const type = question.type.toLowerCase();
 
   // Ranking questions explicitly order user priorities — highest impact
@@ -182,7 +175,7 @@ function calculateSmartScoreImpact(question: QuestionItem, sectionTitle: string)
  * Paragraphical or Main Module, uncertainty is lower.
  */
 function calculatePredictionUncertainty(
-  question: QuestionItem,
+  _question: QuestionItem,
   moduleId: string,
   coverage: CoverageState
 ): number {
