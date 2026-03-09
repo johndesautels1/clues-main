@@ -292,16 +292,17 @@ interface EvaluationResult {
 
 ---
 
-## 7. MAIN MODULE STRUCTURE (300 Questions)
+## 7. MAIN MODULE STRUCTURE (200 Questions)
 
-The Main Module has 4 sub-sections, unlocking sequentially:
+The Main Module flow has 5 sub-sections, unlocking sequentially:
 
 | Section | Questions | Purpose | Unlock Condition |
 |---------|-----------|---------|------------------|
 | Demographics | 34 Q | Context (age, household, income) | Always open |
 | Do Not Wants (DNW) | 33 Q | Hard elimination walls | Demographics complete |
 | Must Haves (MH) | 33 Q | Positive magnets/boosters | DNW complete |
-| General Questions | 200 Q | Deep scoring across all modules | MH complete |
+| Trade-off Questions | 50 Q | Priority weighting between categories | MH complete |
+| General Questions | 50 Q | Deep scoring across all modules | Tradeoffs complete |
 
 ### DNW Severity Tiers (5 levels)
 1. **Mild Preference** - Slight negative, won't eliminate
@@ -521,7 +522,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 ### Illumination States (Module Buttons)
 | State | Visual | Animation |
 |-------|--------|-----------|
-| `locked` | 35% opacity, 70% grayscale | None |
+| `locked` | 60% opacity, 70% grayscale | None |
 | `not_started` | Gray, desaturated | None |
 | `in_progress` | Pulsing sapphire glow | 2.5s pulse cycle |
 | `completed` | Green glow + completion meter | 3s glow cycle |
@@ -694,7 +695,7 @@ clues-main/
 1. **Don't put function configs in vercel.json for routes that don't exist yet** - causes build failures
 2. **tmpclaude-* files**: Add to .gitignore, never commit
 3. **Windows paths in cloud environments**: Use forward slashes, not backslashes
-4. **Typeform/questionnaire data format**: Maintain consistent shape across all 300 questions
+4. **Typeform/questionnaire data format**: Maintain consistent shape across all 2,500 questions
 5. **LLM timeout**: Set 60s timeout for parallel evaluations, don't fail entire batch if one model times out
 6. **Tavily rate limits**: Cache results for 30 minutes, don't re-search same query
 7. **Supabase RLS**: Enable Row Level Security on all tables from day one
@@ -862,7 +863,7 @@ To improve your results:
 | Complete DNWs | +15% | 10 min |
 | Complete MHs | +10% | 10 min |
 | Complete General Questions | +20% | 30 min |
-| Each Mini Module (20 total) | +0.5% each | 5-10 min each |
+| Each Mini Module (23 total) | +0.5% each | 5-10 min each |
 | All Mini Modules | +10% total | 2-3 hours |
 
 The star (★) goes on the highest-gain incomplete item. Items are ordered by gain descending, not by pipeline sequence. A user might skip Demographics but the DNW gain is higher, so DNW shows first.

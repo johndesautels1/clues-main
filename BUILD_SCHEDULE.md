@@ -48,12 +48,12 @@
 
 | Component | Files | Lines | Status |
 |-----------|-------|-------|--------|
-| **Dashboard** | `Dashboard/` (9 files) | ~1,022 | Working — globe, module grid, hero, nav |
-| **Paragraphical Flow** | `Discovery/` (10 files) + `Paragraphical/` (2 files) | ~3,263 | Working — 30-paragraph Olivia-guided input |
+| **Dashboard** | `Dashboard/` (18 files) | ~2,277 | Working — globe, module grid, hero, nav |
+| **Paragraphical Flow** | `Discovery/` (11 files) + `Paragraphical/` (2 files) | ~3,263 | Working — 30-paragraph Olivia-guided input |
 | **Question Library** | `Admin/QuestionLibrary.tsx` + `data/questionLibrary.ts` | ~15,244 | Working — 2,500 questions browsable, admin dashboard |
-| **Auth System** | `Auth/` (2 files) + `context/AuthContext.tsx` | ~340+ | Working — Supabase auth, protected routes |
+| **Auth System** | `Auth/` (3 files) + `context/AuthContext.tsx` | ~340+ | Working — Supabase auth, protected routes |
 | **User Context** | `context/UserContext.tsx` | exists | Working — session state management |
-| **Shared UI** | `Shared/` (11 files) | ~2,139 | Working — header, footer, legal modals, chat bubbles |
+| **Shared UI** | `Shared/` (18 files) | ~2,139 | Working — header, footer, legal modals, chat bubbles |
 | **Results Shells** | `Results/` (6 files) | ~1,521 | Built but NOT wired — ReasoningTrace, SideBySide, FileUpload, ThinkingDetails |
 | **API: Paragraphical** | `api/paragraphical.ts` | 598 | Built — Gemini 3.1 Pro Preview reasoning engine |
 | **API: Olivia Chat** | `api/olivia-chat.ts` | 159 | Built — Olivia AI chat endpoint |
@@ -67,8 +67,8 @@
 | **Data: Modules** | `data/modules.ts` | 260 | Complete — 23 module definitions |
 | **Data: Paragraph Targets** | `data/paragraphTargets.ts` | 567 | Complete — extraction targets per paragraph |
 | **Types** | `types/index.ts` | 317 | Partial — needs expansion for evaluation pipeline |
-| **Supabase Schema** | `supabase/schema.sql` | ~700 | Complete — 20 tables, 2 views, RLS, indexes |
-| **Styles** | 18 CSS files | ~5,152 | Working — dark glassmorphic, WCAG compliant |
+| **Supabase Schema** | `supabase/schema.sql` | ~1,012 | Complete — 20 tables, 2 views, RLS, indexes |
+| **Styles** | 21 CSS files | ~6,365 | Working — dark glassmorphic, WCAG compliant |
 
 ### What DOES NOT EXIST Yet
 
@@ -499,7 +499,7 @@ Don't build abstractions for hypothetical future needs:
 |------|--------|--------|
 | `README.md` | **NEEDS UPDATE** — currently 46KB, contains mix of accurate and outdated info | Should be trimmed to <10KB: tech stack, setup instructions, deployment. NOT a spec doc. |
 | `CLUES_MAIN_BUILD_REFERENCE.md` | **PARTIALLY SUPERSEDED** — 58KB, much of it duplicated in PARAGRAPHICAL_ARCHITECTURE.md and this file | Keep as deep reference for LifeScore patterns and tier engine details. Remove build state tracking (that's now in BUILD_SCHEDULE.md). |
-| `docs/*.md` (25 files) | **REFERENCE ONLY** — question definition docs for each module | These are the raw question reference material. They are NOT read by agents unless building that specific module's questionnaire. They should never be imported into code — `questionLibrary.ts` is the canonical source. |
+| `docs/*.md` (27 files) | **REFERENCE ONLY** — question definition docs for each module | These are the raw question reference material. They are NOT read by agents unless building that specific module's questionnaire. They should never be imported into code — `questionLibrary.ts` is the canonical source. |
 
 ### README.md Rewrite Plan
 
@@ -540,7 +540,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - Designed `modules: string[]` architecture (Section 10)
 - Added `modules` field to QuestionItem type
 - Tagged main_module.ts (100 questions) manually with cross-module refs
-- Pass 1: Auto-tagged all 2,450 mini module questions with default self-module tags
+- Pass 1: Auto-tagged all 2,400 remaining questions (23 mini modules + general + tradeoff) with default self-module tags
 
 **Previous conversation (2026-03-09, Session 1) built:**
 - Created `LLM_PROVIDER_ARCHITECTURE.md` — complete LLM assignment document
