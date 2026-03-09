@@ -981,6 +981,58 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 ---
 
+## Phase 1 Codebase Audit — Master Issue Chart
+
+**Audit Date:** 2026-03-09 | **Files Audited:** 16 | **Total Issues:** 116 (16 HIGH, 40 MEDIUM, 60 LOW)
+
+### Conv 1-2: Auth, Supabase Client, Landing Page, Onboarding
+
+**Files:** `src/lib/supabase.ts`, `src/components/Auth/AuthProvider.tsx`, `src/components/LandingPage/LandingPage.tsx`, `src/components/Onboarding/OnboardingFlow.tsx`
+
+| # | File | Line(s) | Severity | Description |
+|---|------|---------|----------|-------------|
+| 1 | `supabase.ts` | 1-15 | **HIGH** | Hardcoded Supabase URL and anon key in source — should use `import.meta.env` |
+| 2 | `supabase.ts` | 15 | MEDIUM | No validation that `supabaseUrl`/`supabaseAnonKey` are non-empty before creating client |
+| 3 | `AuthProvider.tsx` | 38-42 | **HIGH** | `onAuthStateChange` listener never unsubscribed — memory leak on unmount |
+| 4 | `AuthProvider.tsx` | 55-60 | MEDIUM | `signOut` doesn't clear local state before calling `supabase.auth.signOut()` — stale user visible during async gap |
+| 5 | `AuthProvider.tsx` | 25 | LOW | `loading` state initialized `true` but no timeout/fallback if auth check hangs indefinitely |
+| 6 | `LandingPage.tsx` | entire | **HIGH (WCAG)** | Zero light mode support — all colors hardcoded for dark backgrounds; `#f9fafb` on `#ffffff` = 1.07:1 |
+| 7 | `LandingPage.tsx` | hero | MEDIUM (WCAG) | Glassmorphic overlays make actual rendered background unpredictable — contrast not verified against overlay composites |
+| 8 | `LandingPage.tsx` | buttons | MEDIUM (WCAG) | No `:focus-visible` outline on interactive elements (CTA buttons, nav links) |
+| 9 | `LandingPage.tsx` | badges | LOW (WCAG) | Badge text uses small font sizes — verify >= 11px minimum |
+| 10 | `OnboardingFlow.tsx` | entire | **HIGH (WCAG)** | No light mode support — same dark-only color scheme, invisible on white |
+| 11 | `OnboardingFlow.tsx` | steps | MEDIUM (WCAG) | Step indicators use color-only differentiation for active/complete states — needs icon/shape pair |
+| 12 | `OnboardingFlow.tsx` | inputs | MEDIUM (WCAG) | No visible focus outlines on form inputs |
+| 13 | `OnboardingFlow.tsx` | validation | LOW | Client-side validation messages not announced to screen readers (no `role="alert"`) |
+| 14 | `OnboardingFlow.tsx` | nav | LOW | Back/Next buttons have no `aria-label` distinguishing them from other navigation |
+
+### Conv 3-4: Question Engine, Paragraphical Pipeline, Smart Scores, Dashboard
+
+**Files:** `src/data/questions.ts`, `src/data/paragraphs.ts`, `src/lib/smartScores.ts`, `src/components/Dashboard/Dashboard.tsx`
+
+| # | File | Line(s) | Severity | Description |
+|---|------|---------|----------|-------------|
+| 15 | `questions.ts` | module map | MEDIUM | Module IDs use inconsistent casing conventions (`safety_security` vs potential camelCase in other files) — audit cross-references |
+| 16 | `questions.ts` | weights | LOW | Module weights not validated to sum to 1.0 — silent drift if weights are edited |
+| 17 | `paragraphs.ts` | P1-P30 | LOW | Paragraph phase boundaries are magic numbers — no enum or constant defines phase ranges |
+| 18 | `paragraphs.ts` | prompts | MEDIUM | Gemini prompt templates contain model name as string literal — should reference canonical `gemini-3.1-pro-preview` constant |
+| 19 | `smartScores.ts` | scoring | **HIGH** | Score normalization uses hardcoded min/max ranges that may not match actual Gemini output ranges — scores can clip or overflow |
+| 20 | `smartScores.ts` | weights | MEDIUM | Category weight multiplication happens before normalization — order-dependent; rearranging operations changes results |
+| 21 | `smartScores.ts` | fallback | LOW | Missing data fallback returns 0.5 (neutral) — no flag distinguishing "no data" from "genuinely average" |
+| 22 | `Dashboard.tsx` | entire | **HIGH (WCAG)** | No light mode support — all inline styles use dark-mode hex colors |
+| 23 | `Dashboard.tsx` | charts | MEDIUM (WCAG) | Chart colors rely solely on color to distinguish data series — no pattern/shape differentiation |
+| 24 | `Dashboard.tsx` | cards | MEDIUM (WCAG) | Glassmorphic card overlays — text contrast unverified against composite backgrounds |
+| 25 | `Dashboard.tsx` | interactive | MEDIUM (WCAG) | No `:focus-visible` outlines on clickable cards and tab controls |
+| 26 | `Dashboard.tsx` | tooltips | LOW (WCAG) | Tooltip text at small font size — verify >= 11px minimum |
+| 27 | `Dashboard.tsx` | a11y | LOW | Chart sections lack `aria-label` for screen reader context |
+| 28 | `Dashboard.tsx` | loading | LOW | Skeleton loader uses `opacity: 0.3` on placeholder text — below 0.6 minimum per CLAUDE.md |
+
+---
+
+*Continued in next section (Conv 5-6, Conv 7-8) — committed incrementally.*
+
+---
+
 ## Development
 
 See `CLAUDE.md` for WCAG 2.1 AA compliance rules, build rules, and development guidelines.
