@@ -28,7 +28,7 @@ USER
  │    ├── Gemini 3.1 Pro Preview (extraction → metrics + scores)
  │    └── 152 coverage targets across all paragraphs
  │
- └── Main Module (200 structured questions, 5 sections)
+ └── Main Module Flow (200 structured questions across 5 sections: 100 Main Module + 50 Tradeoffs + 50 General)
       ├── Demographics (Q1-Q34)   → 7 logic jump triggers
       ├── Do Not Wants (Q35-Q67)  → Dealbreaker severity 1-5
       ├── Must Haves (Q68-Q100)   → Importance Likert 1-5
@@ -43,7 +43,7 @@ DOWNSTREAM
  ├── Tier Calculation (discovery → exploratory → filtered → evaluated → validated → precision)
  ├── Module Relevance (GQ answers determine which of 23 modules matter)
  ├── Report Generation (Gemini extracts, 5 LLMs score, Cristiano judges)
- └── Olivia Chat (GPT-4o with 19-answer context + position/progress)
+ └── Olivia Chat (Claude Sonnet 4.6 with 19-answer context + position/progress)
 ```
 
 ---
@@ -90,7 +90,7 @@ One paragraph per module, mapping 1:1 to the 23 category modules:
 | P8 | Climate & Weather | climate_weather | T1 Survival | 10-12 |
 | P9 | Legal & Immigration | legal_immigration | T2 Foundation | 10-15 |
 | P10 | Financial & Banking | financial_banking | T2 Foundation | 12-18 |
-| P11 | Housing & Real Estate | housing_real_estate | T2 Foundation | 12-15 |
+| P11 | Housing & Property | housing_property | T2 Foundation | 12-15 |
 | P12 | Professional & Career | professional_career | T2 Foundation | 12-15 |
 | P13 | Technology & Connectivity | technology_connectivity | T3 Infrastructure | 10-12 |
 | P14 | Transportation & Mobility | transportation_mobility | T3 Infrastructure | 10-15 |
@@ -512,7 +512,7 @@ Passes to discoveryData.buildOliviaPrompt()
     ↓
 Olivia system prompt includes all 19 answers + position + progress + skip reasons
     ↓
-GPT-4o responds with contextually-aware guidance
+Claude Sonnet 4.6 responds with contextually-aware guidance
 ```
 
 ---
@@ -762,7 +762,7 @@ Distributed across all 30 paragraphs. Each target has:
 ║            │       PROCESSING LAYER         │                       ║
 ║            ▼                                ▼                       ║
 ║  ┌─────────────────────┐    ┌──────────────────────────────────┐   ║
-║  │ Gemini 3.1 Pro      │    │       OLIVIA (GPT-4o)            │   ║
+║  │ Gemini 3.1 Pro      │    │    OLIVIA (Sonnet 4.6)            │   ║
 ║  │ Preview             │    │                                  │   ║
 ║  │ - Extract metrics   │    │  Receives:                       │   ║
 ║  │ - Score locations   │    │  - 7 demographic keys            │   ║
@@ -789,11 +789,21 @@ Distributed across all 30 paragraphs. Each target has:
 ║            ▼                                                         ║
 ║  ┌──────────────────────────────────┐                               ║
 ║  │     5-LLM SCORING PANEL         │                               ║
-║  │  Sonnet 4.5 | GPT-4o | Gemini   │                               ║
-║  │  Grok 4 | Perplexity Sonar      │                               ║
+║  │  Sonnet 4.6 | GPT-5.4 | Gemini  │                               ║
+║  │  Grok 4.1 | Sonar Reasoning Pro │                               ║
 ║  │            ↓                     │                               ║
-║  │  CRISTIANO JUDGE (Opus 4.5)     │                               ║
+║  │  CRISTIANO JUDGE (Opus 4.6)     │                               ║
 ║  │  Consensus on stdDev > 15       │                               ║
+║  └─────────┬────────────────────────┘                               ║
+║            │                                                         ║
+║  ┌──────────────────────────────────┐                               ║
+║  │  GPT-5.4: Advanced Reasoning    │                               ║
+║  │  Report interp + high-stakes    │                               ║
+║  └─────────┬────────────────────────┘                               ║
+║            │                                                         ║
+║  ┌──────────────────────────────────┐                               ║
+║  │  GPT Realtime 1.5: Olivia       │                               ║
+║  │  Live voice/video interaction   │                               ║
 ║  └─────────┬────────────────────────┘                               ║
 ║            │                                                         ║
 ║            ▼                                                         ║
@@ -818,7 +828,7 @@ Every paragraph's text is:
 2. **Prompted by Olivia** when targets are missed (max 2 interjections per paragraph)
 3. **Extracted by Gemini 3.1 Pro Preview** into numbered metrics
 4. **Scored by 5 LLMs** against candidate locations
-5. **Judged by Cristiano** (Opus 4.5) for consensus
+5. **Judged by Cristiano** (Opus 4.6) for consensus
 
 ### Main Module Questions (Q1-Q100, TQ1-TQ50, GQ1-GQ50)
 

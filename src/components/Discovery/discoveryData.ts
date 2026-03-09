@@ -65,7 +65,7 @@ export const SECTIONS: DiscoverySection[] = [
   { id: 10, cat: 'Foundation',     title: 'Financial & Banking', icon: '\u25C8', accent: '#C0A07E',
     prompt: 'Break down your financial picture. Monthly income and currency? Comfortable vs. stretched cost of living? Tax optimization, banking access for foreigners, international transfers, crypto-friendliness? Savings, investments, rental income?',
     hint: "I earn EUR 6,500/month from remote work. I'd like my total cost of living under EUR 3,000/month including rent. Tax structure matters \u2014 I want an effective rate under 25%\u2026" },
-  { id: 11, cat: 'Foundation',     title: 'Housing & Real Estate', icon: '\u2302', accent: '#95B5BF',
+  { id: 11, cat: 'Foundation',     title: 'Housing & Property', icon: '\u2302', accent: '#95B5BF',
     prompt: 'What does your ideal home look like and what can you afford? Apartment, house, villa? How many bedrooms? Urban, suburban, rural? Monthly rent or purchase budget? Rent or buy? Property rights for foreigners? Furnished or unfurnished? Gated, walkable, near beach, city center?',
     hint: "I want a modern 2-bedroom apartment in a walkable neighborhood. My rent budget is $1,500\u20132,000/month. I'd prefer to rent first then possibly buy\u2026" },
   { id: 12, cat: 'Foundation',     title: 'Professional & Career', icon: '\u2B21', accent: '#88A88E',

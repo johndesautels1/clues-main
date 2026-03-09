@@ -48,24 +48,24 @@ CLUES Main does the same thing, except the metrics are **derived from the user's
 Every measurable, researchable preference becomes a discrete metric:
 
 ```
-From P6 ("Climate & Weather"):
+From P8 ("Climate & Weather"):
   "I hate humidity and want warm winters around 20-25C"
   -->
-  M1: Average annual humidity below 60% [Category: Climate] [Source: P6]
-  M2: Average winter temperature 20-25C [Category: Climate] [Source: P6]
-  M3: Absence of extreme weather events [Category: Climate] [Source: P6]
+  M1: Average annual humidity below 60% [Category: Climate] [Source: P8]
+  M2: Average winter temperature 20-25C [Category: Climate] [Source: P8]
+  M3: Absence of extreme weather events [Category: Climate] [Source: P8]
 
-From P11 ("Financial & Banking"):
+From P10 ("Financial & Banking"):
   "I make about 8000 euros a month and want to live comfortably"
   -->
-  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P11]
-  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P11]
+  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P10]
+  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P10]
 
-From P14 ("Technology & Connectivity"):
+From P13 ("Technology & Connectivity"):
   "I need at least 100mbps for my remote work"
   -->
-  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P14]
-  M29: Reliable coworking space availability [Category: Technology] [Source: P14]
+  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P13]
+  M29: Reliable coworking space availability [Category: Technology] [Source: P13]
 ```
 
 ### Target: 100-250 Metrics
@@ -169,7 +169,7 @@ Opus/Cristiano JUDGES Gemini's work:
 ### At Main Module Tier (when user completes questionnaires):
 ```
 All 5 LLMs complete their evaluations:
-    Gemini (web search) + Sonnet + GPT-4o + Grok + Perplexity
+    Gemini (web search) + Sonnet 4.6 + GPT-5.4 + Grok 4.1 Fast Reasoning + Sonar Reasoning Pro High
     |
     v
 Opus/Cristiano JUDGES ALL of them:
@@ -193,10 +193,10 @@ Opus/Cristiano JUDGES ALL of them:
 ### All LLMs Use Web Search (Except Opus)
 Every evaluating LLM uses web search in API calls PLUS Tavily:
 - **Gemini**: Google Search grounding (native) + Tavily
-- **Claude Sonnet**: Web search tool + Tavily
-- **GPT-4o**: Bing search integration + Tavily
-- **Grok**: X/Twitter real-time data + Tavily
-- **Perplexity Sonar**: Native web search (built-in) + Tavily
+- **Claude Sonnet 4.6**: Web search tool + Tavily
+- **GPT-5.4**: Bing search integration + Tavily
+- **Grok 4.1 Fast Reasoning**: X/Twitter real-time data + Tavily
+- **Perplexity Sonar Reasoning Pro High**: Native web search (built-in) + Tavily
 
 ### Tavily's Role
 Tavily provides:
@@ -332,7 +332,7 @@ The 23 Mini Modules and Main Module questionnaire are DOWNSTREAM of the Paragrap
 - When completed, they ADD precision to the Paragraphical's metrics
 - They can ADD new metrics the paragraphs didn't cover
 - They can REFINE metric weights and priorities
-- They trigger additional LLMs (Sonnet, GPT-4o, Grok, Perplexity)
+- They trigger additional LLMs (Sonnet 4.6, GPT-5.4, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High)
 - They do NOT replace the Paragraphical — they enhance it
 
 The Paragraphical must stand alone as a complete evaluation. Modules make it better, not make it work.
@@ -603,11 +603,11 @@ Plus 6 persona presets that adjust weights (Balanced, Digital Nomad, Entrepreneu
 **LLM Roster**:
 | LLM | Web Search Method | Tavily Use |
 |-----|------------------|------------|
-| Claude Sonnet | Native (Anthropic API tool) | Supplemental |
-| GPT-4o | Tavily injected into prompt context | Primary |
+| Claude Sonnet 4.6 | Native (Anthropic API tool) | Supplemental |
+| GPT-5.4 | Tavily injected into prompt context | Primary |
 | Gemini | Google Search grounding (native) | Supplemental |
-| Grok | Tavily injected into prompt context | Primary |
-| Perplexity Sonar | Native (built-in search) | Supplemental |
+| Grok 4.1 Fast Reasoning | Tavily injected into prompt context | Primary |
+| Sonar Reasoning Pro High | Native (built-in search) | Supplemental |
 
 **Batch Firing Pattern**:
 ```
@@ -753,7 +753,7 @@ LifeScore's Gamma report template:
 
 ### 15.13 CRISTIANO VIDEO PIPELINE (2-Stage)
 
-**Stage 1: Storyboard** (Claude Sonnet generates)
+**Stage 1: Storyboard** (Claude Sonnet 4.6 generates)
 - 7 scenes, 105-120s total, 200-250 words
 - Scene 1 & 7: A-ROLL (avatar talking)
 - Scenes 2-6: B-ROLL (city footage)
@@ -813,11 +813,11 @@ LifeScore's Gamma report template:
 
 | Component | Cost |
 |-----------|------|
-| Claude Sonnet (90 metrics) | ~$0.90 |
-| GPT-4o (90 metrics + Tavily) | ~$2.70 |
+| Claude Sonnet 4.6 (90 metrics) | ~$0.90 |
+| GPT-5.4 (90 metrics + Tavily) | ~$5.00 |
 | Gemini (90 metrics) | ~$0.45 |
-| Grok (90 metrics + Tavily) | ~$0.90 |
-| Perplexity (90 metrics) | ~$0.90 |
+| Grok 4.1 Fast Reasoning (90 metrics + Tavily) | ~$0.06 |
+| Sonar Reasoning Pro High (90 metrics) | ~$0.90 |
 | Tavily searches (540 calls) | ~$2.70 |
 | Opus Judge | ~$13.50 |
 | **Total per comparison** | **~$22** |
@@ -856,7 +856,7 @@ tools: [{
 - `SideBySideMetricView` — Compares City vs Town vs Neighborhood metrics
 - `ReactiveJustification` — Click justification to highlight source Paragraph (P1-P30)
 - `ThinkingDetailsPanel` — Full transparency UI with model info, token stats, timeline
-- `FileUpload` — 100MB upload for medical records (P8), financial spreadsheets (P11)
+- `FileUpload` — 100MB upload for medical records (P7), financial spreadsheets (P10)
 
 ---
 

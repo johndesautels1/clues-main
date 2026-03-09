@@ -75,7 +75,7 @@ The system has exactly 23 category modules. The canonical module IDs are listed 
 
 ```
 TIER 1 - SURVIVAL (P6-P8):    safety_security, health_wellness, climate_weather
-TIER 2 - FOUNDATION (P9-P12): legal_immigration, financial_banking, housing_real_estate, professional_career
+TIER 2 - FOUNDATION (P9-P12): legal_immigration, financial_banking, housing_property, professional_career
 TIER 3 - INFRASTRUCTURE (P13-P16): technology_connectivity, transportation_mobility, education_learning, social_values_governance
 TIER 4 - LIFESTYLE (P17-P20): food_dining, shopping_services, outdoor_recreation, entertainment_nightlife
 TIER 5 - CONNECTION (P21-P23): family_children, neighborhood_urban_design, environment_community_appearance
@@ -117,7 +117,7 @@ TIER 6 - IDENTITY (P24-P28): religion_spirituality, sexual_beliefs_practices_law
 | 3.19 | `climate` (standalone) | `climate_weather` | No `moduleId: 'climate'` or `category: 'climate'` in .ts/.tsx files |
 | 3.20 | `safety` (standalone) | `safety_security` | No `moduleId: 'safety'` in .ts/.tsx files |
 | 3.21 | `healthcare` | `health_wellness` | `grep -rn "healthcare" --include="*.ts" --include="*.tsx"` — zero in data/prompt files |
-| 3.22 | `housing` (standalone) | `housing_real_estate` | No `moduleId: 'housing'` in .ts/.tsx files |
+| 3.22 | `housing` (standalone) | `housing_property` | No `moduleId: 'housing'` in .ts/.tsx files |
 | 3.23 | `financial` (standalone) | `financial_banking` | No `moduleId: 'financial'` in .ts/.tsx files |
 | 3.24 | `technology` (standalone) | `technology_connectivity` | No `moduleId: 'technology'` in .ts/.tsx files |
 | 3.25 | `transportation` (standalone) | `transportation_mobility` | No `moduleId: 'transportation'` in .ts/.tsx files |
@@ -146,7 +146,7 @@ Every paragraph P6-P28 must map to exactly one module in funnel order. This is t
 | 4.8 | P8 | climate_weather | Survival | Tier 1 |
 | 4.9 | P9 | legal_immigration | Foundation | Tier 2 |
 | 4.10 | P10 | financial_banking | Foundation | Tier 2 |
-| 4.11 | P11 | housing_real_estate | Foundation | Tier 2 |
+| 4.11 | P11 | housing_property | Foundation | Tier 2 |
 | 4.12 | P12 | professional_career | Foundation | Tier 2 |
 | 4.13 | P13 | technology_connectivity | Infrastructure | Tier 3 |
 | 4.14 | P14 | transportation_mobility | Infrastructure | Tier 3 |
@@ -205,7 +205,7 @@ The Gemini prompt is built in `api/paragraphical.ts` function `buildExtractionPr
 |---|---------------|---------|----------------|----------------|
 | 6.1 | Paragraph count in intro | ~185 | Total paragraph count | "30 biographical paragraphs" |
 | 6.2 | Pipeline description | ~197-203 | Paragraph ranges | P1-P2 profile, P3 DNW, P4 MH, P5 trade-offs, P6-P28 modules, P29-P30 vision |
-| 6.3 | STEP 1 category list | ~218 | All 23 module IDs listed | Exact list: safety_security, health_wellness, climate_weather, legal_immigration, financial_banking, housing_real_estate, professional_career, technology_connectivity, transportation_mobility, education_learning, social_values_governance, food_dining, shopping_services, outdoor_recreation, entertainment_nightlife, family_children, neighborhood_urban_design, environment_community_appearance, religion_spirituality, sexual_beliefs_practices_laws, arts_culture, cultural_heritage_traditions, pets_animals |
+| 6.3 | STEP 1 category list | ~218 | All 23 module IDs listed | Exact list: safety_security, health_wellness, climate_weather, legal_immigration, financial_banking, housing_property, professional_career, technology_connectivity, transportation_mobility, education_learning, social_values_governance, food_dining, shopping_services, outdoor_recreation, entertainment_nightlife, family_children, neighborhood_urban_design, environment_community_appearance, religion_spirituality, sexual_beliefs_practices_laws, arts_culture, cultural_heritage_traditions, pets_animals |
 | 6.4 | STEP 1 paragraph source range | ~219 | source_paragraph range | "P1-P30" |
 | 6.5 | STEP 5 module count | ~255 | Module count text | "23 category modules (funnel order...)" |
 | 6.6 | STEP 5 funnel text | ~255 | Funnel names | "survival > foundation > infrastructure > lifestyle > connection > identity" |
@@ -302,8 +302,8 @@ The codebase references question counts but question content lives in freestandi
 |---|------------|------|----------------|
 | 11.1 | Module questionCount | `src/data/modules.ts` | Every module has `questionCount: 100` |
 | 11.2 | Total question math | Documentation | 23 modules x 100 = 2,300 module questions |
-| 11.3 | Main Module questions | Referenced in README/build ref | ~100 general questions (Main Module) |
-| 11.4 | No question data files in src/data | `src/data/` | No `questions.ts` or similar — questions live in external module apps |
+| 11.3 | Main Module questions | `src/data/questions/main_module.ts` | 100 Main Module questions (34 Demographics + 33 DNW + 33 Must Haves) |
+| 11.4 | Question data files in src/data/questions/ | `src/data/questions/` | 26 question data files (23 mini modules + main_module + general_questions + tradeoff_questions) |
 | 11.5 | Module url field | `src/data/modules.ts` | `url?: string` field exists for linking to freestanding apps |
 | 11.6 | paragraphTargets coverageTargets | `src/data/paragraphTargets.ts` | Each of 30 entries has `coverageTargets` array (keyword arrays for Olivia) |
 

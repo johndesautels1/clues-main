@@ -8,7 +8,7 @@ export const LIBRARY_META = {
   description: "All review module questions with structured response types for UI modal design",
   totalModules: 26,
   totalQuestions: 2500,
-  moduleStructure: "23 category modules × 100 questions each (10 sections × 10 questions) + Main Module (100Q: 34 Demographics + 33 DNW + 33 Must Haves) + General Questions (50Q) + Trade-off Questions (50Q) = 2,600 total questions",
+  moduleStructure: "23 category modules × 100 questions each (10 sections × 10 questions) + Main Module (100Q: 34 Demographics + 33 DNW + 33 Must Haves) + General Questions (50Q) + Trade-off Questions (50Q) = 2,500 total questions",
   brand: {
   "darkBackground": "#0a0e1a",
   "cardBackground": "#111827",

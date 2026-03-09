@@ -22,15 +22,15 @@ export const PROVIDER_RATES: Record<
   CostProvider,
   { input: number; output: number; label: string; icon: string }
 > = {
-  'claude-sonnet-4-5':   { input: 3.00,  output: 15.00,  label: 'Claude Sonnet 4.5',       icon: '\u{1F3B5}' },
-  'gpt-4o':              { input: 2.50,  output: 10.00,  label: 'GPT-4o',                  icon: '\u{1F916}' },
+  'claude-sonnet-4-6':   { input: 3.00,  output: 15.00,  label: 'Claude Sonnet 4.6',       icon: '\u{1F3B5}' },
+  'gpt-5.4':             { input: 5.00,  output: 20.00,  label: 'GPT-5.4',                  icon: '\u{1F916}' },
   'gemini-3.1-pro-preview': { input: 1.25, output: 10.00, label: 'Gemini 3.1 Pro Preview',  icon: '\u{1F48E}' },
-  'grok-4':              { input: 3.00,  output: 15.00,  label: 'Grok 4',                   icon: '\u{1F680}' },
-  'perplexity-sonar':    { input: 1.00,  output: 1.00,   label: 'Perplexity Sonar',         icon: '\u{1F50D}' },
-  'claude-opus-4-5':     { input: 15.00, output: 75.00,  label: 'Claude Opus 4.5 (Judge)',   icon: '\u{1F9E0}' },
+  'grok-4-1-fast-reasoning': { input: 0.20, output: 0.50, label: 'Grok 4.1 Fast Reasoning',  icon: '\u{1F680}' },
+  'sonar-reasoning-pro-high': { input: 1.00, output: 1.00, label: 'Perplexity Sonar Reasoning Pro High', icon: '\u{1F50D}' },
+  'claude-opus-4-6':     { input: 15.00, output: 75.00,  label: 'Claude Opus 4.6 (Judge)',   icon: '\u{1F9E0}' },
   'tavily':              { input: 0,     output: 0,      label: 'Tavily (Research + Search)', icon: '\u{1F50E}' },
   'gamma':               { input: 0,     output: 0,      label: 'Gamma (Reports)',           icon: '\u{1F4CA}' },
-  'olivia':              { input: 2.50,  output: 10.00,  label: 'Olivia (GPT-4o Chat)',      icon: '\u{1F4AC}' },
+  'olivia':              { input: 3.00,  output: 15.00,  label: 'Olivia (Claude Sonnet 4.6)', icon: '\u{1F4AC}' },
   'tts-elevenlabs':      { input: 0,     output: 0,      label: 'TTS (ElevenLabs)',          icon: '\u{1F50A}' },
   'tts-openai':          { input: 0,     output: 0,      label: 'TTS (OpenAI)',              icon: '\u{1F50A}' },
   'avatar-heygen':       { input: 0,     output: 0,      label: 'Avatar (HeyGen)',           icon: '\u{1F3A5}' },
@@ -38,22 +38,24 @@ export const PROVIDER_RATES: Record<
   'avatar-simli':        { input: 0,     output: 0,      label: 'Avatar (Simli)',            icon: '\u{1F3A5}' },
   'avatar-replicate':    { input: 0,     output: 0,      label: 'Avatar (Replicate)',        icon: '\u{1F3A5}' },
   'kling-ai':            { input: 0,     output: 0,      label: 'Kling AI (Image Gen)',      icon: '\u{1F5BC}\uFE0F' },
+  'gpt-realtime-1.5':    { input: 5.00,  output: 20.00,  label: 'GPT Realtime 1.5 (Olivia Voice/Video)', icon: '\u{1F399}\uFE0F' },
 };
 
 // Grouped labels for the dashboard (aggregate sub-providers)
 export const PROVIDER_GROUPS: { key: string; label: string; icon: string; providers: CostProvider[] }[] = [
   { key: 'tavily',     label: 'Tavily (Research + Search)',  icon: '\u{1F50E}', providers: ['tavily'] },
-  { key: 'sonnet',     label: 'Claude Sonnet 4.5',          icon: '\u{1F3B5}', providers: ['claude-sonnet-4-5'] },
-  { key: 'gpt4o',      label: 'GPT-4o',                     icon: '\u{1F916}', providers: ['gpt-4o'] },
+  { key: 'sonnet',     label: 'Claude Sonnet 4.6',          icon: '\u{1F3B5}', providers: ['claude-sonnet-4-6'] },
+  { key: 'gpt54',      label: 'GPT-5.4',                     icon: '\u{1F916}', providers: ['gpt-5.4'] },
   { key: 'gemini',     label: 'Gemini 3.1 Pro Preview',     icon: '\u{1F48E}', providers: ['gemini-3.1-pro-preview'] },
-  { key: 'grok',       label: 'Grok 4',                     icon: '\u{1F680}', providers: ['grok-4'] },
-  { key: 'perplexity', label: 'Perplexity Sonar',           icon: '\u{1F50D}', providers: ['perplexity-sonar'] },
-  { key: 'opus',       label: 'Claude Opus 4.5 (Judge)',     icon: '\u{1F9E0}', providers: ['claude-opus-4-5'] },
+  { key: 'grok',       label: 'Grok 4.1 Fast Reasoning',    icon: '\u{1F680}', providers: ['grok-4-1-fast-reasoning'] },
+  { key: 'perplexity', label: 'Perplexity Sonar Reasoning Pro High', icon: '\u{1F50D}', providers: ['sonar-reasoning-pro-high'] },
+  { key: 'opus',       label: 'Claude Opus 4.6 (Judge)',     icon: '\u{1F9E0}', providers: ['claude-opus-4-6'] },
   { key: 'gamma',      label: 'Gamma (Reports)',            icon: '\u{1F4CA}', providers: ['gamma'] },
   { key: 'olivia',     label: 'Olivia (Chat Assistant)',    icon: '\u{1F4AC}', providers: ['olivia'] },
   { key: 'tts',        label: 'TTS (ElevenLabs + OpenAI)', icon: '\u{1F50A}', providers: ['tts-elevenlabs', 'tts-openai'] },
   { key: 'avatar',     label: 'Avatar (HeyGen + D-ID + Simli + Replicate)', icon: '\u{1F3A5}', providers: ['avatar-heygen', 'avatar-d-id', 'avatar-simli', 'avatar-replicate'] },
   { key: 'kling',      label: 'Kling AI (Image Generation)', icon: '\u{1F5BC}\uFE0F', providers: ['kling-ai'] },
+  { key: 'gpt-realtime', label: 'GPT Realtime 1.5 (Olivia Voice/Video)', icon: '\u{1F399}\uFE0F', providers: ['gpt-realtime-1.5'] },
 ];
 
 // ─── Calculate Cost from Tokens ────────────────────────────────

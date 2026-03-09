@@ -225,7 +225,7 @@ export const PARAGRAPH_TARGETS: ParagraphTargets[] = [
   },
   {
     paragraphId: 11,
-    heading: 'Housing & Real Estate',
+    heading: 'Housing & Property Preferences',
     coverageTargets: [
       { id: 'type', label: 'Property type', keywords: ['apartment', 'house', 'villa', 'condo', 'loft', 'studio', 'penthouse', 'flat'] },
       { id: 'size', label: 'Size requirements', keywords: ['bedroom', 'bathroom', 'sqm', 'sqft', 'space', 'big', 'small', 'spacious'] },

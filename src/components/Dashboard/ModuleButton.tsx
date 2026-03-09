@@ -6,8 +6,11 @@
  * - completed: Green glow + checkmark + score meter
  * - recommended: Gold border + star badge
  * - locked: Grayed out + lock icon
+ *
+ * Clicking navigates to /module/:moduleId (internal mini module flow).
  */
 
+import { useNavigate } from 'react-router-dom';
 import type { ModuleDefinition } from '../../data/modules';
 import './ModuleButton.css';
 
@@ -16,15 +19,14 @@ interface Props {
 }
 
 export function ModuleButton({ module }: Props) {
+  const navigate = useNavigate();
   const status = module.status ?? 'not_started';
   const statusClass = `module-btn--${status.replace('_', '-')}`;
   const isInteractive = status !== 'locked';
 
   const handleClick = () => {
     if (!isInteractive) return;
-    if (module.url) {
-      window.open(module.url, '_blank', 'noopener,noreferrer');
-    }
+    navigate(`/module/${module.id}`);
   };
 
   return (

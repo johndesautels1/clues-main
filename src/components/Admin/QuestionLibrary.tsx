@@ -289,9 +289,10 @@ export function QuestionLibrary() {
       const mod = next.modules.find(m => m.moduleId === editModule);
       if (!mod) return prev;
       if (editingRef) {
-        mod.sections[editSection].questions[editingRef.qIdx] = { number: editNumber, question: editQuestion.trim(), type: editType };
+        const existing = mod.sections[editSection].questions[editingRef.qIdx];
+        mod.sections[editSection].questions[editingRef.qIdx] = { number: editNumber, question: editQuestion.trim(), type: editType, modules: existing.modules };
       } else {
-        mod.sections[editSection].questions.push({ number: editNumber || mod.sections[editSection].questions.length + 1, question: editQuestion.trim(), type: editType });
+        mod.sections[editSection].questions.push({ number: editNumber || mod.sections[editSection].questions.length + 1, question: editQuestion.trim(), type: editType, modules: [editModule] });
       }
       return next;
     });

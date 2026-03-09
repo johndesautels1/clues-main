@@ -23,8 +23,8 @@
 | Frontend | React 19 + TypeScript + Vite 7 | Dark glassmorphic UI, Montserrat font |
 | Hosting | Vercel | Serverless functions for API routes |
 | Database | Supabase (PostgreSQL) | User data, evaluations, cost tracking |
-| LLM Evaluators | Claude Sonnet 4.5, GPT-4o, Gemini 3.1 Pro Preview, Grok 4, Perplexity Sonar | 5 parallel evaluators |
-| Judge | Claude Opus 4.5 | Consensus builder, reviews stdDev > 15 disagreements |
+| LLM Evaluators | Claude Sonnet 4.6, GPT-5.4, Gemini 3.1 Pro Preview, Grok 4.1 Fast Reasoning, Sonar Reasoning Pro High | 5 parallel evaluators |
+| Judge | Claude Opus 4.6 | Consensus builder, reviews stdDev > 15 disagreements |
 | Reasoning Engine | Gemini 3.1 Pro Preview | Paragraphical extraction, metric scoring, location recommendations (with thinking_level: high, Google Search grounding). Opus judges afterward. |
 | Research | Tavily API | Research (baseline) + Search (category-specific), cached 30 min |
 | Payments | Stripe | Tiered subscriptions |
@@ -93,7 +93,7 @@ Modules are ordered by evaluation funnel logic — each tier progressively narro
 ### TIER 2: FOUNDATION (Can I legally/financially exist here?)
 4. **Legal & Immigration** — Visa pathways, residency, rule of law, property rights
 5. **Financial & Banking** — Banking access, cost of living, taxes, currency stability
-6. **Housing & Real Estate** — Cost, availability, types, rental/purchase options
+6. **Housing & Property** — Cost, availability, types, rental/purchase options
 7. **Professional & Career** — Job market, remote work infrastructure, industry presence
 
 ### TIER 3: INFRASTRUCTURE (Can I function daily here?)
@@ -151,7 +151,7 @@ PHASE 5: MODULE DEEP DIVES (23 paragraphs, 1:1 with category modules in funnel o
   TIER 2: FOUNDATION
     P9:  "Legal & Immigration"                — moduleId: legal_immigration
     P10: "Financial & Banking"                — moduleId: financial_banking
-    P11: "Housing & Real Estate"              — moduleId: housing_real_estate
+    P11: "Housing & Property"              — moduleId: housing_property
     P12: "Professional & Career"              — moduleId: professional_career
   TIER 3: INFRASTRUCTURE
     P13: "Technology & Connectivity"           — moduleId: technology_connectivity
@@ -292,16 +292,17 @@ interface EvaluationResult {
 
 ---
 
-## 7. MAIN MODULE STRUCTURE (300 Questions)
+## 7. MAIN MODULE STRUCTURE (200 Questions)
 
-The Main Module has 4 sub-sections, unlocking sequentially:
+The Main Module flow has 5 sub-sections, unlocking sequentially:
 
 | Section | Questions | Purpose | Unlock Condition |
 |---------|-----------|---------|------------------|
 | Demographics | 34 Q | Context (age, household, income) | Always open |
 | Do Not Wants (DNW) | 33 Q | Hard elimination walls | Demographics complete |
 | Must Haves (MH) | 33 Q | Positive magnets/boosters | DNW complete |
-| General Questions | 200 Q | Deep scoring across all modules | MH complete |
+| Trade-off Questions | 50 Q | Priority weighting between categories | MH complete |
+| General Questions | 50 Q | Deep scoring across all modules | Tradeoffs complete |
 
 ### DNW Severity Tiers (5 levels)
 1. **Mild Preference** - Slight negative, won't eliminate
@@ -321,7 +322,7 @@ The Main Module has 4 sub-sections, unlocking sequentially:
 
 ## 8. CLUES 5-TIER SCORING SCALE & QUESTION RESPONSE TYPE TAXONOMY
 
-> **PURPOSE**: Every question across all 23 category modules (2,300 questions) and the Main Module (~300 questions) must return structured data that maps to the universal CLUES 5-Tier Color Scale. This section defines the scale, the approved response types, and how each response type maps to a 0-100 score.
+> **PURPOSE**: Every question across all 23 category modules (2,300 questions) and the Main Module flow (200 questions: 100 Main Module + 50 Tradeoffs + 50 General) must return structured data that maps to the universal CLUES 5-Tier Color Scale. This section defines the scale, the approved response types, and how each response type maps to a 0-100 score.
 
 ### The CLUES 5-Tier Color Scale (Universal)
 
@@ -521,7 +522,7 @@ Precision (100%):  100-150pg   | 120+pg Gamma  | A+B+hl | 20+min      | 10min mo
 ### Illumination States (Module Buttons)
 | State | Visual | Animation |
 |-------|--------|-----------|
-| `locked` | 35% opacity, 70% grayscale | None |
+| `locked` | 60% opacity, 70% grayscale | None |
 | `not_started` | Gray, desaturated | None |
 | `in_progress` | Pulsing sapphire glow | 2.5s pulse cycle |
 | `completed` | Green glow + completion meter | 3s glow cycle |
@@ -694,7 +695,7 @@ clues-main/
 1. **Don't put function configs in vercel.json for routes that don't exist yet** - causes build failures
 2. **tmpclaude-* files**: Add to .gitignore, never commit
 3. **Windows paths in cloud environments**: Use forward slashes, not backslashes
-4. **Typeform/questionnaire data format**: Maintain consistent shape across all 300 questions
+4. **Typeform/questionnaire data format**: Maintain consistent shape across all 2,500 questions
 5. **LLM timeout**: Set 60s timeout for parallel evaluations, don't fail entire batch if one model times out
 6. **Tavily rate limits**: Cache results for 30 minutes, don't re-search same query
 7. **Supabase RLS**: Enable Row Level Security on all tables from day one
@@ -822,10 +823,10 @@ The system scales AI spend proportionally to data completeness. A busy executive
 | Tier | Which LLMs | Why |
 |------|-----------|-----|
 | Discovery (1) | Gemini only | It already did the extraction — reuse that context for a quick-scan recommendation |
-| Exploratory (2) | Gemini + Claude Sonnet | Sonnet adds structured reasoning on top of Gemini's narrative context |
-| Filtered (3) | + GPT-4o | GPT-4o excels at elimination/classification tasks (DNW hard walls) |
-| Evaluated (4) | + Grok | Grok adds real-time web context for MH scoring (transit, internet, etc.) |
-| Validated (5+Judge) | + Perplexity Sonar + Opus Judge | Full panel. Perplexity adds research-backed citations. Opus arbitrates. |
+| Exploratory (2) | Gemini + Claude Sonnet 4.6 | Sonnet 4.6 adds structured reasoning on top of Gemini's narrative context |
+| Filtered (3) | + GPT-5.4 | GPT-5.4 excels at elimination/classification, advanced reasoning, high-stakes logic |
+| Evaluated (4) | + Grok 4.1 Fast Reasoning | Grok 4.1 Fast Reasoning adds real-time web context for MH scoring (transit, internet, etc.) |
+| Validated (5+Judge) | + Sonar Reasoning Pro High + Opus Judge | Full panel. Sonar Reasoning Pro High adds research-backed citations. Opus arbitrates. |
 | Precision (5+Judge) | Same panel, deeper prompts | Each completed mini module adds domain-specific scoring context |
 
 ---
@@ -862,7 +863,7 @@ To improve your results:
 | Complete DNWs | +15% | 10 min |
 | Complete MHs | +10% | 10 min |
 | Complete General Questions | +20% | 30 min |
-| Each Mini Module (20 total) | +0.5% each | 5-10 min each |
+| Each Mini Module (23 total) | +0.5% each | 5-10 min each |
 | All Mini Modules | +10% total | 2-3 hours |
 
 The star (★) goes on the highest-gain incomplete item. Items are ordered by gain descending, not by pipeline sequence. A user might skip Demographics but the DNW gain is higher, so DNW shows first.
@@ -872,7 +873,7 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 ## 19. COST TRACKING SYSTEM (Built)
 
 ### Architecture
-- **Types**: `CostProvider` (16 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
+- **Types**: `CostProvider` (17 providers), `CostEntry`, `CostSummary`, `ProviderCostSummary`, `SessionCostRow` in `src/types/index.ts`
 - **Service**: `src/lib/costTracking.ts` — rate table, `logCost()`, `fetchAllCosts()`, `buildCostSummary()`, CSV export
 - **UI**: `src/components/Shared/CostTrackingModal.tsx` — admin-only modal
 - **Access**: Header toolbar (money bag icon) + Emilia help panel → "Cost Tracking" category
@@ -880,15 +881,16 @@ The star (★) goes on the highest-gain incomplete item. Items are ordered by ga
 
 ### Provider Rate Table (per 1M tokens, March 2026)
 ```
-claude-sonnet-4-5     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
-gpt-4o                Input: $2.50    Output: $10.00   (LLM Evaluator #2)
+claude-sonnet-4-6     Input: $3.00    Output: $15.00   (LLM Evaluator #1)
+gpt-5.4               Input: $5.00    Output: $20.00   (LLM Evaluator #2)
 gemini-3.1-pro-preview Input: $1.25   Output: $10.00   (Reasoning Engine + LLM Evaluator #3)
-grok-4                Input: $3.00    Output: $15.00   (LLM Evaluator #4)
-perplexity-sonar      Input: $1.00    Output: $1.00    (LLM Evaluator #5)
-claude-opus-4-5       Input: $15.00   Output: $75.00   (Opus Judge)
+grok-4-1-fast-reasoning Input: $0.20   Output: $0.50    (LLM Evaluator #4)
+sonar-reasoning-pro-high Input: $1.00  Output: $1.00    (LLM Evaluator #5)
+claude-opus-4-6       Input: $15.00   Output: $75.00   (Opus Judge)
 tavily                Flat rate per search              (Research + Search)
 gamma                 Flat rate per report              (Report generation)
-olivia (gpt-4o)       Input: $2.50    Output: $10.00   (Chat Assistant — GPT-4o company-wide)
+gpt-realtime-1.5      Input: $5.00    Output: $20.00   (Olivia Live Voice/Video Interaction)
+olivia                Input: $3.00    Output: $15.00   (Chat Assistant — Claude Sonnet 4.6)
 olivia-tutor          Input: $1.25    Output: $10.00   (Paragraphical tutor — Gemini 3.1 Pro Preview)
 tts-elevenlabs        Per character                     (Voice narration)
 tts-openai            Per character                     (Voice narration)
@@ -1013,7 +1015,7 @@ function calculateConfidence(context: EvaluationContext): number {
 
 5. **Tavily searches scale with tier.** Discovery gets 5 basic searches (top candidate regions). Validated gets 200+ searches (every metric for every candidate city). This is the biggest cost driver — more expensive than the LLMs at higher tiers.
 
-6. **Partial success is acceptable.** If GPT-4o times out but 4 other LLMs return, the evaluation proceeds with 4 results. The confidence score adjusts slightly downward but the user still gets their report.
+6. **Partial success is acceptable.** If GPT-5.4 times out but 4 other LLMs return, the evaluation proceeds with 4 results. The confidence score adjusts slightly downward but the user still gets their report.
 
 7. **Mini modules narrow, never expand.** Each completed mini module can only move the recommendation from 3→2→1 city, never introduce new candidates. The narrowing is monotonic.
 

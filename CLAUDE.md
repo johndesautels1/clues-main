@@ -19,14 +19,14 @@ These rules are **non-negotiable**. Every developer and every AI session must fo
 ### Approved Dark-Mode Text Colors (pre-verified against `--bg-primary: #0a0e1a`)
 | Token                  | Hex       | Ratio vs #0a0e1a | Use for                        |
 |------------------------|-----------|-------------------|--------------------------------|
-| `--text-primary`       | `#f9fafb` | 18.3:1            | Headings, primary body text    |
-| `--text-secondary`     | `#9ca3af` | 6.3:1             | Subtitles, descriptions        |
-| `--text-muted`         | `#8b95a5` | 5.2:1             | Hints, captions, timestamps    |
-| `--text-accent`        | `#60a5fa` | 5.1:1             | Links, interactive highlights  |
-| `--clues-sapphire-light` | `#3b82f6` | 3.6:1           | Large text/headings only       |
-| `--clues-orange`       | `#f97316` | 7.0:1             | Accent, badges                 |
-| `--clues-gold`         | `#f59e0b` | 7.9:1             | Accent, badges                 |
-| `--score-green`        | `#22c55e` | 6.4:1             | Success indicators             |
+| `--text-primary`       | `#f9fafb` | 18.4:1            | Headings, primary body text    |
+| `--text-secondary`     | `#9ca3af` | 7.6:1             | Subtitles, descriptions        |
+| `--text-muted`         | `#8b95a5` | 6.4:1             | Hints, captions, timestamps    |
+| `--text-accent`        | `#60a5fa` | 7.6:1             | Links, interactive highlights  |
+| `--clues-sapphire-light` | `#3b82f6` | 5.2:1           | Large text/headings only       |
+| `--clues-orange`       | `#f97316` | 6.9:1             | Accent, badges                 |
+| `--clues-gold`         | `#f59e0b` | 9.0:1             | Accent, badges                 |
+| `--score-green`        | `#22c55e` | 8.5:1             | Success indicators             |
 
 ### Light-Mode Compliance
 - Light mode background: `#ffffff` (or near-white)

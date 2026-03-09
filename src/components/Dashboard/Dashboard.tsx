@@ -4,7 +4,7 @@
  * Reads/writes from UserContext (centralized state with Supabase auto-save).
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroHeading } from './HeroHeading';
 import { GlobeExplorer } from './GlobeExplorer';
@@ -16,19 +16,52 @@ import { Footer } from '../Shared/Footer';
 import { OliviaBubble } from '../Shared/OliviaBubble';
 import { EmiliaBubble } from '../Shared/EmiliaBubble';
 import { useUser } from '../../context/UserContext';
+import { useRelevanceState } from '../../hooks/useRelevanceState';
+import { CoverageMeter } from '../Questionnaire/CoverageMeter';
+import { ReadinessIndicator } from './ReadinessIndicator';
 import { MODULES } from '../../data/modules';
-import type { ModuleStatus } from '../../types';
+import type { ModuleDefinition, ModuleStatus } from '../../data/modules';
 import type { SubSection } from '../../types';
 import './Dashboard.css';
 
 export type { SubSection };
 export type SubSectionStatus = Record<SubSection, ModuleStatus>;
 
+/**
+ * Detect if a module has partial answers in localStorage (in_progress).
+ */
+function hasLocalStorageAnswers(moduleId: string): boolean {
+  try {
+    const stored = localStorage.getItem(`clues-module-${moduleId}`);
+    if (!stored) return false;
+    const parsed = JSON.parse(stored);
+    return Object.keys(parsed).some(k => k.startsWith(`${moduleId}__`));
+  } catch { return false; }
+}
+
 export function Dashboard() {
   const { session, dispatch, isLoading } = useUser();
   const navigate = useNavigate();
+  const { isRecommended } = useRelevanceState();
 
-  const { globe, paragraphical, mainModule } = session;
+  const { globe, paragraphical, mainModule, completedModules } = session;
+
+  // Enrich static MODULES with dynamic status from engines + session
+  const enrichedModules = useMemo((): ModuleDefinition[] => {
+    return MODULES.map(mod => {
+      let status: ModuleStatus = 'not_started';
+
+      if (completedModules.includes(mod.id)) {
+        status = 'completed';
+      } else if (hasLocalStorageAnswers(mod.id)) {
+        status = 'in_progress';
+      } else if (isRecommended(mod.id)) {
+        status = 'recommended';
+      }
+
+      return { ...mod, status };
+    });
+  }, [completedModules, isRecommended]);
 
   // Globe region selected
   const handleRegionSelected = (region: string, lat: number, lng: number, zoomLevel: number) => {
@@ -142,16 +175,32 @@ export function Dashboard() {
           />
         </section>
 
-        {/* 23 Module Grid */}
+        {/* Coverage Meter */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '400ms' }}
+        >
+          <CoverageMeter variant="full" />
+        </section>
+
+        {/* Readiness Indicator (overall report readiness) */}
         <section
           className="dashboard__section"
           style={{ animationDelay: '450ms' }}
+        >
+          <ReadinessIndicator />
+        </section>
+
+        {/* 23 Module Grid */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '550ms' }}
         >
           <h2 className="dashboard__section-title">Exploration Modules</h2>
           <p className="dashboard__section-subtitle">
             Complete modules to progressively narrow your ideal destinations
           </p>
-          <ModuleGrid modules={MODULES} />
+          <ModuleGrid modules={enrichedModules} />
         </section>
       </main>
 
