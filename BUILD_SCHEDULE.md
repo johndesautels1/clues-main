@@ -522,18 +522,20 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 5 (Mini Module Flows)
+### Latest Update: 2026-03-09 — Session 5 (Mini Module Flows + Engine Wiring)
 
 **What was done this conversation:**
 - **Conv 3-4, Part 1**: Mini Module Questionnaire Flows + Dashboard Integration
-  - **MiniModuleFlow.tsx** (~300 lines): One-question-at-a-time card flow for all 23 mini modules. 10 section tabs, direction-aware fade transitions, keyboard navigation, question navigator sidebar, review screen at completion. Reuses QuestionRenderer for all input types.
-  - **ModuleLauncher.tsx**: Route wrapper that resolves `moduleId` from URL params, loads question data via `getModuleById()`, renders MiniModuleFlow. Shows error state for invalid module IDs.
-  - **useModuleState.ts** (~200 lines): State management hook for mini modules. Three-layer persistence (memory → localStorage → UserContext/Supabase). Answer keys prefixed `{moduleId}__q{number}` to avoid collisions. Auto-resumes at first unanswered question. Fires `COMPLETE_MODULE` when all 100 questions answered.
-  - **MiniModuleFlow.css** (~600 lines): Full WCAG 2.1 AA styling with `mmf-*` scoped classes. Glassmorphic cards, progress bar, section tabs, navigation dots, review table. All colors verified 4.5:1/3:1 contrast, 44×44px touch targets, visible focus outlines.
-  - **ModuleButton.tsx**: Updated to navigate to `/module/:moduleId` (internal SPA route) instead of opening external URL.
-  - **App.tsx**: Added `/module/:moduleId` route with `ProtectedRoute allowAnonymous` wrapper.
+  - **MiniModuleFlow.tsx** (~580 lines): One-question-at-a-time card flow for all 23 mini modules. Uses the SAME `mq-*` CSS / Questionnaire.css as MainQuestionnaire — same particle field, Olivia integration (chat/voice/video), topbar, glassmorphic cards, section tabs, nav buttons, review table. No separate design system.
+  - **ModuleLauncher.tsx**: Route wrapper resolving `moduleId` from URL params, loads question data via `getModuleById()`, renders MiniModuleFlow. Error page uses established `mq-universe` styling.
+  - **useModuleState.ts** (~200 lines): State management hook for mini modules. Three-layer persistence (memory → localStorage → UserContext/Supabase). Answer keys prefixed `{moduleId}__q{number}`. Auto-resumes at first unanswered question. Fires `COMPLETE_MODULE` when all 100 answered.
+  - **ModuleButton.tsx**: Navigates to `/module/:moduleId` (internal SPA route) instead of external URL.
+  - **App.tsx**: Added `/module/:moduleId` route with `ProtectedRoute allowAnonymous`.
+- **Engine Wiring, Bite 1**: Coverage tracker → React layer
+  - **useCoverageState.ts** (~130 lines): Reactive hook computing CoverageState from ALL 7 data sources (paragraphical extraction, demographics, DNW, MH, tradeoffs, general, mini module localStorage). Derived state — no new reducer actions. Returns coverage, recommendedModules (gap analysis), isReportReady flag, overallPercentage.
+  - Audit: all 7 `applyCoverage*` signatures verified against `coverageTracker.ts`, localStorage key patterns match `useModuleState`, TypeScript clean.
 - TypeScript compilation verified clean — zero errors
-- **What's next**: Conv 3-4 remaining items — section-by-section save/resume UI on Dashboard, completion status indicators on ModuleGrid, connect adaptive engine to mini module question ordering
+- **What's next**: Bite 2 — moduleRelevanceEngine → Dashboard (module recommendation badges). Bite 3 — adaptiveEngine → useModuleState (smart question ordering).
 
 **Previous conversation (2026-03-09, Session 4) completed:**
 - COMPLETED Section 10, Steps 3-6: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables
