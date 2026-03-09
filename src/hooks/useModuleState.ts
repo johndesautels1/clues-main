@@ -89,7 +89,7 @@ export function useModuleState(moduleData: QuestionModule): UseModuleStateReturn
   });
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Persist to localStorage immediately on answer change
   useEffect(() => {

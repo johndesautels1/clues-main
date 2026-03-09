@@ -17,7 +17,6 @@
 
 import { MODULES, type ModuleDefinition } from '../data/modules';
 import { getModuleQuestions } from '../data/questions';
-import type { QuestionItem } from '../data/questions/types';
 import type {
   GeminiExtraction,
   DemographicAnswers,
