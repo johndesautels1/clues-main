@@ -215,7 +215,7 @@ Expected Information Gain (EIG) =
 9. Repeat
 ```
 
-**Typical result**: 8-15 questions per module instead of 100. Across 3-5 selected modules, the user answers **40-60 total questions** out of a possible 2,300.
+**Typical result**: 8-15 questions per module instead of 100. Across 3-5 selected modules, the user answers **40-60 total adaptive questions** out of the 2,300 mini module questions (23 modules × 100).
 
 ### 3.5 Where LLMs DO Fit in the Adaptive Process
 
@@ -385,7 +385,7 @@ api/olivia-chat.ts                 ← Already built (159 lines)
 - Be architecturally wrong (judges don't investigate)
 - Add unnecessary latency to the questionnaire flow
 
-GPT-5.4's strength is **advanced reasoning on structured data with a massive factual knowledge base.** Perfect for detecting emergent patterns across 200 structured answers.
+GPT-5.4's strength is **advanced reasoning on structured data with a massive factual knowledge base.** Perfect for detecting emergent patterns across the 200 structured Main Module flow answers (100 Main Module + 50 Tradeoff + 50 General).
 
 ### 7.3 Why Pure Math for Question Selection, Not Any LLM
 
@@ -412,7 +412,7 @@ For most users, ~250 total answers (Paragraphical paragraphs + Main Module quest
 | Stage | Input | Output | LLM(s) Used |
 |-------|-------|--------|-------------|
 | **Paragraphical** | 30 free-form paragraphs | 100-250 metrics, initial country/city/town/neighborhood, personality profile, module_relevance | Gemini 3.1 Pro Preview |
-| **Main Module** | 200 structured answers (Demo + DNW + MH + Tradeoffs + General) | Module weights, coverage map, pre-filled signals for mini modules | Deterministic engine + 1 GPT-5.4 refinement call |
+| **Main Module Flow** | 200 structured answers (100 Main Module: 34 Demo + 33 DNW + 33 MH, plus 50 Tradeoffs + 50 General) | Module weights, coverage map, pre-filled signals for mini modules | Deterministic engine + 1 GPT-5.4 refinement call |
 | **Adaptive Module Selection** | All upstream data | Ranked list of 3-5 modules to complete, with estimated questions per module | Deterministic engine (pure math) |
 | **Adaptive Question Selection** | Selected module + all prior answers | Next highest-EIG question within current module | CAT engine (pure math) |
 | **5-LLM Evaluation** | All metrics + candidate locations | Per-metric SMART Scores with sources from 5 independent LLMs | Gemini + GPT-5.4 + Grok 4.1 + Sonar + Sonnet 4.6 |

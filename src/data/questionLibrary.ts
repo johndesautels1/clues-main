@@ -180,7 +180,7 @@ export const questionLibraryData: QuestionLibraryData = {
       "textMuted": "#8b95a5",
       "orangeAccent": "#f97316"
     },
-    "moduleStructure": "23 category modules × 100 questions each (10 sections × 10 questions) + Main Module (100Q: 34 Demographics + 33 DNW + 33 Must Haves) + General Questions (50Q) + Trade-off Questions (50Q) = 2,600 total questions"
+    "moduleStructure": "23 category modules × 100 questions each (10 sections × 10 questions) + Main Module (100Q: 34 Demographics + 33 DNW + 33 Must Haves) + General Questions (50Q) + Trade-off Questions (50Q) = 2,500 total questions"
   },
   "modules": [
     {

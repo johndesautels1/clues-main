@@ -321,7 +321,7 @@ The Main Module has 4 sub-sections, unlocking sequentially:
 
 ## 8. CLUES 5-TIER SCORING SCALE & QUESTION RESPONSE TYPE TAXONOMY
 
-> **PURPOSE**: Every question across all 23 category modules (2,300 questions) and the Main Module (~300 questions) must return structured data that maps to the universal CLUES 5-Tier Color Scale. This section defines the scale, the approved response types, and how each response type maps to a 0-100 score.
+> **PURPOSE**: Every question across all 23 category modules (2,300 questions) and the Main Module flow (200 questions: 100 Main Module + 50 Tradeoffs + 50 General) must return structured data that maps to the universal CLUES 5-Tier Color Scale. This section defines the scale, the approved response types, and how each response type maps to a 0-100 score.
 
 ### The CLUES 5-Tier Color Scale (Universal)
 

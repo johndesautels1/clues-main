@@ -452,7 +452,7 @@ export const tradeoffQuestionsQuestions: QuestionModule = {
           "number": 50,
           "question": "Looking at everything you've told us — if you could ONLY optimize for THREE things in your new home and had to accept \"good enough\" on everything else, what would your three be?",
           "type": "Text",
-          "modules": ["tradeoff_questions"]
+          "modules": ["general_questions"]
         }
       ]
     }

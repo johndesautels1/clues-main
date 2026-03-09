@@ -357,7 +357,7 @@ Large files cause three problems:
 | **> 2,000 lines** (data file) | Split by category/module |
 | **> 300 lines** (types file) | Split by domain (questionnaire.ts, evaluation.ts, report.ts) |
 
-### questionLibrary.ts Split Plan (14,415 lines → 24 files)
+### questionLibrary.ts Split Plan (14,415 lines → 26 files)
 
 ```
 src/data/questionLibrary.ts (14,415 lines)
@@ -534,7 +534,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - TypeScript compilation verified clean — zero errors
 
 **Previous conversation (2026-03-09, Session 3) completed:**
-- Section 10, Steps 1-2: All 2,550 questions across 27 files tagged with correct `modules: string[]` cross-references
+- Section 10, Steps 1-2: All 2,500 questions across 26 files tagged with correct `modules: string[]` cross-references
 
 **Previous conversation (2026-03-09, Session 2) completed:**
 - Designed `modules: string[]` architecture (Section 10)
@@ -700,7 +700,7 @@ STEP 2: Main Module (5 sections, strict order)
       → Severity 4-5 dealbreakers ELIMINATE cities, boost module weights
   2c. Must Haves (33 questions) → +10% confidence
       → Importance 4-5 requirements BOOST cities, boost module weights
-  2d. Trade-offs (15 sliders) → weights categories AGAINST each other
+  2d. Trade-offs (50 sliders) → weights categories AGAINST each other
       → Slider at 80/20 = 80% left category, 20% right category
   2e. General Questions (50 questions) → +20% confidence
       → Broad coverage, GQ answers map to module relevance via GQ_MODULE_SIGNALS
@@ -718,8 +718,8 @@ STEP 3: System-Selected Mini Modules (23 available, system picks 3-8)
   → User CAN STOP after any module → system recalculates overall MOE
 
 CONVERGENCE: ~250 total answers → MOE ≤ 2% → Olivia congratulates → GAMMA Report generated
-  30 paragraphs + 34 demographics + 33 DNW + 33 MH + 15 tradeoffs + 50 general = 195 structured
-  + ~55 adaptive module questions (across 3-8 modules, heavily skipped)
+  30 paragraphs + 34 demographics + 33 DNW + 33 MH + 50 tradeoffs + 50 general = 230 structured
+  + ~20 adaptive module questions (across 3-8 modules, heavily skipped)
   ≈ 250 total → MOE ≤ 2%
 ```
 
@@ -736,7 +736,7 @@ The system LEARNS as data arrives:
 ### Implementation Steps (When Ready)
 
 1. Add `modules: string[]` to `QuestionItem` type in `src/data/questions/types.ts`
-2. Tag every question in all 28 question files with correct `modules` values
+2. Tag every question in all 26 question files with correct `modules` values
    — READ each question carefully, do NOT fabricate module assignments
 3. Update `coverageTracker.ts` to read `modules` from questions, delete `DNW_MODULE_MAP` and `MH_MODULE_MAP`
 4. Update `moduleRelevanceEngine.ts` to read `modules` from questions, delete `MODULE_KEYWORDS`

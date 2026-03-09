@@ -28,7 +28,7 @@ USER
  │    ├── Gemini 3.1 Pro Preview (extraction → metrics + scores)
  │    └── 152 coverage targets across all paragraphs
  │
- └── Main Module (200 structured questions, 5 sections)
+ └── Main Module Flow (200 structured questions across 5 sections: 100 Main Module + 50 Tradeoffs + 50 General)
       ├── Demographics (Q1-Q34)   → 7 logic jump triggers
       ├── Do Not Wants (Q35-Q67)  → Dealbreaker severity 1-5
       ├── Must Haves (Q68-Q100)   → Importance Likert 1-5
