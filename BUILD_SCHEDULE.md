@@ -543,8 +543,14 @@ Target: < 10KB. Everything else lives in specialized docs.
   - Takes `RelevanceResult | null` and `CoverageState | null` as inputs from the other two hooks.
   - Returns: nextQuestion (highest-EIG), recordAdaptiveAnswer, skipAdaptiveQuestion, isSessionComplete, overallMOE, totalAnswered, estimatedRemaining, isAvailable.
   - Audit: all 4 imported functions verified against adaptiveEngine.ts signatures, all type imports (AdaptiveState, NextQuestionResult, CoverageState, RelevanceResult) verified exported, return interface maps correctly to AdaptiveState fields, React patterns correct (useMemo, useCallback, functional setState updaters), TypeScript clean.
+- **Engine Wiring, Bite 4**: Dashboard module badges — dynamic status from engines
+  - **Dashboard.tsx**: Wired `useRelevanceState` into Dashboard. Module grid now shows dynamic statuses: `completed` (from `session.completedModules`), `in_progress` (from localStorage answer detection), `recommended` (from relevance engine), or `not_started` (default). Previously all 23 modules were static `not_started`.
+  - Added `hasLocalStorageAnswers()` helper — reads `clues-module-${moduleId}` localStorage key, checks for `{moduleId}__` prefixed answer keys. Same pattern as `useCoverageState.ts` and `useModuleState.ts`.
+  - `enrichedModules` computed via `useMemo` — merges static MODULES with dynamic status, priority: completed > in_progress > recommended > not_started.
+  - ModuleButton.tsx and ModuleButton.css already support all 5 states (not_started, in_progress, completed, recommended, locked) with illumination CSS — no changes needed.
+  - Audit: all imports verified, localStorage key pattern matches useModuleState, isRecommended signature matches useRelevanceState, TypeScript clean.
 - TypeScript compilation verified clean — zero errors
-- **What's next**: Wire the three hooks (useCoverageState, useRelevanceState, useAdaptiveState) into UI components — Dashboard module badges, MiniModuleFlow adaptive ordering, CoverageMeter component.
+- **What's next**: Bite 5 — Wire useAdaptiveState into MiniModuleFlow for EIG-based question ordering. Bite 6 — Build CoverageMeter.tsx component.
 
 **Previous conversation (2026-03-09, Session 4) completed:**
 - COMPLETED Section 10, Steps 3-6: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables
