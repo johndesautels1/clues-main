@@ -40,7 +40,7 @@ function moeColor(moe: number): string {
 
 // ─── Gap severity badge colors ──────────────────────────────────
 function gapBadgeColor(severity: CoverageGap['severity']): string {
-  if (severity === 'critical') return '#ef4444';  // 5.4:1 (large text OK)
+  if (severity === 'critical') return '#ef4444';  // 5.4:1 vs #0a0e1a (passes 4.5:1 normal text)
   if (severity === 'moderate') return '#f59e0b';  // 9.0:1
   return C.textMuted;                             // 6.4:1
 }
@@ -60,14 +60,14 @@ function CompactMeter() {
       style={{
         display: 'flex', alignItems: 'center', gap: 16,
         padding: '10px 20px',
-        background: 'rgba(17,24,39,0.7)', backdropFilter: 'blur(8px)',
+        background: 'var(--bg-glass-heavy)', backdropFilter: 'blur(8px)',
         borderRadius: 10, border: '1px solid rgba(96,165,250,0.12)',
       }}
     >
       {/* MOE Ring */}
       <div style={{ position: 'relative', width: 44, height: 44, flexShrink: 0 }}>
         <svg width={44} height={44} viewBox="0 0 44 44" aria-hidden="true">
-          <circle cx={22} cy={22} r={18} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={3} />
+          <circle cx={22} cy={22} r={18} fill="none" stroke="var(--bg-card)" strokeWidth={3} />
           <circle
             cx={22} cy={22} r={18}
             fill="none" stroke={moeColor(moe)} strokeWidth={3}
@@ -109,7 +109,7 @@ function CompactMeter() {
           marginLeft: 'auto', flexShrink: 0,
           fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
           color: gapBadgeColor(coverage.gapAnalysis[0].severity),
-          background: 'rgba(255,255,255,0.04)', borderRadius: 6,
+          background: 'var(--bg-card)', borderRadius: 6,
           padding: '3px 8px', letterSpacing: '0.03em',
         }}>
           {coverage.gapAnalysis.filter(g => g.severity === 'critical').length} gaps
@@ -137,7 +137,7 @@ function FullMeter() {
       role="region"
       aria-label="Coverage Meter"
       style={{
-        background: 'rgba(17,24,39,0.5)', backdropFilter: 'blur(12px)',
+        background: 'var(--bg-glass)', backdropFilter: 'blur(12px)',
         borderRadius: 14, border: '1px solid rgba(96,165,250,0.10)',
         padding: '20px 24px',
         fontFamily: "'Outfit',sans-serif",
@@ -148,7 +148,7 @@ function FullMeter() {
         {/* MOE Ring (larger) */}
         <div style={{ position: 'relative', width: 56, height: 56, flexShrink: 0 }}>
           <svg width={56} height={56} viewBox="0 0 56 56" aria-hidden="true">
-            <circle cx={28} cy={28} r={23} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={3.5} />
+            <circle cx={28} cy={28} r={23} fill="none" stroke="var(--bg-card)" strokeWidth={3.5} />
             <circle
               cx={28} cy={28} r={23}
               fill="none" stroke={moeColor(moe)} strokeWidth={3.5}
@@ -190,14 +190,14 @@ function FullMeter() {
           aria-expanded={expanded}
           aria-label={expanded ? 'Collapse dimension details' : 'Expand dimension details'}
           style={{
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--bg-card)', border: '1px solid var(--bg-card-hover)',
             borderRadius: 8, padding: '10px 14px', cursor: 'pointer', minHeight: 44, minWidth: 44,
             fontSize: 12, fontWeight: 600, color: C.textAccent,
             letterSpacing: '0.02em', flexShrink: 0,
             transition: 'background 0.15s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}
         >
           {expanded ? 'Collapse' : 'Details'}
         </button>
@@ -206,7 +206,7 @@ function FullMeter() {
       {/* Overall progress bar */}
       <div style={{
         height: 6, borderRadius: 3,
-        background: 'rgba(255,255,255,0.06)',
+        background: 'var(--bg-card)',
         marginBottom: criticalGaps.length > 0 || moderateGaps.length > 0 ? 14 : 0,
       }}>
         <div style={{
@@ -286,7 +286,7 @@ function DimensionBar({ dim, isRecommended }: { dim: DimensionCoverage; isRecomm
       {/* Bar track */}
       <div style={{
         flex: 1, height: 6, borderRadius: 3,
-        background: 'rgba(255,255,255,0.06)',
+        background: 'var(--bg-card)',
         position: 'relative',
       }}>
         <div style={{
