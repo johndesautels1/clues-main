@@ -522,10 +522,21 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 4 (Engine Refactoring Complete)
+### Latest Update: 2026-03-09 — Session 5 (Mini Module Flows)
 
 **What was done this conversation:**
-- **COMPLETED Section 10, Steps 3-6**: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables
+- **Conv 3-4, Part 1**: Mini Module Questionnaire Flows + Dashboard Integration
+  - **MiniModuleFlow.tsx** (~300 lines): One-question-at-a-time card flow for all 23 mini modules. 10 section tabs, direction-aware fade transitions, keyboard navigation, question navigator sidebar, review screen at completion. Reuses QuestionRenderer for all input types.
+  - **ModuleLauncher.tsx**: Route wrapper that resolves `moduleId` from URL params, loads question data via `getModuleById()`, renders MiniModuleFlow. Shows error state for invalid module IDs.
+  - **useModuleState.ts** (~200 lines): State management hook for mini modules. Three-layer persistence (memory → localStorage → UserContext/Supabase). Answer keys prefixed `{moduleId}__q{number}` to avoid collisions. Auto-resumes at first unanswered question. Fires `COMPLETE_MODULE` when all 100 questions answered.
+  - **MiniModuleFlow.css** (~600 lines): Full WCAG 2.1 AA styling with `mmf-*` scoped classes. Glassmorphic cards, progress bar, section tabs, navigation dots, review table. All colors verified 4.5:1/3:1 contrast, 44×44px touch targets, visible focus outlines.
+  - **ModuleButton.tsx**: Updated to navigate to `/module/:moduleId` (internal SPA route) instead of opening external URL.
+  - **App.tsx**: Added `/module/:moduleId` route with `ProtectedRoute allowAnonymous` wrapper.
+- TypeScript compilation verified clean — zero errors
+- **What's next**: Conv 3-4 remaining items — section-by-section save/resume UI on Dashboard, completion status indicators on ModuleGrid, connect adaptive engine to mini module question ordering
+
+**Previous conversation (2026-03-09, Session 4) completed:**
+- COMPLETED Section 10, Steps 3-6: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables
   - **Step 3 — coverageTracker.ts**: Deleted `DNW_MODULE_MAP` (27 entries) and `MH_MODULE_MAP` (28 entries). DNW/MH coverage now looks up main_module questions by number and uses their `modules` field. Paragraphical signal matching uses a lazy keyword index built from question text. Tradeoff handling upgraded from 15 hardcoded pairs to full 50-question lookup via `getModuleQuestions('tradeoff_questions')`.
   - **Step 4 — moduleRelevanceEngine.ts**: Deleted `MODULE_KEYWORDS` (23 entries × 5-8 keywords each) and `findModuleHitsFromText()`. DNW/MH relevance now looks up questions by number directly. Tradeoff relevance upgraded from 15 hardcoded pairs to 50-question lookup.
   - **Step 5 — adaptiveEngine.ts**: Added cross-module overlap to EIG recalculation. Questions sharing `modules` references with the just-answered question get an information overlap penalty (up to 12% uncertainty reduction per shared module ratio), improving question selection efficiency.
