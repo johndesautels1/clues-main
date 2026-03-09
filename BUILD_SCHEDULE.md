@@ -522,74 +522,65 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-08 (Phase 1, Conv 1-2 COMPLETE + Persistence Fixes)
+### Latest Update: 2026-03-09 (LLM Provider Architecture + Adaptive Engine Scaffold)
 
 **What was done this conversation:**
-- Split `questionLibrary.ts` (14,415 lines) into 26 per-module files in `src/data/questions/`
-  - `types.ts`, `meta.ts`, one file per module, `index.ts` barrel with backward compat
-  - Added `getModuleById()` and `getModuleQuestions()` utility functions
-- Built full Main Module Questionnaire (`/questionnaire` route):
-  - `MainQuestionnaire.tsx` — Phase-based orchestrator (welcome/active/complete)
-  - `QuestionRenderer.tsx` — All 15 response types as interactive single-card controls
-  - `Questionnaire.css` — Mobile-first, WCAG AA, glassmorphic dark theme
-  - `questionnaireData.ts` — 5 sections, logic jumps, color tokens, option extraction
-  - `useQuestionnaireState.ts` — Answers, nav, 3-layer persistence, smart skipping
-  - `src/types/questionnaire.ts` — Full type definitions
-- Wired `/questionnaire` route in App.tsx with ProtectedRoute (allowAnonymous)
-- Full Olivia integration (chat, voice, video) via existing Discovery components
-- 5 sections: Demographics (34Q) → DNW (33Q) → MH (33Q) → Trade-offs (50Q) → General (50Q)
-- Logic jumps: partner Qs skip if single, children Qs skip if no kids, pet Qs skip if no pets, etc.
-- **Fixed 5 Supabase persistence bugs:**
-  1. Added `TradeoffAnswers` type + `tradeoffAnswers` field to `UserSession.mainModule`
-  2. Added `SET_TRADEOFFS` action + reducer case to `UserContext`
-  3. Fixed DNW sync: flat `q35: 3` → `DNWAnswer{ questionId, value, severity }` array
-  4. Fixed MH sync: flat `q68: 4` → `MHAnswer{ questionId, value, importance }` array
-  5. Fixed key collisions: `tq{n}` for tradeoffs, `gq{n}` for general (avoids overlap with `q{n}` demographics)
-- **Built comprehensive Supabase schema: 2 tables → 20 tables + 2 views:**
-  - `user_profiles` — extended user data beyond auth
-  - `paragraphs` — individual paragraph entries (1-30) with word counts
-  - `gemini_extractions` — extraction metadata from Gemini reasoning engine
-  - `gemini_metrics` — individual metrics (100-250 per extraction)
-  - `questionnaire_answers` — normalized per-answer rows for all 5 sections
-  - `module_progress` — per-module status tracking (main + mini)
-  - `location_recommendations` — Gemini-recommended locations
-  - `evaluations` — evaluation run metadata
-  - `llm_evaluations` — per-LLM evaluation outputs
-  - `evaluation_metrics` — per-metric per-LLM scores with sources
-  - `judge_reports` — Opus judge verdicts
-  - `judge_overrides` — individual metric overrides by Opus
-  - `tavily_cache` — cached web search results (30-min TTL)
-  - `reports` — generated report metadata (Gamma, PDF, video)
-  - `subscriptions` — Stripe subscription tracking
-  - `question_performance` — question effectiveness analytics
-  - `paragraph_summaries` — Gemini per-paragraph analysis
-  - `thinking_steps` — Gemini reasoning chain transparency
-  - `session_overview` view — admin dashboard aggregation
-  - `question_effectiveness` view — question health leaderboard
-  - `supabasePersistence.ts` — dual-write service (JSONB + normalized)
-  - RLS on every table, indexes on all FKs + query patterns
+- Created `LLM_PROVIDER_ARCHITECTURE.md` — complete LLM assignment document:
+  - Defines which LLM handles which task (Gemini=Paragraphical, GPT-5.4=refinement, Opus=judge)
+  - **KEY DECISION**: Module/question selection is PURE MATH (not LLM) — deterministic engine
+  - **KEY DECISION**: GPT-5.4 fires ONE refinement call per completed Main Module section (~$0.50 total)
+  - **KEY DECISION**: Adaptive engine uses Computerized Adaptive Testing (CAT) — same math as GRE/GMAT
+  - Olivia delivers questions conversationally but does NOT select them
+  - Documents full pipeline: Paragraphical → Main Module → Adaptive Modules → 5-LLM Eval → Opus Judge → SMART Scores → GAMMA Report
+- Built `src/lib/coverageTracker.ts` (~400 lines) — 23-dimension coverage state:
+  - `DimensionCoverage` per module: dataPoints, signalStrength, signalConsistency, weight, moeContribution
+  - Functions to apply coverage from: Paragraphical, Demographics, DNW, MH, Trade-offs, General, Mini Modules
+  - Gap analysis: identifies critical/moderate/minor coverage gaps
+  - MOE decomposition: overall MOE broken down per-module
+  - Keyword maps: DNW/MH text → module relevance (deterministic, no LLM)
+- Built `src/lib/moduleRelevanceEngine.ts` (~380 lines) — deterministic module recommendation:
+  - `ModuleRelevance` per module: relevance (0-1), confidence (0-1), recommended flag, reasons
+  - `DEMOGRAPHIC_RULES` array: 15+ rules mapping demographic facts to module boosts
+  - `MODULE_KEYWORDS` map: text keywords → module IDs for DNW/MH answer matching
+  - Recommendation logic: priority = relevance × (1 - confidence). High relevance + low confidence = recommend
+  - Functions to apply relevance from: Paragraphical, Demographics, DNW, MH, Trade-offs, General
+- Built `src/lib/adaptiveEngine.ts` (~380 lines) — CAT question selection engine:
+  - `QuestionBelief` per question: predictionUncertainty, smartScoreImpact, EIG (Expected Information Gain)
+  - `initializeAdaptiveEngine()` — creates belief states for all questions in recommended modules
+  - `selectNextQuestion()` — returns highest-EIG unanswered question + selection reason for Olivia
+  - `recordAnswer()` — updates beliefs, recalculates EIG, checks stopping criterion (MOE ≤ 2%)
+  - `markPreFilled()` — skip questions answerable from upstream data
+  - Information overlap detection: answering Q reduces EIG of nearby/same-section questions
+  - Typical result: 8-15 questions per module (not 100), 40-60 total across 3-5 modules (not 2,300)
+
+**Previous conversation (2026-03-08) built:**
+- Questionnaire Renderer (Phase 1, Conv 1-2): MainQuestionnaire, QuestionRenderer, 5 sections, logic jumps
+- Question library split: 14,415 lines → 26 per-module files
+- Supabase schema: 20 tables + 2 views with RLS
+- 5 Supabase persistence bug fixes
+- (See git log for full details)
 
 **Current build position:**
 - Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
-- Phase 1, Conv 3-4 (Main + Mini Module Flows) is NEXT
-- The Main Module questionnaire UI is complete and functional
-- Mini Module flows (23 category modules × 100Q each) need similar treatment
-- No evaluation pipeline code exists yet
-- Results components exist as shells but are not wired to routes or data
+- Phase 1, Conv 5-6 (Adaptive Intelligence) is SCAFFOLDED — core engines exist, need UI + integration
+- Phase 1, Conv 3-4 (Main + Mini Module Flows) is NEXT — needed to wire adaptive engine to UI
+- No evaluation pipeline code exists yet (Phase 2)
+- Results components exist as shells but are not wired to routes or data (Phase 3)
 
 **Next agent should:**
-1. Read mandatory files (CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md, PARAGRAPHICAL_ARCHITECTURE.md)
-2. Begin Phase 1, Conv 3-4: Build Main + Mini Module Flows
-3. Mini modules use the same `QuestionRenderer` but load from individual module files
-4. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
-5. Build module unlock/recommendation logic based on Gemini extraction `module_relevance`
-6. Build the Dashboard module cards that link to each questionnaire
+1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md, PARAGRAPHICAL_ARCHITECTURE.md, **LLM_PROVIDER_ARCHITECTURE.md** (NEW)
+2. Begin Phase 1, Conv 3-4: Build Mini Module Flows
+3. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
+4. Build `CoverageMeter.tsx` — real-time MOE/coverage UI component
+5. Build `ModuleLauncher.tsx` — Dashboard integration using `moduleRelevanceEngine` scores
+6. Wire adaptive engine into questionnaire flow: `adaptiveEngine.selectNextQuestion()` → QuestionRenderer
+7. Build GPT-5.4 refinement endpoint: `api/refinement-gpt.ts` (1 call per section, catches emergent patterns)
 
 **Known issues:**
 - `questionLibrary.ts` (original monolith) still exists — can be deleted once all consumers migrated
 - `README.md` at 46KB needs trimming (not urgent, do during Phase 4 polish)
-- `CLUES_MAIN_BUILD_REFERENCE.md` has some overlap with this file — not harmful but could be trimmed
-- Olivia's logic-jump behavior in MainQuestionnaire is currently passive (Olivia doesn't yet proactively suggest skips or follow-ups based on answers — that's a Conv 3-4 enhancement)
+- Trade-off pairs in `coverageTracker.ts` and `moduleRelevanceEngine.ts` use placeholder mappings (tq1-tq15) — need to verify against actual tradeoff question data
+- Olivia's logic-jump behavior in MainQuestionnaire is currently passive (needs Conv 3-4 enhancement)
 
 ---
 
