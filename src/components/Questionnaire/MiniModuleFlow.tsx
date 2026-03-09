@@ -21,8 +21,10 @@ import { useModuleState } from '../../hooks/useModuleState';
 import { useCoverageState } from '../../hooks/useCoverageState';
 import { useRelevanceState } from '../../hooks/useRelevanceState';
 import { useAdaptiveState } from '../../hooks/useAdaptiveState';
+import { useSkipLogic } from '../../hooks/useSkipLogic';
 import { getCleanQuestion, C } from './questionnaireData';
 import { QuestionRenderer } from './QuestionRenderer';
+import { SkipIndicator, SkipSummaryBar } from './SkipLogic';
 import { ParticleField } from '../Discovery/ParticleField';
 import { OliviaChoiceModal } from '../Discovery/OliviaChoiceModal';
 import { OliviaPanel } from '../Discovery/OliviaPanel';
@@ -63,6 +65,19 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
   const { relevance } = useRelevanceState();
   const adaptive = useAdaptiveState(relevance, coverage);
 
+  // ─── Skip Logic (cross-module pre-fill detection) ────────────
+  const questionModules = useMemo(() => {
+    const map = new Map<number, string[]>();
+    for (const section of moduleData.sections) {
+      for (const q of section.questions) {
+        map.set(q.number, q.modules);
+      }
+    }
+    return map;
+  }, [moduleData.sections]);
+
+  const skipLogic = useSkipLogic(moduleData.moduleId, coverage, questionModules);
+
   // Notify adaptive engine when user answers a question (keeps MOE in sync)
   const handleAnswerWithAdaptive = useCallback((questionNumber: number, value: string | number | boolean | string[]) => {
     ms.setAnswer(questionNumber, value);
@@ -70,6 +85,17 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
       adaptive.recordAdaptiveAnswer(moduleData.moduleId, questionNumber, value);
     }
   }, [ms, adaptive, moduleData.moduleId]);
+
+  // Handle skip from SkipIndicator — marks pre-filled in adaptive + advances
+  const handleSkipQuestion = useCallback((questionNumber: number) => {
+    if (adaptive.isAvailable) {
+      adaptive.markAdaptivePreFilled(moduleData.moduleId, questionNumber, true);
+    }
+    // Advance to next question
+    if (!ms.isLastQuestion) {
+      ms.goNext();
+    }
+  }, [adaptive, moduleData.moduleId, ms]);
 
   // ─── Phase State ───────────────────────────────────────────────
   const [phase, setPhase] = useState<'welcome' | 'active' | 'complete'>('welcome');
@@ -613,6 +639,11 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
             Question {qNumInSection} of {qTotalInSection}
           </p>
 
+          {/* Skip Summary Bar */}
+          {phase === 'active' && skipLogic.skippableCount > 0 && (
+            <SkipSummaryBar skipSummary={skipLogic.skipSummary} skippableCount={skipLogic.skippableCount} />
+          )}
+
           {/* Question Card */}
           {ms.currentQuestion && (
             <div className="mq-card" style={{ '--card-accent': accent } as React.CSSProperties}>
@@ -638,6 +669,14 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
                 onChange={(val) => handleAnswerWithAdaptive(ms.currentQuestion.number, val)}
                 accent={accent}
               />
+
+              {/* Skip indicator (if this question can be skipped) */}
+              {skipLogic.getSkipInfo(ms.currentQuestion.number) && (
+                <SkipIndicator
+                  skipInfo={skipLogic.getSkipInfo(ms.currentQuestion.number)!}
+                  onSkip={() => handleSkipQuestion(ms.currentQuestion.number)}
+                />
+              )}
             </div>
           )}
 

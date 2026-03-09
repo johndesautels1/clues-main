@@ -21,6 +21,7 @@ import {
   selectNextQuestion,
   recordAnswer,
   skipQuestion,
+  markPreFilled,
   type AdaptiveState,
   type NextQuestionResult,
 } from '../lib/adaptiveEngine';
@@ -39,6 +40,9 @@ export interface UseAdaptiveReturn {
 
   /** User declines to answer — skip without MOE reduction */
   skipAdaptiveQuestion: (moduleId: string, questionNumber: number) => void;
+
+  /** Mark a question as pre-filled from upstream data (partial MOE reduction) */
+  markAdaptivePreFilled: (moduleId: string, questionNumber: number, value: string | number | boolean) => void;
 
   /** Is the adaptive session complete? (MOE ≤ 2%) */
   isSessionComplete: boolean;
@@ -107,11 +111,20 @@ export function useAdaptiveState(
     });
   }, []);
 
+  // Mark a question as pre-filled from upstream data
+  const markAdaptivePreFilled = useCallback((moduleId: string, questionNumber: number, value: string | number | boolean) => {
+    setState(prev => {
+      if (!prev) return prev;
+      return markPreFilled(prev, moduleId, questionNumber, value);
+    });
+  }, []);
+
   return {
     adaptiveState: state,
     nextQuestion,
     recordAdaptiveAnswer,
     skipAdaptiveQuestion,
+    markAdaptivePreFilled,
     isSessionComplete: state?.isSessionComplete ?? false,
     overallMOE: state?.overallMOE ?? 1,
     totalAnswered: state?.totalAnswered ?? 0,
