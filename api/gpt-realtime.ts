@@ -151,7 +151,7 @@ export default async function handler(
     const expiresAt = sessionData.client_secret?.expires_at ?? sessionData.expires_at;
 
     if (!token) {
-      console.error('[/api/gpt-realtime] No token in OpenAI response:', JSON.stringify(sessionData).slice(0, 500));
+      console.error('[/api/gpt-realtime] No token in OpenAI response (session ID:', sessionData.id ?? 'unknown', ')');
       res.status(502).json({ error: 'OpenAI Realtime session created but no token returned' });
       return;
     }
@@ -174,12 +174,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/gpt-realtime] GPT Realtime 1.5 session creation failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/gpt-realtime] Detail:', message);
+    console.error('[/api/gpt-realtime] GPT Realtime 1.5 session creation failed:', message);
     res.status(500).json({
       error: 'GPT Realtime session creation failed',
+      detail: message,
       durationMs,
     });
   }

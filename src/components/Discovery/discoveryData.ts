@@ -159,23 +159,25 @@ export const CAT_COLORS: Record<string, string> = {
  * Aligned with globals.css design tokens.
  */
 export const C = {
-  // Backgrounds
-  pageBg: '#0a0e1a',       // var(--bg-primary) — THE canonical dark background
-  cardBg: '#111827',       // var(--bg-secondary)
-  inputBg: '#0d1222',      // Slightly lighter than pageBg for inputs
-  inputBorder: '#374151',  // var(--gray-700) — 3.2:1 against pageBg
+  // Backgrounds — CSS custom properties for dark/light auto-switch
+  pageBg: 'var(--bg-primary)',
+  cardBg: 'var(--bg-secondary)',
+  inputBg: 'var(--bg-secondary)',
+  inputBorder: 'var(--border-glass)',
 
   // Borders & dividers
-  divider: '#1f2937',      // var(--gray-800)
+  divider: 'var(--border-glass)',
 
-  // Text — all verified against #0a0e1a
-  textPrimary: '#f9fafb',    // 18.3:1 — headings, body
-  textSecondary: '#9ca3af',  // 6.3:1  — subtitles, descriptions
-  textMuted: '#8b95a5',      // 5.2:1  — hints, captions, timestamps
-  textAccent: '#60a5fa',     // 5.1:1  — links, interactive
+  // Text — CSS custom properties, auto-switch dark/light
+  // Dark ratios (vs #0a0e1a): primary 18.4:1, secondary 7.6:1, muted 6.4:1, accent 7.6:1
+  // Light ratios (vs #ffffff): primary 15.4:1, secondary 7.4:1, muted 5.0:1, accent 5.3:1
+  textPrimary: 'var(--text-primary)',
+  textSecondary: 'var(--text-secondary)',
+  textMuted: 'var(--text-muted)',
+  textAccent: 'var(--text-accent)',
 
-  // Placeholder — must meet 4.5:1 per CLAUDE.md
-  textPlaceholder: '#8b95a5', // Using --text-muted (5.2:1)
+  // Placeholder — uses --text-muted (meets 4.5:1 in both modes)
+  textPlaceholder: 'var(--text-muted)',
 
   // Focus ring
   focusDefault: '#C4A87A',

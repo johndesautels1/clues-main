@@ -30,6 +30,7 @@ import type {
   JudgeOpusRequest,
   MetricOverride,
 } from '../src/types/judge';
+// EvaluatorModel used for VALID_MODELS set below
 import type { EvaluatorModel } from '../src/types/evaluation';
 
 // ─── Cost tracking helper (server-side, writes to Supabase directly) ──
@@ -244,26 +245,36 @@ export default async function handler(
       body.userContext || { paragraphCount: 0, completedModules: [], tier: 'discovery' }
     );
 
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 32768,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        system: 'You are Cristiano, the CLUES Intelligence Supreme Judge. You render precise, evidence-based verdicts. Return only valid JSON. No markdown fences.',
-        temperature: 0.2,
-      }),
-    });
+    // 120-second timeout to prevent hung requests from blocking the pipeline
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120_000);
+
+    let anthropicResponse: Response;
+    try {
+      anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-6',
+          max_tokens: 32768,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          system: 'You are Cristiano, the CLUES Intelligence Supreme Judge. You render precise, evidence-based verdicts. Return only valid JSON. No markdown fences.',
+          temperature: 0.2,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!anthropicResponse.ok) {
       const errText = await anthropicResponse.text();
@@ -279,7 +290,8 @@ export default async function handler(
     }
 
     // ─── Parse response ──────────────────────────────────────
-    const textBlock = anthropicResult.content?.find((b: { type: string }) => b.type === 'text');
+    const contentBlocks = Array.isArray(anthropicResult.content) ? anthropicResult.content : [];
+    const textBlock = contentBlocks.find((b: { type: string }) => b.type === 'text');
     const rawText = textBlock?.text ?? '';
 
     let judgeResponse: Omit<JudgeReport, 'reportId' | 'judgedAt'>;
@@ -312,12 +324,13 @@ export default async function handler(
     };
 
     // ─── Validate trustedModel against EvaluatorModel union ──
-    const VALID_MODELS: Set<string> = new Set([
+    // Derived from EvaluatorModel type to stay in sync
+    const VALID_MODELS: Set<EvaluatorModel> = new Set<EvaluatorModel>([
       'claude-sonnet-4-6', 'gpt-5.4', 'gemini-3.1-pro-preview',
       'grok-4-1-fast-reasoning', 'sonar-reasoning-pro-high',
     ]);
     for (const override of report.metricOverrides) {
-      if (override.trustedModel && !VALID_MODELS.has(override.trustedModel)) {
+      if (override.trustedModel && !VALID_MODELS.has(override.trustedModel as EvaluatorModel)) {
         // Opus returned a non-standard model name — clear it rather than propagate bad data
         delete (override as MetricOverride).trustedModel;
       }
@@ -356,12 +369,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/judge-opus] Opus 4.6 judge failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/judge-opus] Detail:', message);
+    console.error('[/api/judge-opus] Opus 4.6 judge failed:', message);
     res.status(500).json({
       error: 'Opus judge failed',
+      detail: message,
       durationMs,
     });
   }

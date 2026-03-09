@@ -383,6 +383,7 @@ export function SideBySideMetricView({
                                 e.stopPropagation();
                                 onParagraphClick?.(metric.source_paragraph);
                               }}
+                              aria-label={`View user justification from paragraph ${metric.source_paragraph}`}
                               style={{
                                 display: 'block',
                                 width: '100%',

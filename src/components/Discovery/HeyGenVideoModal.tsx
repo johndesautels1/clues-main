@@ -161,7 +161,7 @@ export function HeyGenVideoModal({ open, onClose, section, currentAnswer, sessio
     >
       <div style={{
         width: 'clamp(320px,92vw,860px)', maxHeight: '92vh',
-        background: 'linear-gradient(145deg,#0a0e1a 0%,#0d1222 100%)',
+        background: 'var(--bg-primary)',
         border: '1px solid rgba(196,168,122,0.15)', borderRadius: 28,
         overflow: 'hidden',
         boxShadow: '0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03)',

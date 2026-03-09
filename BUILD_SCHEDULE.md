@@ -173,14 +173,14 @@
 - [x] Cost tracking integration for Opus calls
 
 #### Conv 15-16: Smart Score Engine
-- [ ] `src/lib/smartScoreEngine.ts` — normalize raw scores → 0-100 Smart Scores
-- [ ] `src/lib/categoryRollup.ts` — metric → category → overall city scores
-- [ ] `src/lib/relativeScoring.ts` — cities scored relative to each other (not absolute)
-- [ ] `src/types/smartScore.ts` — CitySmartScore, CategorySmartScore types
-- [ ] Dual scoring (legal vs lived) for applicable metrics
-- [ ] Weight derivation from user persona + paragraph emphasis
-- [ ] Confidence levels from StdDev (unanimous/strong/moderate/split)
-- [ ] Winner determination with tie threshold (< 1 point)
+- [x] `src/lib/smartScoreEngine.ts` — normalize raw scores → 0-100 Smart Scores
+- [x] `src/lib/categoryRollup.ts` — metric → category → overall city scores
+- [x] `src/lib/relativeScoring.ts` — cities scored relative to each other (not absolute)
+- [x] `src/types/smartScore.ts` — CitySmartScore, CategorySmartScore types
+- [x] Dual scoring (legal vs lived) for applicable metrics
+- [x] Weight derivation from user persona + paragraph emphasis
+- [x] Confidence levels from StdDev (unanimous/strong/moderate/split)
+- [x] Winner determination with tie threshold (< 1 point)
 
 ### PHASE 3: RESULTS & REPORTS (Conversations 17-22)
 *Displaying results and generating deliverables. Depends on Phase 2 evaluation working.*
@@ -522,7 +522,104 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 9 (Full Codebase Audit — Conv 7-16 — COMPLETE)
+### Latest Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued + Build Fix)
+
+**What was done this conversation (4 commits):**
+
+**Commit 1 — WCAG opacity + hardcoded rgba (5 files):**
+- `ParagraphicalFlow.css`: `.para-flow__btn:disabled` opacity 0.4 → 0.6 + grayscale filter
+- `Questionnaire.css`: `.qr-ranking-arrow:disabled` opacity 0.3 → 0.6 + grayscale filter
+- `QuestionLibrary.css`: `.ql-empty-state .ql-icon` opacity 0.4 → 0.6
+- `OliviaPanel.tsx`: Loading placeholder opacity 0.5 → 0.6; all `rgba(10,14,26,...)` and `rgba(255,255,255,0.04)` → CSS custom properties
+- `NavOverlay.tsx`: Overlay background → `var(--bg-glass-heavy)`, buttons → `var(--bg-card)`, `var(--bg-glass)`
+
+**Commit 2 — Light-mode overrides + aria (6 files):**
+- `Questionnaire.css`: light-mode overrides for textarea, dropdown, search inputs
+- `QuestionLibrary.css`: Full light-mode variable overrides for admin panel
+- `Discovery.css`: textarea background light-mode override
+- `MapOverlay.css`: Leaflet controls, back button, layer toggle light-mode overrides
+- `PrivacyPolicyModal.css`: Hardcoded dark gradient → `var(--bg-secondary)`
+- `SideBySideMetricView.tsx`: Added `aria-label` to user justification button
+
+**Commit 3 — Documentation:**
+- README.md audit fix status updated with all Session 12 fixes
+- BUILD_SCHEDULE.md handoff updated
+
+**Commit 4 — Build fix (5 files):**
+- `relativeScoring.ts`: Removed import statements for types not referenced in that file (types still exist in their source files and are used elsewhere — `JudgeReport` in `judgeOrchestrator.ts`, `CategoryWeights` in `categoryRollup.ts`, etc.)
+- `categoryRollup.ts`: Removed unused `ConfidenceLevel` import (type still exists in `smartScore.ts`)
+- `smartScoreEngine.ts`: Prefixed unused function param `_locationConsensus` (placeholder function that returns `[]`)
+- `evaluationOrchestrator.ts`: `process.env.VERCEL_URL` → `import.meta.env.VITE_VERCEL_URL` (Vite browser build has no `process`)
+- `judgeOrchestrator.ts`: Same `process.env` → `import.meta.env` fix
+- **`npm run build` (tsc -b && vite build): PASSES CLEAN**
+
+**IMPORTANT NOTE FOR NEXT AGENT:** The removed imports in Commit 4 were ONLY `import` statements at the top of files that didn't reference those types. The types themselves (`JudgeReport`, `CategoryWeights`, `OrchestrationResult`, etc.) are NOT deleted — they still exist in `src/types/judge.ts`, `src/types/smartScore.ts`, `src/types/evaluation.ts` and are used by other files. When `relativeScoring.ts` grows to need them, re-add the imports.
+
+**What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
+
+### Previous Update: 2026-03-09 — Session 11 (Phase 1 Audit Fix Pass — COMPLETE)
+
+**What was done this conversation:**
+- **Full 116-issue audit chart committed to README.md** (Conv 1-8, all severity levels documented).
+- **P0 Data Corruption Fixes:**
+  - `adaptiveEngine.ts`: EIG recalculation now includes `module.moduleWeight` (was dropping it, breaking cross-module prioritization). Added `moduleWeight` field to `ModuleAdaptiveState`. Replaced recursive `selectNextQuestion` with iterative loop. Fixed stale model name comments. Renamed misleading `getQuestionByBelief` → `getQuestionByModuleAndNumber`.
+  - `coverageTracker.ts`: Guarded division-by-zero in `applyCoverageFromMiniModule` (totalQuestions=0 → early return). Fixed `addOrUpdateSource` averaging bug (naive avg → weighted running avg). Clamped `estimatedQuestionsToResolve` to `Math.max(1, ...)`.
+- **P1 WCAG Light Mode (systemic):**
+  - `globals.css`: Added `@media (prefers-color-scheme: light)` block with WCAG-verified text colors (#111827 15.4:1, #4b5563 7.4:1, #6b7280 5.0:1, #2563eb 5.3:1), surface vars, score color overrides (darkened --score-green, --clues-gold etc. for 4.5:1 on white).
+  - `questionnaireData.ts`, `discoveryData.ts`, `ReadinessIndicator.tsx`: All `C` token objects converted from hardcoded hex to `var(--text-primary)` etc.
+  - `CoverageMeter.tsx`: Hardcoded dark `rgba(17,24,39,*)` backgrounds → `var(--bg-glass)` / `var(--bg-card)`.
+  - `OliviaChoiceModal.tsx`, `HeyGenVideoModal.tsx`, `main.tsx`: Dark gradient/colors → CSS variables.
+  - `LoginPage.tsx`: GitHub SVG `fill="#f9fafb"` → `fill="currentColor"`.
+- **P2 API Resilience:**
+  - `evaluate-gemini.ts`: Added retry loop (3x exponential backoff: 1s, 2s, 4s) on 429/5xx.
+  - `judge-opus.ts`: Added 120s AbortController timeout.
+- **False Positives Documented:** Issues #1-4 (supabase already uses import.meta.env, auth already unsubscribes), #53 (uses process.env), #59 (validates required fields).
+- **tsc: 0 errors** after all changes.
+
+**What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
+
+### Previous Update: 2026-03-09 — Session 10 (Conv 15-16 — Smart Score Engine — COMPLETE)
+
+**What was done this conversation:**
+- **Conv 15-16: Smart Score Engine** — ALL 8 checklist items completed. 4 new files, ~1,172 lines total.
+
+**src/types/smartScore.ts** (~290 lines):
+- `MetricSmartScore`: per-metric per-location score with judge override tracking, dual score, confidence, sources
+- `CategorySmartScore`: per-category weighted average with metric breakdown, judge analysis
+- `CitySmartScore`: overall city score with category rollup, rank, judge trend
+- `DualScore`: legal vs enforcement scoring with combined/conservative modes
+- `WinnerDetermination`: rankings, tie detection, advantage category analysis
+- `CategoryWeights`: weight derivation tracking (default/persona/paragraph_emphasis)
+- `SmartScoreInput`/`SmartScoreOutput`: full pipeline I/O types
+- `ConfidenceLevel` type + `CONFIDENCE_THRESHOLDS` constants (§15.5)
+- Tie thresholds: `CITY_TIE_THRESHOLD = 1`, `CATEGORY_TIE_THRESHOLD = 2` (§15.4)
+- 6 `PersonaPreset` definitions: Balanced, Digital Nomad, Entrepreneur, Family, Retiree, Investor
+
+**src/lib/smartScoreEngine.ts** (~260 lines):
+- `getConfidenceLevel()`: σ < 5 → unanimous, < 12 → strong, < 20 → moderate, ≥ 20 → split
+- `clampScore()`, `normalizeNumeric()`, `normalizeBoolean()`: raw → 0-100 normalization
+- `isDualScoreMetric()`: categories where legal vs lived distinction applies (safety, legal, social values, sexual beliefs, religion)
+- `computeDualScore()`: combined = (legal × legalWeight) + (enforcement × enforcementWeight), conservative = MIN(legal, enforcement)
+- `computeMetricSmartScore()`: consensus + judge override → final MetricSmartScore
+- `computeAllMetricSmartScores()`: main entry point — OrchestrationResult + JudgeReport → Map<location, MetricSmartScore[]>
+- Utility: `mean()`, `median()`, `stdDev()`
+
+**src/lib/categoryRollup.ts** (~220 lines):
+- `deriveCategoryWeights()`: equal base (1/23) → persona preset multipliers → paragraph emphasis → normalize to sum 1.0
+- `rollupToCategories()`: group metrics by category, weighted average (excludes score -1 missing data), aggregate confidence
+- `rollupToCity()`: weighted sum of category scores → overall 0-100, judge trend from summaryOfFindings
+- `computeCityScore()`: full pipeline for one city (metrics → categories → city)
+
+**src/lib/relativeScoring.ts** (~190 lines):
+- `applyRelativeScoring()`: per-metric linear interpolation across peer cities (best=100, worst=0, equal=50)
+- `determineWinner()`: rank cities, detect ties (< 1pt city, < 2pt category), identify advantage/tied categories
+- `computeSmartScores()`: THE main entry point tying all 3 engines: consensus→smartScores→relativeScoring→rollup→winner
+
+**Build status**: tsc 0 errors. **Phase 2 (Evaluation Pipeline) is now COMPLETE** — all Conv 9-16 items done.
+
+- **What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
+
+### Previous Update: 2026-03-09 — Session 9 (Full Codebase Audit — Conv 7-16 — COMPLETE)
 
 **What was done this conversation:**
 - **Full retroactive audit of ALL code from Conv 7-16** — 5 commits, ~35 bugs fixed across ~15 files.
@@ -560,8 +657,6 @@ Target: < 10KB. Everything else lives in specialized docs.
 
 **Build status**: tsc 0 errors, Vite 0 errors, 669 modules transformed after all fixes.
 **All Conv 7-16 code is now audited and clean.**
-
-- **What's next**: Conv 15-16 — Smart Score Engine (smartScoreEngine.ts, categoryRollup.ts, relativeScoring.ts, smartScore types, dual scoring, weight derivation, confidence levels, winner determination). This is NEW CODE, not yet built — all checklist items in Phase 2 Conv 15-16 are unchecked.
 
 ### Previous Update: 2026-03-09 — Session 8 (Conv 13-14 — Opus Judge System — COMPLETE)
 

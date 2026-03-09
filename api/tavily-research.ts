@@ -332,7 +332,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       );
 
       for (const { topic, response } of batchResults) {
-        const validResults = response.results.filter(r => isValidSourceURL(r.url));
+        const validResults = (response.results ?? []).filter(r => isValidSourceURL(r.url));
         const sources = validResults.map(extractSourceURL);
 
         topicResults.push({
@@ -383,9 +383,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[/api/tavily-research] Error:', message);
-    console.error('[/api/tavily-research] Detail:', message);
     res.status(500).json({
       error: 'Tavily research failed',
+      detail: message,
       durationMs: Date.now() - startTime,
     });
   }

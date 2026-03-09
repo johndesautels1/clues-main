@@ -24,7 +24,7 @@
   max-height: 88vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(145deg, #0d1222 0%, #0a0e1a 100%);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
   box-shadow:

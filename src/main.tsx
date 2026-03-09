@@ -12,9 +12,9 @@ createRoot(document.getElementById('root')!).render(
         style: {
           maxWidth: '400px',
           fontSize: '0.875rem',
-          background: '#1f2937',
-          color: '#f9fafb',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          background: 'var(--bg-secondary)',
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border-glass)',
         },
       }}
     />

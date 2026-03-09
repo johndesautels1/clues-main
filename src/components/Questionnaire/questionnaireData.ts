@@ -115,19 +115,21 @@ export function getCleanQuestion(questionText: string): string {
 }
 
 // ─── WCAG-Verified Color Tokens ──────────────────────────────────
-// Same token set as Discovery, reused for consistency.
+// Uses CSS custom properties for automatic dark/light mode switching.
+// Dark ratios (vs #0a0e1a): primary 18.4:1, secondary 7.6:1, muted 6.4:1, accent 7.6:1
+// Light ratios (vs #ffffff): primary 15.4:1, secondary 7.4:1, muted 5.0:1, accent 5.3:1
 
 export const C = {
-  pageBg: '#0a0e1a',
-  cardBg: '#111827',
-  inputBg: '#0d1222',
-  inputBorder: '#374151',
-  divider: '#1f2937',
-  textPrimary: '#f9fafb',    // 18.3:1
-  textSecondary: '#9ca3af',  // 6.3:1
-  textMuted: '#8b95a5',      // 5.2:1
-  textAccent: '#60a5fa',     // 5.1:1
-  textPlaceholder: '#8b95a5', // 5.2:1
+  pageBg: 'var(--bg-primary)',
+  cardBg: 'var(--bg-secondary)',
+  inputBg: 'var(--bg-secondary)',
+  inputBorder: 'var(--border-glass)',
+  divider: 'var(--border-glass)',
+  textPrimary: 'var(--text-primary)',
+  textSecondary: 'var(--text-secondary)',
+  textMuted: 'var(--text-muted)',
+  textAccent: 'var(--text-accent)',
+  textPlaceholder: 'var(--text-muted)',
   focusDefault: '#C4A87A',
   gold: '#C4A87A',
   dealbreaker: ['#7f1d1d', '#991b1b', '#b91c1c', '#dc2626', '#ef4444'],

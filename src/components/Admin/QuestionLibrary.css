@@ -466,7 +466,7 @@
 }
 .ql-results-info span { color: var(--ql-gold); font-weight: 600; }
 .ql-empty-state { text-align: center; padding: 80px 20px; color: var(--ql-text-muted); }
-.ql-empty-state .ql-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.ql-empty-state .ql-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
 .ql-empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--ql-text-secondary); }
 
 /* ─── MODAL ─── */
@@ -803,3 +803,42 @@
 .ql-section-link:focus-visible { outline: 2px solid var(--ql-gold); outline-offset: 2px; background: var(--ql-bg-glass); color: var(--ql-text-secondary); }
 .ql-add-btn:focus-visible, .ql-btn-save:focus-visible, .ql-drawer-edit-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .ql-btn-cancel:focus-visible, .ql-q-action-btn:focus-visible, .ql-modal-close:focus-visible, .ql-drawer-close:focus-visible { outline: 2px solid var(--ql-gold); outline-offset: 2px; }
+
+/* ─── Light mode overrides ─── */
+@media (prefers-color-scheme: light) {
+  .ql-root {
+    --ql-bg-deep: #f5f5f5;
+    --ql-bg-primary: #ffffff;
+    --ql-bg-card: rgba(0, 0, 0, 0.04);
+    --ql-bg-glass: rgba(0, 0, 0, 0.03);
+    --ql-bg-glass-hover: rgba(0, 0, 0, 0.06);
+    --ql-border: rgba(0, 0, 0, 0.12);
+    --ql-border-bright: rgba(0, 0, 0, 0.2);
+    --ql-text-primary: #111827;
+    --ql-text-secondary: #4b5563;
+    --ql-text-muted: #6b7280;
+  }
+  .ql-type-filter option,
+  .ql-form-row select option {
+    background: #ffffff;
+    color: #111827;
+  }
+  .ql-header {
+    background: rgba(255, 255, 255, 0.95);
+  }
+  .ql-sidebar {
+    background: rgba(245, 245, 245, 0.95);
+  }
+  .ql-breadcrumb {
+    background: rgba(255, 255, 255, 0.8);
+  }
+  .ql-modal {
+    background: #ffffff;
+  }
+  .ql-modal-header {
+    background: #ffffff;
+  }
+  .ql-detail-drawer {
+    background: #ffffff;
+  }
+}

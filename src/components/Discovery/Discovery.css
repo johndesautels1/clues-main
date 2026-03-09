@@ -197,3 +197,12 @@
 @media (max-width: 768px) {
   .discovery-timeline { display: none !important; }
 }
+
+/* ─── Light mode overrides ─── */
+@media (prefers-color-scheme: light) {
+  .discovery-textarea {
+    background: var(--bg-secondary);
+    border-color: var(--border-glass);
+    color: var(--text-primary);
+  }
+}

@@ -146,9 +146,9 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
       aria-label="Chat with Olivia"
       style={{
         position: 'fixed', right: 0, top: 0, bottom: 0, width: 400,
-        background: 'rgba(10,14,26,0.98)',
+        background: 'var(--bg-secondary)',
         backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
-        borderLeft: '1px solid rgba(196,168,122,0.12)',
+        borderLeft: '1px solid var(--border-glass)',
         zIndex: 499, display: 'flex', flexDirection: 'column',
         animation: 'discovery-slideInRight 0.38s cubic-bezier(0.22,1,0.36,1)',
       }}
@@ -156,9 +156,9 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
       {/* Header */}
       <div style={{
         padding: '18px 18px 14px',
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        borderBottom: '1px solid var(--border-glass)',
         display: 'flex', alignItems: 'center', gap: 14,
-        background: 'linear-gradient(180deg,rgba(196,168,122,0.04) 0%,transparent 100%)',
+        background: 'var(--bg-glass)',
       }}>
         <OliviaAvatar isSpeaking={oliviaSpeaking} size={56} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -175,7 +175,7 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
               aria-label="Stop speaking"
               style={{
                 width: 32, height: 32, borderRadius: 8,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'var(--bg-card)', border: '1px solid var(--border-glass)',
                 color: C.textMuted, fontSize: 13,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
@@ -185,7 +185,7 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
             onClick={onClose} aria-label="Close chat" className="discovery-btn"
             style={{
               width: 32, height: 32, borderRadius: 8,
-              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--bg-card)', border: '1px solid var(--border-glass)',
               color: C.textMuted, fontSize: 18,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -196,7 +196,7 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
       {/* Section context */}
       <div style={{
         padding: '10px 18px',
-        borderBottom: '1px solid rgba(255,255,255,0.03)',
+        borderBottom: '1px solid var(--border-glass)',
         background: `linear-gradient(135deg,${accent}08 0%,transparent 100%)`,
       }}>
         <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.textMuted, marginBottom: 3 }}>
@@ -210,7 +210,7 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 14px 8px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {messages.length === 0 && !loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 12, opacity: 0.5, paddingTop: 40 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 12, opacity: 0.6, paddingTop: 40 }}>
             <div style={{ fontSize: 28, color: '#C4A87A' }}>{'\u25C6'}</div>
             <div style={{ fontFamily: "'Crimson Pro',serif", fontSize: 15, color: C.textMuted, textAlign: 'center', lineHeight: 1.6, maxWidth: 240 }}>
               Connecting with Olivia&hellip;
@@ -234,8 +234,8 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
                 borderRadius: m.role === 'user' ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
                 background: m.role === 'user'
                   ? 'linear-gradient(135deg,rgba(196,168,122,0.14) 0%,rgba(196,168,122,0.08) 100%)'
-                  : 'rgba(255,255,255,0.04)',
-                border: m.role === 'user' ? '1px solid rgba(196,168,122,0.22)' : '1px solid rgba(255,255,255,0.06)',
+                  : 'var(--bg-card)',
+                border: m.role === 'user' ? '1px solid rgba(196,168,122,0.22)' : `1px solid var(--border-glass)`,
                 fontFamily: "'Crimson Pro',Georgia,serif", fontSize: 15, lineHeight: 1.7,
                 color: m.role === 'user' ? C.textPrimary : '#C5C0B8',
               }}
@@ -262,8 +262,8 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, paddingLeft: 4 }}>
             <div style={{
               display: 'flex', gap: 5, padding: '12px 16px',
-              background: 'rgba(255,255,255,0.04)', borderRadius: '4px 18px 18px 18px',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'var(--bg-card)', borderRadius: '4px 18px 18px 18px',
+              border: '1px solid var(--border-glass)',
             }}>
               {[0, 1, 2].map((i) => (
                 <div key={i} style={{
@@ -279,7 +279,7 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
       </div>
 
       {/* Input bar */}
-      <div style={{ padding: '12px 14px 18px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ padding: '12px 14px 18px', borderTop: '1px solid var(--border-glass)' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
           <button
             onClick={toggleOliviaVoice}
@@ -287,8 +287,8 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
             className="discovery-btn"
             style={{
               width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-              background: oliviaListening ? 'rgba(196,168,122,0.18)' : 'rgba(255,255,255,0.04)',
-              border: oliviaListening ? '1px solid rgba(196,168,122,0.45)' : '1px solid rgba(255,255,255,0.09)',
+              background: oliviaListening ? 'rgba(196,168,122,0.18)' : 'var(--bg-card)',
+              border: oliviaListening ? '1px solid rgba(196,168,122,0.45)' : '1px solid var(--border-glass)',
               color: oliviaListening ? '#C4A87A' : C.textMuted,
               fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
               animation: oliviaListening ? 'discovery-micGlow 1.2s ease-in-out infinite' : 'none',
@@ -311,8 +311,8 @@ export function OliviaPanel({ open, onClose, section, currentAnswer, accent, ses
             aria-label="Send message"
             style={{
               width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-              background: input.trim() ? 'rgba(196,168,122,0.15)' : 'rgba(255,255,255,0.03)',
-              border: input.trim() ? '1px solid rgba(196,168,122,0.35)' : '1px solid rgba(255,255,255,0.07)',
+              background: input.trim() ? 'rgba(196,168,122,0.15)' : 'var(--bg-card)',
+              border: input.trim() ? '1px solid rgba(196,168,122,0.35)' : '1px solid var(--border-glass)',
               color: input.trim() ? '#C4A87A' : C.textMuted,
               fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}

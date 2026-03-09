@@ -8,13 +8,12 @@
  * answer it, recalculate, repeat. Stop when MOE ≤ 2%.
  *
  * This is PURE MATH — no LLM calls. Runs client-side, instant, free.
- * The math engine selects questions. Olivia (GPT-5.4 / GPT Realtime 1.5) delivers them.
+ * The math engine selects questions. Olivia delivers them.
  *
- * Architecture (see LLM_PROVIDER_ARCHITECTURE.md):
+ * Architecture (see LLM & API Provider Registry in README.md):
  * - Deterministic math engine: module selection + question selection
- * - GPT-5.4: one refinement call per completed section (catches emergent patterns)
- * - Gemini: Paragraphical text extraction (upstream, already done before this runs)
- * - Opus: judges evaluation results (downstream, after this engine feeds data)
+ * - Gemini 3.1 Pro Preview: Paragraphical text extraction (upstream, already done before this runs)
+ * - Claude Opus 4.6: judges evaluation results (downstream, after this engine feeds data)
  *
  * CLUES predicts: best country → top 3 cities → top 3 towns → top 3 neighborhoods
  */
@@ -61,6 +60,9 @@ export interface ModuleAdaptiveState {
 
   /** All questions with their belief states */
   questions: QuestionBelief[];
+
+  /** Module relevance weight from the relevance engine (0-1) */
+  moduleWeight: number;
 
   /** Current module-level MOE (0-1). Target: ≤ 0.02 */
   moduleMOE: number;
@@ -244,6 +246,7 @@ export function initializeAdaptiveEngine(
       moduleId: rec.moduleId,
       moduleName: rec.moduleName,
       questions: beliefs,
+      moduleWeight: rec.relevance,
       moduleMOE,
       answeredCount: 0,
       skippedCount: 0,
@@ -274,24 +277,32 @@ export function initializeAdaptiveEngine(
 export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | null {
   if (state.isSessionComplete) return null;
 
-  // Find the active module (or the first incomplete one)
-  let activeModule = state.modules.find(m => m.moduleId === state.activeModuleId && !m.isComplete);
-  if (!activeModule) {
-    activeModule = state.modules.find(m => !m.isComplete);
+  // Find the active module with available questions (loop instead of recursion)
+  let activeModule: ModuleAdaptiveState | undefined;
+  let nextBelief: QuestionBelief | undefined;
+
+  // First try the current active module
+  activeModule = state.modules.find(m => m.moduleId === state.activeModuleId && !m.isComplete);
+
+  // Search through modules for one with unanswered questions
+  for (let attempts = 0; attempts < state.modules.length; attempts++) {
     if (!activeModule) {
-      // All modules complete
-      return null;
+      activeModule = state.modules.find(m => !m.isComplete);
+      if (!activeModule) return null; // All modules complete
     }
-    state.activeModuleId = activeModule.moduleId;
+
+    nextBelief = activeModule.questions.find(q => !q.answered && !q.skipReason);
+    if (nextBelief) {
+      state.activeModuleId = activeModule.moduleId;
+      break;
+    }
+
+    // No questions left in this module — mark complete, try next
+    activeModule.isComplete = true;
+    activeModule = undefined;
   }
 
-  // Find highest-EIG unanswered, non-skipped question
-  const nextBelief = activeModule.questions.find(q => !q.answered && !q.skipReason);
-  if (!nextBelief) {
-    // No more questions in this module — mark complete, move to next
-    activeModule.isComplete = true;
-    return selectNextQuestion(state); // Recurse to next module
-  }
+  if (!activeModule || !nextBelief) return null;
 
   // Look up the actual QuestionItem from the question library
   const questionModule = getModuleById(activeModule.moduleId);
@@ -404,7 +415,7 @@ export function markPreFilled(
   module.skippedCount++;
   updated.totalSkipped++;
 
-  // Pre-fills provide partial information gain (70% of full answer)
+  // Pre-fills provide partial information gain (~67% of full answer's 0.15 factor)
   const partialReduction = belief.eig * 0.1;
   module.moduleMOE = Math.max(0, module.moduleMOE - partialReduction);
 
@@ -439,7 +450,7 @@ export function skipQuestion(
 // ─── Internal Helpers ─────────────────────────────────────────────
 
 /** Look up a QuestionItem by module and question number (for cross-module overlap checks) */
-function getQuestionByBelief(moduleId: string, questionNumber: number): QuestionItem | undefined {
+function getQuestionByModuleAndNumber(moduleId: string, questionNumber: number): QuestionItem | undefined {
   const questions = getModuleQuestions(moduleId);
   return questions.find(q => q.number === questionNumber);
 }
@@ -453,7 +464,7 @@ function getQuestionByBelief(moduleId: string, questionNumber: number): Question
  */
 function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: QuestionBelief): void {
   // Look up the answered question's cross-module references
-  const answeredQuestion = getQuestionByBelief(module.moduleId, answeredBelief.questionNumber);
+  const answeredQuestion = getQuestionByModuleAndNumber(module.moduleId, answeredBelief.questionNumber);
   const answeredModules = new Set(answeredQuestion?.modules ?? []);
 
   for (const q of module.questions) {
@@ -472,7 +483,7 @@ function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: Quest
 
     // Cross-module overlap: questions sharing module references cover similar ground
     if (answeredModules.size > 0) {
-      const candidateQuestion = getQuestionByBelief(module.moduleId, q.questionNumber);
+      const candidateQuestion = getQuestionByModuleAndNumber(module.moduleId, q.questionNumber);
       const candidateModules = candidateQuestion?.modules ?? [];
       const sharedCount = candidateModules.filter(m => answeredModules.has(m)).length;
       if (sharedCount > 0 && candidateModules.length > 0) {
@@ -482,8 +493,8 @@ function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: Quest
       }
     }
 
-    // Recalculate EIG
-    q.eig = q.predictionUncertainty * q.smartScoreImpact;
+    // Recalculate EIG — include moduleWeight to match initial formula
+    q.eig = q.predictionUncertainty * q.smartScoreImpact * module.moduleWeight;
   }
 
   // Re-sort by updated EIG

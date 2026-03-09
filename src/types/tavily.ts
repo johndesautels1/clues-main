@@ -121,7 +121,9 @@ export interface TavilyResearchResponse {
   research: RegionResearch;
   usage: {
     queriesExecuted: number;
+    cacheHits: number;
     totalResults: number;
+    uniqueSources: number;
     durationMs: number;
   };
 }
@@ -143,6 +145,7 @@ export interface TavilyMetricSearchResponse {
   results: MetricResearch[];
   usage: {
     searchesExecuted: number;
+    cacheHits: number;
     totalResults: number;
     durationMs: number;
   };

@@ -34,6 +34,17 @@ import { supabase, isSupabaseConfigured } from './supabase';
 
 // ─── LLM Endpoint Map ────────────────────────────────────────
 
+/**
+ * Resolve the base URL for API endpoints.
+ * In browser: relative paths work. In SSR/Node: need VERCEL_URL or localhost.
+ */
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined') return ''; // Browser — relative paths work
+  const vercelUrl = import.meta.env.VITE_VERCEL_URL;
+  if (vercelUrl) return `https://${vercelUrl}`;
+  return 'http://localhost:3000';
+}
+
 const LLM_ENDPOINTS: Record<EvaluatorModel, string> = {
   'claude-sonnet-4-6': '/api/evaluate-sonnet',
   'gpt-5.4': '/api/evaluate-gpt54',
@@ -244,7 +255,7 @@ async function evaluateWithModel(
   timeoutMs: number
 ): Promise<EvaluatorResult> {
   const startTime = Date.now();
-  const endpoint = LLM_ENDPOINTS[model];
+  const endpoint = `${getBaseUrl()}${LLM_ENDPOINTS[model]}`;
 
   try {
     const controller = new AbortController();
@@ -347,10 +358,11 @@ function buildConsensus(
       ? Math.max(...perLocationStdDevs)
       : 0;
 
+    // Thresholds match CONFIDENCE_THRESHOLDS in smartScore.ts (§15.5)
     const confidenceLevel: MetricConsensus['confidenceLevel'] =
-      stdDev <= 5 ? 'unanimous' :
-      stdDev <= 10 ? 'strong' :
-      stdDev <= 15 ? 'moderate' :
+      stdDev < 5 ? 'unanimous' :
+      stdDev < 12 ? 'strong' :
+      stdDev < 20 ? 'moderate' :
       'split';
 
     const contributingModels = [...new Set(

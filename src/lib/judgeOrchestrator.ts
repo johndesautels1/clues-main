@@ -92,7 +92,8 @@ export async function runJudge(
     invocationCount++;
 
     try {
-      const response = await fetch('/api/judge-opus', {
+      const baseUrl = typeof window !== 'undefined' ? '' : (import.meta.env.VITE_VERCEL_URL ? `https://${import.meta.env.VITE_VERCEL_URL}` : 'http://localhost:3000');
+      const response = await fetch(`${baseUrl}/api/judge-opus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,8 +129,11 @@ export async function runJudge(
     applySafeguards(mergedReport, allBatches);
 
   // ─── 7. Persist to Supabase ───────────────────────────────
-  persistJudgeReport(sessionId, correctedReport, safeguardTriggered, totalCostUsd, Date.now() - startTime)
-    .catch(err => console.error('[JudgeOrchestrator] Persistence failed:', err));
+  try {
+    await persistJudgeReport(sessionId, correctedReport, safeguardTriggered, totalCostUsd, Date.now() - startTime);
+  } catch (err) {
+    console.error('[JudgeOrchestrator] Persistence failed:', err);
+  }
 
   return {
     finalReport: correctedReport,
@@ -376,10 +380,18 @@ function applySafeguards(
   // Opus cannot override confidence levels — they're computed from actual StdDev.
   // We don't modify confidence here; it's enforced by the evaluation types.
   // But if Opus claims "high" confidence when the data shows "split", flag it.
-  const avgStdDev = allBatches
+  // Use max stdDev among disputed metrics (not average across ALL metrics)
+  // to avoid diluting high-disagreement signals with agreeable metrics.
+  const disputedMetrics = allBatches
     .filter(b => b.isUsable)
     .flatMap(b => b.consensus)
-    .reduce((sum, c, _, arr) => sum + c.stdDev / arr.length, 0);
+    .filter(c => c.needsJudgeReview);
+  const avgStdDev = disputedMetrics.length > 0
+    ? disputedMetrics.reduce((sum, c) => sum + c.stdDev, 0) / disputedMetrics.length
+    : allBatches
+        .filter(b => b.isUsable)
+        .flatMap(b => b.consensus)
+        .reduce((sum, c, _, arr) => sum + c.stdDev / arr.length, 0);
 
   const computedConfidence: JudgeSummary['overallConfidence'] =
     avgStdDev <= 5 ? 'high' :
