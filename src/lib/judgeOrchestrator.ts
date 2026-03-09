@@ -32,7 +32,9 @@ import type {
   SafeguardCorrection,
   MetricOverride,
   JudgeSummary,
+  JudgeReportRow,
 } from '../types/judge';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 // ─── Constants ───────────────────────────────────────────────
 
@@ -107,7 +109,10 @@ export async function runJudge(
         continue;
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        report?: JudgeReport;
+        metadata?: { costUsd?: number };
+      };
       if (data.report) reports.push(data.report);
       if (data.metadata?.costUsd) totalCostUsd += data.metadata.costUsd;
     } catch (err) {
@@ -123,7 +128,8 @@ export async function runJudge(
     applySafeguards(mergedReport, allBatches);
 
   // ─── 7. Persist to Supabase ───────────────────────────────
-  persistJudgeReport(sessionId, correctedReport, totalCostUsd, Date.now() - startTime).catch(() => {});
+  persistJudgeReport(sessionId, correctedReport, safeguardTriggered, totalCostUsd, Date.now() - startTime)
+    .catch(err => console.error('[JudgeOrchestrator] Persistence failed:', err));
 
   return {
     finalReport: correctedReport,
@@ -152,7 +158,7 @@ function buildCategorySummaries(batches: CategoryBatchResult[]): JudgeCategorySu
       const locationMap = new Map<string, { location: string; country: string; scores: number[] }>();
 
       for (const result of batch.results) {
-        if (!result.response) continue;
+        if (!result.response?.evaluations) continue;
         for (const evaluation of result.response.evaluations) {
           const key = `${evaluation.location}|${evaluation.country}`;
           if (!locationMap.has(key)) {
@@ -262,7 +268,8 @@ function mergeReports(reports: JudgeReport[], sessionId: string): JudgeReport {
 
   if (reports.length === 1) return reports[0];
 
-  // Use the last report's executive summary (it has full context)
+  // Use the last report's executive summary (each batch only sees its own 30 metrics,
+  // so multi-batch runs may have an incomplete executive summary — known limitation)
   const lastReport = reports[reports.length - 1];
 
   // Merge overrides and confirmed metrics from all reports
@@ -291,7 +298,8 @@ function mergeReports(reports: JudgeReport[], sessionId: string): JudgeReport {
     summaryOfFindings: {
       ...lastReport.summaryOfFindings,
       metricsReviewed: totalReviewed,
-      metricsOverridden: totalOverridden,
+      // Use actual array length as ground truth, not Opus's self-reported count
+      metricsOverridden: allOverrides.length,
     },
     categoryAnalysis: Array.from(categoryMap.values()),
     executiveSummary: lastReport.executiveSummary,
@@ -342,12 +350,14 @@ function applySafeguards(
     }
   }
 
-  // Check if Opus's recommendation matches
+  // Check if Opus's recommendation matches (normalize: trim, lowercase, strip trailing punctuation)
+  const normalize = (s: string) => s.trim().toLowerCase().replace(/[.,;!]+$/, '');
   if (
     computedWinner &&
     report.executiveSummary?.recommendation &&
-    report.executiveSummary.recommendation !== 'tie' &&
-    report.executiveSummary.recommendation.toLowerCase() !== computedWinner.toLowerCase()
+    normalize(report.executiveSummary.recommendation) !== 'tie' &&
+    !normalize(report.executiveSummary.recommendation).includes(normalize(computedWinner)) &&
+    !normalize(computedWinner).includes(normalize(report.executiveSummary.recommendation))
   ) {
     corrections.push({
       type: 'winner_override',
@@ -447,33 +457,27 @@ function buildCleanResult(
 async function persistJudgeReport(
   sessionId: string,
   report: JudgeReport,
+  safeguardTriggered: boolean,
   costUsd: number,
   durationMs: number
 ): Promise<void> {
-  const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) return;
+  if (!isSupabaseConfigured) return;
 
   try {
-    await fetch(`${supabaseUrl}/rest/v1/judge_reports`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify({
-        session_id: sessionId,
-        report_json: report,
-        metrics_reviewed: report.summaryOfFindings?.metricsReviewed ?? 0,
-        metrics_overridden: report.metricOverrides?.length ?? 0,
-        safeguard_triggered: false, // Updated by caller
-        cost_usd: costUsd,
-        duration_ms: durationMs,
-      }),
-    });
+    const row: Omit<JudgeReportRow, 'id' | 'created_at'> = {
+      session_id: sessionId,
+      report_json: report,
+      metrics_reviewed: report.summaryOfFindings?.metricsReviewed ?? 0,
+      metrics_overridden: report.metricOverrides?.length ?? 0,
+      safeguard_triggered: safeguardTriggered,
+      cost_usd: costUsd,
+      duration_ms: durationMs,
+    };
+
+    const { error } = await supabase.from('judge_reports').insert(row);
+    if (error) {
+      console.warn('[JudgeOrchestrator] Failed to persist judge report:', error.message);
+    }
   } catch (err) {
     console.warn('[JudgeOrchestrator] Failed to persist judge report:', err);
   }

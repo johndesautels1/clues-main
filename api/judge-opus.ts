@@ -27,7 +27,10 @@ import type {
   JudgeMetric,
   JudgeCategorySummary,
   JudgeReport,
+  JudgeOpusRequest,
+  MetricOverride,
 } from '../src/types/judge';
+import type { EvaluatorModel } from '../src/types/evaluation';
 
 // ─── Cost tracking helper (server-side, writes to Supabase directly) ──
 async function trackCost(entry: {
@@ -216,12 +219,7 @@ export default async function handler(
     return;
   }
 
-  const body = req.body as {
-    sessionId: string;
-    metrics: JudgeMetric[];
-    categoryResults: JudgeCategorySummary[];
-    userContext: { globeRegion?: string; paragraphCount: number; completedModules: string[]; tier: string };
-  };
+  const body = req.body as JudgeOpusRequest;
 
   if (!body.sessionId) {
     res.status(400).json({ error: 'Missing sessionId' });
@@ -255,7 +253,7 @@ export default async function handler(
       },
       body: JSON.stringify({
         model: 'claude-opus-4-6',
-        max_tokens: 16384,
+        max_tokens: 32768,
         messages: [
           {
             role: 'user',
@@ -274,6 +272,11 @@ export default async function handler(
 
     const anthropicResult = await anthropicResponse.json();
     const durationMs = Date.now() - startTime;
+
+    // ─── Check for truncation ────────────────────────────────
+    if (anthropicResult.stop_reason === 'max_tokens') {
+      console.warn('[/api/judge-opus] Response truncated (hit max_tokens). May produce invalid JSON.');
+    }
 
     // ─── Parse response ──────────────────────────────────────
     const textBlock = anthropicResult.content?.find((b: { type: string }) => b.type === 'text');
@@ -307,6 +310,18 @@ export default async function handler(
       confirmedMetrics: judgeResponse.confirmedMetrics ?? [],
       judgedAt: new Date().toISOString(),
     };
+
+    // ─── Validate trustedModel against EvaluatorModel union ──
+    const VALID_MODELS: Set<string> = new Set([
+      'claude-sonnet-4-6', 'gpt-5.4', 'gemini-3.1-pro-preview',
+      'grok-4-1-fast-reasoning', 'sonar-reasoning-pro-high',
+    ]);
+    for (const override of report.metricOverrides) {
+      if (override.trustedModel && !VALID_MODELS.has(override.trustedModel)) {
+        // Opus returned a non-standard model name — clear it rather than propagate bad data
+        delete (override as MetricOverride).trustedModel;
+      }
+    }
 
     // ─── Token usage ─────────────────────────────────────────
     const usage = anthropicResult.usage;
@@ -344,9 +359,9 @@ export default async function handler(
     console.error('[/api/judge-opus] Opus 4.6 judge failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/judge-opus] Detail:', message);
     res.status(500).json({
       error: 'Opus judge failed',
-      detail: message,
       durationMs,
     });
   }
