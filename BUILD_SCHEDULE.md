@@ -160,7 +160,7 @@
 - [ ] `src/lib/evaluationOrchestrator.ts` — parallel batch firing (waves of 2 categories)
 - [ ] `src/types/evaluation.ts` — per-LLM response types, MetricConsensus, batch results
 - [ ] Dynamic timeout: 120s + 5s per metric (max 300s)
-- [ ] Partial success handling: 3/6 categories = usable
+- [ ] Partial success handling: 3/5 LLMs responding = usable result
 - [ ] Supabase: `llm_evaluations` table (user_id, llm_model, category, metrics_json, created_at)
 
 #### Conv 13-14: Opus Judge System
@@ -364,11 +364,11 @@ src/data/questionLibrary.ts (14,415 lines)
     ↓ SPLIT INTO:
 src/data/questions/index.ts              — re-exports everything, maintains backward compat
 src/data/questions/types.ts              — shared question types
-src/data/questions/mainModule.ts         — Main Module questions
-src/data/questions/safetySecurityQ.ts    — Module 1 questions
-src/data/questions/healthWellnessQ.ts    — Module 2 questions
-src/data/questions/climateWeatherQ.ts    — Module 3 questions
-... (one file per module, 23 files)
+src/data/questions/main_module.ts        — Main Module questions
+src/data/questions/safety_security.ts    — Module 1 questions
+src/data/questions/health_wellness.ts    — Module 2 questions
+src/data/questions/climate_weather.ts    — Module 3 questions
+... (one file per module, 23 mini module files + general_questions.ts + tradeoff_questions.ts + meta.ts)
 ```
 
 **When to split**: First conversation that touches the questionnaire renderer (Conv 1-2 of Phase 1).
@@ -700,7 +700,7 @@ STEP 2: Main Module (5 sections, strict order)
       → Severity 4-5 dealbreakers ELIMINATE cities, boost module weights
   2c. Must Haves (33 questions) → +10% confidence
       → Importance 4-5 requirements BOOST cities, boost module weights
-  2d. Trade-offs (50 sliders) → weights categories AGAINST each other
+  2d. Trade-offs (50 questions: 49 sliders + 1 text) → weights categories AGAINST each other
       → Slider at 80/20 = 80% left category, 20% right category
   2e. General Questions (50 questions) → +20% confidence
       → Broad coverage, GQ answers map to module relevance via GQ_MODULE_SIGNALS
