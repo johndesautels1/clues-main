@@ -18,7 +18,7 @@
  *   - Override the computed winner (anti-hallucination safeguard force-corrects)
  */
 
-import type { EvaluatorModel, MetricConsensus } from './evaluation';
+import type { EvaluatorModel } from './evaluation';
 
 // ─── Judge Request Types ──────────────────────────────────────
 

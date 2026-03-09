@@ -21,7 +21,6 @@ import type {
   CategoryBatchResult,
   MetricConsensus,
   EvaluationMetric,
-  EvaluatorModel,
 } from '../types/evaluation';
 import type {
   JudgeMetric,
@@ -68,7 +67,7 @@ export async function runJudge(
 
   // If no disputed metrics, return a clean report
   if (disputedConsensus.length === 0) {
-    return buildCleanResult(sessionId, orchestrationResult, startTime);
+    return buildCleanResult(sessionId, startTime);
   }
 
   // ─── 2. Build judge evidence from raw evaluator results ────
@@ -412,7 +411,6 @@ function applySafeguards(
 
 function buildCleanResult(
   sessionId: string,
-  orchestrationResult: OrchestrationResult,
   startTime: number
 ): JudgeOrchestrationResult {
   return {
@@ -452,14 +450,8 @@ async function persistJudgeReport(
   costUsd: number,
   durationMs: number
 ): Promise<void> {
-  const supabaseUrl =
-    typeof process !== 'undefined' && process.env?.SUPABASE_URL
-      ? process.env.SUPABASE_URL
-      : import.meta.env?.VITE_SUPABASE_URL;
-  const supabaseKey =
-    typeof process !== 'undefined' && process.env?.SUPABASE_SERVICE_ROLE_KEY
-      ? process.env.SUPABASE_SERVICE_ROLE_KEY
-      : import.meta.env?.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) return;
 
