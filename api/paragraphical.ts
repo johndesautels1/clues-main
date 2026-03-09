@@ -215,7 +215,7 @@ Convert every measurable, researchable preference into a discrete metric.
 - Minimum 100 metrics, maximum 250
 - Each metric must be:
   - Numbered (M1, M2, M3...)
-  - Categorized (one of: safety_security, health_wellness, climate_weather, legal_immigration, financial_banking, housing_real_estate, professional_career, technology_connectivity, transportation_mobility, education_learning, social_values_governance, food_dining, shopping_services, outdoor_recreation, entertainment_nightlife, family_children, neighborhood_urban_design, environment_community_appearance, religion_spirituality, sexual_beliefs_practices_laws, arts_culture, cultural_heritage_traditions, pets_animals)
+  - Categorized (one of: safety_security, health_wellness, climate_weather, legal_immigration, financial_banking, housing_property, professional_career, technology_connectivity, transportation_mobility, education_learning, social_values_governance, food_dining, shopping_services, outdoor_recreation, entertainment_nightlife, family_children, neighborhood_urban_design, environment_community_appearance, religion_spirituality, sexual_beliefs_practices_laws, arts_culture, cultural_heritage_traditions, pets_animals)
   - Sourced to a specific paragraph (P1-P30)
   - Researchable (you can find real data for it)
   - Scorable (numeric, boolean, ranking, or index)
@@ -350,7 +350,7 @@ Return ONLY valid JSON matching this schema (no markdown fences, no explanation)
     "climate_weather": <0.0-1.0>,
     "legal_immigration": <0.0-1.0>,
     "financial_banking": <0.0-1.0>,
-    "housing_real_estate": <0.0-1.0>,
+    "housing_property": <0.0-1.0>,
     "professional_career": <0.0-1.0>,
     "technology_connectivity": <0.0-1.0>,
     "transportation_mobility": <0.0-1.0>,

@@ -90,7 +90,7 @@ One paragraph per module, mapping 1:1 to the 23 category modules:
 | P8 | Climate & Weather | climate_weather | T1 Survival | 10-12 |
 | P9 | Legal & Immigration | legal_immigration | T2 Foundation | 10-15 |
 | P10 | Financial & Banking | financial_banking | T2 Foundation | 12-18 |
-| P11 | Housing & Real Estate | housing_real_estate | T2 Foundation | 12-15 |
+| P11 | Housing & Property | housing_property | T2 Foundation | 12-15 |
 | P12 | Professional & Career | professional_career | T2 Foundation | 12-15 |
 | P13 | Technology & Connectivity | technology_connectivity | T3 Infrastructure | 10-12 |
 | P14 | Transportation & Mobility | transportation_mobility | T3 Infrastructure | 10-15 |

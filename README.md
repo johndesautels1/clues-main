@@ -39,7 +39,7 @@ This is **not** a law-based app (unlike LifeScore, which focuses on legal freedo
 ### TIER 2: FOUNDATION (4 categories)
 4. **Legal & Immigration** — visa types, residency paths, bureaucracy, rights
 5. **Financial & Banking** — cost of living, taxes, banking access, currency, investment
-6. **Housing & Real Estate** — cost, availability, quality, rental vs ownership, neighborhoods
+6. **Housing & Property** — cost, availability, quality, rental vs ownership, neighborhoods
 7. **Professional & Career** — career opportunities, remote work, business climate
 
 ### TIER 3: INFRASTRUCTURE (4 categories)
@@ -332,7 +332,7 @@ P10: "Financial & Banking" → moduleId: financial_banking → 12-18 metrics
     M41: Grocery cost for family of [X] below EUR 600/month [Financial]
     M42: Favorable capital gains tax rate (below 20%) [Financial]
 
-P11: "Housing & Real Estate" → moduleId: housing_real_estate → 12-15 metrics
+P11: "Housing & Property" → moduleId: housing_property → 12-15 metrics
   Coverage targets:
   - Property type (apartment, house, villa, loft)
   - Size requirements (bedrooms, sqm/sqft)
@@ -668,9 +668,9 @@ User mentioned safety concerns but nothing about climate or visa:
 
 Phase 3 (Advanced): Context-aware cross-paragraph intelligence
   - Olivia remembers what was said in ALL previous paragraphs
-  - If P17 (Family) mentions kids but P16 (Education) doesn't address schools: prompt
-  - If P11 (Financial) mentions tight budget but P9 (Housing) describes a villa: flag conflict
-  - If P3 (Dealbreakers) mentions safety but P7 (Safety) is vague: prompt for specifics
+  - If P21 (Family) mentions kids but P15 (Education) doesn't address schools: prompt
+  - If P10 (Financial) mentions tight budget but P11 (Housing) describes a villa: flag conflict
+  - If P3 (Dealbreakers) mentions safety but P6 (Safety) is vague: prompt for specifics
            - Why this is better than Googling / reading blogs
            - VISUAL: Pipeline flowchart showing 6 phases + downstream modules
 

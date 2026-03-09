@@ -93,7 +93,7 @@ Modules are ordered by evaluation funnel logic — each tier progressively narro
 ### TIER 2: FOUNDATION (Can I legally/financially exist here?)
 4. **Legal & Immigration** — Visa pathways, residency, rule of law, property rights
 5. **Financial & Banking** — Banking access, cost of living, taxes, currency stability
-6. **Housing & Real Estate** — Cost, availability, types, rental/purchase options
+6. **Housing & Property** — Cost, availability, types, rental/purchase options
 7. **Professional & Career** — Job market, remote work infrastructure, industry presence
 
 ### TIER 3: INFRASTRUCTURE (Can I function daily here?)
@@ -151,7 +151,7 @@ PHASE 5: MODULE DEEP DIVES (23 paragraphs, 1:1 with category modules in funnel o
   TIER 2: FOUNDATION
     P9:  "Legal & Immigration"                — moduleId: legal_immigration
     P10: "Financial & Banking"                — moduleId: financial_banking
-    P11: "Housing & Real Estate"              — moduleId: housing_real_estate
+    P11: "Housing & Property"              — moduleId: housing_property
     P12: "Professional & Career"              — moduleId: professional_career
   TIER 3: INFRASTRUCTURE
     P13: "Technology & Connectivity"           — moduleId: technology_connectivity

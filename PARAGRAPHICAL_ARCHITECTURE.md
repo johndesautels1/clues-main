@@ -48,24 +48,24 @@ CLUES Main does the same thing, except the metrics are **derived from the user's
 Every measurable, researchable preference becomes a discrete metric:
 
 ```
-From P6 ("Climate & Weather"):
+From P8 ("Climate & Weather"):
   "I hate humidity and want warm winters around 20-25C"
   -->
-  M1: Average annual humidity below 60% [Category: Climate] [Source: P6]
-  M2: Average winter temperature 20-25C [Category: Climate] [Source: P6]
-  M3: Absence of extreme weather events [Category: Climate] [Source: P6]
+  M1: Average annual humidity below 60% [Category: Climate] [Source: P8]
+  M2: Average winter temperature 20-25C [Category: Climate] [Source: P8]
+  M3: Absence of extreme weather events [Category: Climate] [Source: P8]
 
-From P11 ("Financial & Banking"):
+From P10 ("Financial & Banking"):
   "I make about 8000 euros a month and want to live comfortably"
   -->
-  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P11]
-  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P11]
+  M15: Monthly cost of living below EUR 4,000 for comfortable lifestyle [Category: Financial] [Source: P10]
+  M16: Favorable tax treatment for foreign income [Category: Financial] [Source: P10]
 
-From P14 ("Technology & Connectivity"):
+From P13 ("Technology & Connectivity"):
   "I need at least 100mbps for my remote work"
   -->
-  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P14]
-  M29: Reliable coworking space availability [Category: Technology] [Source: P14]
+  M28: Average broadband speed above 100 Mbps [Category: Technology] [Source: P13]
+  M29: Reliable coworking space availability [Category: Technology] [Source: P13]
 ```
 
 ### Target: 100-250 Metrics
@@ -856,7 +856,7 @@ tools: [{
 - `SideBySideMetricView` — Compares City vs Town vs Neighborhood metrics
 - `ReactiveJustification` — Click justification to highlight source Paragraph (P1-P30)
 - `ThinkingDetailsPanel` — Full transparency UI with model info, token stats, timeline
-- `FileUpload` — 100MB upload for medical records (P8), financial spreadsheets (P11)
+- `FileUpload` — 100MB upload for medical records (P7), financial spreadsheets (P10)
 
 ---
 
