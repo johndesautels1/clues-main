@@ -155,3 +155,22 @@
     justify-content: center;
   }
 }
+
+/* ─── Light mode overrides ─── */
+@media (prefers-color-scheme: light) {
+  .map-overlay .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: var(--text-muted) !important;
+  }
+  .map-overlay .leaflet-control-zoom a {
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-glass) !important;
+  }
+  .map-overlay__back-btn {
+    background: rgba(255, 255, 255, 0.92);
+  }
+  .map-overlay__layer-toggle {
+    background: rgba(255, 255, 255, 0.92);
+  }
+}

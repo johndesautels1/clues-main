@@ -1212,3 +1212,35 @@
   outline: 2px solid #C4A87A;
   outline-offset: 2px;
 }
+
+/* ─── LIGHT MODE OVERRIDES ─── */
+@media (prefers-color-scheme: light) {
+  .mq-universe {
+    background: var(--bg-primary);
+  }
+  .qr-textarea {
+    background: var(--bg-secondary);
+    border-color: var(--border-glass);
+    color: var(--text-primary);
+  }
+  .qr-textarea::placeholder {
+    color: var(--text-muted);
+  }
+  .qr-dropdown-select {
+    background: var(--bg-secondary);
+    border-color: var(--border-glass);
+    color: var(--text-primary);
+  }
+  .qr-dropdown-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  .qr-sm-search {
+    background: var(--bg-secondary);
+    border-color: var(--border-glass);
+    color: var(--text-primary);
+  }
+  .qr-sm-search::placeholder {
+    color: var(--text-muted);
+  }
+}
