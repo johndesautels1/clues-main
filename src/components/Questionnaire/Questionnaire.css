@@ -603,8 +603,9 @@
 }
 
 .qr-ranking-arrow:disabled {
-  opacity: 0.3;
+  opacity: 0.6;
   cursor: not-allowed;
+  filter: grayscale(0.5);
 }
 
 .qr-ranking-arrow:focus-visible {

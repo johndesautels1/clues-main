@@ -35,7 +35,7 @@ export function NavOverlay({ visible, onClose, current, answers, onNavigate }: N
       onClick={onClose}
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'rgba(10,14,26,0.92)',
+        background: 'var(--bg-glass-heavy)',
         backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
         zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center',
         animation: 'discovery-overlayIn 0.3s ease',
@@ -63,7 +63,7 @@ export function NavOverlay({ visible, onClose, current, answers, onNavigate }: N
             aria-label="Close"
             className="discovery-btn"
             style={{
-              background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.inputBorder}`,
+              background: 'var(--bg-card)', border: `1px solid ${C.inputBorder}`,
               borderRadius: 10, width: 40, height: 40, color: C.textSecondary,
               fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -95,7 +95,7 @@ export function NavOverlay({ visible, onClose, current, answers, onNavigate }: N
                     style={{
                       display: 'flex', alignItems: 'center', gap: 12,
                       padding: '12px 16px', textAlign: 'left',
-                      background: isActive ? `${s.accent}18` : 'rgba(255,255,255,0.02)',
+                      background: isActive ? `${s.accent}18` : 'var(--bg-glass)',
                       border: `1px solid ${isActive ? s.accent + '55' : C.divider}`,
                       borderRadius: 12, transition: 'all 0.25s ease',
                     }}
