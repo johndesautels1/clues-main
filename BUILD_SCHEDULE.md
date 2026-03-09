@@ -522,18 +522,19 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 3 (Pass 2: Cross-Module Tagging Complete)
+### Latest Update: 2026-03-09 — Session 4 (Engine Refactoring Complete)
 
 **What was done this conversation:**
-- **COMPLETED Section 10, Step 2 (Pass 2)**: All 2,550 questions across all 27 question files now have correct `modules: string[]` cross-references
-  - **tradeoff_questions.ts**: All 50 questions corrected from `["tradeoff_questions"]` → proper module pairs (e.g., Q1 cost vs safety → `["financial_banking", "safety_security"]`). Q50 (open text) kept as `["tradeoff_questions"]`
-  - **general_questions.ts**: All 50 questions corrected from `["general_questions"]` → proper module mappings (e.g., Q14 religious practice → `["religion_spirituality"]`, Q49 LGBTQ+ → `["sexual_beliefs_practices_laws", "social_values_governance"]`). Personality/meta questions (Q6, Q7, Q9, Q10) kept as `["general_questions"]`
-  - **safety_security.ts**: 30+ cross-refs added (e.g., Q43 school safety → `education_learning, family_children`; Q82 LGBTQ+ → `sexual_beliefs_practices_laws`; Q51-55 transport safety → `transportation_mobility`; Q61-67 environmental → `climate_weather`)
-  - **education_learning.ts**: 18 cross-refs added (e.g., Q36-39 vocational → `professional_career`; Q61 special needs → `family_children, health_wellness`; Q79 school safety → `safety_security`; Q93 credentials → `professional_career, legal_immigration`)
-  - **health_wellness.ts**: 19 cross-refs added (e.g., Q8/14/26/36/44/91 cost questions → `financial_banking`; Q75 climate health → `climate_weather`; Q76 pediatric → `family_children`; Q82 environmental → `environment_community_appearance, climate_weather`)
-  - **family_children.ts**: 32 cross-refs added (e.g., Q31/37 pediatric/mental health → `health_wellness`; Q51-53 child safety → `safety_security`; Q55 school transport → `transportation_mobility, education_learning`; Q81/84/93/95/96 career → `professional_career`)
-  - **19 remaining mini modules** (financial_banking, housing_property, transportation_mobility, legal_immigration, neighborhood_urban_design, professional_career, cultural_heritage_traditions, religion_spirituality, social_values_governance, sexual_beliefs_practices_laws, arts_culture, climate_weather, entertainment_nightlife, environment_community_appearance, food_dining, outdoor_recreation, pets_animals, shopping_services, technology_connectivity): All cross-referenced via 4 parallel agents
-- TypeScript compilation verified clean after ALL edits — zero errors
+- **COMPLETED Section 10, Steps 3-6**: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables
+  - **Step 3 — coverageTracker.ts**: Deleted `DNW_MODULE_MAP` (27 entries) and `MH_MODULE_MAP` (28 entries). DNW/MH coverage now looks up main_module questions by number and uses their `modules` field. Paragraphical signal matching uses a lazy keyword index built from question text. Tradeoff handling upgraded from 15 hardcoded pairs to full 50-question lookup via `getModuleQuestions('tradeoff_questions')`.
+  - **Step 4 — moduleRelevanceEngine.ts**: Deleted `MODULE_KEYWORDS` (23 entries × 5-8 keywords each) and `findModuleHitsFromText()`. DNW/MH relevance now looks up questions by number directly. Tradeoff relevance upgraded from 15 hardcoded pairs to 50-question lookup.
+  - **Step 5 — adaptiveEngine.ts**: Added cross-module overlap to EIG recalculation. Questions sharing `modules` references with the just-answered question get an information overlap penalty (up to 12% uncertainty reduction per shared module ratio), improving question selection efficiency.
+  - **Step 6 — Grep verification**: Zero remaining hardcoded keyword-to-module lookup tables in `src/`. Confirmed: `DNW_MODULE_MAP`, `MH_MODULE_MAP`, `MODULE_KEYWORDS`, `tradeoffPairs`, `TRADEOFF_PAIRS` all eliminated.
+- Net code reduction: -53 lines (173 added, 226 removed)
+- TypeScript compilation verified clean — zero errors
+
+**Previous conversation (2026-03-09, Session 3) completed:**
+- Section 10, Steps 1-2: All 2,550 questions across 27 files tagged with correct `modules: string[]` cross-references
 
 **Previous conversation (2026-03-09, Session 2) completed:**
 - Designed `modules: string[]` architecture (Section 10)
@@ -555,30 +556,22 @@ Target: < 10KB. Everything else lives in specialized docs.
 
 **Current build position:**
 - Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
-- Phase 1, Conv 5-6 (Adaptive Intelligence) is SCAFFOLDED — core engines exist, need refactoring
-- Section 10, Steps 1-2 are COMPLETE — all questions tagged with correct `modules: string[]`
-- **NEXT**: Section 10, Steps 3-5 (refactor engines to read from question `modules` field)
-- **THEN**: Phase 1, Conv 3-4 (Main + Mini Module Flows)
+- Phase 1, Conv 5-6 (Adaptive Intelligence) is SCAFFOLDED — engines refactored, read from question data
+- Section 10 is COMPLETE — all 6 steps done (tagging + engine refactoring + grep verification)
+- **NEXT**: Phase 1, Conv 3-4 (Main + Mini Module Flows)
 
 **Next agent should:**
-1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md (especially **Section 10**), PARAGRAPHICAL_ARCHITECTURE.md, LLM_PROVIDER_ARCHITECTURE.md
-2. **FIRST**: Execute Section 10 remaining steps:
-   - Step 3: Refactor `coverageTracker.ts` — delete `DNW_MODULE_MAP`, `MH_MODULE_MAP`, read from questions' `modules` field
-   - Step 4: Refactor `moduleRelevanceEngine.ts` — delete `MODULE_KEYWORDS`, read from questions' `modules` field
-   - Step 5: Update `adaptiveEngine.ts` to use question `modules` field for EIG calculation
-   - Step 6: Verify with grep: zero remaining hardcoded keyword-to-module lookup tables
-3. **THEN**: Begin Phase 1, Conv 3-4: Build Mini Module Flows
-4. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
-5. Build `CoverageMeter.tsx` — real-time MOE/coverage UI component
-6. Build `ModuleLauncher.tsx` — Dashboard integration using `moduleRelevanceEngine` scores
-7. Wire adaptive engine into questionnaire flow: `adaptiveEngine.selectNextQuestion()` → QuestionRenderer
+1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md, PARAGRAPHICAL_ARCHITECTURE.md, LLM_PROVIDER_ARCHITECTURE.md
+2. Begin Phase 1, Conv 3-4: Build Mini Module Flows
+3. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
+4. Build `CoverageMeter.tsx` — real-time MOE/coverage UI component
+5. Build `ModuleLauncher.tsx` — Dashboard integration using `moduleRelevanceEngine` scores
+6. Wire adaptive engine into questionnaire flow: `adaptiveEngine.selectNextQuestion()` → QuestionRenderer
 
 **Known issues:**
 - `questionLibrary.ts` (original monolith) still exists — can be deleted once all consumers migrated
 - `README.md` at 46KB needs trimming (not urgent, do during Phase 4 polish)
-- Trade-off pairs in `coverageTracker.ts` and `moduleRelevanceEngine.ts` use placeholder mappings (tq1-tq15) — need to verify against actual tradeoff question data
 - Olivia's logic-jump behavior in MainQuestionnaire is currently passive (needs Conv 3-4 enhancement)
-- `coverageTracker.ts` and `moduleRelevanceEngine.ts` still have hardcoded keyword maps — MUST be refactored per Section 10 Steps 3-4
 
 ---
 
