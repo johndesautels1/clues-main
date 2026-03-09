@@ -1027,9 +1027,45 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 27 | `Dashboard.tsx` | a11y | LOW | Chart sections lack `aria-label` for screen reader context |
 | 28 | `Dashboard.tsx` | loading | LOW | Skeleton loader uses `opacity: 0.3` on placeholder text — below 0.6 minimum per CLAUDE.md |
 
+### Conv 5-6: Adaptive Engine, Coverage Tracker, CoverageMeter UI, SkipLogic UI
+
+**Files:** `src/lib/adaptiveEngine.ts`, `src/lib/coverageTracker.ts`, `src/components/Questionnaire/CoverageMeter.tsx`, `src/components/Questionnaire/SkipLogic.tsx`
+
+| # | File | Line(s) | Severity | Description |
+|---|------|---------|----------|-------------|
+| 29 | `adaptiveEngine.ts` | 486 | **HIGH** | EIG recalculation drops `moduleWeight` from formula — initial EIG uses `uncertainty * impact * moduleWeight` but recalc uses only `uncertainty * impact`, breaking cross-module prioritization |
+| 30 | `adaptiveEngine.ts` | 11, 15 | MEDIUM | Stale comment references "GPT-5.4 / GPT Realtime 1.5" — unverified model names, misleading during audits |
+| 31 | `adaptiveEngine.ts` | 293 | MEDIUM | Unbounded recursion in `selectNextQuestion` — if all modules complete, 23 recursive stack frames; a loop would be safer |
+| 32 | `adaptiveEngine.ts` | 285 | LOW | `selectNextQuestion` mutates `state.activeModuleId` directly instead of returning new state via `structuredClone` like other methods |
+| 33 | `adaptiveEngine.ts` | 408 | LOW | Comment says "70% of full answer" but actual multiplier is `0.1` (~67% of 0.15) — misleading documentation |
+| 34 | `adaptiveEngine.ts` | 442-445 | LOW | `getQuestionByBelief` misnamed — takes moduleId + questionNumber, not a belief object |
+| 35 | `coverageTracker.ts` | 462 | **HIGH** | Division by zero in `applyCoverageFromMiniModule` — `answeredCount / totalQuestions` where totalQuestions can be 0, producing `Infinity`/`NaN` that corrupts MOE calculations |
+| 36 | `coverageTracker.ts` | 127-128 | MEDIUM | Hardcoded question-number ranges (Q35-Q67, Q68-Q100) in comments — silently stale if question data changes |
+| 37 | `coverageTracker.ts` | 563 | LOW | `addOrUpdateSource` averaging bug — `(existing.avg + new) / 2` progressively underweights earlier data points instead of true running mean |
+| 38 | `coverageTracker.ts` | 304 | LOW | `parseInt` on questionId silently parses "35abc" as 35 — `Number()` or regex would be stricter |
+| 39 | `coverageTracker.ts` | 509 | LOW | `estimatedQuestionsToResolve` for minor gaps can go negative — needs `Math.max(1, ...)` |
+| 40 | `coverageTracker.ts` | 92-98 | LOW | Mutable module-level cache (`_mainModuleQuestions`, `_signalIndex`) not invalidated on HMR |
+| 41 | `CoverageMeter.tsx` | entire | **HIGH (WCAG)** | Zero light mode support — all backgrounds use dark rgba values; `#f9fafb` on `#ffffff` = ~1.07:1 contrast |
+| 42 | `CoverageMeter.tsx` | 43, 227-231 | MEDIUM (WCAG) | `#ef4444` badge comment says "large text OK" but used at 11px/600wt (not large text) — comment misleading (ratio 5.4:1 does pass normal text) |
+| 43 | `CoverageMeter.tsx` | 188-203 | MEDIUM (WCAG) | Expand/collapse button has no `:focus-visible` outline — inline styles can't express pseudo-selectors |
+| 44 | `CoverageMeter.tsx` | 297 | MEDIUM (WCAG) | Dimension bar fill `opacity: 0.85` could drop tier colors below 3:1 for UI components |
+| 45 | `CoverageMeter.tsx` | 63, 70 | MEDIUM | Glassmorphic overlay (`rgba(17,24,39,0.7)` + `backdropFilter`) makes rendered background unpredictable — contrast unverified against composites |
+| 46 | `CoverageMeter.tsx` | 127-128 | MEDIUM (WCAG) | `C.textMuted` claimed 5.2:1 and `C.textSecondary` claimed 6.3:1 in constants — contradicts CLAUDE.md values (6.4:1 and 7.6:1); needs reconciliation |
+| 47 | `SkipLogic.tsx` | entire | **HIGH (WCAG)** | Zero light mode support — `#9ca3af` on `#ffffff` = ~2.5:1, `#8b95a5` on white = ~3.5:1, `#60a5fa` on white = ~3.1:1 — all fail 4.5:1 |
+| 48 | `SkipLogic.tsx` | 72-90 | MEDIUM (WCAG) | Skip button has no `:focus-visible` outline — keyboard users see no focus indicator |
+| 49 | `SkipLogic.tsx` | 42 | LOW | `role="status"` live region may cause unexpected screen reader announcements when rendered statically (not dynamically inserted) |
+| 50 | `SkipLogic.tsx` | 19-23 | LOW | `sourceLabel` default case returns generic "Coverage" — no exhaustive switch, new source types silently fall through |
+
+### Cross-File Issues (Conv 5-6)
+
+| # | Files | Line(s) | Severity | Description |
+|---|-------|---------|----------|-------------|
+| 51 | `adaptiveEngine.ts`, `coverageTracker.ts` | imports | LOW | Both import from `'../data/questions'` with no validation that question library loaded — silent degraded results on import failure |
+| 52 | `CoverageMeter.tsx`, `questionnaireData.ts` | constants | MEDIUM (WCAG) | `C` object contrast ratios (5.2:1, 6.3:1) differ from CLAUDE.md approved values (6.4:1, 7.6:1) — source of truth unclear |
+
 ---
 
-*Continued in next section (Conv 5-6, Conv 7-8) — committed incrementally.*
+*Continued in next section (Conv 7-8) — committed incrementally.*
 
 ---
 
