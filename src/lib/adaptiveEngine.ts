@@ -19,7 +19,7 @@
  * CLUES predicts: best country → top 3 cities → top 3 towns → top 3 neighborhoods
  */
 
-import { getModuleById } from '../data/questions';
+import { getModuleById, getModuleQuestions } from '../data/questions';
 import type { QuestionItem, QuestionSection } from '../data/questions/types';
 import type { CoverageState } from './coverageTracker';
 import type { RelevanceResult } from './moduleRelevanceEngine';
@@ -438,12 +438,24 @@ export function skipQuestion(
 
 // ─── Internal Helpers ─────────────────────────────────────────────
 
+/** Look up a QuestionItem by module and question number (for cross-module overlap checks) */
+function getQuestionByBelief(moduleId: string, questionNumber: number): QuestionItem | undefined {
+  const questions = getModuleQuestions(moduleId);
+  return questions.find(q => q.number === questionNumber);
+}
+
 /**
  * After answering a question, recalculate EIG for remaining questions.
- * Questions in the same section as the answered one get reduced EIG
- * (information overlap — nearby questions cover similar ground).
+ * Three overlap signals reduce uncertainty for remaining questions:
+ * 1. Same section (topic area)
+ * 2. Nearby question numbers
+ * 3. Shared cross-module references (questions touching the same categories)
  */
 function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: QuestionBelief): void {
+  // Look up the answered question's cross-module references
+  const answeredQuestion = getQuestionByBelief(module.moduleId, answeredBelief.questionNumber);
+  const answeredModules = new Set(answeredQuestion?.modules ?? []);
+
   for (const q of module.questions) {
     if (q.answered || q.skipReason) continue;
 
@@ -456,6 +468,18 @@ function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: Quest
     const distance = Math.abs(q.questionNumber - answeredBelief.questionNumber);
     if (distance <= 3) {
       q.predictionUncertainty *= 0.9; // 10% reduction
+    }
+
+    // Cross-module overlap: questions sharing module references cover similar ground
+    if (answeredModules.size > 0) {
+      const candidateQuestion = getQuestionByBelief(module.moduleId, q.questionNumber);
+      const candidateModules = candidateQuestion?.modules ?? [];
+      const sharedCount = candidateModules.filter(m => answeredModules.has(m)).length;
+      if (sharedCount > 0 && candidateModules.length > 0) {
+        // More shared modules = more overlap = less new information
+        const overlapRatio = sharedCount / candidateModules.length;
+        q.predictionUncertainty *= (1 - overlapRatio * 0.12); // Up to 12% reduction per shared module ratio
+      }
     }
 
     // Recalculate EIG

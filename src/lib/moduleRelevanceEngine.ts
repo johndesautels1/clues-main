@@ -16,6 +16,8 @@
  */
 
 import { MODULES, type ModuleDefinition } from '../data/modules';
+import { getModuleQuestions } from '../data/questions';
+import type { QuestionItem } from '../data/questions/types';
 import type {
   GeminiExtraction,
   DemographicAnswers,
@@ -282,12 +284,17 @@ export function applyDNWRelevance(
 ): RelevanceResult {
   const updated = structuredClone(result);
 
-  // Group DNW answers by which modules they signal
+  // Look up each DNW question's modules field directly
+  const mainQuestions = getModuleQuestions('main_module');
   for (const dnw of dnwAnswers) {
     const strengthMultiplier = dnw.severity / 5; // 0.2 to 1.0
-    const text = (dnw.value || dnw.questionId || '').toLowerCase();
 
-    const moduleHits = findModuleHitsFromText(text);
+    // Look up question by number → use its modules field
+    const questionNumber = parseInt(dnw.questionId, 10);
+    const question = !isNaN(questionNumber)
+      ? mainQuestions.find(q => q.number === questionNumber)
+      : undefined;
+    const moduleHits = question?.modules ?? [];
 
     for (const moduleId of moduleHits) {
       const mod = updated.modules.find(m => m.moduleId === moduleId);
@@ -314,11 +321,16 @@ export function applyMHRelevance(
 ): RelevanceResult {
   const updated = structuredClone(result);
 
+  const mainQuestionsForMH = getModuleQuestions('main_module');
   for (const mh of mhAnswers) {
     const strengthMultiplier = mh.importance / 5;
-    const text = (mh.value || mh.questionId || '').toLowerCase();
 
-    const moduleHits = findModuleHitsFromText(text);
+    // Look up question by number → use its modules field
+    const questionNumber = parseInt(mh.questionId, 10);
+    const question = !isNaN(questionNumber)
+      ? mainQuestionsForMH.find(q => q.number === questionNumber)
+      : undefined;
+    const moduleHits = question?.modules ?? [];
 
     for (const moduleId of moduleHits) {
       const mod = updated.modules.find(m => m.moduleId === moduleId);
@@ -345,47 +357,30 @@ export function applyTradeoffRelevance(
 ): RelevanceResult {
   const updated = structuredClone(result);
 
-  // These map trade-off keys to module pairs [favored_when_high, favored_when_low]
-  const TRADEOFF_PAIRS: Record<string, [string, string]> = {
-    tq1: ['safety_security', 'entertainment_nightlife'],
-    tq2: ['climate_weather', 'financial_banking'],
-    tq3: ['health_wellness', 'professional_career'],
-    tq4: ['arts_culture', 'financial_banking'],
-    tq5: ['outdoor_recreation', 'shopping_services'],
-    tq6: ['family_children', 'entertainment_nightlife'],
-    tq7: ['technology_connectivity', 'environment_community_appearance'],
-    tq8: ['transportation_mobility', 'housing_property'],
-    tq9: ['education_learning', 'financial_banking'],
-    tq10: ['social_values_governance', 'professional_career'],
-    tq11: ['food_dining', 'financial_banking'],
-    tq12: ['religion_spirituality', 'entertainment_nightlife'],
-    tq13: ['neighborhood_urban_design', 'housing_property'],
-    tq14: ['cultural_heritage_traditions', 'technology_connectivity'],
-    tq15: ['sexual_beliefs_practices_laws', 'cultural_heritage_traditions'],
-  };
+  // Look up tradeoff questions to get their modules field (covers all 50 questions)
+  const tradeoffQuestions = getModuleQuestions('tradeoff_questions');
 
   for (const [key, value] of Object.entries(tradeoffs)) {
-    const pair = TRADEOFF_PAIRS[key];
-    if (!pair) continue;
+    // Extract question number from key (e.g., "tq1" → 1)
+    const match = key.match(/^tq(\d+)$/);
+    if (!match) continue;
+
+    const questionNumber = parseInt(match[1], 10);
+    const question = tradeoffQuestions.find(q => q.number === questionNumber);
+    if (!question?.modules?.length) continue;
 
     const sliderValue = typeof value === 'number' ? value : 50;
-    const [rightMod, leftMod] = pair;
+    // Strength = how strongly the user feels (deviation from neutral)
+    const strength = Math.abs(sliderValue - 50) / 50; // 0 = neutral, 1 = extreme
+    const boost = strength * 0.15;
 
-    // Slider 0 = full left, 100 = full right
-    // If slider > 50, right module is favored
-    const rightBoost = (sliderValue - 50) / 100 * 0.3;
-    const leftBoost = -rightBoost;
-
-    const rightModule = updated.modules.find(m => m.moduleId === rightMod);
-    const leftModule = updated.modules.find(m => m.moduleId === leftMod);
-
-    if (rightModule) {
-      rightModule.relevance = clamp(rightModule.relevance + rightBoost, 0, 1);
-      rightModule.confidence = Math.min(1, rightModule.confidence + 0.05);
-    }
-    if (leftModule) {
-      leftModule.relevance = clamp(leftModule.relevance + leftBoost, 0, 1);
-      leftModule.confidence = Math.min(1, leftModule.confidence + 0.05);
+    // A non-neutral answer boosts all involved modules' relevance and confidence
+    for (const modId of question.modules) {
+      const mod = updated.modules.find(m => m.moduleId === modId);
+      if (mod) {
+        mod.relevance = clamp(mod.relevance + boost, 0, 1);
+        mod.confidence = Math.min(1, mod.confidence + 0.05);
+      }
     }
   }
 
@@ -447,52 +442,6 @@ function recalculateRankings(result: RelevanceResult): RelevanceResult {
   result.estimatedTotalQuestions = result.recommendedModules.length * 12;
 
   return result;
-}
-
-// ─── Text-to-Module Matching ──────────────────────────────────────
-
-/**
- * Simple keyword matching to find which modules a text fragment relates to.
- * This is for DNW/MH answer text → module mapping.
- * NOT an LLM call — just keyword lookup.
- */
-const MODULE_KEYWORDS: Record<string, string[]> = {
-  safety_security: ['crime', 'violence', 'theft', 'safety', 'police', 'emergency', 'security', 'dangerous'],
-  health_wellness: ['health', 'medical', 'hospital', 'doctor', 'healthcare', 'wellness', 'insurance'],
-  climate_weather: ['climate', 'weather', 'humidity', 'heat', 'cold', 'temperature', 'rain', 'snow', 'disaster'],
-  legal_immigration: ['visa', 'legal', 'immigration', 'residency', 'permit', 'law', 'corruption', 'bureaucracy'],
-  financial_banking: ['tax', 'cost', 'expensive', 'banking', 'financial', 'income', 'salary', 'afford', 'budget'],
-  housing_property: ['housing', 'rent', 'property', 'apartment', 'house', 'real estate', 'mortgage'],
-  professional_career: ['job', 'career', 'work', 'employment', 'business', 'entrepreneur', 'startup', 'coworking'],
-  technology_connectivity: ['internet', 'wifi', 'broadband', 'tech', '5g', 'digital', 'connectivity'],
-  transportation_mobility: ['traffic', 'transit', 'metro', 'bus', 'train', 'walkable', 'bike', 'airport', 'commute'],
-  education_learning: ['school', 'university', 'education', 'college', 'learning', 'tutor'],
-  social_values_governance: ['democracy', 'freedom', 'governance', 'political', 'rights', 'equality', 'tolerance'],
-  food_dining: ['food', 'restaurant', 'dining', 'grocery', 'cuisine', 'organic', 'vegetarian', 'vegan'],
-  shopping_services: ['shopping', 'mall', 'retail', 'delivery', 'amazon', 'convenience'],
-  outdoor_recreation: ['park', 'hiking', 'beach', 'mountain', 'nature', 'outdoor', 'sport', 'fitness', 'gym'],
-  entertainment_nightlife: ['nightlife', 'bar', 'club', 'concert', 'festival', 'entertainment', 'cinema', 'theater'],
-  family_children: ['family', 'children', 'kids', 'childcare', 'daycare', 'playground', 'pediatric'],
-  neighborhood_urban_design: ['neighborhood', 'walkability', 'urban', 'streetscape', 'community', 'noise', 'quiet'],
-  environment_community_appearance: ['clean', 'pollution', 'green', 'environment', 'trash', 'aesthetic', 'beautiful'],
-  religion_spirituality: ['religion', 'church', 'mosque', 'temple', 'spiritual', 'worship', 'faith', 'prayer'],
-  sexual_beliefs_practices_laws: ['lgbtq', 'gay', 'lesbian', 'transgender', 'reproductive', 'abortion', 'sexual'],
-  arts_culture: ['museum', 'gallery', 'art', 'culture', 'theater', 'music', 'creative', 'intellectual'],
-  cultural_heritage_traditions: ['heritage', 'tradition', 'custom', 'integration', 'belonging', 'cultural identity'],
-  pets_animals: ['pet', 'dog', 'cat', 'animal', 'veterinary', 'vet', 'pet-friendly'],
-};
-
-function findModuleHitsFromText(text: string): string[] {
-  const hits: string[] = [];
-  for (const [moduleId, keywords] of Object.entries(MODULE_KEYWORDS)) {
-    for (const keyword of keywords) {
-      if (text.includes(keyword)) {
-        hits.push(moduleId);
-        break; // One hit per module is enough
-      }
-    }
-  }
-  return hits;
 }
 
 // ─── Utility ──────────────────────────────────────────────────────

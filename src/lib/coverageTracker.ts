@@ -12,6 +12,8 @@
  */
 
 import { MODULES, type ModuleDefinition } from '../data/modules';
+import { getModuleQuestions } from '../data/questions';
+import type { QuestionItem } from '../data/questions/types';
 import type {
   GeminiExtraction,
   DemographicAnswers,
@@ -80,74 +82,62 @@ export interface CoverageGap {
   estimatedQuestionsToResolve: number;
 }
 
-// ─── Module-to-category mapping ───────────────────────────────────
+// ─── Question-data-driven module lookup ───────────────────────────
 
 /**
- * Maps Main Module question ranges to the 23 category modules.
- * DNW and MH questions have known mappings to specific modules.
- * These mappings are deterministic — no LLM needed.
+ * Look up a main_module question by number and return its modules field.
+ * Replaces hardcoded DNW_MODULE_MAP / MH_MODULE_MAP — the mapping now
+ * lives on each QuestionItem.modules, co-located with the question text.
  */
-const DNW_MODULE_MAP: Record<string, string[]> = {
-  // DNW question keywords → module IDs they signal
-  crime: ['safety_security'],
-  violence: ['safety_security'],
-  theft: ['safety_security'],
-  healthcare: ['health_wellness'],
-  medical: ['health_wellness'],
-  hospital: ['health_wellness'],
-  humidity: ['climate_weather'],
-  heat: ['climate_weather'],
-  cold: ['climate_weather'],
-  weather: ['climate_weather'],
-  natural_disaster: ['climate_weather'],
-  visa: ['legal_immigration'],
-  immigration: ['legal_immigration'],
-  corruption: ['legal_immigration', 'social_values_governance'],
-  tax: ['financial_banking'],
-  expensive: ['financial_banking'],
-  cost: ['financial_banking'],
-  housing_cost: ['housing_property'],
-  internet: ['technology_connectivity'],
-  traffic: ['transportation_mobility'],
-  pollution: ['climate_weather', 'environment_community_appearance'],
-  noise: ['neighborhood_urban_design'],
-  isolation: ['entertainment_nightlife', 'arts_culture'],
-  discrimination: ['sexual_beliefs_practices_laws', 'social_values_governance'],
-  religion_intolerance: ['religion_spirituality'],
-  pet_restrictions: ['pets_animals'],
-  school_quality: ['education_learning', 'family_children'],
-};
+let _mainModuleQuestions: QuestionItem[] | null = null;
+function getMainModuleQuestion(questionNumber: number): QuestionItem | undefined {
+  if (!_mainModuleQuestions) {
+    _mainModuleQuestions = getModuleQuestions('main_module');
+  }
+  return _mainModuleQuestions.find(q => q.number === questionNumber);
+}
 
-const MH_MODULE_MAP: Record<string, string[]> = {
-  safety: ['safety_security'],
-  healthcare: ['health_wellness'],
-  climate: ['climate_weather'],
-  sunshine: ['climate_weather'],
-  legal_rights: ['legal_immigration'],
-  affordable: ['financial_banking'],
-  banking: ['financial_banking'],
-  housing: ['housing_property'],
-  remote_work: ['professional_career', 'technology_connectivity'],
-  job_market: ['professional_career'],
-  fast_internet: ['technology_connectivity'],
-  public_transit: ['transportation_mobility'],
-  walkable: ['transportation_mobility', 'neighborhood_urban_design'],
-  schools: ['education_learning'],
-  democracy: ['social_values_governance'],
-  restaurants: ['food_dining'],
-  grocery: ['food_dining'],
-  shopping: ['shopping_services'],
-  parks: ['outdoor_recreation'],
-  beaches: ['outdoor_recreation'],
-  nightlife: ['entertainment_nightlife'],
-  family_friendly: ['family_children'],
-  clean: ['environment_community_appearance'],
-  worship: ['religion_spirituality'],
-  lgbtq: ['sexual_beliefs_practices_laws'],
-  museums: ['arts_culture'],
-  culture: ['arts_culture', 'cultural_heritage_traditions'],
-  pet_friendly: ['pets_animals'],
-};
+/**
+ * Build a keyword → modules index from all question text.
+ * Used for matching Paragraphical signal strings (e.g., "crime", "healthcare")
+ * to their relevant modules. Built lazily, cached after first call.
+ */
+let _signalIndex: Record<string, string[]> | null = null;
+function getSignalModuleIndex(): Record<string, string[]> {
+  if (_signalIndex) return _signalIndex;
+
+  const index: Record<string, Set<string>> = {};
+  const stopWords = new Set([
+    'the', 'and', 'for', 'you', 'your', 'that', 'this', 'with', 'are', 'have',
+    'would', 'will', 'can', 'how', 'what', 'where', 'when', 'which', 'does',
+    'about', 'from', 'into', 'more', 'most', 'much', 'than', 'they', 'them',
+    'been', 'being', 'very', 'some', 'other', 'also', 'just', 'like', 'over',
+    'such', 'only', 'well', 'even', 'not', 'but', 'its', 'any', 'all', 'our',
+  ]);
+
+  // Index main_module DNW (Q35-Q67) and MH (Q68-Q100) questions
+  const mainQuestions = getModuleQuestions('main_module');
+  for (const q of mainQuestions) {
+    if (q.number < 35) continue; // Skip demographics
+    const words = q.question.toLowerCase()
+      .replace(/[^a-z\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 3 && !stopWords.has(w));
+
+    for (const word of words) {
+      if (!index[word]) index[word] = new Set();
+      for (const mod of q.modules) {
+        index[word].add(mod);
+      }
+    }
+  }
+
+  _signalIndex = {};
+  for (const [key, mods] of Object.entries(index)) {
+    _signalIndex[key] = Array.from(mods);
+  }
+  return _signalIndex;
+}
 
 // ─── Core Functions ───────────────────────────────────────────────
 
@@ -222,14 +212,14 @@ export function applyCoverageFromParagraphical(
     }
   }
 
-  // DNW signals boost relevant modules
+  // DNW signals boost relevant modules (matched via question data index)
   if (extraction.dnw_signals?.length) {
-    applySignalHits(updated, extraction.dnw_signals, DNW_MODULE_MAP, 'paragraphical', 0.15);
+    applySignalHitsFromIndex(updated, extraction.dnw_signals, 'paragraphical', 0.15);
   }
 
-  // MH signals boost relevant modules
+  // MH signals boost relevant modules (matched via question data index)
   if (extraction.mh_signals?.length) {
-    applySignalHits(updated, extraction.mh_signals, MH_MODULE_MAP, 'paragraphical', 0.15);
+    applySignalHitsFromIndex(updated, extraction.mh_signals, 'paragraphical', 0.15);
   }
 
   recalculateMOE(updated);
@@ -309,17 +299,13 @@ export function applyCoverageFromDNW(
   for (const dnw of dnwAnswers) {
     // Severity 1-5 maps to signal strength 0.1-0.5
     const strength = dnw.severity * 0.1;
-    const questionText = (dnw.value || dnw.questionId || '').toLowerCase();
 
-    // Find matching modules from keyword mapping
-    const matchedModules = new Set<string>();
-    for (const [keyword, modules] of Object.entries(DNW_MODULE_MAP)) {
-      if (questionText.includes(keyword)) {
-        for (const modId of modules) matchedModules.add(modId);
-      }
-    }
+    // Look up question by number → use its modules field directly
+    const questionNumber = parseInt(dnw.questionId, 10);
+    const question = !isNaN(questionNumber) ? getMainModuleQuestion(questionNumber) : undefined;
+    const matchedModules = new Set<string>(question?.modules ?? []);
 
-    // If no keyword match, use questionId patterns (e.g., "dnw_safety_*")
+    // Fallback: check if questionId contains a module ID
     if (matchedModules.size === 0) {
       for (const dim of updated.dimensions) {
         if (dnw.questionId?.includes(dim.moduleId)) {
@@ -360,15 +346,13 @@ export function applyCoverageFromMH(
 
   for (const mh of mhAnswers) {
     const strength = mh.importance * 0.1;
-    const questionText = (mh.value || mh.questionId || '').toLowerCase();
 
-    const matchedModules = new Set<string>();
-    for (const [keyword, modules] of Object.entries(MH_MODULE_MAP)) {
-      if (questionText.includes(keyword)) {
-        for (const modId of modules) matchedModules.add(modId);
-      }
-    }
+    // Look up question by number → use its modules field directly
+    const questionNumber = parseInt(mh.questionId, 10);
+    const question = !isNaN(questionNumber) ? getMainModuleQuestion(questionNumber) : undefined;
+    const matchedModules = new Set<string>(question?.modules ?? []);
 
+    // Fallback: check if questionId contains a module ID
     if (matchedModules.size === 0) {
       for (const dim of updated.dimensions) {
         if (mh.questionId?.includes(dim.moduleId)) {
@@ -405,49 +389,30 @@ export function applyCoverageFromTradeoffs(
 ): CoverageState {
   const updated = structuredClone(state);
 
-  // Trade-off slider keys map to category pairs
-  // e.g., "culture_vs_cost" → slider 80 = 80% culture, 20% cost
-  const tradeoffPairs: Record<string, [string, string]> = {
-    tq1: ['safety_security', 'entertainment_nightlife'],
-    tq2: ['climate_weather', 'financial_banking'],
-    tq3: ['health_wellness', 'professional_career'],
-    tq4: ['arts_culture', 'financial_banking'],
-    tq5: ['outdoor_recreation', 'shopping_services'],
-    tq6: ['family_children', 'entertainment_nightlife'],
-    tq7: ['technology_connectivity', 'environment_community_appearance'],
-    tq8: ['transportation_mobility', 'housing_property'],
-    tq9: ['education_learning', 'financial_banking'],
-    tq10: ['social_values_governance', 'professional_career'],
-    tq11: ['food_dining', 'financial_banking'],
-    tq12: ['religion_spirituality', 'entertainment_nightlife'],
-    tq13: ['neighborhood_urban_design', 'housing_property'],
-    tq14: ['cultural_heritage_traditions', 'technology_connectivity'],
-    tq15: ['sexual_beliefs_practices_laws', 'cultural_heritage_traditions'],
-  };
+  // Look up tradeoff questions to get their modules field
+  const tradeoffQuestions = getModuleQuestions('tradeoff_questions');
 
   for (const [key, value] of Object.entries(tradeoffs)) {
-    const pair = tradeoffPairs[key];
-    if (!pair) continue;
+    // Extract question number from key (e.g., "tq1" → 1, "tq42" → 42)
+    const match = key.match(/^tq(\d+)$/);
+    if (!match) continue;
+
+    const questionNumber = parseInt(match[1], 10);
+    const question = tradeoffQuestions.find(q => q.number === questionNumber);
+    if (!question?.modules?.length) continue;
 
     const sliderValue = typeof value === 'number' ? value : 50;
-    const [leftMod, rightMod] = pair;
+    // Strength = how strongly the user feels (deviation from neutral)
+    const strength = Math.abs(sliderValue - 50) / 50; // 0 = neutral, 1 = extreme
 
-    // Slider 0-100: 0 = fully left, 100 = fully right
-    const leftWeight = (100 - sliderValue) / 100;
-    const rightWeight = sliderValue / 100;
-
-    const leftDim = updated.dimensions.find(d => d.moduleId === leftMod);
-    const rightDim = updated.dimensions.find(d => d.moduleId === rightMod);
-
-    if (leftDim) {
-      leftDim.weight = Math.max(0.05, leftDim.weight * (0.5 + leftWeight));
-      leftDim.dataPoints += 1;
-      addOrUpdateSource(leftDim, 'tradeoffs', 1, leftWeight);
-    }
-    if (rightDim) {
-      rightDim.weight = Math.max(0.05, rightDim.weight * (0.5 + rightWeight));
-      rightDim.dataPoints += 1;
-      addOrUpdateSource(rightDim, 'tradeoffs', 1, rightWeight);
+    // A non-neutral answer signals these modules matter to the user
+    for (const modId of question.modules) {
+      const dim = updated.dimensions.find(d => d.moduleId === modId);
+      if (dim) {
+        dim.weight = Math.max(0.05, dim.weight * (0.5 + 0.5 * (1 + strength)));
+        dim.dataPoints += 1;
+        addOrUpdateSource(dim, 'tradeoffs', 1, strength);
+      }
     }
   }
 
@@ -601,25 +566,34 @@ function addOrUpdateSource(
   }
 }
 
-function applySignalHits(
+/**
+ * Match Paragraphical signal strings against a keyword index built from question data.
+ * Replaces the old hardcoded DNW_MODULE_MAP / MH_MODULE_MAP matching.
+ */
+function applySignalHitsFromIndex(
   state: CoverageState,
   signals: string[],
-  moduleMap: Record<string, string[]>,
   sourceType: CoverageSourceType,
   strength: number
 ): void {
+  const index = getSignalModuleIndex();
   for (const signal of signals) {
-    const lower = signal.toLowerCase();
-    for (const [keyword, modIds] of Object.entries(moduleMap)) {
-      if (lower.includes(keyword)) {
-        for (const modId of modIds) {
-          const dim = state.dimensions.find(d => d.moduleId === modId);
-          if (dim) {
-            dim.dataPoints += 1;
-            dim.signalStrength = Math.min(1, dim.signalStrength + strength);
-            addOrUpdateSource(dim, sourceType, 1, strength);
-          }
-        }
+    const words = signal.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+    const hitModules = new Set<string>();
+
+    for (const word of words) {
+      const mods = index[word];
+      if (mods) {
+        for (const modId of mods) hitModules.add(modId);
+      }
+    }
+
+    for (const modId of hitModules) {
+      const dim = state.dimensions.find(d => d.moduleId === modId);
+      if (dim) {
+        dim.dataPoints += 1;
+        dim.signalStrength = Math.min(1, dim.signalStrength + strength);
+        addOrUpdateSource(dim, sourceType, 1, strength);
       }
     }
   }
