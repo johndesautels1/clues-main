@@ -985,6 +985,24 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 **Audit Date:** 2026-03-09 | **Files Audited:** 16 | **Total Issues:** 116 (16 HIGH, 40 MEDIUM, 60 LOW)
 
+**Fix Status (2026-03-09):**
+- Issues #1-4: FALSE POSITIVES — `supabase.ts` already uses `import.meta.env`, AuthProvider already unsubscribes at line 98, signOut calls setUser(null) after API call.
+- Issue #29 (HIGH): FIXED — EIG recalculation now includes `module.moduleWeight`; added `moduleWeight` field to `ModuleAdaptiveState`.
+- Issue #30 (MEDIUM): FIXED — Stale GPT model name comments updated.
+- Issue #31 (MEDIUM): FIXED — `selectNextQuestion` uses iterative loop instead of recursion.
+- Issue #33 (LOW): FIXED — Misleading "70%" comment corrected.
+- Issue #34 (LOW): FIXED — Renamed `getQuestionByBelief` → `getQuestionByModuleAndNumber`.
+- Issue #35 (HIGH): FIXED — `applyCoverageFromMiniModule` guards against `totalQuestions === 0`.
+- Issue #37 (LOW): FIXED — `addOrUpdateSource` uses proper weighted running average.
+- Issue #39 (LOW): FIXED — `estimatedQuestionsToResolve` clamped to `Math.max(1, ...)`.
+- Issue #42 (MEDIUM): FIXED — Corrected misleading contrast ratio comment.
+- Issue #46/#52 (MEDIUM): FIXED — `C` token objects now use CSS custom properties.
+- Issue #53: FALSE POSITIVE — `evaluate-gemini.ts` uses `process.env.GEMINI_API_KEY`.
+- Issue #55 (MEDIUM): FIXED — Gemini API retries 3x with exponential backoff on 429/5xx.
+- Issue #59: FALSE POSITIVE — `judge-opus.ts` validates required fields at lines 283-286.
+- Issue #61 (MEDIUM): FIXED — Opus judge has 120s AbortController timeout.
+- Issue #91 (HIGH/WCAG): FIXED — Added `@media (prefers-color-scheme: light)` block to `globals.css` with verified light-mode text colors, surfaces, score colors, shadows. All `C` token objects across 3 files converted to CSS custom properties for automatic dark/light switching.
+
 ### Conv 1-2: Auth, Supabase Client, Landing Page, Onboarding
 
 **Files:** `src/lib/supabase.ts`, `src/components/Auth/AuthProvider.tsx`, `src/components/LandingPage/LandingPage.tsx`, `src/components/Onboarding/OnboardingFlow.tsx`

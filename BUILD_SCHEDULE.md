@@ -522,7 +522,28 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 10 (Conv 15-16 — Smart Score Engine — COMPLETE)
+### Latest Update: 2026-03-09 — Session 11 (Phase 1 Audit Fix Pass — COMPLETE)
+
+**What was done this conversation:**
+- **Full 116-issue audit chart committed to README.md** (Conv 1-8, all severity levels documented).
+- **P0 Data Corruption Fixes:**
+  - `adaptiveEngine.ts`: EIG recalculation now includes `module.moduleWeight` (was dropping it, breaking cross-module prioritization). Added `moduleWeight` field to `ModuleAdaptiveState`. Replaced recursive `selectNextQuestion` with iterative loop. Fixed stale model name comments. Renamed misleading `getQuestionByBelief` → `getQuestionByModuleAndNumber`.
+  - `coverageTracker.ts`: Guarded division-by-zero in `applyCoverageFromMiniModule` (totalQuestions=0 → early return). Fixed `addOrUpdateSource` averaging bug (naive avg → weighted running avg). Clamped `estimatedQuestionsToResolve` to `Math.max(1, ...)`.
+- **P1 WCAG Light Mode (systemic):**
+  - `globals.css`: Added `@media (prefers-color-scheme: light)` block with WCAG-verified text colors (#111827 15.4:1, #4b5563 7.4:1, #6b7280 5.0:1, #2563eb 5.3:1), surface vars, score color overrides (darkened --score-green, --clues-gold etc. for 4.5:1 on white).
+  - `questionnaireData.ts`, `discoveryData.ts`, `ReadinessIndicator.tsx`: All `C` token objects converted from hardcoded hex to `var(--text-primary)` etc.
+  - `CoverageMeter.tsx`: Hardcoded dark `rgba(17,24,39,*)` backgrounds → `var(--bg-glass)` / `var(--bg-card)`.
+  - `OliviaChoiceModal.tsx`, `HeyGenVideoModal.tsx`, `main.tsx`: Dark gradient/colors → CSS variables.
+  - `LoginPage.tsx`: GitHub SVG `fill="#f9fafb"` → `fill="currentColor"`.
+- **P2 API Resilience:**
+  - `evaluate-gemini.ts`: Added retry loop (3x exponential backoff: 1s, 2s, 4s) on 429/5xx.
+  - `judge-opus.ts`: Added 120s AbortController timeout.
+- **False Positives Documented:** Issues #1-4 (supabase already uses import.meta.env, auth already unsubscribes), #53 (uses process.env), #59 (validates required fields).
+- **tsc: 0 errors** after all changes.
+
+**What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
+
+### Previous Update: 2026-03-09 — Session 10 (Conv 15-16 — Smart Score Engine — COMPLETE)
 
 **What was done this conversation:**
 - **Conv 15-16: Smart Score Engine** — ALL 8 checklist items completed. 4 new files, ~1,172 lines total.
