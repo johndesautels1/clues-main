@@ -522,23 +522,24 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 2 (Question Changeability Architecture)
+### Latest Update: 2026-03-09 — Session 3 (Pass 2: Cross-Module Tagging Complete)
 
 **What was done this conversation:**
-- **KEY ARCHITECTURE DECISION**: `modules: string[]` field added to QuestionItem type definition
-  - Question-to-module mapping now lives ON the question, not in separate lookup tables
-  - Founder's wife audits all questions — when she changes a question, the module mapping
-    is right there next to the question text, impossible to forget
-  - This replaces: `DNW_MODULE_MAP`, `MH_MODULE_MAP` (coverageTracker.ts), `MODULE_KEYWORDS` (moduleRelevanceEngine.ts)
-  - Full architecture documented in Section 10 of this file (PERMANENT — survives compression)
-- Documented the complete funnel architecture in Section 10:
-  - Paragraphical (30 paragraphs) → Main Module (5 sections) → System-selected Mini Modules (3-8 of 23)
-  - Step-off/step-on at ANY point — system always produces valid report at current confidence level
-  - CAT/EIG adaptive logic within modules: 8-15 questions per module, not 100
-  - ~250 answers out of ~2,500 → MOE ≤ 2%
-  - Bayesian-like learning: deduces, induces, logic-jumps, funnels
-- Audited ALL markdown docs for contradictions with this architecture — NONE found
-- All docs are consistent: no separate mapping files documented as canonical
+- **COMPLETED Section 10, Step 2 (Pass 2)**: All 2,550 questions across all 27 question files now have correct `modules: string[]` cross-references
+  - **tradeoff_questions.ts**: All 50 questions corrected from `["tradeoff_questions"]` → proper module pairs (e.g., Q1 cost vs safety → `["financial_banking", "safety_security"]`). Q50 (open text) kept as `["tradeoff_questions"]`
+  - **general_questions.ts**: All 50 questions corrected from `["general_questions"]` → proper module mappings (e.g., Q14 religious practice → `["religion_spirituality"]`, Q49 LGBTQ+ → `["sexual_beliefs_practices_laws", "social_values_governance"]`). Personality/meta questions (Q6, Q7, Q9, Q10) kept as `["general_questions"]`
+  - **safety_security.ts**: 30+ cross-refs added (e.g., Q43 school safety → `education_learning, family_children`; Q82 LGBTQ+ → `sexual_beliefs_practices_laws`; Q51-55 transport safety → `transportation_mobility`; Q61-67 environmental → `climate_weather`)
+  - **education_learning.ts**: 18 cross-refs added (e.g., Q36-39 vocational → `professional_career`; Q61 special needs → `family_children, health_wellness`; Q79 school safety → `safety_security`; Q93 credentials → `professional_career, legal_immigration`)
+  - **health_wellness.ts**: 19 cross-refs added (e.g., Q8/14/26/36/44/91 cost questions → `financial_banking`; Q75 climate health → `climate_weather`; Q76 pediatric → `family_children`; Q82 environmental → `environment_community_appearance, climate_weather`)
+  - **family_children.ts**: 32 cross-refs added (e.g., Q31/37 pediatric/mental health → `health_wellness`; Q51-53 child safety → `safety_security`; Q55 school transport → `transportation_mobility, education_learning`; Q81/84/93/95/96 career → `professional_career`)
+  - **19 remaining mini modules** (financial_banking, housing_property, transportation_mobility, legal_immigration, neighborhood_urban_design, professional_career, cultural_heritage_traditions, religion_spirituality, social_values_governance, sexual_beliefs_practices_laws, arts_culture, climate_weather, entertainment_nightlife, environment_community_appearance, food_dining, outdoor_recreation, pets_animals, shopping_services, technology_connectivity): All cross-referenced via 4 parallel agents
+- TypeScript compilation verified clean after ALL edits — zero errors
+
+**Previous conversation (2026-03-09, Session 2) completed:**
+- Designed `modules: string[]` architecture (Section 10)
+- Added `modules` field to QuestionItem type
+- Tagged main_module.ts (100 questions) manually with cross-module refs
+- Pass 1: Auto-tagged all 2,450 mini module questions with default self-module tags
 
 **Previous conversation (2026-03-09, Session 1) built:**
 - Created `LLM_PROVIDER_ARCHITECTURE.md` — complete LLM assignment document
@@ -555,18 +556,17 @@ Target: < 10KB. Everything else lives in specialized docs.
 **Current build position:**
 - Phase 1, Conv 1-2 (Questionnaire Renderer) is DONE
 - Phase 1, Conv 5-6 (Adaptive Intelligence) is SCAFFOLDED — core engines exist, need refactoring
-- **BEFORE Conv 3-4**: Must add `modules: string[]` to all 28 question files (Section 10 steps 1-2)
-- **BEFORE Conv 3-4**: Must refactor coverageTracker + moduleRelevanceEngine to read from question `modules` field
-- Phase 1, Conv 3-4 (Main + Mini Module Flows) is NEXT after question tagging is complete
+- Section 10, Steps 1-2 are COMPLETE — all questions tagged with correct `modules: string[]`
+- **NEXT**: Section 10, Steps 3-5 (refactor engines to read from question `modules` field)
+- **THEN**: Phase 1, Conv 3-4 (Main + Mini Module Flows)
 
 **Next agent should:**
 1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md (especially **Section 10**), PARAGRAPHICAL_ARCHITECTURE.md, LLM_PROVIDER_ARCHITECTURE.md
-2. **FIRST**: Execute Section 10 implementation steps:
-   - Step 1: Add `modules: string[]` to QuestionItem in `src/data/questions/types.ts`
-   - Step 2: Tag every question in all 28 question files with correct `modules` values (READ each question, do NOT fabricate)
-   - Step 3: Refactor `coverageTracker.ts` — delete `DNW_MODULE_MAP`, `MH_MODULE_MAP`, read from questions
-   - Step 4: Refactor `moduleRelevanceEngine.ts` — delete `MODULE_KEYWORDS`, read from questions
-   - Step 5: Verify with grep: zero remaining hardcoded keyword-to-module lookup tables
+2. **FIRST**: Execute Section 10 remaining steps:
+   - Step 3: Refactor `coverageTracker.ts` — delete `DNW_MODULE_MAP`, `MH_MODULE_MAP`, read from questions' `modules` field
+   - Step 4: Refactor `moduleRelevanceEngine.ts` — delete `MODULE_KEYWORDS`, read from questions' `modules` field
+   - Step 5: Update `adaptiveEngine.ts` to use question `modules` field for EIG calculation
+   - Step 6: Verify with grep: zero remaining hardcoded keyword-to-module lookup tables
 3. **THEN**: Begin Phase 1, Conv 3-4: Build Mini Module Flows
 4. Wire mini module routes: `/questionnaire/:moduleId` for the 23 category modules
 5. Build `CoverageMeter.tsx` — real-time MOE/coverage UI component
@@ -578,7 +578,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - `README.md` at 46KB needs trimming (not urgent, do during Phase 4 polish)
 - Trade-off pairs in `coverageTracker.ts` and `moduleRelevanceEngine.ts` use placeholder mappings (tq1-tq15) — need to verify against actual tradeoff question data
 - Olivia's logic-jump behavior in MainQuestionnaire is currently passive (needs Conv 3-4 enhancement)
-- `coverageTracker.ts` and `moduleRelevanceEngine.ts` still have hardcoded keyword maps — MUST be refactored per Section 10
+- `coverageTracker.ts` and `moduleRelevanceEngine.ts` still have hardcoded keyword maps — MUST be refactored per Section 10 Steps 3-4
 
 ---
 

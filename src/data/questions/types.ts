@@ -5,6 +5,11 @@ export interface QuestionItem {
   number: number;
   question: string;
   type: string;
+  /** Which of the 23 category modules this question maps to.
+   *  The mapping lives HERE, on the question — NOT in separate lookup tables.
+   *  When the question text changes, update this field in the same edit.
+   *  See BUILD_SCHEDULE.md Section 10 for the architectural decision. */
+  modules: string[];
   /** Left (low) label for Slider questions — e.g. "Very private" */
   sliderLeft?: string;
   /** Right (high) label for Slider questions — e.g. "Very open" */
