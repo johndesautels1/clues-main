@@ -40,7 +40,7 @@ export function OliviaChoiceModal({ visible, onClose, onSelectChat, onSelectVide
         onClick={(e) => e.stopPropagation()}
         style={{
           width: 'clamp(320px,90vw,500px)',
-          background: 'linear-gradient(145deg,rgba(17,24,39,0.99) 0%,rgba(10,14,26,0.99) 100%)',
+          background: 'var(--bg-secondary)',
           border: '1px solid rgba(196,168,122,0.18)', borderRadius: 24,
           overflow: 'hidden',
           boxShadow: '0 32px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)',
