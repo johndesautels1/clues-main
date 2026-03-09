@@ -74,7 +74,7 @@ export function deriveCategoryWeights(
 
   // Step 3: Apply paragraph emphasis
   if (paragraphEmphasis && Object.keys(paragraphEmphasis).length > 0) {
-    derivation = preset ? 'paragraph_emphasis' : 'paragraph_emphasis';
+    derivation = preset ? 'paragraph_emphasis' : 'custom';
     for (const [catId, emphasis] of Object.entries(paragraphEmphasis)) {
       if (rawWeights[catId] !== undefined && emphasis > 0) {
         // Emphasis is 0-1 scale; convert to multiplier (1.0 to 2.0 range)
@@ -126,7 +126,8 @@ function normalizeWeights(raw: Record<string, number>): Record<string, number> {
 export function rollupToCategories(
   metricScores: MetricSmartScore[],
   categoryWeights: CategoryWeights,
-  judgeReport: JudgeReport | null
+  judgeReport: JudgeReport | null,
+  locationName?: string
 ): CategorySmartScore[] {
   // Group metrics by category
   const grouped = new Map<string, MetricSmartScore[]>();
@@ -188,7 +189,10 @@ export function rollupToCategories(
       metricScores: metrics,
       confidence,
       avgStdDev: Math.round(avgStdDev * 100) / 100,
-      judgeAnalysis: judgeAnalysis?.locationAnalyses?.[0]?.analysis,
+      judgeAnalysis: locationName
+        ? judgeAnalysis?.locationAnalyses?.find(la => la.location === locationName)?.analysis
+          ?? judgeAnalysis?.locationAnalyses?.[0]?.analysis
+        : judgeAnalysis?.locationAnalyses?.[0]?.analysis,
       trendNotes: judgeAnalysis?.trendNotes,
     });
   }
@@ -281,7 +285,8 @@ export function computeCityScore(
   const categoryScores = rollupToCategories(
     metricScores,
     categoryWeights,
-    judgeReport
+    judgeReport,
+    location.location
   );
   return rollupToCity(location, categoryScores, judgeReport);
 }

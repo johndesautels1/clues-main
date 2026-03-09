@@ -88,6 +88,10 @@ export function applyRelativeScoring(
       // All cities have the same score — set to 50 (neutral)
       for (const ms of locationMap.values()) {
         if (ms.score >= 0) {
+          // Preserve absolute score in rawConsensusScore (if not already overridden by judge)
+          if (!ms.judgeOverridden) {
+            ms.rawConsensusScore = ms.score;
+          }
           ms.score = 50;
         }
       }
@@ -95,6 +99,9 @@ export function applyRelativeScoring(
       // Linear interpolation: ((score - min) / (max - min)) * 100
       for (const ms of locationMap.values()) {
         if (ms.score >= 0) {
+          if (!ms.judgeOverridden) {
+            ms.rawConsensusScore = ms.score;
+          }
           ms.score =
             Math.round(((ms.score - min) / (max - min)) * 100 * 100) / 100;
         }
@@ -119,6 +126,10 @@ export function applyRelativeScoring(
 export function determineWinner(
   cityScores: CitySmartScore[]
 ): WinnerDetermination {
+  if (cityScores.length === 0) {
+    throw new Error('determineWinner requires at least one city score');
+  }
+
   // Sort by overall score descending
   const ranked = [...cityScores].sort((a, b) => b.overallScore - a.overallScore);
 

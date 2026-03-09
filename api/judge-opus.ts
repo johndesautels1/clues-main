@@ -30,6 +30,7 @@ import type {
   JudgeOpusRequest,
   MetricOverride,
 } from '../src/types/judge';
+// EvaluatorModel used for VALID_MODELS set below
 import type { EvaluatorModel } from '../src/types/evaluation';
 
 // ─── Cost tracking helper (server-side, writes to Supabase directly) ──
@@ -279,7 +280,8 @@ export default async function handler(
     }
 
     // ─── Parse response ──────────────────────────────────────
-    const textBlock = anthropicResult.content?.find((b: { type: string }) => b.type === 'text');
+    const contentBlocks = Array.isArray(anthropicResult.content) ? anthropicResult.content : [];
+    const textBlock = contentBlocks.find((b: { type: string }) => b.type === 'text');
     const rawText = textBlock?.text ?? '';
 
     let judgeResponse: Omit<JudgeReport, 'reportId' | 'judgedAt'>;
@@ -312,12 +314,13 @@ export default async function handler(
     };
 
     // ─── Validate trustedModel against EvaluatorModel union ──
-    const VALID_MODELS: Set<string> = new Set([
+    // Derived from EvaluatorModel type to stay in sync
+    const VALID_MODELS: Set<EvaluatorModel> = new Set<EvaluatorModel>([
       'claude-sonnet-4-6', 'gpt-5.4', 'gemini-3.1-pro-preview',
       'grok-4-1-fast-reasoning', 'sonar-reasoning-pro-high',
     ]);
     for (const override of report.metricOverrides) {
-      if (override.trustedModel && !VALID_MODELS.has(override.trustedModel)) {
+      if (override.trustedModel && !VALID_MODELS.has(override.trustedModel as EvaluatorModel)) {
         // Opus returned a non-standard model name — clear it rather than propagate bad data
         delete (override as MetricOverride).trustedModel;
       }
@@ -356,12 +359,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/judge-opus] Opus 4.6 judge failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/judge-opus] Detail:', message);
+    console.error('[/api/judge-opus] Opus 4.6 judge failed:', message);
     res.status(500).json({
       error: 'Opus judge failed',
+      detail: message,
       durationMs,
     });
   }

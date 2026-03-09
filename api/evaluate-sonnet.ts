@@ -263,7 +263,8 @@ export default async function handler(
     }
 
     // ─── Parse response ──────────────────────────────────────
-    const textBlock = anthropicResult.content?.find((b: { type: string }) => b.type === 'text');
+    const contentBlocks = Array.isArray(anthropicResult.content) ? anthropicResult.content : [];
+    const textBlock = contentBlocks.find((b: { type: string }) => b.type === 'text');
     const rawText = textBlock?.text ?? '';
 
     let evaluation: LLMEvaluationResponse;
@@ -316,12 +317,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/evaluate-sonnet] Claude Sonnet 4.6 evaluation failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/evaluate-sonnet] Detail:', message);
+    console.error('[/api/evaluate-sonnet] Claude Sonnet 4.6 evaluation failed:', message);
     res.status(500).json({
       error: 'Sonnet evaluation failed',
+      detail: message,
       durationMs,
     });
   }

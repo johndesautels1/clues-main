@@ -19,8 +19,6 @@ import type {
   MetricConsensus,
   LocationConsensus,
   EvaluationMetric,
-  CityCandidate,
-  EvaluatorModel,
 } from '../types/evaluation';
 import type { JudgeReport, MetricOverride } from '../types/judge';
 import type {

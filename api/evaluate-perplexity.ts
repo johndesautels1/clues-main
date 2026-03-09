@@ -321,12 +321,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/evaluate-perplexity] Perplexity Sonar evaluation failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/evaluate-perplexity] Detail:', message);
+    console.error('[/api/evaluate-perplexity] Perplexity Sonar evaluation failed:', message);
     res.status(500).json({
       error: 'Perplexity evaluation failed',
+      detail: message,
       durationMs,
     });
   }

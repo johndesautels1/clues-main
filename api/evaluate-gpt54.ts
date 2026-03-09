@@ -319,12 +319,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/evaluate-gpt54] GPT-5.4 evaluation failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/evaluate-gpt54] Detail:', message);
+    console.error('[/api/evaluate-gpt54] GPT-5.4 evaluation failed:', message);
     res.status(500).json({
       error: 'GPT-5.4 evaluation failed',
+      detail: message,
       durationMs,
     });
   }

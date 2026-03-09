@@ -265,6 +265,7 @@ export default async function handler(
       console.warn('[/api/evaluate-gemini] Response truncated (hit maxOutputTokens).');
     } else if (finishReason === 'SAFETY') {
       console.warn('[/api/evaluate-gemini] Response blocked by safety filters.');
+      throw new Error('Gemini response blocked by safety filters — no usable output');
     }
 
     // ─── Parse response ──────────────────────────────────────
@@ -320,12 +321,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/evaluate-gemini] Gemini 3.1 Pro Preview evaluation failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/evaluate-gemini] Detail:', message);
+    console.error('[/api/evaluate-gemini] Gemini 3.1 Pro Preview evaluation failed:', message);
     res.status(500).json({
       error: 'Gemini evaluation failed',
+      detail: message,
       durationMs,
     });
   }

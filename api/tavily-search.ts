@@ -54,16 +54,31 @@ interface MetricResearch {
 
 // ─── Source URL Extraction ───────────────────────────────────────
 
-const GOV_DOMAINS = ['.gov', '.gov.', '.mil', '.europa.eu', '.un.org', '.who.int', '.oecd.org'];
-const ACADEMIC_DOMAINS = ['.edu', '.ac.', 'scholar.google', 'researchgate', 'jstor', 'pubmed'];
+// Anchored to TLD position to avoid false positives (e.g., governance.com)
+const GOV_PATTERN = /\.gov(\.[a-z]{2})?$/i;
+const MIL_PATTERN = /\.mil(\.[a-z]{2})?$/i;
+const GOV_ORGS = ['.europa.eu', '.un.org', '.who.int', '.oecd.org'];
+const EDU_PATTERN = /\.edu(\.[a-z]{2})?$/i;
+const AC_PATTERN = /\.ac\.[a-z]{2}$/i;
+const ACADEMIC_HOSTS = ['scholar.google.com', 'researchgate.net', 'jstor.org', 'pubmed.ncbi.nlm.nih.gov'];
 
 function extractSourceURL(result: TavilySearchResult): SourceURL {
   let domain = '';
   try {
-    domain = new URL(result.url).hostname;
+    domain = new URL(result.url).hostname.toLowerCase();
   } catch {
-    domain = result.url.split('/')[2] ?? '';
+    domain = (result.url.split('/')[2] ?? '').toLowerCase();
   }
+
+  const isGovernment =
+    GOV_PATTERN.test(domain) ||
+    MIL_PATTERN.test(domain) ||
+    GOV_ORGS.some(d => domain.endsWith(d));
+
+  const isAcademic =
+    EDU_PATTERN.test(domain) ||
+    AC_PATTERN.test(domain) ||
+    ACADEMIC_HOSTS.some(d => domain === d || domain.endsWith('.' + d));
 
   return {
     url: result.url,
@@ -72,8 +87,8 @@ function extractSourceURL(result: TavilySearchResult): SourceURL {
     relevanceScore: result.score,
     snippet: result.content.slice(0, 300),
     publishedDate: result.published_date,
-    isGovernment: GOV_DOMAINS.some(d => domain.includes(d) || result.url.includes(d)),
-    isAcademic: ACADEMIC_DOMAINS.some(d => domain.includes(d) || result.url.includes(d)),
+    isGovernment,
+    isAcademic,
   };
 }
 
@@ -249,7 +264,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   const { sessionId, city, country } = body;
-  const maxSearches = body.maxSearches ?? 200; // Default to max
+  const maxSearches = Math.min(body.maxSearches ?? 100, 200); // Default to 100, hard cap 200
   const metrics = body.metrics.slice(0, maxSearches); // Enforce tier limit
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -318,9 +333,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[/api/tavily-search] Error:', message);
-    console.error('[/api/tavily-search] Detail:', message);
     res.status(500).json({
       error: 'Tavily metric search failed',
+      detail: message,
       durationMs: Date.now() - startTime,
     });
   }
@@ -335,7 +350,7 @@ function buildMetricResult(
   response: TavilyAPIResponse,
   responseTimeMs: number
 ): MetricResearch {
-  const validResults = response.results.filter(r => isValidSourceURL(r.url));
+  const validResults = (response.results ?? []).filter(r => isValidSourceURL(r.url));
   const sources = validResults.map(extractSourceURL);
 
   return {

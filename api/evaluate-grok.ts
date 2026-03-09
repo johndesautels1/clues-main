@@ -317,12 +317,11 @@ export default async function handler(
     });
   } catch (err) {
     const durationMs = Date.now() - startTime;
-    console.error('[/api/evaluate-grok] Grok 4.1 Fast Reasoning evaluation failed:', err);
-
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/evaluate-grok] Detail:', message);
+    console.error('[/api/evaluate-grok] Grok 4.1 Fast Reasoning evaluation failed:', message);
     res.status(500).json({
       error: 'Grok evaluation failed',
+      detail: message,
       durationMs,
     });
   }
