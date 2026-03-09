@@ -164,13 +164,13 @@
 - [x] Supabase: `llm_evaluations` table (user_id, llm_model, category, metrics_json, created_at)
 
 #### Conv 13-14: Opus Judge System
-- [ ] `api/judge-opus.ts` — Opus 4.6 judge endpoint
-- [ ] `src/lib/judgeOrchestrator.ts` — aggregates 5 LLM results → feeds Opus
-- [ ] `src/types/judge.ts` — JudgeReport type, verdict structure, override records
-- [ ] σ > 15 detection: flag high-disagreement metrics for judge review
-- [ ] Anti-hallucination safeguard: computed winner override if Opus contradicts math
-- [ ] Judge report storage: Supabase `judge_reports` table
-- [ ] Cost tracking integration for Opus calls
+- [x] `api/judge-opus.ts` — Opus 4.6 judge endpoint
+- [x] `src/lib/judgeOrchestrator.ts` — aggregates 5 LLM results → feeds Opus
+- [x] `src/types/judge.ts` — JudgeReport type, verdict structure, override records
+- [x] σ > 15 detection: flag high-disagreement metrics for judge review
+- [x] Anti-hallucination safeguard: computed winner override if Opus contradicts math
+- [x] Judge report storage: Supabase `judge_reports` table
+- [x] Cost tracking integration for Opus calls
 
 #### Conv 15-16: Smart Score Engine
 - [ ] `src/lib/smartScoreEngine.ts` — normalize raw scores → 0-100 Smart Scores
@@ -522,7 +522,23 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 8 (Conv 11-12 — 5-LLM Parallel Evaluator — COMPLETE)
+### Latest Update: 2026-03-09 — Session 8 (Conv 13-14 — Opus Judge System — COMPLETE)
+
+**What was done this conversation:**
+- **Conv 13-14: Opus Judge System** (ALL items):
+  - **src/types/judge.ts** (~190 lines): JudgeMetric (evidence per disputed metric with per-LLM scores/reasoning), JudgeLocationEvidence, JudgeLLMScore, JudgeOpusRequest, JudgeCategorySummary. JudgeReport with summaryOfFindings (location scores, trends, confidence), categoryAnalysis (per-location 2-3 sentence analyses), executiveSummary (recommendation, rationale, keyFactors, futureOutlook), metricOverrides (per-metric score adjustments with judgeExplanation, trustedModel, legalScore/enforcementScore), confirmedMetrics. SafeguardCorrection (winner_override, confidence_override). JudgeReportRow (Supabase shape).
+  - **api/judge-opus.ts** (~240 lines): Claude Opus 4.6 via Anthropic Messages API. temperature 0.2, max_tokens 16384. Max 30 metrics per call. Prompt: Cristiano persona, reviews all LLM evidence per disputed metric (score, confidence, data_justification, source, reasoning), category summaries, user context. Returns JudgeReport with overrides + executive summary. $15/$75 per 1M tokens.
+  - **src/lib/judgeOrchestrator.ts** (~310 lines): runJudge() takes OrchestrationResult + metricsMap + userContext. (1) Filters σ>15 metrics, (2) builds JudgeMetric evidence from raw EvaluatorResults, (3) batches into groups of 30, (4) calls /api/judge-opus per batch, (5) merges reports (overrides, confirmed, category analyses, executive summary), (6) anti-hallucination safeguards, (7) persists to Supabase judge_reports table.
+  - **σ > 15 detection**: Already in evaluation types (MetricConsensus.needsJudgeReview). Orchestrator filters and batches these.
+  - **Anti-hallucination safeguard #1**: Winner override — if Opus recommends location X but computed mean scores show location Y wins, force-correct to Y.
+  - **Anti-hallucination safeguard #2**: Confidence override — if Opus claims "high" confidence but average σ warrants "medium" or "low", force-correct downward (never upward).
+  - **judge_reports table**: session_id, report_json, metrics_reviewed, metrics_overridden, safeguard_triggered, cost_usd, duration_ms.
+  - **Cost tracking**: Full Opus token tracking via Supabase cost_tracking table.
+  - Build verified: tsc 0 errors, Vite 0 errors, 669 modules transformed.
+  - **Conv 13-14 is now COMPLETE.**
+- **What's next**: Conv 15-16 — Smart Score Engine (smartScoreEngine.ts, categoryRollup.ts, relativeScoring.ts, smartScore types, dual scoring, weight derivation, confidence levels, winner determination).
+
+### Previous Update: 2026-03-09 — Session 8 (Conv 11-12 — 5-LLM Parallel Evaluator — COMPLETE)
 
 **What was done this conversation:**
 - **Conv 11-12: 5-LLM Parallel Evaluator** (ALL items):
