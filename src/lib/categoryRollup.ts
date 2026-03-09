@@ -24,7 +24,6 @@ import type {
   CategorySmartScore,
   CitySmartScore,
   CategoryWeights,
-  ConfidenceLevel,
 } from '../types/smartScore';
 import {
   DEFAULT_CATEGORY_COUNT,

@@ -220,7 +220,7 @@ export function computeMetricSmartScore(
  * In the current pipeline, sources come from LLM evaluations via Tavily.
  * We produce a placeholder structure; actual URLs come from upstream data.
  */
-function extractSources(locationConsensus: LocationConsensus): MetricSource[] {
+function extractSources(_locationConsensus: LocationConsensus): MetricSource[] {
   // Sources are populated during the evaluation phase and stored in the
   // LLM responses. At the Smart Score level, we carry forward what the
   // orchestrator collected. The actual URL extraction happens upstream

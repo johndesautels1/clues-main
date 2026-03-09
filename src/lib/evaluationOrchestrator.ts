@@ -40,7 +40,7 @@ import { supabase, isSupabaseConfigured } from './supabase';
  */
 function getBaseUrl(): string {
   if (typeof window !== 'undefined') return ''; // Browser — relative paths work
-  const vercelUrl = process.env.VERCEL_URL;
+  const vercelUrl = import.meta.env.VITE_VERCEL_URL;
   if (vercelUrl) return `https://${vercelUrl}`;
   return 'http://localhost:3000';
 }

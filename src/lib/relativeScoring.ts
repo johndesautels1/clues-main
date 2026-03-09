@@ -18,15 +18,8 @@
  */
 
 import type {
-  OrchestrationResult,
-  EvaluationMetric,
-  CityCandidate,
-} from '../types/evaluation';
-import type { JudgeReport } from '../types/judge';
-import type {
   MetricSmartScore,
   CitySmartScore,
-  CategoryWeights,
   WinnerDetermination,
   SmartScoreInput,
   SmartScoreOutput,
@@ -74,7 +67,7 @@ export function applyRelativeScoring(
   }
 
   // For each metric, compute relative scores
-  for (const [metricId, locationMap] of metricIndex) {
+  for (const [_metricId, locationMap] of metricIndex) {
     const scores = Array.from(locationMap.values())
       .map((ms) => ms.score)
       .filter((s) => s >= 0); // Exclude missing data
