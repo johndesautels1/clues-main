@@ -142,13 +142,13 @@
 *The AI evaluation engine. Depends on Phase 1 data collection being functional.*
 
 #### Conv 9-10: Tavily Research Pipeline
-- [ ] `api/tavily-research.ts` — Vercel serverless: baseline research per region
-- [ ] `api/tavily-search.ts` — Vercel serverless: metric-specific search per city
-- [ ] `src/lib/tavilyClient.ts` — client-side orchestrator (fires research + search calls)
-- [ ] `src/types/tavily.ts` — Tavily response types, source URL structures
-- [ ] Cache layer: 30-min TTL, max 50 entries, dedup across LLMs
-- [ ] Source URL extraction and validation
-- [ ] Supabase: `tavily_cache` table (query_hash, response, expires_at)
+- [x] `api/tavily-research.ts` — Vercel serverless: baseline research per region
+- [x] `api/tavily-search.ts` — Vercel serverless: metric-specific search per city
+- [x] `src/lib/tavilyClient.ts` — client-side orchestrator (fires research + search calls)
+- [x] `src/types/tavily.ts` — Tavily response types, source URL structures
+- [x] Cache layer: 30-min TTL, max 50 entries, dedup across LLMs
+- [x] Source URL extraction and validation
+- [x] Supabase: `tavily_cache` table (query_hash, response, expires_at)
 
 #### Conv 11-12: 5-LLM Parallel Evaluator
 - [ ] `api/evaluate-sonnet.ts` — Claude Sonnet 4.6 evaluation endpoint
@@ -536,7 +536,19 @@ Target: < 10KB. Everything else lives in specialized docs.
   - Build verified: 0 errors, 669 modules transformed.
   - **Conv 7-8 is now COMPLETE. PHASE 1 (Data Collection Engine) is COMPLETE** — all Conv 1-8 items done.
 - **Also completed earlier in session**: Conv 5-6 final item (EIG question prioritization), 4 pre-existing build errors fixed.
-- **What's next**: PHASE 2 — Conv 9-10 Tavily Research Pipeline (tavily-research.ts, tavily-search.ts, tavilyClient.ts, cache layer, tavily_cache table).
+- **What's next**: Conv 11-12 — 5-LLM Parallel Evaluator (evaluate-sonnet.ts, evaluate-gpt54.ts, evaluate-gemini.ts, evaluate-grok.ts, evaluate-perplexity.ts, gpt-realtime.ts).
+
+### Previous Update: 2026-03-09 — Session 7b (Conv 9-10 Tavily Research Pipeline — COMPLETE)
+
+**What was done:**
+- **Conv 9-10: Tavily Research Pipeline** (ALL 7 items):
+  - **src/types/tavily.ts** (~170 lines): TavilySearchRequest/Response, SourceURL with .gov/.edu detection, RegionResearch (10-topic baseline), MetricResearch (per-city per-metric), TavilyCacheEntry, MemoryCacheEntry, DEFAULT_RESEARCH_TOPICS.
+  - **api/tavily-research.ts** (~280 lines): Baseline region research. 10 topic searches (cost_of_living, safety, healthcare, climate, connectivity, visa, education, transport, culture, English). Parallel batches of 3. Supabase tavily_cache with 30-min TTL. SHA-256 query hash dedup. Source URL validation + .gov/.edu flags. Cost tracking.
+  - **api/tavily-search.ts** (~280 lines): Metric-specific searches. Gemini research_query + city + country → Tavily advanced. Parallel batches of 5. Same cache/hash/cost patterns. Tier-limited via maxSearches (5-200).
+  - **src/lib/tavilyClient.ts** (~220 lines): Client orchestrator with 3-layer cache (in-memory LRU max 50, 30-min TTL → Supabase → API). Request dedup via inflight map. researchRegion(), searchMetrics(), getCacheStats(), clearCache(), evictExpired().
+  - Build: 0 errors (tsc + Vite + API routes verified separately).
+  - **Conv 9-10 is now COMPLETE.**
+- **What's next**: Conv 11-12 — 5-LLM Parallel Evaluator.
 
 ### Previous Update: 2026-03-09 — Session 7 (EIG Question Prioritization — Conv 5-6 COMPLETE)
 
