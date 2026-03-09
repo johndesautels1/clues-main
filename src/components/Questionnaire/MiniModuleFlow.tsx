@@ -13,7 +13,7 @@
  *  - WCAG 2.1 AA compliant throughout
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
@@ -116,6 +116,18 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
 
   // ─── Question Navigator State ────────────────────────────────
   const [questionNavOpen, setQuestionNavOpen] = useState(false);
+
+  // ─── Green Light Trigger (Olivia congratulates at MOE target) ──
+  const greenLightShownRef = useRef(false);
+  useEffect(() => {
+    if (coverage && coverage.isReportReady && !greenLightShownRef.current && phase === 'active') {
+      greenLightShownRef.current = true;
+      toast.success(
+        'Congratulations! Your data is now comprehensive enough for a full evaluation report. You can keep refining or head to your Dashboard.',
+        { duration: 8000, icon: '\u2728' }
+      );
+    }
+  }, [coverage?.isReportReady, phase]);
 
   // Auto-detect returning user
   useEffect(() => {

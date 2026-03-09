@@ -18,6 +18,7 @@ import { EmiliaBubble } from '../Shared/EmiliaBubble';
 import { useUser } from '../../context/UserContext';
 import { useRelevanceState } from '../../hooks/useRelevanceState';
 import { CoverageMeter } from '../Questionnaire/CoverageMeter';
+import { ReadinessIndicator } from './ReadinessIndicator';
 import { MODULES } from '../../data/modules';
 import type { ModuleDefinition, ModuleStatus } from '../../data/modules';
 import type { SubSection } from '../../types';
@@ -182,10 +183,18 @@ export function Dashboard() {
           <CoverageMeter variant="full" />
         </section>
 
+        {/* Readiness Indicator (overall report readiness) */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '450ms' }}
+        >
+          <ReadinessIndicator />
+        </section>
+
         {/* 23 Module Grid */}
         <section
           className="dashboard__section"
-          style={{ animationDelay: '500ms' }}
+          style={{ animationDelay: '550ms' }}
         >
           <h2 className="dashboard__section-title">Exploration Modules</h2>
           <p className="dashboard__section-subtitle">
