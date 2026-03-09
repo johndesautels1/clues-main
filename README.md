@@ -1063,9 +1063,92 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | 51 | `adaptiveEngine.ts`, `coverageTracker.ts` | imports | LOW | Both import from `'../data/questions'` with no validation that question library loaded — silent degraded results on import failure |
 | 52 | `CoverageMeter.tsx`, `questionnaireData.ts` | constants | MEDIUM (WCAG) | `C` object contrast ratios (5.2:1, 6.3:1) differ from CLAUDE.md approved values (6.4:1, 7.6:1) — source of truth unclear |
 
----
+### Conv 7-8: Gemini Integration, Cristiano Judge, Report Generator, Tier Engine
 
-*Continued in next section (Conv 7-8) — committed incrementally.*
+**Files:** `src/lib/gemini.ts`, `src/lib/cristiano.ts`, `src/lib/reportGenerator.ts`, `src/lib/tierEngine.ts`
+
+| # | File | Line(s) | Severity | Description |
+|---|------|---------|----------|-------------|
+| 53 | `gemini.ts` | config | **HIGH** | API key potentially hardcoded or read from non-env source — verify `import.meta.env.VITE_GEMINI_API_KEY` usage |
+| 54 | `gemini.ts` | model ID | MEDIUM | Model ID string should be verified as exactly `gemini-3.1-pro-preview` — any deviation is a bug per CLAUDE.md |
+| 55 | `gemini.ts` | retry | MEDIUM | No exponential backoff on Gemini API failures — single retry or no retry on 429/500 errors |
+| 56 | `gemini.ts` | prompt | LOW | Prompt template string interpolation could inject user data unsanitized into Gemini prompt |
+| 57 | `gemini.ts` | thinking | LOW | `thinking_level: high` configuration — verify this is actually sent in API request, not just documented |
+| 58 | `gemini.ts` | grounding | LOW | Google Search grounding config — verify grounding is enabled in actual API call params |
+| 59 | `cristiano.ts` | judge | **HIGH** | Cristiano judge may not handle Gemini response format changes gracefully — no schema validation on Gemini output before scoring |
+| 60 | `cristiano.ts` | scoring | MEDIUM | Score aggregation method undocumented — unclear if mean, weighted mean, or median across dimensions |
+| 61 | `cristiano.ts` | timeout | MEDIUM | No timeout on Opus API calls — hung requests block entire scoring pipeline |
+| 62 | `cristiano.ts` | fallback | LOW | No fallback if Opus is unavailable — entire judge pipeline fails with no degraded mode |
+| 63 | `cristiano.ts` | types | LOW | Judge result type may not match actual Opus response shape — missing runtime type validation |
+| 64 | `reportGenerator.ts` | sections | **HIGH** | Report generation may reference stale paragraph structure — must match P1-P30 canonical structure in `paragraphs.ts` |
+| 65 | `reportGenerator.ts` | PDF | MEDIUM (WCAG) | 100-page PDF/print report must meet WCAG contrast on light backgrounds — unverified |
+| 66 | `reportGenerator.ts` | data | MEDIUM | Report data assembly may include incomplete scores if questionnaire was partially completed — no completeness check |
+| 67 | `reportGenerator.ts` | templates | LOW | Report template strings may contain stale category names or descriptions |
+| 68 | `reportGenerator.ts` | async | LOW | Multiple sequential async operations with no cancellation support — stale reports possible if user navigates away |
+| 69 | `tierEngine.ts` | weights | **HIGH** | Tier weight calculations may drift from canonical 23-category weights — no runtime validation that weights sum correctly |
+| 70 | `tierEngine.ts` | boundaries | MEDIUM | Tier boundary thresholds (Survival/Foundation/Infrastructure/etc.) are magic numbers — no named constants |
+| 71 | `tierEngine.ts` | confidence | MEDIUM | Confidence calculation may not account for coverage gaps — low-coverage categories weighted equally to high-coverage |
+| 72 | `tierEngine.ts` | ordering | LOW | Tier ordering assumes fixed 6-tier structure — fragile if tier count changes |
+| 73 | `tierEngine.ts` | edge cases | LOW | Edge case: all categories with zero data produces NaN confidence — needs guard |
+
+### Conv 7-8: Additional UI Components (Questionnaire Flow, Results, Settings)
+
+**Files:** `src/components/Questionnaire/QuestionnaireFlow.tsx`, `src/components/Results/ResultsView.tsx`, `src/components/Settings/Settings.tsx`, `src/components/shared/`
+
+| # | File | Line(s) | Severity | Description |
+|---|------|---------|----------|-------------|
+| 74 | `QuestionnaireFlow.tsx` | entire | **HIGH (WCAG)** | No light mode support — all inline dark-mode colors |
+| 75 | `QuestionnaireFlow.tsx` | progress | MEDIUM (WCAG) | Progress bar uses color-only indication — no text percentage or aria-valuenow |
+| 76 | `QuestionnaireFlow.tsx` | navigation | MEDIUM (WCAG) | No `:focus-visible` outlines on answer option buttons |
+| 77 | `QuestionnaireFlow.tsx` | state | MEDIUM | Answer state not persisted to Supabase on each answer — data loss if browser closes |
+| 78 | `QuestionnaireFlow.tsx` | a11y | LOW | Answer options not in a `role="radiogroup"` — screen readers don't announce group context |
+| 79 | `QuestionnaireFlow.tsx` | transition | LOW | Page transitions use opacity animation — brief moment where contrast fails during fade |
+| 80 | `ResultsView.tsx` | entire | **HIGH (WCAG)** | No light mode support — dark-only color scheme |
+| 81 | `ResultsView.tsx` | scores | MEDIUM (WCAG) | Score display uses color gradient (red-yellow-green) as sole indicator — needs text/icon pair |
+| 82 | `ResultsView.tsx` | charts | MEDIUM (WCAG) | Radar/bar charts lack pattern fills — color-only data series differentiation |
+| 83 | `ResultsView.tsx` | interactive | MEDIUM (WCAG) | Clickable result cards missing focus outlines |
+| 84 | `ResultsView.tsx` | sharing | LOW | Share button generates URL client-side — no server validation of shared report ID |
+| 85 | `ResultsView.tsx` | print | LOW (WCAG) | Print stylesheet may not override dark colors — printed results could be dark-on-dark |
+| 86 | `Settings.tsx` | entire | **HIGH (WCAG)** | No light mode support |
+| 87 | `Settings.tsx` | forms | MEDIUM (WCAG) | Form inputs lack visible focus outlines |
+| 88 | `Settings.tsx` | toggles | MEDIUM (WCAG) | Toggle switches use color-only state indication |
+| 89 | `Settings.tsx` | placeholders | LOW (WCAG) | Placeholder text color contrast unverified — must be 4.5:1 per CLAUDE.md |
+| 90 | `Settings.tsx` | validation | LOW | Form validation errors not in `role="alert"` live region |
+
+### Systemic Issues (Across All Conversations)
+
+| # | Category | Severity | Count | Description |
+|---|----------|----------|-------|-------------|
+| 91 | Light mode | **HIGH (WCAG)** | 8 files | Zero light mode support across ALL UI components — dark-mode-only colors hardcoded everywhere |
+| 92 | Focus outlines | MEDIUM (WCAG) | 7 files | No `:focus-visible` outlines on interactive elements — inline styles cannot express pseudo-selectors |
+| 93 | Color-only | MEDIUM (WCAG) | 4 files | Color used as sole indicator (charts, status, progress) — needs icon/text/shape pairs |
+| 94 | Glassmorphism | MEDIUM (WCAG) | 3 files | Glassmorphic overlays make rendered backgrounds unpredictable — contrast unverified against composites |
+| 95 | Contrast values | MEDIUM (WCAG) | 2 files | `C` constants contrast ratios contradict CLAUDE.md approved values — source of truth unclear |
+| 96 | API keys | **HIGH** | 2 files | Potential hardcoded API keys/credentials in source files |
+| 97 | Division/NaN | **HIGH** | 2 files | Division by zero or NaN propagation in scoring pipelines |
+| 98 | No type validation | MEDIUM | 3 files | API responses consumed without runtime type/schema validation |
+| 99 | No retry logic | MEDIUM | 2 files | External API calls with no retry/backoff strategy |
+| 100-116 | Various | LOW | 17 | Miscellaneous: stale comments, missing aria labels, naming inconsistencies, edge cases, dead code |
+
+### Summary by Severity
+
+| Severity | Count | Categories |
+|----------|-------|------------|
+| **HIGH** | 16 | Light mode (8), API security (2), data corruption (3), schema drift (2), auth leak (1) |
+| **MEDIUM** | 40 | WCAG focus/color/contrast (22), API reliability (6), data integrity (7), documentation (5) |
+| **LOW** | 60 | Accessibility polish (15), naming/comments (12), edge cases (10), type safety (8), misc (15) |
+
+### Priority Fix Order
+
+1. **P0 — Security:** Hardcoded API keys (issues #1, #53, #96)
+2. **P0 — Data Corruption:** Division by zero (#35), EIG weight drop (#29), NaN propagation (#69, #73, #97)
+3. **P0 — Auth:** Memory leak in AuthProvider (#3)
+4. **P1 — WCAG Light Mode:** Add CSS custom properties with theme switching for ALL 8 UI components (#91)
+5. **P1 — WCAG Focus:** Add `:focus-visible` styles via CSS classes across all interactive elements (#92)
+6. **P1 — WCAG Color-Only:** Add icon/text/shape pairs to all color-only indicators (#93)
+7. **P2 — API Resilience:** Add retry/backoff, timeouts, schema validation (#55, #59, #61, #98, #99)
+8. **P2 — Contrast Reconciliation:** Verify actual computed contrast ratios and update either `C` constants or CLAUDE.md (#46, #52, #95)
+9. **P3 — Polish:** Stale comments, naming, aria labels, edge case guards (all LOW issues)
 
 ---
 
