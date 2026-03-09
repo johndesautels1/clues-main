@@ -245,26 +245,36 @@ export default async function handler(
       body.userContext || { paragraphCount: 0, completedModules: [], tier: 'discovery' }
     );
 
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-6',
-        max_tokens: 32768,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        system: 'You are Cristiano, the CLUES Intelligence Supreme Judge. You render precise, evidence-based verdicts. Return only valid JSON. No markdown fences.',
-        temperature: 0.2,
-      }),
-    });
+    // 120-second timeout to prevent hung requests from blocking the pipeline
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120_000);
+
+    let anthropicResponse: Response;
+    try {
+      anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-opus-4-6',
+          max_tokens: 32768,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          system: 'You are Cristiano, the CLUES Intelligence Supreme Judge. You render precise, evidence-based verdicts. Return only valid JSON. No markdown fences.',
+          temperature: 0.2,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!anthropicResponse.ok) {
       const errText = await anthropicResponse.text();

@@ -234,26 +234,44 @@ export default async function handler(
 
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
 
-    const geminiResponse = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        systemInstruction: {
-          parts: [{ text: 'You are a precise location analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.' }],
-        },
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 32768,
-          responseMimeType: 'application/json',
-        },
-        tools: [{ google_search: {} }],
-      }),
+    const requestBody = JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      systemInstruction: {
+        parts: [{ text: 'You are a precise location analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.' }],
+      },
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 32768,
+        responseMimeType: 'application/json',
+      },
+      tools: [{ google_search: {} }],
     });
 
-    if (!geminiResponse.ok) {
+    // Retry with exponential backoff on 429 (rate limit) and 5xx errors
+    let geminiResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      geminiResponse = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+      });
+
+      if (geminiResponse.ok) break;
+
+      const status = geminiResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        const backoffMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
       const errText = await geminiResponse.text();
-      throw new Error(`Gemini API returned ${geminiResponse.status}: ${errText}`);
+      throw new Error(`Gemini API returned ${status}: ${errText}`);
+    }
+
+    if (!geminiResponse || !geminiResponse.ok) {
+      throw new Error('Gemini API request failed after retries');
     }
 
     const geminiResult = await geminiResponse.json();
