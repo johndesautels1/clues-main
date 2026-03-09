@@ -19,9 +19,9 @@
  * CLUES predicts: best country → top 3 cities → top 3 towns → top 3 neighborhoods
  */
 
-import { MODULES } from '@/data/modules';
-import { getModuleById } from '@/data/questions';
-import type { QuestionItem } from '@/data/questions/types';
+import { MODULES } from '../data/modules';
+import { getModuleById } from '../data/questions';
+import type { QuestionItem, QuestionSection } from '../data/questions/types';
 import type {
   CoverageState,
   DimensionCoverage,
@@ -218,11 +218,11 @@ export function initializeAdaptiveEngine(
     const questionModule = getModuleById(rec.moduleId);
     if (!questionModule) continue;
 
-    const allQuestions = questionModule.sections.flatMap(s =>
-      s.questions.map(q => ({ ...q, sectionTitle: s.title }))
+    const allQuestions = questionModule.sections.flatMap((s: QuestionSection) =>
+      s.questions.map((q: QuestionItem) => ({ ...q, sectionTitle: s.title }))
     );
 
-    const beliefs: QuestionBelief[] = allQuestions.map(q => {
+    const beliefs: QuestionBelief[] = allQuestions.map((q: QuestionItem & { sectionTitle: string }) => {
       const uncertainty = calculatePredictionUncertainty(q, rec.moduleId, coverage);
       const impact = calculateSmartScoreImpact(q, q.sectionTitle);
       const moduleWeight = rec.relevance;
@@ -303,8 +303,8 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
   // Look up the actual QuestionItem from the question library
   const questionModule = getModuleById(activeModule.moduleId);
   const questionItem = questionModule?.sections
-    .flatMap(s => s.questions)
-    .find(q => q.number === nextBelief.questionNumber) ?? null;
+    .flatMap((s: QuestionSection) => s.questions)
+    .find((q: QuestionItem) => q.number === nextBelief.questionNumber) ?? null;
 
   if (!questionItem) return null;
 

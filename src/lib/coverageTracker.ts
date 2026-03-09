@@ -11,7 +11,7 @@
  * Coverage determines how confident those predictions are.
  */
 
-import { MODULES } from '@/data/modules';
+import { MODULES, type ModuleDefinition } from '../data/modules';
 import type {
   GeminiExtraction,
   DemographicAnswers,
@@ -19,7 +19,7 @@ import type {
   MHAnswers,
   TradeoffAnswers,
   GeneralAnswers,
-} from '@/types';
+} from '../types';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -153,7 +153,7 @@ const MH_MODULE_MAP: Record<string, string[]> = {
 
 /** Initialize empty coverage state for all 23 dimensions */
 export function initializeCoverage(): CoverageState {
-  const dimensions: DimensionCoverage[] = MODULES.map(mod => ({
+  const dimensions: DimensionCoverage[] = MODULES.map((mod: ModuleDefinition) => ({
     moduleId: mod.id,
     moduleName: mod.name,
     dataPoints: 0,
@@ -287,7 +287,6 @@ export function applyCoverageFromDemographics(
   }
 
   // Demographics provides data points to ALL modules (baseline persona)
-  const answerCount = Object.keys(demographics).length;
   for (const dim of updated.dimensions) {
     dim.dataPoints += 1; // Everyone gets 1 point from demographics
     addOrUpdateSource(dim, 'demographics', 1, 0.1);

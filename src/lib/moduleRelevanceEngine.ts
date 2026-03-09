@@ -15,7 +15,7 @@
  * CLUES predicts: best country → top 3 cities → top 3 towns → top 3 neighborhoods
  */
 
-import { MODULES } from '@/data/modules';
+import { MODULES, type ModuleDefinition } from '../data/modules';
 import type {
   GeminiExtraction,
   DemographicAnswers,
@@ -23,7 +23,7 @@ import type {
   MHAnswers,
   TradeoffAnswers,
   GeneralAnswers,
-} from '@/types';
+} from '../types';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -185,7 +185,7 @@ const DEMOGRAPHIC_RULES: DemographicRule[] = [
 
 /** Initialize relevance scores with equal weights */
 export function initializeRelevance(): RelevanceResult {
-  const modules: ModuleRelevance[] = MODULES.map((mod, i) => ({
+  const modules: ModuleRelevance[] = MODULES.map((mod: ModuleDefinition, i: number) => ({
     moduleId: mod.id,
     moduleName: mod.name,
     relevance: 0.5,  // Neutral baseline
@@ -230,7 +230,7 @@ export function applyParagraphicalRelevance(
     }
 
     // Count Gemini metrics per category as additional signal
-    const metricCount = extraction.metrics.filter(m => m.category === mod.moduleId).length;
+    const metricCount = extraction.metrics.filter((m: { category: string }) => m.category === mod.moduleId).length;
     if (metricCount > 0) {
       mod.confidence = Math.min(1, mod.confidence + Math.min(0.3, metricCount * 0.03));
       if (metricCount >= 8) {
@@ -430,7 +430,6 @@ function recalculateRankings(result: RelevanceResult): RelevanceResult {
   const CONFIDENCE_THRESHOLD = 0.75;  // Above this, already covered
 
   for (const mod of result.modules) {
-    const priority = mod.relevance * (1 - mod.confidence);
     mod.recommended = mod.relevance >= RELEVANCE_THRESHOLD && mod.confidence < CONFIDENCE_THRESHOLD;
   }
 
