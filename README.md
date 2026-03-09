@@ -1002,6 +1002,12 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 - Issue #59: FALSE POSITIVE — `judge-opus.ts` validates required fields at lines 283-286.
 - Issue #61 (MEDIUM): FIXED — Opus judge has 120s AbortController timeout.
 - Issue #91 (HIGH/WCAG): FIXED — Added `@media (prefers-color-scheme: light)` block to `globals.css` with verified light-mode text colors, surfaces, score colors, shadows. All `C` token objects across 3 files converted to CSS custom properties for automatic dark/light switching.
+- Issues #92 (WCAG opacity): FIXED — Disabled button opacity raised from 0.3-0.4 → 0.6 minimum in `ParagraphicalFlow.css`, `Questionnaire.css`, `QuestionLibrary.css`; OliviaPanel.tsx loading placeholder opacity 0.5 → 0.6.
+- Issue #91 (WCAG dark rgba): FIXED — `OliviaPanel.tsx` hardcoded `rgba(10,14,26,...)` and `rgba(255,255,255,0.04)` backgrounds replaced with CSS custom properties (`var(--bg-secondary)`, `var(--bg-card)`, `var(--border-glass)`).
+- Issue #91 (WCAG dark rgba): FIXED — `NavOverlay.tsx` overlay background replaced with `var(--bg-glass-heavy)`, buttons with `var(--bg-card)` and `var(--bg-glass)`.
+- Issue #91 (WCAG light-mode): FIXED — Light-mode `@media (prefers-color-scheme: light)` overrides added to `Questionnaire.css`, `Discovery.css`, `MapOverlay.css`, `QuestionLibrary.css`.
+- Issue #91 (WCAG light-mode): FIXED — `PrivacyPolicyModal.css` hardcoded dark gradient replaced with `var(--bg-secondary)`.
+- Issue #93 (WCAG aria): FIXED — `SideBySideMetricView.tsx` user justification button now has `aria-label`.
 
 ### Conv 1-2: Auth, Supabase Client, Landing Page, Onboarding
 

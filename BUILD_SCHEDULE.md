@@ -522,7 +522,30 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 11 (Phase 1 Audit Fix Pass — COMPLETE)
+### Latest Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued)
+
+**What was done this conversation:**
+- **WCAG Opacity Violations Fixed (4 files):**
+  - `ParagraphicalFlow.css`: `.para-flow__btn:disabled` opacity 0.4 → 0.6 + grayscale filter
+  - `Questionnaire.css`: `.qr-ranking-arrow:disabled` opacity 0.3 → 0.6 + grayscale filter
+  - `QuestionLibrary.css`: `.ql-empty-state .ql-icon` opacity 0.4 → 0.6
+  - `OliviaPanel.tsx`: Loading placeholder opacity 0.5 → 0.6
+- **Hardcoded Dark rgba → CSS Custom Properties (2 files):**
+  - `OliviaPanel.tsx`: All `rgba(10,14,26,...)` and `rgba(255,255,255,0.04)` → `var(--bg-secondary)`, `var(--bg-card)`, `var(--border-glass)`
+  - `NavOverlay.tsx`: Overlay background `rgba(10,14,26,0.92)` → `var(--bg-glass-heavy)`, buttons → `var(--bg-card)`, `var(--bg-glass)`
+- **Light-Mode Overrides Added (6 CSS files):**
+  - `Questionnaire.css`: textarea, dropdown, search inputs
+  - `QuestionLibrary.css`: Full variable overrides for admin panel (bg, text, surfaces, modals)
+  - `Discovery.css`: textarea background
+  - `MapOverlay.css`: Leaflet controls, back button, layer toggle
+  - `PrivacyPolicyModal.css`: Hardcoded dark gradient → `var(--bg-secondary)`
+- **Accessibility Fix:**
+  - `SideBySideMetricView.tsx`: Added `aria-label` to user justification button
+- **tsc: 0 errors** after all changes.
+
+**What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
+
+### Previous Update: 2026-03-09 — Session 11 (Phase 1 Audit Fix Pass — COMPLETE)
 
 **What was done this conversation:**
 - **Full 116-issue audit chart committed to README.md** (Conv 1-8, all severity levels documented).
