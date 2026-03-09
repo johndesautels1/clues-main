@@ -125,10 +125,10 @@
 - [ ] `src/lib/adaptiveEngine.ts` — Bayesian-like coverage tracking
 - [ ] `src/lib/coverageTracker.ts` — 23-dimension coverage state
 - [x] `src/components/Questionnaire/CoverageMeter.tsx` — real-time MOE/coverage UI
-- [ ] `src/components/Questionnaire/SkipLogic.tsx` — pre-fill and skip display
+- [x] `src/components/Questionnaire/SkipLogic.tsx` — pre-fill and skip display
 - [ ] Question prioritization: most information-gain questions surface first
-- [ ] Cross-module inference: answer in Paragraphical → pre-fill in module
-- [ ] Olivia integration: "You can skip this section — your paragraphs covered it"
+- [x] Cross-module inference: answer in Paragraphical → pre-fill in module
+- [x] Olivia integration: "You can skip this section — your paragraphs covered it"
 
 #### Conv 7-8: Answer Aggregation + Quality
 - [ ] `src/lib/answerAggregator.ts` — merge Paragraphical + Main + Modules into unified user profile
@@ -533,7 +533,14 @@ Target: < 10KB. Everything else lives in specialized docs.
   - Tier colors: 23 module IDs verified against MODULES array — 3+4+4+4+3+5=23. Same colors as MiniModuleFlow.getModuleAccent.
   - WCAG verified: all text ≥11px, C.textPrimary (18.4:1), C.textSecondary (7.6:1), C.textMuted (6.4:1), C.textAccent (7.6:1), #22c55e (8.5:1), #f59e0b (9.0:1), #ef4444 (5.4:1) — all pass 4.5:1. Button 44px touch target. Global :focus-visible inherited. Color never sole indicator (text labels on all badges).
   - Audit: all imports verified (paths, types), SVG math verified, unused CompactMeterProps interface removed, TypeScript clean.
-- **What's next**: Bite 7 — Build SkipLogic.tsx (pre-fill + skip display for cross-module inference: "You can skip this — your paragraphs covered it").
+- **Engine Wiring, Bite 7**: SkipLogic — cross-module pre-fill + skip detection
+  - **useSkipLogic.ts** (~170 lines): Hook detecting skippable questions from 3 sources: (1) Paragraphical metrics ≥2 matching the question's module category, (2) Main Module DNW/MH answers with severity/importance ≥4 + signalStrength ≥0.5, (3) high coverage ≥0.8 for the dimension. Returns `getSkipInfo(qNum)`, `skippableCount`, `skipSummary`.
+  - **SkipLogic.tsx** (~140 lines): Two visual components. `SkipIndicator`: inline badge below the question with reason text, source label ("Paragraphs"/"Main Module"/"Coverage"), confidence %, and 44px "Skip" button. `SkipSummaryBar`: Olivia-attributed module-level summary ("X of Y questions covered by prior answers").
+  - **useAdaptiveState.ts**: Wired `markPreFilled` (5th and final adaptive engine function, deferred from Bite 3). `markAdaptivePreFilled(moduleId, qNum, value)` marks question as pre-filled with partial MOE reduction (70% of full EIG).
+  - **MiniModuleFlow.tsx**: Integrated all skip logic — `questionModules` map built from `moduleData.sections`, `useSkipLogic` hook wired, `SkipSummaryBar` above the card, `SkipIndicator` below QuestionRenderer, `handleSkipQuestion` calls both `markAdaptivePreFilled` and `ms.goNext()`.
+  - WCAG verified: all text ≥11px, C.textSecondary (7.6:1), C.textMuted (6.4:1), C.textAccent (7.6:1), #22c55e (8.5:1) — all pass 4.5:1. Skip button 44px touch target. Color never sole indicator.
+  - Audit: all imports verified (5 new imports across 3 files), `markPreFilled` signature verified against adaptiveEngine.ts, `GeminiMetricObject.category` verified, unused `GeminiExtraction` import removed, TypeScript clean.
+- **What's next**: Conv 5-6 remaining items — question prioritization (EIG-driven ordering in MiniModuleFlow), then Conv 7-8 Answer Aggregation.
 
 **Previous conversation (2026-03-09, Session 5) completed:**
 - **Conv 3-4, Part 1**: Mini Module Questionnaire Flows + Dashboard Integration
@@ -607,10 +614,8 @@ Target: < 10KB. Everything else lives in specialized docs.
 
 **Next agent should:**
 1. Read mandatory files: CLAUDE.md, CLUES_MISSION.md, BUILD_SCHEDULE.md, PARAGRAPHICAL_ARCHITECTURE.md, LLM_PROVIDER_ARCHITECTURE.md
-2. Build `SkipLogic.tsx` — cross-module pre-fill + skip display ("Your paragraphs covered this")
-3. Wire Olivia integration: "You can skip this section — your paragraphs covered it"
-4. Continue Conv 5-6 Adaptive Intelligence remaining items
-5. Move to Conv 7-8: Answer Aggregation + Quality
+2. Wire EIG-driven question ordering into MiniModuleFlow (use adaptive.nextQuestion to reorder instead of sequential)
+3. Move to Conv 7-8: Answer Aggregation + Quality (answerAggregator.ts, qualityScorer.ts, Dashboard readiness indicator, MOE green light trigger)
 
 **Known issues:**
 - `questionLibrary.ts` (original monolith) still exists — can be deleted once all consumers migrated
