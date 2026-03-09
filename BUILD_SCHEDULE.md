@@ -549,8 +549,14 @@ Target: < 10KB. Everything else lives in specialized docs.
   - `enrichedModules` computed via `useMemo` — merges static MODULES with dynamic status, priority: completed > in_progress > recommended > not_started.
   - ModuleButton.tsx and ModuleButton.css already support all 5 states (not_started, in_progress, completed, recommended, locked) with illumination CSS — no changes needed.
   - Audit: all imports verified, localStorage key pattern matches useModuleState, isRecommended signature matches useRelevanceState, TypeScript clean.
+- **Engine Wiring, Bite 5**: Adaptive engine → MiniModuleFlow (insight overlay + MOE sync)
+  - **MiniModuleFlow.tsx**: Wired all three hooks (useCoverageState, useRelevanceState, useAdaptiveState) into MiniModuleFlow. Adaptive engine runs as an OVERLAY — useModuleState still handles persistence and sequential navigation.
+  - **handleAnswerWithAdaptive**: Wrapper that calls both `ms.setAnswer()` (persistence) and `adaptive.recordAdaptiveAnswer()` (MOE tracking) on every answer. Keeps adaptive state in sync without replacing the persistence layer.
+  - **Adaptive Insight Bar**: Fixed bar below progress bar showing: Olivia's selection reason (from `generateSelectionReason()`), current MOE percentage (green ≤2%, gold ≤10%, muted otherwise), estimated remaining questions. Only visible when adaptive engine has data.
+  - WCAG verified: all text 11px (minimum allowed), C.textMuted (6.4:1), #22c55e (8.5:1), #f59e0b (9.0:1) — all pass 4.5:1 against near-#0a0e1a background.
+  - Audit: all 3 hook imports verified (paths, return types), handleAnswerWithAdaptive argument types match both ms.setAnswer and adaptive.recordAdaptiveAnswer, adaptive.nextQuestion.selectionReason verified as string on NextQuestionResult, TypeScript clean.
 - TypeScript compilation verified clean — zero errors
-- **What's next**: Bite 5 — Wire useAdaptiveState into MiniModuleFlow for EIG-based question ordering. Bite 6 — Build CoverageMeter.tsx component.
+- **What's next**: Bite 6 — Build CoverageMeter.tsx component (real-time MOE/coverage UI for Dashboard and/or MiniModuleFlow topbar).
 
 **Previous conversation (2026-03-09, Session 4) completed:**
 - COMPLETED Section 10, Steps 3-6: All three engines now read from `QuestionItem.modules` instead of hardcoded lookup tables

@@ -18,6 +18,9 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { useModuleState } from '../../hooks/useModuleState';
+import { useCoverageState } from '../../hooks/useCoverageState';
+import { useRelevanceState } from '../../hooks/useRelevanceState';
+import { useAdaptiveState } from '../../hooks/useAdaptiveState';
 import { getCleanQuestion, C } from './questionnaireData';
 import { QuestionRenderer } from './QuestionRenderer';
 import { ParticleField } from '../Discovery/ParticleField';
@@ -54,6 +57,19 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
   const accent = getModuleAccent(moduleData.moduleId);
 
   const ms = useModuleState(moduleData);
+
+  // ─── Adaptive Engine (overlay — does NOT replace useModuleState) ──
+  const { coverage } = useCoverageState();
+  const { relevance } = useRelevanceState();
+  const adaptive = useAdaptiveState(relevance, coverage);
+
+  // Notify adaptive engine when user answers a question (keeps MOE in sync)
+  const handleAnswerWithAdaptive = useCallback((questionNumber: number, value: string | number | boolean | string[]) => {
+    ms.setAnswer(questionNumber, value);
+    if (adaptive.isAvailable) {
+      adaptive.recordAdaptiveAnswer(moduleData.moduleId, questionNumber, value);
+    }
+  }, [ms, adaptive, moduleData.moduleId]);
 
   // ─── Phase State ───────────────────────────────────────────────
   const [phase, setPhase] = useState<'welcome' | 'active' | 'complete'>('welcome');
@@ -509,6 +525,38 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
         }} />
       </div>
 
+      {/* ─── ADAPTIVE INSIGHT BAR ─── */}
+      {adaptive.isAvailable && adaptive.nextQuestion && (
+        <div style={{
+          position: 'fixed', top: 100, left: 0, right: 0, zIndex: 97,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+          padding: '6px 20px',
+          background: 'rgba(10,14,26,0.85)', backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid rgba(96,165,250,0.12)',
+        }}>
+          <span style={{
+            fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted,
+            letterSpacing: '0.04em', maxWidth: 500, overflow: 'hidden',
+            textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {adaptive.nextQuestion.selectionReason}
+          </span>
+          <span style={{
+            fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
+            color: adaptive.overallMOE <= 0.02 ? '#22c55e' : adaptive.overallMOE <= 0.10 ? '#f59e0b' : C.textMuted,
+            letterSpacing: '0.03em', flexShrink: 0,
+          }}>
+            MOE: {Math.round(adaptive.overallMOE * 100)}%
+          </span>
+          <span style={{
+            fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted,
+            letterSpacing: '0.03em', flexShrink: 0,
+          }}>
+            ~{adaptive.estimatedRemaining} remaining
+          </span>
+        </div>
+      )}
+
       {/* ─── OLIVIA INTEGRATION ─── */}
       <OliviaChoiceModal
         visible={oliviaChoiceOpen}
@@ -587,7 +635,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               <QuestionRenderer
                 question={ms.currentQuestion}
                 value={ms.getAnswer(ms.currentQuestion.number)}
-                onChange={(val) => ms.setAnswer(ms.currentQuestion.number, val)}
+                onChange={(val) => handleAnswerWithAdaptive(ms.currentQuestion.number, val)}
                 accent={accent}
               />
             </div>
