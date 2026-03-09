@@ -225,7 +225,7 @@ export default async function handler(
       body.category,
       body.metrics,
       body.cities,
-      body.tavilyResearch || []
+      Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
     const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -259,14 +259,23 @@ export default async function handler(
     const perplexityResult = await perplexityResponse.json();
     const durationMs = Date.now() - startTime;
 
+    // ─── Check for truncation ────────────────────────────────
+    if (perplexityResult.choices?.[0]?.finish_reason === 'length') {
+      console.warn('[/api/evaluate-perplexity] Response truncated (hit max_tokens).');
+    }
+
     // ─── Parse response ──────────────────────────────────────
     const rawText = perplexityResult.choices?.[0]?.message?.content ?? '';
 
     let evaluation: LLMEvaluationResponse;
     try {
-      evaluation = JSON.parse(rawText);
+      // Strip <think> blocks from reasoning models before parsing
+      const stripped = rawText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+      evaluation = JSON.parse(stripped);
     } catch {
-      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const cleaned = rawText
+        .replace(/<think>[\s\S]*?<\/think>/g, '')
+        .replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       evaluation = JSON.parse(cleaned);
     }
 
@@ -315,9 +324,9 @@ export default async function handler(
     console.error('[/api/evaluate-perplexity] Perplexity Sonar evaluation failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/evaluate-perplexity] Detail:', message);
     res.status(500).json({
       error: 'Perplexity evaluation failed',
-      detail: message,
       durationMs,
     });
   }

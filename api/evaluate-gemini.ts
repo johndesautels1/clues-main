@@ -229,7 +229,7 @@ export default async function handler(
       body.category,
       body.metrics,
       body.cities,
-      body.tavilyResearch || []
+      Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;
@@ -258,6 +258,14 @@ export default async function handler(
 
     const geminiResult = await geminiResponse.json();
     const durationMs = Date.now() - startTime;
+
+    // ─── Check for truncation or safety block ────────────────
+    const finishReason = geminiResult.candidates?.[0]?.finishReason;
+    if (finishReason === 'MAX_TOKENS') {
+      console.warn('[/api/evaluate-gemini] Response truncated (hit maxOutputTokens).');
+    } else if (finishReason === 'SAFETY') {
+      console.warn('[/api/evaluate-gemini] Response blocked by safety filters.');
+    }
 
     // ─── Parse response ──────────────────────────────────────
     const rawText = geminiResult.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
@@ -315,9 +323,9 @@ export default async function handler(
     console.error('[/api/evaluate-gemini] Gemini 3.1 Pro Preview evaluation failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/evaluate-gemini] Detail:', message);
     res.status(500).json({
       error: 'Gemini evaluation failed',
-      detail: message,
       durationMs,
     });
   }

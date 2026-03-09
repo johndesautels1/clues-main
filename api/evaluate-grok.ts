@@ -17,67 +17,20 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type {
+  EvaluationMetric,
+  CityCandidate,
+  TavilyResult,
+  LLMEvaluationResponse,
+} from '../src/types/evaluation';
 
-// ─── Types ─────────────────────────────────────────────────────
-
-interface EvaluationMetric {
-  id: string;                 // "M1", "M2", etc.
-  fieldId: string;            // Machine-readable field ID
-  description: string;        // Human-readable metric description
-  category: string;           // One of 23 categories
-  source_paragraph: number;   // Which paragraph (1-30)
-  data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
-  research_query: string;     // What Tavily searched for this metric
-  threshold?: {
-    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
-    value: number | [number, number];
-    unit: string;
-  };
-}
-
-interface CityCandidate {
-  location: string;
-  country: string;
-  location_type: 'city' | 'town' | 'neighborhood';
-  parent?: string;
-}
-
-interface TavilyResult {
-  metric_id: string;
-  query: string;
-  results: { title: string; url: string; content: string }[];
-}
-
+// ─── Request type ─────────────────────────────────────────────
 interface EvaluateGrokRequest {
   sessionId: string;
-  category: string;           // One of 23 categories
+  category: string;
   metrics: EvaluationMetric[];
   cities: CityCandidate[];
   tavilyResearch: TavilyResult[];
-}
-
-interface MetricScore {
-  metric_id: string;
-  score: number;              // 0-100
-  confidence: number;         // 0-1
-  user_justification: string;
-  data_justification: string;
-  source: string;
-  reasoning: string;          // Grok's reasoning chain for this metric
-}
-
-interface CityEvaluation {
-  location: string;
-  country: string;
-  overall_score: number;
-  metric_scores: MetricScore[];
-}
-
-interface GrokEvaluationResponse {
-  category: string;
-  evaluations: CityEvaluation[];
-  disagreements: string[];    // Metrics where Grok strongly disagrees with Tavily data
-  reasoning_summary: string;  // Overall reasoning for this category
 }
 
 // ─── Cost tracking helper (server-side, writes to Supabase directly) ──
@@ -270,7 +223,7 @@ export default async function handler(
       body.category,
       body.metrics,
       body.cities,
-      body.tavilyResearch || []
+      Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
     const grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -305,10 +258,15 @@ export default async function handler(
     const grokResult = await grokResponse.json();
     const durationMs = Date.now() - startTime;
 
+    // ─── Check for truncation ────────────────────────────────
+    if (grokResult.choices?.[0]?.finish_reason === 'length') {
+      console.warn('[/api/evaluate-grok] Response truncated (hit max_tokens).');
+    }
+
     // ─── Parse response ──────────────────────────────────────
     const rawText = grokResult.choices?.[0]?.message?.content ?? '';
 
-    let evaluation: GrokEvaluationResponse;
+    let evaluation: LLMEvaluationResponse;
     try {
       evaluation = JSON.parse(rawText);
     } catch {
@@ -362,9 +320,9 @@ export default async function handler(
     console.error('[/api/evaluate-grok] Grok 4.1 Fast Reasoning evaluation failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/evaluate-grok] Detail:', message);
     res.status(500).json({
       error: 'Grok evaluation failed',
-      detail: message,
       durationMs,
     });
   }

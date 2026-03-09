@@ -225,7 +225,7 @@ export default async function handler(
       body.category,
       body.metrics,
       body.cities,
-      body.tavilyResearch || []
+      Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
     const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
@@ -256,6 +256,11 @@ export default async function handler(
 
     const anthropicResult = await anthropicResponse.json();
     const durationMs = Date.now() - startTime;
+
+    // ─── Check for truncation ────────────────────────────────
+    if (anthropicResult.stop_reason === 'max_tokens') {
+      console.warn('[/api/evaluate-sonnet] Response truncated (hit max_tokens).');
+    }
 
     // ─── Parse response ──────────────────────────────────────
     const textBlock = anthropicResult.content?.find((b: { type: string }) => b.type === 'text');
@@ -314,9 +319,9 @@ export default async function handler(
     console.error('[/api/evaluate-sonnet] Claude Sonnet 4.6 evaluation failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/evaluate-sonnet] Detail:', message);
     res.status(500).json({
       error: 'Sonnet evaluation failed',
-      detail: message,
       durationMs,
     });
   }

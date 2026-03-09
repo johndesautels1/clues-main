@@ -30,6 +30,7 @@ import type {
   OrchestrationResult,
   EvaluateResponse,
 } from '../types/evaluation';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 // ─── LLM Endpoint Map ────────────────────────────────────────
 
@@ -128,10 +129,12 @@ export async function runEvaluation(
 
     const waveDuration = Date.now() - waveStart;
 
-    // Sum cost
+    // Sum cost (guard against undefined/NaN from malformed responses)
     for (const cr of categoryResults) {
       for (const r of cr.results) {
-        if (r.metadata) totalCostUsd += r.metadata.costUsd;
+        if (r.metadata && typeof r.metadata.costUsd === 'number' && !Number.isNaN(r.metadata.costUsd)) {
+          totalCostUsd += r.metadata.costUsd;
+        }
       }
     }
 
@@ -335,9 +338,14 @@ function buildConsensus(
       return { location: city.location, country: city.country, mean, median, scores };
     });
 
-    // StdDev across all scores from all locations (flattened)
-    const allScores = locations.flatMap(l => l.scores.map(s => s.score));
-    const stdDev = computeStdDev(allScores);
+    // StdDev: compute per-location (LLM disagreement within each city), then take the max.
+    // This avoids false positives where cities legitimately differ but LLMs agree.
+    const perLocationStdDevs = locations
+      .map(l => computeStdDev(l.scores.map(s => s.score)))
+      .filter(sd => sd > 0);
+    const stdDev = perLocationStdDevs.length > 0
+      ? Math.max(...perLocationStdDevs)
+      : 0;
 
     const confidenceLevel: MetricConsensus['confidenceLevel'] =
       stdDev <= 5 ? 'unanimous' :
@@ -391,10 +399,7 @@ export async function persistEvaluationResults(
   sessionId: string,
   batch: CategoryBatchResult
 ): Promise<void> {
-  const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) return;
+  if (!isSupabaseConfigured) return;
 
   const rows = batch.results
     .filter(r => r.response && r.metadata)
@@ -409,16 +414,10 @@ export async function persistEvaluationResults(
   if (rows.length === 0) return;
 
   try {
-    await fetch(`${supabaseUrl}/rest/v1/llm_evaluations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify(rows),
-    });
+    const { error } = await supabase.from('llm_evaluations').insert(rows);
+    if (error) {
+      console.warn('[EvalOrchestrator] Failed to persist evaluation results:', error.message);
+    }
   } catch (err) {
     console.warn('[EvalOrchestrator] Failed to persist evaluation results:', err);
   }

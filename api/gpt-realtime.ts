@@ -146,12 +146,22 @@ export default async function handler(
       durationMs,
     }).catch(() => {});
 
+    // ─── Validate token was returned ─────────────────────────
+    const token = sessionData.client_secret?.value ?? sessionData.token;
+    const expiresAt = sessionData.client_secret?.expires_at ?? sessionData.expires_at;
+
+    if (!token) {
+      console.error('[/api/gpt-realtime] No token in OpenAI response:', JSON.stringify(sessionData).slice(0, 500));
+      res.status(502).json({ error: 'OpenAI Realtime session created but no token returned' });
+      return;
+    }
+
     // ─── Return session token + config ───────────────────────
     res.status(200).json({
       /** Ephemeral token for WebRTC connection (expires in 60s) */
-      token: sessionData.client_secret?.value ?? sessionData.token,
+      token,
       /** Token expiry timestamp */
-      expiresAt: sessionData.client_secret?.expires_at ?? sessionData.expires_at,
+      expiresAt,
       /** Session ID from OpenAI */
       realtimeSessionId: sessionData.id,
       /** Voice used */
@@ -167,9 +177,9 @@ export default async function handler(
     console.error('[/api/gpt-realtime] GPT Realtime 1.5 session creation failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/gpt-realtime] Detail:', message);
     res.status(500).json({
       error: 'GPT Realtime session creation failed',
-      detail: message,
       durationMs,
     });
   }

@@ -225,7 +225,7 @@ export default async function handler(
       body.category,
       body.metrics,
       body.cities,
-      body.tavilyResearch || []
+      Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -259,6 +259,11 @@ export default async function handler(
 
     const openaiResult = await openaiResponse.json();
     const durationMs = Date.now() - startTime;
+
+    // ─── Check for truncation ────────────────────────────────
+    if (openaiResult.choices?.[0]?.finish_reason === 'length') {
+      console.warn('[/api/evaluate-gpt54] Response truncated (hit max_tokens).');
+    }
 
     // ─── Parse response ──────────────────────────────────────
     const rawText = openaiResult.choices?.[0]?.message?.content ?? '';
@@ -317,9 +322,9 @@ export default async function handler(
     console.error('[/api/evaluate-gpt54] GPT-5.4 evaluation failed:', err);
 
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[/api/evaluate-gpt54] Detail:', message);
     res.status(500).json({
       error: 'GPT-5.4 evaluation failed',
-      detail: message,
       durationMs,
     });
   }
