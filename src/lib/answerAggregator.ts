@@ -219,7 +219,7 @@ function extractParagraphicalSignals(extraction: GeminiExtraction): ProfileSigna
   const signals: ProfileSignal[] = [];
 
   // Metric signals (each metric belongs to a category/module)
-  for (const metric of extraction.metrics) {
+  for (const metric of extraction.metrics ?? []) {
     signals.push({
       moduleId: metric.category,
       key: `metric_${metric.id}`,

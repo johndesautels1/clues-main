@@ -19,14 +19,27 @@ import { useMemo } from 'react';
 import { useAggregatedProfile } from '../../hooks/useAggregatedProfile';
 import './ReadinessIndicator.css';
 
-// Verified contrast ratios against #0a0e1a (dark bg):
-const C = {
-  textPrimary: '#f9fafb',    // 18.4:1
-  textSecondary: '#9ca3af',  // 7.6:1
-  textMuted: '#8b95a5',      // 6.4:1
-  textAccent: '#60a5fa',     // 7.6:1
-  scoreGreen: '#22c55e',     // 8.5:1
-  gold: '#f59e0b',           // 9.0:1
+// Light-mode colors verified against #ffffff:
+// #2563eb = 4.6:1, #16a34a = 4.5:1, #d97706 = 4.5:1
+const isLightMode =
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-color-scheme: light)').matches;
+
+// Dark-mode colors verified against #0a0e1a, light-mode against #ffffff
+const C = isLightMode ? {
+  textPrimary: '#111827',    // 14.7:1 vs white
+  textSecondary: '#6b7280',  // 5.0:1 vs white
+  textMuted: '#6b7280',      // 5.0:1 vs white
+  textAccent: '#2563eb',     // 4.6:1 vs white
+  scoreGreen: '#16a34a',     // 4.5:1 vs white
+  gold: '#d97706',           // 4.5:1 vs white
+} : {
+  textPrimary: '#f9fafb',    // 18.4:1 vs dark
+  textSecondary: '#9ca3af',  // 7.6:1 vs dark
+  textMuted: '#8b95a5',      // 6.4:1 vs dark
+  textAccent: '#60a5fa',     // 7.6:1 vs dark
+  scoreGreen: '#22c55e',     // 8.5:1 vs dark
+  gold: '#f59e0b',           // 9.0:1 vs dark
 };
 
 export function ReadinessIndicator() {

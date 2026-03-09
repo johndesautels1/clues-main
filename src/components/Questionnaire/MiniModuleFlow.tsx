@@ -281,7 +281,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
                   <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 13, color: accent, fontWeight: 600 }}>
                     {sec.questions.length}
                   </div>
-                  <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 10, color: C.textMuted, letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 2, maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, color: C.textMuted, letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 2, maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     S{idx + 1}
                   </div>
                 </div>

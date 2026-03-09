@@ -66,6 +66,7 @@ export function useAggregatedProfile(): UseAggregatedProfileReturn {
     return aggregateProfile(session);
   }, [
     session.id,
+    session.paragraphical.paragraphs.length,
     session.paragraphical.extraction,
     session.mainModule.demographics,
     session.mainModule.dnw,
@@ -114,8 +115,8 @@ export function useAggregatedProfile(): UseAggregatedProfileReturn {
       }, { onConflict: 'session_id' });
 
       lastPersistedRef.current = fingerprint;
-    } catch {
-      // Supabase write failure — non-critical, ignore
+    } catch (err) {
+      console.warn('[useAggregatedProfile] Supabase persist failed:', err);
     }
   }, [profile, quality, session.id, session.userId]);
 

@@ -17,6 +17,10 @@
 
 import type { AggregatedProfile, SignalSource, ModuleProfile } from './answerAggregator';
 import type { CoverageState } from './coverageTracker';
+import { MODULES } from '../data/modules';
+
+/** Total module count — used for scoring denominators */
+const MODULE_COUNT = MODULES.length; // 24
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -149,15 +153,15 @@ export function scoreQuality(
   //   30% average module depth
   //   20% MOE-based coverage (from coverageTracker)
   //   10% completed module bonus
-  const moeCoverage = Math.round((1 - coverage.overallMOE) * 100);
-  const completedBonus = Math.min(100, Math.round((profile.completedModuleIds.length / 23) * 100));
+  const moeCoverage = Math.max(0, Math.min(100, Math.round((1 - coverage.overallMOE) * 100)));
+  const completedBonus = Math.min(100, Math.round((profile.completedModuleIds.length / MODULE_COUNT) * 100));
 
-  const overallReadiness = Math.round(
+  const overallReadiness = Math.max(0, Math.min(100, Math.round(
     sourceCompleteness * 0.4 +
     averageDepth * 0.3 +
     moeCoverage * 0.2 +
     completedBonus * 0.1
-  );
+  )));
 
   // ─── Readiness Label ────────────────────────────────────────
   const readinessLabel = getReadinessLabel(overallReadiness);
@@ -218,7 +222,7 @@ function scoreSourceQuality(profile: AggregatedProfile): SourceQuality[] {
 function scoreModuleQuality(mod: ModuleProfile, coverage: CoverageState): ModuleQuality {
   const dim = coverage.dimensions.find(d => d.moduleId === mod.moduleId);
   const signalStrength = dim?.signalStrength ?? 0;
-  const weight = dim?.weight ?? 1 / 23;
+  const weight = dim?.weight ?? 1 / MODULE_COUNT;
 
   // Completeness: based on signal count relative to weight
   // Higher-weight modules need more data points
