@@ -83,16 +83,31 @@ function buildTopicQuery(topic: string, region: string): string {
 
 // ─── Source URL Validation ───────────────────────────────────────
 
-const GOV_DOMAINS = ['.gov', '.gov.', '.mil', '.europa.eu', '.un.org', '.who.int', '.oecd.org'];
-const ACADEMIC_DOMAINS = ['.edu', '.ac.', 'scholar.google', 'researchgate', 'jstor', 'pubmed'];
+// Anchored to TLD position to avoid false positives (e.g., governance.com)
+const GOV_PATTERN = /\.gov(\.[a-z]{2})?$/i;
+const MIL_PATTERN = /\.mil(\.[a-z]{2})?$/i;
+const GOV_ORGS = ['.europa.eu', '.un.org', '.who.int', '.oecd.org'];
+const EDU_PATTERN = /\.edu(\.[a-z]{2})?$/i;
+const AC_PATTERN = /\.ac\.[a-z]{2}$/i;
+const ACADEMIC_HOSTS = ['scholar.google.com', 'researchgate.net', 'jstor.org', 'pubmed.ncbi.nlm.nih.gov'];
 
 function extractSourceURL(result: TavilySearchResult): SourceURL {
   let domain = '';
   try {
-    domain = new URL(result.url).hostname;
+    domain = new URL(result.url).hostname.toLowerCase();
   } catch {
-    domain = result.url.split('/')[2] ?? '';
+    domain = (result.url.split('/')[2] ?? '').toLowerCase();
   }
+
+  const isGovernment =
+    GOV_PATTERN.test(domain) ||
+    MIL_PATTERN.test(domain) ||
+    GOV_ORGS.some(d => domain.endsWith(d));
+
+  const isAcademic =
+    EDU_PATTERN.test(domain) ||
+    AC_PATTERN.test(domain) ||
+    ACADEMIC_HOSTS.some(d => domain === d || domain.endsWith('.' + d));
 
   return {
     url: result.url,
@@ -101,8 +116,8 @@ function extractSourceURL(result: TavilySearchResult): SourceURL {
     relevanceScore: result.score,
     snippet: result.content.slice(0, 300),
     publishedDate: result.published_date,
-    isGovernment: GOV_DOMAINS.some(d => domain.includes(d) || result.url.includes(d)),
-    isAcademic: ACADEMIC_DOMAINS.some(d => domain.includes(d) || result.url.includes(d)),
+    isGovernment,
+    isAcademic,
   };
 }
 
@@ -172,25 +187,28 @@ async function setCachedResearch(
   queryHash: string,
   query: string,
   response: TavilyAPIResponse,
-  region: string,
   supabaseUrl: string,
   supabaseKey: string
 ): Promise<void> {
   try {
+    const sourceUrls = (response.results ?? [])
+      .map((r: TavilySearchResult) => r.url)
+      .filter(Boolean);
+
     await fetch(`${supabaseUrl}/rest/v1/tavily_cache`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal',
+        Prefer: 'return=minimal,resolution=merge-duplicates',
       },
       body: JSON.stringify({
         query_hash: queryHash,
-        query,
+        query_text: query,
         response,
-        region,
-        created_at: new Date().toISOString(),
+        result_count: response.results?.length ?? 0,
+        source_urls: sourceUrls,
         expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30-min TTL
       }),
     });
@@ -306,7 +324,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
           // Cache the result
           if (hasCache) {
-            setCachedResearch(queryHash, query, response, region, supabaseUrl!, supabaseKey!);
+            setCachedResearch(queryHash, query, response, supabaseUrl!, supabaseKey!);
           }
 
           return { topic, response, fromCache: false, queryHash, query };
@@ -365,9 +383,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[/api/tavily-research] Error:', message);
+    console.error('[/api/tavily-research] Detail:', message);
     res.status(500).json({
       error: 'Tavily research failed',
-      detail: message,
       durationMs: Date.now() - startTime,
     });
   }

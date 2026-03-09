@@ -150,24 +150,22 @@ export interface TavilyMetricSearchResponse {
 
 // ─── Cache Types ─────────────────────────────────────────────────
 
-/** Cache entry for tavily_cache Supabase table */
+/** Cache entry for tavily_cache Supabase table (matches schema.sql columns) */
 export interface TavilyCacheEntry {
   id?: string;
-  query_hash: string; // SHA-256 of normalized query
-  query: string;
+  query_hash: string;      // SHA-256 of normalized query (UNIQUE)
+  query_text: string;      // original search query
   response: TavilySearchResponse;
-  region?: string;
-  city?: string;
-  metric_id?: string;
-  created_at: string;
-  expires_at: string; // 30-min TTL
+  result_count: number;
+  source_urls: string[];
+  expires_at: string;      // 30-min TTL
+  created_at?: string;
 }
 
-/** In-memory cache entry with TTL tracking */
-export interface MemoryCacheEntry {
-  queryHash: string;
-  response: TavilySearchResponse;
-  cachedAt: number; // Date.now()
+/** Generic in-memory cache entry with TTL tracking (used by tavilyClient.ts) */
+export interface MemoryCacheEntry<T = unknown> {
+  data: T;
+  cachedAt: number;  // Date.now()
   expiresAt: number; // Date.now() + TTL
 }
 

@@ -153,27 +153,28 @@ async function setCache(
   queryHash: string,
   query: string,
   response: TavilyAPIResponse,
-  city: string,
-  metricId: string,
   supabaseUrl: string,
   supabaseKey: string
 ): Promise<void> {
   try {
+    const sourceUrls = (response.results ?? [])
+      .map((r: TavilySearchResult) => r.url)
+      .filter(Boolean);
+
     await fetch(`${supabaseUrl}/rest/v1/tavily_cache`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal',
+        Prefer: 'return=minimal,resolution=merge-duplicates',
       },
       body: JSON.stringify({
         query_hash: queryHash,
-        query,
+        query_text: query,
         response,
-        city,
-        metric_id: metricId,
-        created_at: new Date().toISOString(),
+        result_count: response.results?.length ?? 0,
+        source_urls: sourceUrls,
         expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
       }),
     });
@@ -284,7 +285,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
           // Cache
           if (hasCache) {
-            setCache(queryHash, query, response, city, metricId, supabaseUrl!, supabaseKey!);
+            setCache(queryHash, query, response, supabaseUrl!, supabaseKey!);
           }
 
           return buildMetricResult(metricId, query, city, response, Date.now() - searchStart);
@@ -317,9 +318,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('[/api/tavily-search] Error:', message);
+    console.error('[/api/tavily-search] Detail:', message);
     res.status(500).json({
       error: 'Tavily metric search failed',
-      detail: message,
       durationMs: Date.now() - startTime,
     });
   }

@@ -148,6 +148,11 @@ export async function searchMetrics(
   maxSearches?: number
 ): Promise<MetricResearch[]> {
   const cacheKey = `metrics_${city}_${country}_${metrics.map(m => m.metricId).join(',')}`;
+  const queryHash = await hashQuery(cacheKey);
+
+  // Check memory cache for the full batch result
+  const cached = getFromMemory<MetricResearch[]>(queryHash);
+  if (cached) return cached;
 
   // Deduplicated API call
   const result = await dedupedFetch<TavilyMetricSearchResponse>(cacheKey, async () => {
@@ -165,11 +170,8 @@ export async function searchMetrics(
     return response.json() as Promise<TavilyMetricSearchResponse>;
   });
 
-  // Cache individual metric results in memory (keyed by metric query + location)
-  for (const metricResult of result.results) {
-    const metricHash = await hashQuery(`${metricResult.query}_${city}_${country}`);
-    setInMemory<MetricResearch>(metricHash, metricResult);
-  }
+  // Cache the full batch result in memory
+  setInMemory<MetricResearch[]>(queryHash, result.results);
 
   return result.results;
 }
@@ -193,10 +195,9 @@ export function getCacheStats(): {
   };
 }
 
-/** Clear the in-memory cache */
+/** Clear the in-memory cache (does NOT cancel inflight requests) */
 export function clearCache(): void {
   memoryCache.clear();
-  inflightRequests.clear();
 }
 
 /** Evict expired entries from memory cache */
