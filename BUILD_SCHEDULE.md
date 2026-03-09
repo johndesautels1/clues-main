@@ -173,14 +173,14 @@
 - [x] Cost tracking integration for Opus calls
 
 #### Conv 15-16: Smart Score Engine
-- [ ] `src/lib/smartScoreEngine.ts` — normalize raw scores → 0-100 Smart Scores
-- [ ] `src/lib/categoryRollup.ts` — metric → category → overall city scores
-- [ ] `src/lib/relativeScoring.ts` — cities scored relative to each other (not absolute)
-- [ ] `src/types/smartScore.ts` — CitySmartScore, CategorySmartScore types
-- [ ] Dual scoring (legal vs lived) for applicable metrics
-- [ ] Weight derivation from user persona + paragraph emphasis
-- [ ] Confidence levels from StdDev (unanimous/strong/moderate/split)
-- [ ] Winner determination with tie threshold (< 1 point)
+- [x] `src/lib/smartScoreEngine.ts` — normalize raw scores → 0-100 Smart Scores
+- [x] `src/lib/categoryRollup.ts` — metric → category → overall city scores
+- [x] `src/lib/relativeScoring.ts` — cities scored relative to each other (not absolute)
+- [x] `src/types/smartScore.ts` — CitySmartScore, CategorySmartScore types
+- [x] Dual scoring (legal vs lived) for applicable metrics
+- [x] Weight derivation from user persona + paragraph emphasis
+- [x] Confidence levels from StdDev (unanimous/strong/moderate/split)
+- [x] Winner determination with tie threshold (< 1 point)
 
 ### PHASE 3: RESULTS & REPORTS (Conversations 17-22)
 *Displaying results and generating deliverables. Depends on Phase 2 evaluation working.*
@@ -522,7 +522,48 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 9 (Full Codebase Audit — Conv 7-16 — COMPLETE)
+### Latest Update: 2026-03-09 — Session 10 (Conv 15-16 — Smart Score Engine — COMPLETE)
+
+**What was done this conversation:**
+- **Conv 15-16: Smart Score Engine** — ALL 8 checklist items completed. 4 new files, ~1,172 lines total.
+
+**src/types/smartScore.ts** (~290 lines):
+- `MetricSmartScore`: per-metric per-location score with judge override tracking, dual score, confidence, sources
+- `CategorySmartScore`: per-category weighted average with metric breakdown, judge analysis
+- `CitySmartScore`: overall city score with category rollup, rank, judge trend
+- `DualScore`: legal vs enforcement scoring with combined/conservative modes
+- `WinnerDetermination`: rankings, tie detection, advantage category analysis
+- `CategoryWeights`: weight derivation tracking (default/persona/paragraph_emphasis)
+- `SmartScoreInput`/`SmartScoreOutput`: full pipeline I/O types
+- `ConfidenceLevel` type + `CONFIDENCE_THRESHOLDS` constants (§15.5)
+- Tie thresholds: `CITY_TIE_THRESHOLD = 1`, `CATEGORY_TIE_THRESHOLD = 2` (§15.4)
+- 6 `PersonaPreset` definitions: Balanced, Digital Nomad, Entrepreneur, Family, Retiree, Investor
+
+**src/lib/smartScoreEngine.ts** (~260 lines):
+- `getConfidenceLevel()`: σ < 5 → unanimous, < 12 → strong, < 20 → moderate, ≥ 20 → split
+- `clampScore()`, `normalizeNumeric()`, `normalizeBoolean()`: raw → 0-100 normalization
+- `isDualScoreMetric()`: categories where legal vs lived distinction applies (safety, legal, social values, sexual beliefs, religion)
+- `computeDualScore()`: combined = (legal × legalWeight) + (enforcement × enforcementWeight), conservative = MIN(legal, enforcement)
+- `computeMetricSmartScore()`: consensus + judge override → final MetricSmartScore
+- `computeAllMetricSmartScores()`: main entry point — OrchestrationResult + JudgeReport → Map<location, MetricSmartScore[]>
+- Utility: `mean()`, `median()`, `stdDev()`
+
+**src/lib/categoryRollup.ts** (~220 lines):
+- `deriveCategoryWeights()`: equal base (1/23) → persona preset multipliers → paragraph emphasis → normalize to sum 1.0
+- `rollupToCategories()`: group metrics by category, weighted average (excludes score -1 missing data), aggregate confidence
+- `rollupToCity()`: weighted sum of category scores → overall 0-100, judge trend from summaryOfFindings
+- `computeCityScore()`: full pipeline for one city (metrics → categories → city)
+
+**src/lib/relativeScoring.ts** (~190 lines):
+- `applyRelativeScoring()`: per-metric linear interpolation across peer cities (best=100, worst=0, equal=50)
+- `determineWinner()`: rank cities, detect ties (< 1pt city, < 2pt category), identify advantage/tied categories
+- `computeSmartScores()`: THE main entry point tying all 3 engines: consensus→smartScores→relativeScoring→rollup→winner
+
+**Build status**: tsc 0 errors. **Phase 2 (Evaluation Pipeline) is now COMPLETE** — all Conv 9-16 items done.
+
+- **What's next**: Conv 17-18 — Results Page Assembly (ResultsDashboard, WinnerHero, CategoryBreakdown, MetricDetailTable, EvidencePanel, CityComparisonGrid, TownNeighborhoodDrilldown). Wire existing Results components into /results route.
+
+### Previous Update: 2026-03-09 — Session 9 (Full Codebase Audit — Conv 7-16 — COMPLETE)
 
 **What was done this conversation:**
 - **Full retroactive audit of ALL code from Conv 7-16** — 5 commits, ~35 bugs fixed across ~15 files.
@@ -560,8 +601,6 @@ Target: < 10KB. Everything else lives in specialized docs.
 
 **Build status**: tsc 0 errors, Vite 0 errors, 669 modules transformed after all fixes.
 **All Conv 7-16 code is now audited and clean.**
-
-- **What's next**: Conv 15-16 — Smart Score Engine (smartScoreEngine.ts, categoryRollup.ts, relativeScoring.ts, smartScore types, dual scoring, weight derivation, confidence levels, winner determination). This is NEW CODE, not yet built — all checklist items in Phase 2 Conv 15-16 are unchecked.
 
 ### Previous Update: 2026-03-09 — Session 8 (Conv 13-14 — Opus Judge System — COMPLETE)
 
