@@ -70,7 +70,7 @@ export interface QualityReport {
   /** Human-readable readiness label */
   readinessLabel: string;
 
-  /** Per-module quality assessments (23 entries) */
+  /** Per-module quality assessments (24 entries) */
   modules: ModuleQuality[];
 
   /** Per-source quality assessments (7 entries) */

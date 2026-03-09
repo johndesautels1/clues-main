@@ -4,7 +4,7 @@
  * Displays:
  * - Readiness percentage with animated progress bar
  * - Source completeness (X/7 sources)
- * - Module coverage (X/23 adequate)
+ * - Module coverage (X/24 adequate)
  * - Top 3 next steps for the user
  * - "Report Ready" celebration state at ≥ 80%
  *
@@ -94,7 +94,7 @@ export function ReadinessIndicator() {
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{quality.adequateModuleCount}</span>
-          <span className="readiness__stat-label">/23 modules</span>
+          <span className="readiness__stat-label">/24 modules</span>
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{totalSignals}</span>

@@ -522,21 +522,52 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 8 (Conv 13-14 — Opus Judge System — COMPLETE)
+### Latest Update: 2026-03-09 — Session 9 (Full Codebase Audit — Conv 7-16 — COMPLETE)
 
 **What was done this conversation:**
-- **Conv 13-14: Opus Judge System** (ALL items):
-  - **src/types/judge.ts** (~190 lines): JudgeMetric (evidence per disputed metric with per-LLM scores/reasoning), JudgeLocationEvidence, JudgeLLMScore, JudgeOpusRequest, JudgeCategorySummary. JudgeReport with summaryOfFindings (location scores, trends, confidence), categoryAnalysis (per-location 2-3 sentence analyses), executiveSummary (recommendation, rationale, keyFactors, futureOutlook), metricOverrides (per-metric score adjustments with judgeExplanation, trustedModel, legalScore/enforcementScore), confirmedMetrics. SafeguardCorrection (winner_override, confidence_override). JudgeReportRow (Supabase shape).
-  - **api/judge-opus.ts** (~240 lines): Claude Opus 4.6 via Anthropic Messages API. temperature 0.2, max_tokens 16384. Max 30 metrics per call. Prompt: Cristiano persona, reviews all LLM evidence per disputed metric (score, confidence, data_justification, source, reasoning), category summaries, user context. Returns JudgeReport with overrides + executive summary. $15/$75 per 1M tokens.
-  - **src/lib/judgeOrchestrator.ts** (~310 lines): runJudge() takes OrchestrationResult + metricsMap + userContext. (1) Filters σ>15 metrics, (2) builds JudgeMetric evidence from raw EvaluatorResults, (3) batches into groups of 30, (4) calls /api/judge-opus per batch, (5) merges reports (overrides, confirmed, category analyses, executive summary), (6) anti-hallucination safeguards, (7) persists to Supabase judge_reports table.
-  - **σ > 15 detection**: Already in evaluation types (MetricConsensus.needsJudgeReview). Orchestrator filters and batches these.
-  - **Anti-hallucination safeguard #1**: Winner override — if Opus recommends location X but computed mean scores show location Y wins, force-correct to Y.
-  - **Anti-hallucination safeguard #2**: Confidence override — if Opus claims "high" confidence but average σ warrants "medium" or "low", force-correct downward (never upward).
-  - **judge_reports table**: session_id, report_json, metrics_reviewed, metrics_overridden, safeguard_triggered, cost_usd, duration_ms.
-  - **Cost tracking**: Full Opus token tracking via Supabase cost_tracking table.
-  - Build verified: tsc 0 errors, Vite 0 errors, 669 modules transformed.
-  - **Conv 13-14 is now COMPLETE.**
-- **What's next**: Conv 15-16 — Smart Score Engine (smartScoreEngine.ts, categoryRollup.ts, relativeScoring.ts, smartScore types, dual scoring, weight derivation, confidence levels, winner determination).
+- **Full retroactive audit of ALL code from Conv 7-16** — 5 commits, ~35 bugs fixed across ~15 files.
+- **Audit approach**: Deep subagent audits on every file from each conversation group, prioritized by severity, verified with `tsc -b && vite build` after each round.
+
+**Conv 15-16 audit fixes (commit 1):**
+- `evaluationOrchestrator.ts`: Fixed `process.env` → `import.meta.env` (build error), replaced raw Supabase fetch with shared client, CRITICAL stdDev fix (was flattening across cities causing false judge triggers → now per-location max), NaN guard on costUsd
+- `judgeOrchestrator.ts`: Fixed `process.env` → `import.meta.env`, shared Supabase client, fixed `safeguard_triggered` hardcoded false, fixed silent catch, winner override string normalization, `metrics_overridden` uses allOverrides.length, typed Opus response
+- `src/types/judge.ts`: Removed unused `MetricConsensus` import
+
+**Conv 13-14 audit fixes (commit 2):**
+- `api/judge-opus.ts`: Increased max_tokens 16384→32768, added stop_reason truncation warning, imported shared `JudgeOpusRequest` type, added `trustedModel` validation, removed error detail leak
+- All 5 evaluate endpoints: Added finish_reason truncation warnings, removed error detail leaks, added `Array.isArray(body.tavilyResearch)` guard
+- `api/evaluate-perplexity.ts`: Added `<think>` tag stripping for reasoning model
+- `api/evaluate-grok.ts`: Replaced 60 lines duplicated types with shared imports
+- `api/evaluate-gemini.ts`: Added `finishReason === 'SAFETY'` check
+- `api/gpt-realtime.ts`: Added token validation, removed error detail leak
+
+**Conv 11-12 audit fixes (commit 3):**
+- `evaluationOrchestrator.ts`: Additional shared Supabase integration fixes
+- All evaluate endpoints: Consistent error handling patterns
+
+**Conv 9-10 audit fixes (commit 4):**
+- `api/tavily-search.ts`: CRITICAL cache column fix (`query` → `query_text`, removed non-existent `city`/`metric_id` columns), added `result_count`/`source_urls`, added `Prefer: resolution=merge-duplicates` for upsert
+- `api/tavily-research.ts`: Same cache column fix, fixed .gov/.edu detection from substring to anchored regex (was matching `governance.com` as `.gov`), removed error detail leak
+- `src/lib/tavilyClient.ts`: Fixed searchMetrics memory cache check, fixed clearCache not clearing inflightRequests
+- `src/types/tavily.ts`: Aligned TavilyCacheEntry with actual schema.sql columns
+
+**Conv 7-8 audit fixes (commit 5):**
+- `src/lib/qualityScorer.ts`: Hardcoded `23` → `MODULE_COUNT` (= MODULES.length = 24), clamped `moeCoverage` and `overallReadiness` to 0-100 range
+- `src/components/Dashboard/ReadinessIndicator.tsx`: Added light-mode WCAG-compliant color variants (4.5:1+ contrast against white)
+- `src/components/Questionnaire/MiniModuleFlow.tsx`: Fixed `fontSize: 10` → `11` (below WCAG 11px minimum)
+- `src/hooks/useAggregatedProfile.ts`: Added `paragraphs.length` to useMemo deps, added console.warn to catch block
+- `src/lib/answerAggregator.ts`: Null guard on `extraction.metrics`
+
+**Build status**: tsc 0 errors, Vite 0 errors, 669 modules transformed after all fixes.
+**All Conv 7-16 code is now audited and clean.**
+
+- **What's next**: Conv 15-16 — Smart Score Engine (smartScoreEngine.ts, categoryRollup.ts, relativeScoring.ts, smartScore types, dual scoring, weight derivation, confidence levels, winner determination). This is NEW CODE, not yet built — all checklist items in Phase 2 Conv 15-16 are unchecked.
+
+### Previous Update: 2026-03-09 — Session 8 (Conv 13-14 — Opus Judge System — COMPLETE)
+
+**What was done this conversation:**
+- Built Conv 13-14: Opus Judge System (all items). See commit history for details.
+- **Conv 13-14 is now COMPLETE.**
 
 ### Previous Update: 2026-03-09 — Session 8 (Conv 11-12 — 5-LLM Parallel Evaluator — COMPLETE)
 
