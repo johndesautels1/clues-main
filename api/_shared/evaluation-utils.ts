@@ -98,6 +98,12 @@ export interface EvaluatorIdentity {
   rule4?: string;
   /** Override the IMPORTANT paragraph (e.g., Perplexity uses native search + Tavily) */
   importantOverride?: string;
+  /** Override "- source: Attribution to a specific data source" (e.g., Perplexity: "include URLs") */
+  sourceInstruction?: string;
+  /** Override "- reasoning: Your analytical reasoning chain" (e.g., Perplexity: "search-augmented") */
+  reasoningInstruction?: string;
+  /** Override JSON schema source example (e.g., Perplexity: "<data source with URL>") */
+  sourceSchemaExample?: string;
 }
 
 /**
@@ -173,8 +179,8 @@ For each location, score EVERY metric:
 - confidence: 0.0-1.0 (how confident you are in this score)
 - user_justification: Why this matters to the user (reference their paragraph)
 - data_justification: Real-world data backing this score (cite 2026 data)
-- source: Attribution to a specific data source
-- reasoning: Your analytical reasoning chain
+- source: ${identity.sourceInstruction ?? 'Attribution to a specific data source'}
+- reasoning: ${identity.reasoningInstruction ?? 'Your analytical reasoning chain'}
 
 Also provide:
 - disagreements: Metrics where your analysis contradicts the Tavily research data
@@ -196,7 +202,7 @@ Return ONLY valid JSON matching this schema (no markdown fences):
           "confidence": <0.0-1.0>,
           "user_justification": "<why this matters to user>",
           "data_justification": "<real-world data>",
-          "source": "<data source>",
+          "source": "${identity.sourceSchemaExample ?? '<data source>'}",
           "reasoning": "<your analytical reasoning>"
         }
       ]
