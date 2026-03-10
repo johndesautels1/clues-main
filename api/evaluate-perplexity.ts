@@ -29,6 +29,9 @@ const EVALUATOR_IDENTITY = {
     'Citing real sources with URLs for every claim',
     'Cross-validating research data with independent web searches',
   ],
+  rule3: 'Use your native search to independently verify Tavily data — you\'re the fact-checker.',
+  rule4: 'Flag ANY data inconsistency between Tavily research and your search results.',
+  importantOverride: 'IMPORTANT: You have Tavily research data below AND your own native search. Use BOTH. Tavily is your starting point, but independently verify and supplement with your own search. If you find contradictions, flag them in the "disagreements" array.',
 };
 
 function calculateCost(inputTokens: number, outputTokens: number): number {

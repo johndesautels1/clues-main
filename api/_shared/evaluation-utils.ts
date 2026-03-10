@@ -92,6 +92,12 @@ export interface EvaluatorIdentity {
   number: number;       // 1-5
   model: string;        // e.g. "Claude Sonnet 4.6"
   strengths: string[];  // bullet points
+  /** Per-evaluator Rule 3 — unique instruction leveraging this model's specialty */
+  rule3: string;
+  /** Per-evaluator Rule 4 variation (default: "Flag ANY data inconsistency between Tavily research and your knowledge.") */
+  rule4?: string;
+  /** Override the IMPORTANT paragraph (e.g., Perplexity uses native search + Tavily) */
+  importantOverride?: string;
 }
 
 /**
@@ -141,7 +147,7 @@ Your role: Score each city/location against each metric for the "${category}" ca
 You are especially strong at:
 ${strengthsText}
 
-IMPORTANT: You have Tavily research data below. Use it as your PRIMARY source. Cross-reference with your own knowledge. If you find contradictions, flag them in the "disagreements" array.
+${identity.importantOverride ?? 'IMPORTANT: You have Tavily research data below. Use it as your PRIMARY source. Cross-reference with your own knowledge. If you find contradictions, flag them in the "disagreements" array.'}
 
 ═══════════════════════════════════════════════════════════════
 METRICS TO EVALUATE (${metrics.length} metrics):
@@ -203,8 +209,8 @@ Return ONLY valid JSON matching this schema (no markdown fences):
 Rules:
 1. Score EVERY metric for EVERY location. No skipping.
 2. Scores are RELATIVE — best location gets highest score, others scaled accordingly.
-3. Use your specialized strengths to provide the most accurate assessment.
-4. Flag ANY data inconsistency between Tavily research and your knowledge.
+3. ${identity.rule3}
+4. ${identity.rule4 ?? 'Flag ANY data inconsistency between Tavily research and your knowledge.'}
 5. Confidence below 0.5 means you could not find reliable data — flag it.`;
 }
 

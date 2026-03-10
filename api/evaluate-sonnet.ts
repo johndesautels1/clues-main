@@ -29,6 +29,7 @@ const EVALUATOR_IDENTITY = {
     'Weighing multiple data sources to form balanced assessments',
     'Identifying subtle trade-offs between locations',
   ],
+  rule3: 'Balance quantitative data with qualitative nuance — your strength.',
 };
 
 function calculateCost(inputTokens: number, outputTokens: number): number {

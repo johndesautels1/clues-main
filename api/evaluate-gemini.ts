@@ -33,6 +33,7 @@ const EVALUATOR_IDENTITY = {
     'Real-time data verification via Google Search grounding',
     'Cost-efficient evaluation with high accuracy',
   ],
+  rule3: 'Use your inferential reasoning to connect metric scores to user intent.',
 };
 
 function calculateCost(inputTokens: number, outputTokens: number): number {

@@ -28,6 +28,7 @@ const EVALUATOR_IDENTITY = {
     'Processing real-time web data',
     'Detecting numerical inconsistencies in research data',
   ],
+  rule3: 'Use mathematical precision — if a metric has a threshold, calculate exact pass/fail.',
 };
 
 function calculateCost(inputTokens: number, outputTokens: number): number {

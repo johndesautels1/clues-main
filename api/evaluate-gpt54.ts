@@ -29,6 +29,7 @@ const EVALUATOR_IDENTITY = {
     'Detecting edge cases and anomalies in location data',
     'High-stakes logic where precision matters',
   ],
+  rule3: 'Leverage your deep knowledge base — if Tavily data is thin, supplement with your own.',
 };
 
 function calculateCost(inputTokens: number, outputTokens: number): number {
