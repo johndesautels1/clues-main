@@ -260,7 +260,7 @@ export default async function handler(
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
+          'anthropic-version': '2024-10-22',
         },
         body: JSON.stringify({
           model: 'claude-opus-4-6',

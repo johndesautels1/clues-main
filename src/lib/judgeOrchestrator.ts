@@ -298,21 +298,17 @@ function mergeReports(reports: JudgeReport[], sessionId: string): JudgeReport {
 
   if (reports.length === 1) return reports[0];
 
-  // Use the last report's executive summary (each batch only sees its own 30 metrics,
-  // so multi-batch runs may have an incomplete executive summary — known limitation)
   const lastReport = reports[reports.length - 1];
 
   // Merge overrides and confirmed metrics from all reports
   const allOverrides: MetricOverride[] = [];
   const allConfirmed: string[] = [];
   let totalReviewed = 0;
-  let totalOverridden = 0;
 
   for (const r of reports) {
     allOverrides.push(...(r.metricOverrides ?? []));
     allConfirmed.push(...(r.confirmedMetrics ?? []));
     totalReviewed += r.summaryOfFindings?.metricsReviewed ?? 0;
-    totalOverridden += r.summaryOfFindings?.metricsOverridden ?? 0;
   }
 
   // Merge category analyses (dedupe by categoryId, prefer later reports)
@@ -323,19 +319,102 @@ function mergeReports(reports: JudgeReport[], sessionId: string): JudgeReport {
     }
   }
 
+  // M2 fix: Synthesize executive summary from ALL batch reports.
+  // Each batch's Opus call only sees its own ≤30 metrics, so no single batch
+  // has the full picture. We merge keyFactors from all batches (deduped),
+  // concatenate rationales, use the recommendation from the batch with the
+  // most overrides (it saw the most contentious data), and combine outlooks.
+  const synthesizedExecutiveSummary = synthesizeExecutiveSummary(reports);
+
+  // Merge location scores from all summaryOfFindings (dedupe by location)
+  const locationScoreMap = new Map<string, typeof lastReport.summaryOfFindings.locationScores[0]>();
+  for (const r of reports) {
+    for (const ls of r.summaryOfFindings?.locationScores ?? []) {
+      const key = `${ls.location}|${ls.country}`;
+      // Prefer scores from reports with more overrides (more data reviewed)
+      if (!locationScoreMap.has(key)) {
+        locationScoreMap.set(key, ls);
+      }
+    }
+  }
+
   return {
     reportId: lastReport.reportId,
     summaryOfFindings: {
-      ...lastReport.summaryOfFindings,
+      locationScores: Array.from(locationScoreMap.values()),
+      overallConfidence: lastReport.summaryOfFindings?.overallConfidence ?? 'low',
       metricsReviewed: totalReviewed,
       // Use actual array length as ground truth, not Opus's self-reported count
       metricsOverridden: allOverrides.length,
     },
     categoryAnalysis: Array.from(categoryMap.values()),
-    executiveSummary: lastReport.executiveSummary,
+    executiveSummary: synthesizedExecutiveSummary,
     metricOverrides: allOverrides,
     confirmedMetrics: [...new Set(allConfirmed)],
     judgedAt: lastReport.judgedAt,
+  };
+}
+
+/**
+ * M2 fix: Synthesize a unified executive summary from multiple batch reports.
+ *
+ * Strategy:
+ * - recommendation: from the batch with the most metric overrides (most contentious)
+ * - rationale: concatenate all batch rationales (each covers different metrics)
+ * - keyFactors: merge + dedupe across all batches
+ * - futureOutlook: concatenate all batch outlooks (each may cover different trends)
+ */
+function synthesizeExecutiveSummary(
+  reports: JudgeReport[]
+): JudgeReport['executiveSummary'] {
+  // Find the batch that reviewed the most contentious metrics
+  let mostOverridesReport = reports[0];
+  let maxOverrides = 0;
+  for (const r of reports) {
+    const count = r.metricOverrides?.length ?? 0;
+    if (count >= maxOverrides) {
+      maxOverrides = count;
+      mostOverridesReport = r;
+    }
+  }
+
+  // Merge keyFactors from all batches, dedupe by lowercase content
+  const seenFactors = new Set<string>();
+  const allKeyFactors: string[] = [];
+  for (const r of reports) {
+    for (const factor of r.executiveSummary?.keyFactors ?? []) {
+      const normalized = factor.toLowerCase().trim();
+      if (!seenFactors.has(normalized)) {
+        seenFactors.add(normalized);
+        allKeyFactors.push(factor);
+      }
+    }
+  }
+
+  // Concatenate rationales from all batches
+  const rationales = reports
+    .map(r => r.executiveSummary?.rationale)
+    .filter((r): r is string => !!r && r.trim().length > 0);
+  const mergedRationale = rationales.length > 1
+    ? rationales.join('\n\n')
+    : rationales[0] ?? '';
+
+  // Concatenate future outlooks from all batches (dedupe identical ones)
+  const outlookSet = new Set<string>();
+  const outlooks: string[] = [];
+  for (const r of reports) {
+    const outlook = r.executiveSummary?.futureOutlook?.trim();
+    if (outlook && !outlookSet.has(outlook)) {
+      outlookSet.add(outlook);
+      outlooks.push(outlook);
+    }
+  }
+
+  return {
+    recommendation: mostOverridesReport.executiveSummary?.recommendation ?? '',
+    rationale: mergedRationale,
+    keyFactors: allKeyFactors,
+    futureOutlook: outlooks.join('\n\n'),
   };
 }
 

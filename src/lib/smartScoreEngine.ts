@@ -219,14 +219,24 @@ export function computeMetricSmartScore(
 
 /**
  * Extract source citations from a LocationConsensus.
- * In the current pipeline, sources come from LLM evaluations via Tavily.
- * We produce a placeholder structure; actual URLs come from upstream data.
+ *
+ * M1 KNOWN GAP: This is a stub. Returns [] for every metric.
+ *
+ * The raw LLM evaluation responses DO contain source strings (each LLM's
+ * `data_justification` and `source` fields are populated via Tavily research).
+ * Those strings survive into JudgeLLMScore.source for judge review. However,
+ * no code currently transforms them into MetricSource[] objects ({ name, url,
+ * excerpt }) at the Smart Score level.
+ *
+ * To fix: LocationConsensus needs to carry forward aggregated source strings
+ * from the evaluation phase. Then this function should parse URLs from those
+ * strings and build MetricSource[] objects. Until then, the `sources` field
+ * on every MetricSmartScore is always [].
  */
 function extractSources(_locationConsensus: LocationConsensus): MetricSource[] {
-  // Sources are populated during the evaluation phase and stored in the
-  // LLM responses. At the Smart Score level, we carry forward what the
-  // orchestrator collected. The actual URL extraction happens upstream
-  // in the evaluation endpoints.
+  // TODO: Aggregate source citations from upstream LLM evaluation responses.
+  // The data exists in EvaluatorResult.response.evaluations[].metric_scores[].source
+  // but LocationConsensus does not currently carry it through.
   return [];
 }
 
