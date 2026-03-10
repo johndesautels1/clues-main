@@ -11,35 +11,20 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import {
+  searchTavily,
+  hashQuery,
+  getCached,
+  setCache,
+  trackCost,
+  extractSourceURL,
+  isValidSourceURL,
+  sanitizeInput,
+  type TavilySearchResult,
+  type SourceURL,
+} from './_shared/tavily-utils';
 
-// ─── Types (inlined to avoid src/ imports in serverless) ─────────
-
-interface TavilySearchResult {
-  title: string;
-  url: string;
-  content: string;
-  raw_content?: string;
-  score: number;
-  published_date?: string;
-}
-
-interface TavilyAPIResponse {
-  query: string;
-  answer?: string;
-  results: TavilySearchResult[];
-  response_time: number;
-}
-
-interface SourceURL {
-  url: string;
-  title: string;
-  domain: string;
-  relevanceScore: number;
-  snippet: string;
-  publishedDate?: string;
-  isGovernment: boolean;
-  isAcademic: boolean;
-}
+// ─── Types ──────────────────────────────────────────────────────
 
 interface RegionResearchTopic {
   topic: string;
@@ -49,6 +34,7 @@ interface RegionResearchTopic {
 }
 
 // ─── Default Topics ──────────────────────────────────────────────
+// M4: Canonical list — mirrors src/types/tavily.ts DEFAULT_RESEARCH_TOPICS
 
 const DEFAULT_TOPICS = [
   'cost_of_living',
@@ -66,207 +52,38 @@ const DEFAULT_TOPICS = [
 // ─── Topic → Search Query Templates ─────────────────────────────
 
 function buildTopicQuery(topic: string, region: string): string {
+  // M5 fix: Use dynamic year instead of hardcoded "2025 2026"
+  const currentYear = new Date().getFullYear();
+  const prevYear = currentYear - 1;
+  const yearTag = `${prevYear} ${currentYear}`;
+
   const templates: Record<string, string> = {
-    cost_of_living: `cost of living index ${region} 2025 2026 average rent food utilities`,
-    safety_crime: `safety crime rate ${region} 2025 violent crime index expat safety`,
-    healthcare_quality: `healthcare quality ${region} 2025 hospital access insurance expats`,
+    cost_of_living: `cost of living index ${region} ${yearTag} average rent food utilities`,
+    safety_crime: `safety crime rate ${region} ${yearTag} violent crime index expat safety`,
+    healthcare_quality: `healthcare quality ${region} ${yearTag} hospital access insurance expats`,
     climate_weather: `climate weather ${region} average temperature humidity seasons`,
-    internet_connectivity: `internet speed connectivity ${region} 2025 broadband fiber 5G`,
-    visa_immigration: `visa immigration requirements ${region} 2025 residency permits digital nomad`,
-    education_quality: `education quality ${region} 2025 international schools universities ranking`,
-    transportation: `public transportation ${region} 2025 metro bus infrastructure walkability`,
+    internet_connectivity: `internet speed connectivity ${region} ${yearTag} broadband fiber 5G`,
+    visa_immigration: `visa immigration requirements ${region} ${yearTag} residency permits digital nomad`,
+    education_quality: `education quality ${region} ${yearTag} international schools universities ranking`,
+    transportation: `public transportation ${region} ${yearTag} metro bus infrastructure walkability`,
     cultural_diversity: `cultural diversity ${region} expat community international population`,
-    english_proficiency: `English proficiency ${region} 2025 EF EPI language barrier`,
+    english_proficiency: `English proficiency ${region} ${yearTag} EF EPI language barrier`,
   };
-  return templates[topic] ?? `${topic.replace(/_/g, ' ')} ${region} 2025`;
-}
-
-// ─── Source URL Validation ───────────────────────────────────────
-
-// Anchored to TLD position to avoid false positives (e.g., governance.com)
-const GOV_PATTERN = /\.gov(\.[a-z]{2})?$/i;
-const MIL_PATTERN = /\.mil(\.[a-z]{2})?$/i;
-const GOV_ORGS = ['.europa.eu', '.un.org', '.who.int', '.oecd.org'];
-const EDU_PATTERN = /\.edu(\.[a-z]{2})?$/i;
-const AC_PATTERN = /\.ac\.[a-z]{2}$/i;
-const ACADEMIC_HOSTS = ['scholar.google.com', 'researchgate.net', 'jstor.org', 'pubmed.ncbi.nlm.nih.gov'];
-
-function extractSourceURL(result: TavilySearchResult): SourceURL {
-  let domain = '';
-  try {
-    domain = new URL(result.url).hostname.toLowerCase();
-  } catch {
-    domain = (result.url.split('/')[2] ?? '').toLowerCase();
-  }
-
-  const isGovernment =
-    GOV_PATTERN.test(domain) ||
-    MIL_PATTERN.test(domain) ||
-    GOV_ORGS.some(d => domain.endsWith(d));
-
-  const isAcademic =
-    EDU_PATTERN.test(domain) ||
-    AC_PATTERN.test(domain) ||
-    ACADEMIC_HOSTS.some(d => domain === d || domain.endsWith('.' + d));
-
-  return {
-    url: result.url,
-    title: result.title,
-    domain,
-    relevanceScore: result.score,
-    snippet: result.content.slice(0, 300),
-    publishedDate: result.published_date,
-    isGovernment,
-    isAcademic,
-  };
-}
-
-function isValidSourceURL(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return ['http:', 'https:'].includes(parsed.protocol) && parsed.hostname.includes('.');
-  } catch {
-    return false;
-  }
-}
-
-// ─── Tavily API Call ─────────────────────────────────────────────
-
-async function searchTavily(
-  apiKey: string,
-  query: string
-): Promise<TavilyAPIResponse> {
-  const response = await fetch('https://api.tavily.com/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      api_key: apiKey,
-      query,
-      search_depth: 'advanced',
-      topic: 'general',
-      max_results: 5,
-      include_answer: true,
-      include_raw_content: false,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Tavily API error ${response.status}: ${errorText}`);
-  }
-
-  return response.json() as Promise<TavilyAPIResponse>;
-}
-
-// ─── Supabase Cache ──────────────────────────────────────────────
-
-async function getCachedResearch(
-  queryHash: string,
-  supabaseUrl: string,
-  supabaseKey: string
-): Promise<TavilyAPIResponse | null> {
-  try {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/tavily_cache?query_hash=eq.${queryHash}&expires_at=gt.${new Date().toISOString()}&select=response&limit=1`,
-      {
-        headers: {
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-      }
-    );
-    if (!res.ok) return null;
-    const rows = await res.json();
-    return rows.length > 0 ? rows[0].response : null;
-  } catch {
-    return null;
-  }
-}
-
-async function setCachedResearch(
-  queryHash: string,
-  query: string,
-  response: TavilyAPIResponse,
-  supabaseUrl: string,
-  supabaseKey: string
-): Promise<void> {
-  try {
-    const sourceUrls = (response.results ?? [])
-      .map((r: TavilySearchResult) => r.url)
-      .filter(Boolean);
-
-    await fetch(`${supabaseUrl}/rest/v1/tavily_cache`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal,resolution=merge-duplicates',
-      },
-      body: JSON.stringify({
-        query_hash: queryHash,
-        query_text: query,
-        response,
-        result_count: response.results?.length ?? 0,
-        source_urls: sourceUrls,
-        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30-min TTL
-      }),
-    });
-  } catch (err) {
-    console.warn('[/api/tavily-research] Cache write failed:', err);
-  }
-}
-
-// ─── Hash Utility ────────────────────────────────────────────────
-
-async function hashQuery(query: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(query.toLowerCase().trim());
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// ─── Cost Tracking ───────────────────────────────────────────────
-
-async function trackCost(entry: {
-  sessionId: string;
-  endpoint: string;
-  queriesExecuted: number;
-  durationMs: number;
-}): Promise<void> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !supabaseKey) return;
-
-  try {
-    await fetch(`${supabaseUrl}/rest/v1/cost_tracking`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify({
-        session_id: entry.sessionId,
-        model: 'tavily',
-        endpoint: entry.endpoint,
-        // input_tokens repurposed: stores queries_executed for Tavily (not LLM tokens)
-        input_tokens: entry.queriesExecuted,
-        output_tokens: 0,
-        cost_usd: 0, // Tavily cost tracked separately via API dashboard
-        duration_ms: entry.durationMs,
-      }),
-    });
-  } catch (err) {
-    console.warn('[CostTracking] Failed to log Tavily cost:', err);
-  }
+  return templates[topic] ?? `${topic.replace(/_/g, ' ')} ${region} ${currentYear}`;
 }
 
 // ─── Handler ─────────────────────────────────────────────────────
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  // M10 fix: Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(204).end();
+    return;
+  }
+
   const startTime = Date.now();
 
   if (req.method !== 'POST') {
@@ -287,8 +104,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const { sessionId, region } = body;
-  const topics = body.topics ?? DEFAULT_TOPICS;
+  const sessionId = sanitizeInput(body.sessionId, 100); // H4 fix
+  const region = sanitizeInput(body.region, 200);        // H4 fix
+
+  // L6 fix: Validate topics against the whitelist
+  const validTopics = new Set(DEFAULT_TOPICS);
+  const topics = body.topics
+    ? body.topics.filter(t => validTopics.has(t))
+    : DEFAULT_TOPICS;
+
+  if (topics.length === 0) {
+    res.status(400).json({ error: 'No valid topics provided' });
+    return;
+  }
 
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -313,19 +141,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
           // Check cache first
           if (hasCache) {
-            const cached = await getCachedResearch(queryHash, supabaseUrl!, supabaseKey!);
+            const cached = await getCached(queryHash, supabaseUrl!, supabaseKey!);
             if (cached) {
               cacheHits++;
               return { topic, response: cached, fromCache: true, queryHash, query };
             }
           }
 
-          // Fresh search
+          // Fresh search (H1: retry, H2: timeout built into searchTavily)
           const response = await searchTavily(apiKey, query);
 
-          // Cache the result
+          // M1 fix: Fire-and-forget cache write (don't block on it)
           if (hasCache) {
-            await setCachedResearch(queryHash, query, response, supabaseUrl!, supabaseKey!);
+            void setCache(queryHash, query, response, supabaseUrl!, supabaseKey!);
           }
 
           return { topic, response, fromCache: false, queryHash, query };
@@ -355,11 +183,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     const durationMs = Date.now() - startTime;
 
-    // Track cost
-    trackCost({
+    // M2 fix: Explicitly fire-and-forget cost tracking
+    void trackCost({
       sessionId,
       endpoint: '/api/tavily-research',
-      queriesExecuted: topics.length - cacheHits,
+      searchesExecuted: topics.length - cacheHits, // M3 fix: standardized name
       durationMs,
     });
 

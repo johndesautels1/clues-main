@@ -37,6 +37,9 @@ interface CacheEntry<T = unknown> {
 const memoryCache = new Map<string, CacheEntry>();
 
 function getFromMemory<T>(queryHash: string): T | null {
+  // L9 fix: Evict expired entries lazily on read
+  evictExpiredLazy();
+
   const entry = memoryCache.get(queryHash);
   if (!entry) return null;
 
@@ -68,17 +71,40 @@ function setInMemory<T>(queryHash: string, data: T): void {
   });
 }
 
+// L9 fix: Lazy eviction — runs at most once per minute on cache reads
+let lastEvictionTime = 0;
+const EVICTION_INTERVAL_MS = 60_000; // 1 minute
+
+function evictExpiredLazy(): void {
+  const now = Date.now();
+  if (now - lastEvictionTime < EVICTION_INTERVAL_MS) return;
+  lastEvictionTime = now;
+
+  for (const [key, entry] of memoryCache) {
+    if (now > entry.expiresAt) {
+      memoryCache.delete(key);
+    }
+  }
+}
+
 // ─── Request Deduplication ───────────────────────────────────────
 
 const inflightRequests = new Map<string, Promise<unknown>>();
 
+// M8 fix: Add error context to deduped fetch failures
 async function dedupedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   const existing = inflightRequests.get(key);
   if (existing) return existing as Promise<T>;
 
-  const promise = fetcher().finally(() => {
-    inflightRequests.delete(key);
-  });
+  const promise = fetcher()
+    .catch((err: unknown) => {
+      // M8 fix: Wrap error with key context for debugging
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`[dedupedFetch] Failed for key "${key.slice(0, 80)}": ${message}`);
+    })
+    .finally(() => {
+      inflightRequests.delete(key);
+    });
 
   inflightRequests.set(key, promise);
   return promise;
@@ -147,7 +173,9 @@ export async function searchMetrics(
   country: string,
   maxSearches?: number
 ): Promise<MetricResearch[]> {
-  const cacheKey = `metrics_${city}_${country}_${metrics.map(m => m.metricId).join(',')}`;
+  // M9 fix: Include maxSearches in cache key so different tier limits
+  // don't return cached results from a smaller search
+  const cacheKey = `metrics_${city}_${country}_${maxSearches ?? 'default'}_${metrics.map(m => m.metricId).join(',')}`;
   const queryHash = await hashQuery(cacheKey);
 
   // Check memory cache for the full batch result
@@ -184,8 +212,8 @@ export function getCacheStats(): {
   maxEntries: number;
   oldestEntryAge: number | null;
 } {
-  // LRU: first entry in Map insertion order is the oldest
-  const firstEntry = memoryCache.values().next().value;
+  // M7 fix: Explicit type annotation for iterator value
+  const firstEntry = memoryCache.values().next().value as CacheEntry | undefined;
   const oldestAge = firstEntry ? Date.now() - firstEntry.cachedAt : null;
 
   return {
