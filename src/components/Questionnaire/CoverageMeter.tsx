@@ -106,18 +106,23 @@ function CompactMeter() {
         </span>
       </div>
 
-      {/* Gap count badge */}
-      {coverage.gapAnalysis.length > 0 && (
-        <span style={{
-          marginLeft: 'auto', flexShrink: 0,
-          fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
-          color: gapBadgeColor(coverage.gapAnalysis[0].severity),
-          background: 'var(--bg-card)', borderRadius: 6,
-          padding: '3px 8px', letterSpacing: '0.03em',
-        }}>
-          {coverage.gapAnalysis.filter(g => g.severity === 'critical').length} gaps
-        </span>
-      )}
+      {/* M14/M15 fix: Gap count badge — show total gaps with worst severity color */}
+      {coverage.gapAnalysis.length > 0 && (() => {
+        const critCount = coverage.gapAnalysis.filter(g => g.severity === 'critical').length;
+        const totalGaps = coverage.gapAnalysis.length;
+        const worstSeverity = critCount > 0 ? 'critical' : coverage.gapAnalysis[0].severity;
+        return (
+          <span style={{
+            marginLeft: 'auto', flexShrink: 0,
+            fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
+            color: gapBadgeColor(worstSeverity),
+            background: 'var(--bg-card)', borderRadius: 6,
+            padding: '3px 8px', letterSpacing: '0.03em',
+          }}>
+            {totalGaps} gap{totalGaps !== 1 ? 's' : ''}
+          </span>
+        );
+      })()}
     </div>
   );
 }

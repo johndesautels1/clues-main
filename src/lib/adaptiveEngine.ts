@@ -482,10 +482,19 @@ export function skipQuestion(
 
 // ─── Internal Helpers ─────────────────────────────────────────────
 
-/** Look up a QuestionItem by module and question number (for cross-module overlap checks) */
+/** M3 fix: Cached question lookup — avoids re-flattening sections on every call */
+const _questionCache = new Map<string, Map<number, QuestionItem>>();
 function getQuestionByModuleAndNumber(moduleId: string, questionNumber: number): QuestionItem | undefined {
-  const questions = getModuleQuestions(moduleId);
-  return questions.find(q => q.number === questionNumber);
+  let moduleMap = _questionCache.get(moduleId);
+  if (!moduleMap) {
+    moduleMap = new Map();
+    const questions = getModuleQuestions(moduleId);
+    for (const q of questions) {
+      moduleMap.set(q.number, q);
+    }
+    _questionCache.set(moduleId, moduleMap);
+  }
+  return moduleMap.get(questionNumber);
 }
 
 /**

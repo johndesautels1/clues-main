@@ -286,6 +286,8 @@ export function applyCoverageFromDemographics(
     updateSignalConsistency(dim);
   }
 
+  // M7 fix: Normalize weights after demographic boosts (consistent with DNW/MH/tradeoffs)
+  normalizeWeights(updated);
   recalculateMOE(updated);
   return updated;
 }
@@ -412,6 +414,9 @@ export function applyCoverageFromTradeoffs(
     const sliderValue = typeof value === 'number' ? value : 50;
     // Strength = how strongly the user feels (deviation from neutral)
     const strength = Math.abs(sliderValue - 50) / 50; // 0 = neutral, 1 = extreme
+
+    // M6 fix: Skip neutral answers (strength=0) to avoid polluting source list
+    if (strength < 0.01) continue;
 
     // A non-neutral answer signals these modules matter to the user
     for (const modId of question.modules) {

@@ -40,7 +40,7 @@ export function SkipIndicator({ skipInfo, onSkip }: SkipIndicatorProps) {
 
   return (
     <div
-      role="status"
+      role="note"
       aria-label={`This question can be skipped: ${skipInfo.reason}`}
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
@@ -112,7 +112,7 @@ export function SkipSummaryBar({ skipSummary, skippableCount }: SkipSummaryBarPr
 
   return (
     <div
-      role="status"
+      role="note"
       aria-label={skipSummary}
       style={{
         display: 'flex', alignItems: 'center', gap: 10,

@@ -78,16 +78,21 @@ export function useAdaptiveState(
   const isAvailable = !!(relevance && coverage && relevance.recommendedModules.length > 0 && enabled);
 
   // Initialize the engine when inputs become available (useEffect, not useMemo — side effect)
+  // M9 fix: Also re-initialize when relevance changes (e.g., user returns with new data)
   useEffect(() => {
     if (!isAvailable || !relevance || !coverage) {
+      // If disabled or data removed, clear state
+      if (!isAvailable && state) {
+        setState(null);
+      }
       return;
     }
 
-    // Only initialize if we don't have a state yet
+    // Initialize if we don't have state, or re-initialize if recommended modules changed
     if (!state) {
       setState(initializeAdaptiveEngine(relevance, coverage));
     }
-  }, [isAvailable]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isAvailable, relevance, coverage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Get next question from current state
   const nextQuestion = useMemo((): NextQuestionResult | null => {
