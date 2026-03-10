@@ -3,6 +3,7 @@
  *
  * Pricing (per 1M tokens): Input $3.00, Output $15.00
  * Strengths: Structured scoring, nuanced qualitative analysis, consistent JSON
+ * Built-in web search tool for verification
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';

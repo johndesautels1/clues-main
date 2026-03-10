@@ -3,6 +3,7 @@
  *
  * Pricing (per 1M tokens): Input $5.00, Output $20.00
  * Strengths: Enormous knowledge base, multi-step reasoning, edge case detection
+ * Bing search integration for verification
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
