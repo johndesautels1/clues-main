@@ -78,7 +78,8 @@ const PERPLEXITY_INPUT_RATE = 1.00;
 const PERPLEXITY_OUTPUT_RATE = 1.00;
 
 function calculatePerplexityCost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * PERPLEXITY_INPUT_RATE + outputTokens * PERPLEXITY_OUTPUT_RATE) / 1_000_000;
+  const cost = (inputTokens * PERPLEXITY_INPUT_RATE + outputTokens * PERPLEXITY_OUTPUT_RATE) / 1_000_000;
+  return Number.isFinite(cost) ? cost : 0;
 }
 
 // ─── Build the evaluation prompt ─────────────────────────────
@@ -228,32 +229,50 @@ export default async function handler(
       Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'sonar-reasoning-pro-high',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a precise location analyst with native web search. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 32768,
-      }),
+    const requestBody = JSON.stringify({
+      model: 'sonar-reasoning-pro-high',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a precise location analyst with native web search. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 32768,
     });
 
-    if (!perplexityResponse.ok) {
+    // Retry with exponential backoff on 429 (rate limit) and 5xx errors
+    let perplexityResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: requestBody,
+      });
+
+      if (perplexityResponse.ok) break;
+
+      const status = perplexityResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
       const errText = await perplexityResponse.text();
-      throw new Error(`Perplexity API returned ${perplexityResponse.status}: ${errText}`);
+      throw new Error(`Perplexity API returned ${status}: ${errText}`);
+    }
+
+    if (!perplexityResponse || !perplexityResponse.ok) {
+      throw new Error('Perplexity API request failed after retries');
     }
 
     const perplexityResult = await perplexityResponse.json();
@@ -276,7 +295,11 @@ export default async function handler(
       const cleaned = rawText
         .replace(/<think>[\s\S]*?<\/think>/g, '')
         .replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      evaluation = JSON.parse(cleaned);
+      try {
+        evaluation = JSON.parse(cleaned);
+      } catch (parseErr) {
+        throw new Error(`Failed to parse Perplexity JSON response: ${parseErr instanceof Error ? parseErr.message : 'Unknown parse error'}`);
+      }
     }
 
     // ─── Validate required fields ────────────────────────────

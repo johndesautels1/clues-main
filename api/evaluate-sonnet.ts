@@ -78,7 +78,8 @@ const SONNET_INPUT_RATE = 3.00;
 const SONNET_OUTPUT_RATE = 15.00;
 
 function calculateSonnetCost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * SONNET_INPUT_RATE + outputTokens * SONNET_OUTPUT_RATE) / 1_000_000;
+  const cost = (inputTokens * SONNET_INPUT_RATE + outputTokens * SONNET_OUTPUT_RATE) / 1_000_000;
+  return Number.isFinite(cost) ? cost : 0;
 }
 
 // ─── Build the evaluation prompt ─────────────────────────────
@@ -228,30 +229,48 @@ export default async function handler(
       Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 32768,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        system: 'You are a precise location analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
-        temperature: 0.3,
-      }),
+    const requestBody = JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 32768,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      system: 'You are a precise location analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
+      temperature: 0.3,
     });
 
-    if (!anthropicResponse.ok) {
+    // Retry with exponential backoff on 429 (rate limit) and 5xx errors
+    let anthropicResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: requestBody,
+      });
+
+      if (anthropicResponse.ok) break;
+
+      const status = anthropicResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
       const errText = await anthropicResponse.text();
-      throw new Error(`Anthropic API returned ${anthropicResponse.status}: ${errText}`);
+      throw new Error(`Anthropic API returned ${status}: ${errText}`);
+    }
+
+    if (!anthropicResponse || !anthropicResponse.ok) {
+      throw new Error('Anthropic API request failed after retries');
     }
 
     const anthropicResult = await anthropicResponse.json();
@@ -272,7 +291,11 @@ export default async function handler(
       evaluation = JSON.parse(rawText);
     } catch {
       const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      evaluation = JSON.parse(cleaned);
+      try {
+        evaluation = JSON.parse(cleaned);
+      } catch (parseErr) {
+        throw new Error(`Failed to parse Sonnet JSON response: ${parseErr instanceof Error ? parseErr.message : 'Unknown parse error'}`);
+      }
     }
 
     // ─── Validate required fields ────────────────────────────

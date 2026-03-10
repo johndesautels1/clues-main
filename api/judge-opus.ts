@@ -298,8 +298,14 @@ export default async function handler(
     try {
       judgeResponse = JSON.parse(rawText);
     } catch {
-      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      judgeResponse = JSON.parse(cleaned);
+      try {
+        const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        judgeResponse = JSON.parse(cleaned);
+      } catch (retryErr) {
+        throw new Error(
+          `Failed to parse Opus judge JSON after cleanup: ${retryErr instanceof Error ? retryErr.message : 'Unknown parse error'}. Raw text starts with: ${rawText.slice(0, 200)}`
+        );
+      }
     }
 
     // ─── Assemble full report ────────────────────────────────
@@ -324,11 +330,16 @@ export default async function handler(
     };
 
     // ─── Validate trustedModel against EvaluatorModel union ──
-    // Derived from EvaluatorModel type to stay in sync
-    const VALID_MODELS: Set<EvaluatorModel> = new Set<EvaluatorModel>([
+    // MAINTENANCE: This array must match the EvaluatorModel union in
+    // src/types/evaluation.ts exactly. The `satisfies` clause below
+    // provides a compile-time check — if a model is listed here that
+    // is NOT in EvaluatorModel, TypeScript will error. However, if a
+    // new model is ADDED to EvaluatorModel, you must add it here too.
+    const VALID_MODELS_LIST = [
       'claude-sonnet-4-6', 'gpt-5.4', 'gemini-3.1-pro-preview',
       'grok-4-1-fast-reasoning', 'sonar-reasoning-pro-high',
-    ]);
+    ] as const satisfies readonly EvaluatorModel[];
+    const VALID_MODELS: Set<string> = new Set(VALID_MODELS_LIST);
     for (const override of report.metricOverrides) {
       if (override.trustedModel && !VALID_MODELS.has(override.trustedModel as EvaluatorModel)) {
         // Opus returned a non-standard model name — clear it rather than propagate bad data

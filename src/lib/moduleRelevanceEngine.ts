@@ -289,7 +289,7 @@ export function applyDNWRelevance(
     const strengthMultiplier = dnw.severity / 5; // 0.2 to 1.0
 
     // Look up question by number → use its modules field
-    const questionNumber = parseInt(dnw.questionId, 10);
+    const questionNumber = parseInt(dnw.questionId.replace(/\D/g, ''), 10);
     const question = !isNaN(questionNumber)
       ? mainQuestions.find(q => q.number === questionNumber)
       : undefined;
@@ -325,7 +325,7 @@ export function applyMHRelevance(
     const strengthMultiplier = mh.importance / 5;
 
     // Look up question by number → use its modules field
-    const questionNumber = parseInt(mh.questionId, 10);
+    const questionNumber = parseInt(mh.questionId.replace(/\D/g, ''), 10);
     const question = !isNaN(questionNumber)
       ? mainQuestionsForMH.find(q => q.number === questionNumber)
       : undefined;

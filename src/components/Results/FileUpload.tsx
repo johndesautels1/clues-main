@@ -162,7 +162,7 @@ export function FileUpload({ onFileUploaded, maxFiles = 5 }: FileUploadProps) {
         <p style={{
           fontFamily: "'Outfit', sans-serif",
           fontSize: '0.75rem',
-          color: 'var(--score-red, #ef4444)',
+          color: 'var(--score-red, #f87171)',
           marginTop: 8,
         }}>
           {error}
@@ -207,7 +207,7 @@ export function FileUpload({ onFileUploaded, maxFiles = 5 }: FileUploadProps) {
                   borderRadius: 4,
                   border: 'none',
                   background: 'rgba(239, 68, 68, 0.1)',
-                  color: 'var(--score-red, #ef4444)',
+                  color: 'var(--score-red, #f87171)',
                   cursor: 'pointer',
                   fontSize: '0.75rem',
                   display: 'flex',

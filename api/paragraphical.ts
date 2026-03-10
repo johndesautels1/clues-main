@@ -135,6 +135,7 @@ async function trackCost(entry: {
   endpoint: string;
   inputTokens: number;
   outputTokens: number;
+  thinkingTokens?: number;
   costUsd: number;
   durationMs: number;
 }): Promise<void> {
@@ -158,6 +159,7 @@ async function trackCost(entry: {
         endpoint: entry.endpoint,
         input_tokens: entry.inputTokens,
         output_tokens: entry.outputTokens,
+        thinking_tokens: entry.thinkingTokens ?? 0,
         cost_usd: entry.costUsd,
         duration_ms: entry.durationMs,
       }),
@@ -383,12 +385,18 @@ Rules:
 8. Score each location's metrics independently — a metric may score 92 in City A but 45 in City B.`;
 }
 
-// ─── Gemini Token Rates (per 1M tokens) ─────────────────────────────
-const GEMINI_INPUT_RATE = 1.25;
-const GEMINI_OUTPUT_RATE = 10.00;
+// ─── Gemini Token Rates (per 1M tokens, March 2026) ─────────────────
+const GEMINI_INPUT_RATE = 2.00;
+const GEMINI_OUTPUT_RATE = 12.00;
 
-function calculateGeminiCost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * GEMINI_INPUT_RATE + outputTokens * GEMINI_OUTPUT_RATE) / 1_000_000;
+const GEMINI_THINKING_RATE = 12.00; // Thinking tokens billed at output rate
+
+function calculateGeminiCost(inputTokens: number, outputTokens: number, thinkingTokens: number = 0): number {
+  return (
+    inputTokens * GEMINI_INPUT_RATE +
+    outputTokens * GEMINI_OUTPUT_RATE +
+    thinkingTokens * GEMINI_THINKING_RATE
+  ) / 1_000_000;
 }
 
 // ─── Main Handler ───────────────────────────────────────────────────
@@ -508,7 +516,10 @@ export default async function handler(
 
     // Extract the main JSON output
     const textParts = candidate.content?.parts?.filter((p: any) => p.text);
-    const rawText = textParts?.map((p: any) => p.text).join('') ?? '';
+    if (!textParts || textParts.length === 0) {
+      throw new Error('Gemini returned no text content in response parts');
+    }
+    const rawText = textParts.map((p: any) => p.text).join('');
 
     let extraction: GeminiExtraction;
     try {
@@ -516,7 +527,11 @@ export default async function handler(
     } catch {
       // Strip markdown fences if present
       const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      extraction = JSON.parse(cleaned);
+      try {
+        extraction = JSON.parse(cleaned);
+      } catch (parseErr) {
+        throw new Error(`Failed to parse Gemini JSON response: ${parseErr instanceof Error ? parseErr.message : 'Unknown parse error'}`);
+      }
     }
 
     // Attach thinking details to extraction
@@ -544,15 +559,17 @@ export default async function handler(
     const inputTokens = usage?.promptTokenCount ?? 0;
     const outputTokens = usage?.candidatesTokenCount ?? 0;
     const thinkingTokens = usage?.thinkingTokenCount ?? 0;
-    const costUsd = calculateGeminiCost(inputTokens, outputTokens + thinkingTokens);
+    // Thinking tokens billed at output rate but itemized separately for transparency
+    const costUsd = calculateGeminiCost(inputTokens, outputTokens, thinkingTokens);
 
-    // Track cost (non-blocking)
+    // Track cost (non-blocking) — thinking tokens itemized separately
     trackCost({
       sessionId: body.sessionId,
       model: 'gemini-3.1-pro-preview',
       endpoint: '/api/paragraphical',
       inputTokens,
-      outputTokens: outputTokens + thinkingTokens,
+      outputTokens,
+      thinkingTokens,
       costUsd,
       durationMs,
     }).catch(() => {});

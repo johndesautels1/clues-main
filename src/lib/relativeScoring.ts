@@ -55,9 +55,15 @@ export function applyRelativeScoring(
     return locationScores;
   }
 
+  // Clone all input objects to avoid mutating the caller's data
+  const clonedScores = new Map<string, MetricSmartScore[]>();
+  for (const [location, scores] of locationScores) {
+    clonedScores.set(location, scores.map(ms => ({ ...ms })));
+  }
+
   // Build metric index: metric_id → { location → MetricSmartScore }
   const metricIndex = new Map<string, Map<string, MetricSmartScore>>();
-  for (const [location, scores] of locationScores) {
+  for (const [location, scores] of clonedScores) {
     for (const ms of scores) {
       if (!metricIndex.has(ms.metric_id)) {
         metricIndex.set(ms.metric_id, new Map());
@@ -102,7 +108,7 @@ export function applyRelativeScoring(
     }
   }
 
-  return locationScores;
+  return clonedScores;
 }
 
 // ─── Winner Determination ────────────────────────────────────

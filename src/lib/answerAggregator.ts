@@ -310,13 +310,14 @@ function extractDemographicSignals(demo: DemographicAnswers): ProfileSignal[] {
   }
 
   // All demographics contribute a baseline signal to every module
+  const TOTAL_DEMO_QUESTIONS = 34; // Demographics section has 34 questions (q1-q34)
   const demoCount = Object.keys(demo).length;
   if (demoCount > 0) {
     for (const mod of MODULES) {
       signals.push({
         moduleId: mod.id,
         key: 'demo_baseline',
-        value: Math.min(1, demoCount / 34), // Normalize by total demo questions
+        value: Math.min(1, demoCount / TOTAL_DEMO_QUESTIONS),
         source: 'demographics',
         confidence: 0.3,
         rawValue: demoCount,
@@ -416,9 +417,11 @@ function extractGeneralSignals(general: GeneralAnswers): ProfileSignal[] {
     const moduleIds = question?.modules ?? [];
 
     // Normalize answer value to 0-1
+    // GeneralAnswers numeric values are expected on a 0-10 scale (e.g. Likert 0-10).
+    // Result is clamped to 0-1 range to guard against out-of-range inputs.
     let normalized = 0.5;
     if (typeof value === 'number') {
-      normalized = Math.min(1, Math.max(0, value / 10)); // Assume 0-10 scale
+      normalized = Math.min(1, Math.max(0, value / 10));
     } else if (value === 'yes' || value === 'true') {
       normalized = 0.8;
     } else if (value === 'no' || value === 'false') {
@@ -465,7 +468,8 @@ function extractMiniModuleSignals(moduleId: string): ProfileSignal[] {
       } else if (rawValue === 'false' || rawValue === 'no') {
         normalized = 0.2;
       } else if (Array.isArray(rawValue)) {
-        normalized = Math.min(1, rawValue.length / 5); // Multi-select: more = stronger
+        // Multi-select: more selections = stronger signal, capped at 1.0
+        normalized = Math.min(rawValue.length / 5, 1.0);
       } else if (typeof rawValue === 'string' && rawValue.length > 0) {
         normalized = 0.6; // Has text answer
       }
@@ -479,8 +483,9 @@ function extractMiniModuleSignals(moduleId: string): ProfileSignal[] {
         rawValue: Array.isArray(rawValue) ? rawValue.join(', ') : rawValue,
       });
     }
-  } catch {
-    // localStorage read failure — skip silently
+  } catch (err) {
+    // localStorage read failure — log warning so issues are visible in dev tools
+    console.warn(`[answerAggregator] Failed to read mini module "${moduleId}" from localStorage:`, err);
   }
 
   return signals;

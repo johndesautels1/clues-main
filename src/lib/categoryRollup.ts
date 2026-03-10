@@ -73,7 +73,7 @@ export function deriveCategoryWeights(
 
   // Step 3: Apply paragraph emphasis
   if (paragraphEmphasis && Object.keys(paragraphEmphasis).length > 0) {
-    derivation = preset ? 'paragraph_emphasis' : 'custom';
+    derivation = 'paragraph_emphasis';
     for (const [catId, emphasis] of Object.entries(paragraphEmphasis)) {
       if (rawWeights[catId] !== undefined && emphasis > 0) {
         // Emphasis is 0-1 scale; convert to multiplier (1.0 to 2.0 range)

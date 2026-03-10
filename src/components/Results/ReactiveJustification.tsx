@@ -72,7 +72,7 @@ export function ReactiveJustification({
           fontWeight: 700,
           color: metric.score >= 70 ? 'var(--score-green, #22c55e)'
             : metric.score >= 40 ? 'var(--score-yellow, #eab308)'
-            : 'var(--score-red, #ef4444)',
+            : 'var(--score-red, #f87171)',
         }}>
           {metric.score}
         </span>
