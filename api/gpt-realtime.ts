@@ -13,23 +13,18 @@
  * The ephemeral token expires after 60 seconds (OpenAI default).
  * The client must establish the WebRTC connection within that window.
  *
- * Pricing (per 1M tokens):
- *   - Input:  $5.00
- *   - Output: $20.00
+ * Pricing (per 1M tokens): Input $5.00, Output $20.00
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// ─── Request type ─────────────────────────────────────────────
-interface GPTRealtimeRequest {
-  sessionId: string;
-  /** Voice preset for Olivia */
-  voice?: 'alloy' | 'ash' | 'ballad' | 'coral' | 'echo' | 'sage' | 'shimmer' | 'verse';
-  /** System instructions for Olivia's persona */
-  instructions?: string;
-}
+// ─── Config ─────────────────────────────────────────────────────
+const MODEL_ID = 'gpt-realtime-1.5';
+const ALLOWED_VOICES = new Set(['alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse']);
+const SESSION_TIMEOUT_MS = 15_000; // 15s timeout for session creation
+const MAX_INSTRUCTIONS_LENGTH = 2000;
 
-// ─── Cost tracking helper (server-side, writes to Supabase directly) ──
+// ─── Cost tracking helper ───────────────────────────────────────
 async function trackCost(entry: {
   sessionId: string;
   model: string;
@@ -41,7 +36,6 @@ async function trackCost(entry: {
 }): Promise<void> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
   if (!supabaseUrl || !supabaseKey) return;
 
   try {
@@ -68,7 +62,7 @@ async function trackCost(entry: {
   }
 }
 
-// ─── Default Olivia system instructions ──────────────────────
+// ─── Default Olivia system instructions ──────────────────────────
 const DEFAULT_OLIVIA_INSTRUCTIONS = `You are Olivia, the CLUES Intelligence AI advisor. You help users understand their relocation evaluation results through live voice conversation.
 
 Your personality:
@@ -80,11 +74,18 @@ Your personality:
 
 Keep responses concise for voice — 2-3 sentences max per turn unless the user asks for detail.`;
 
-// ─── Main Handler ──────────────────────────────────────────────
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-): Promise<void> {
+// ─── Handler ─────────────────────────────────────────────────────
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -96,57 +97,79 @@ export default async function handler(
     return;
   }
 
-  const body = req.body as GPTRealtimeRequest;
+  const body = req.body as { sessionId?: string; voice?: string; instructions?: string };
 
-  if (!body.sessionId) {
-    res.status(400).json({ error: 'Missing sessionId' });
+  if (!body.sessionId || typeof body.sessionId !== 'string') {
+    res.status(400).json({ error: 'Missing or invalid sessionId' });
     return;
   }
 
   const startTime = Date.now();
 
   try {
-    // ─── Create ephemeral session token ──────────────────────
-    const realtimeResponse = await fetch('https://api.openai.com/v1/realtime/sessions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-realtime-1.5',
-        voice: body.voice ?? 'shimmer',
-        instructions: body.instructions ?? DEFAULT_OLIVIA_INSTRUCTIONS,
-        input_audio_transcription: { model: 'whisper-1' },
-        turn_detection: {
-          type: 'server_vad',
-          threshold: 0.5,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
+    // Validate voice against whitelist (runtime check)
+    const voice = ALLOWED_VOICES.has(body.voice ?? '') ? body.voice! : 'shimmer';
+
+    // Sanitize instructions: use default if not provided, or truncate + strip HTML
+    const instructions = body.instructions
+      ? body.instructions
+          .replace(/<[^>]*>/g, '')
+          .replace(/[\x00-\x1f\x7f]/g, '')
+          .trim()
+          .slice(0, MAX_INSTRUCTIONS_LENGTH)
+      : DEFAULT_OLIVIA_INSTRUCTIONS;
+
+    // Create ephemeral session token with timeout
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), SESSION_TIMEOUT_MS);
+
+    let realtimeResponse: Response;
+    try {
+      realtimeResponse = await fetch('https://api.openai.com/v1/realtime/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
         },
-      }),
-    });
+        body: JSON.stringify({
+          model: MODEL_ID,
+          voice,
+          instructions,
+          input_audio_transcription: { model: 'whisper-1' },
+          turn_detection: {
+            type: 'server_vad',
+            threshold: 0.5,
+            prefix_padding_ms: 300,
+            silence_duration_ms: 500,
+          },
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!realtimeResponse.ok) {
       const errText = await realtimeResponse.text();
-      throw new Error(`OpenAI Realtime API returned ${realtimeResponse.status}: ${errText}`);
+      console.error(`[/api/gpt-realtime] OpenAI returned ${realtimeResponse.status}: ${errText}`);
+      throw new Error('OpenAI Realtime API error');
     }
 
     const sessionData = await realtimeResponse.json();
     const durationMs = Date.now() - startTime;
 
-    // Track the session creation cost (minimal — just the API call)
-    trackCost({
+    // Track session creation (cost is 0 — usage billed per audio token during stream)
+    void trackCost({
       sessionId: body.sessionId,
-      model: 'gpt-realtime-1.5',
+      model: MODEL_ID,
       endpoint: '/api/gpt-realtime',
       inputTokens: 0,
       outputTokens: 0,
-      costUsd: 0, // Session creation is free; usage billed per audio token
+      costUsd: 0,
       durationMs,
-    }).catch(() => {});
+    });
 
-    // ─── Validate token was returned ─────────────────────────
+    // Validate token was returned
     const token = sessionData.client_secret?.value ?? sessionData.token;
     const expiresAt = sessionData.client_secret?.expires_at ?? sessionData.expires_at;
 
@@ -156,18 +179,13 @@ export default async function handler(
       return;
     }
 
-    // ─── Return session token + config ───────────────────────
     res.status(200).json({
-      /** Ephemeral token for WebRTC connection (expires in 60s) */
       token,
-      /** Token expiry timestamp */
       expiresAt,
-      /** Session ID from OpenAI */
       realtimeSessionId: sessionData.id,
-      /** Voice used */
-      voice: body.voice ?? 'shimmer',
+      voice,
       metadata: {
-        model: 'gpt-realtime-1.5',
+        model: MODEL_ID,
         durationMs,
         timestamp: new Date().toISOString(),
       },
@@ -175,11 +193,8 @@ export default async function handler(
   } catch (err) {
     const durationMs = Date.now() - startTime;
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[/api/gpt-realtime] GPT Realtime 1.5 session creation failed:', message);
-    res.status(500).json({
-      error: 'GPT Realtime session creation failed',
-      detail: message,
-      durationMs,
-    });
+    console.error('[/api/gpt-realtime] Failed:', message);
+    // Error detail removed — logged server-side only
+    res.status(500).json({ error: 'GPT Realtime session creation failed', durationMs });
   }
 }

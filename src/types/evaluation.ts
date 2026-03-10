@@ -90,6 +90,8 @@ export interface EvaluationMetadata {
   costUsd: number;
   durationMs: number;
   disagreementCount: number;
+  /** True if the LLM response was truncated due to max_tokens */
+  truncated?: boolean;
   timestamp: string;
 }
 
@@ -97,13 +99,6 @@ export interface EvaluationMetadata {
 export interface EvaluateResponse {
   evaluation: LLMEvaluationResponse;
   metadata: EvaluationMetadata;
-}
-
-/** Error response from any evaluation endpoint */
-export interface EvaluateErrorResponse {
-  error: string;
-  detail: string;
-  durationMs: number;
 }
 
 // ─── Orchestrator Types ───────────────────────────────────────
