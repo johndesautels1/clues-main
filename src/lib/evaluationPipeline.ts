@@ -195,7 +195,7 @@ export async function runPipeline(
   // ─── Done ────────────────────────────────────────────────────
   const totalDurationMs = Date.now() - startTime;
   const totalCostUsd = evaluation.totalCostUsd + (cityRecommendation
-    ? cityRecommendation.individualResults.reduce((sum, r) => sum + (r.durationMs > 0 ? 0.01 : 0), 0)
+    ? cityRecommendation.individualResults.reduce((sum, r) => sum + (r.response ? 0.005 : 0), 0)
     : 0);
 
   return {

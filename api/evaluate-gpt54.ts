@@ -78,7 +78,8 @@ const GPT54_INPUT_RATE = 5.00;
 const GPT54_OUTPUT_RATE = 20.00;
 
 function calculateGPT54Cost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * GPT54_INPUT_RATE + outputTokens * GPT54_OUTPUT_RATE) / 1_000_000;
+  const cost = (inputTokens * GPT54_INPUT_RATE + outputTokens * GPT54_OUTPUT_RATE) / 1_000_000;
+  return Number.isFinite(cost) ? cost : 0;
 }
 
 // ─── Build the evaluation prompt ─────────────────────────────
@@ -228,33 +229,51 @@ export default async function handler(
       Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-5.4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a precise location analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 32768,
-        response_format: { type: 'json_object' },
-      }),
+    const requestBody = JSON.stringify({
+      model: 'gpt-5.4',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a precise location analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 32768,
+      response_format: { type: 'json_object' },
     });
 
-    if (!openaiResponse.ok) {
+    // Retry with exponential backoff on 429 (rate limit) and 5xx errors
+    let openaiResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: requestBody,
+      });
+
+      if (openaiResponse.ok) break;
+
+      const status = openaiResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
       const errText = await openaiResponse.text();
-      throw new Error(`OpenAI API returned ${openaiResponse.status}: ${errText}`);
+      throw new Error(`OpenAI API returned ${status}: ${errText}`);
+    }
+
+    if (!openaiResponse || !openaiResponse.ok) {
+      throw new Error('OpenAI API request failed after retries');
     }
 
     const openaiResult = await openaiResponse.json();
@@ -273,7 +292,11 @@ export default async function handler(
       evaluation = JSON.parse(rawText);
     } catch {
       const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      evaluation = JSON.parse(cleaned);
+      try {
+        evaluation = JSON.parse(cleaned);
+      } catch (parseErr) {
+        throw new Error(`Failed to parse GPT-5.4 JSON response: ${parseErr instanceof Error ? parseErr.message : 'Unknown parse error'}`);
+      }
     }
 
     // ─── Validate required fields ────────────────────────────

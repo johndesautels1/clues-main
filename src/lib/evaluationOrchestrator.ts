@@ -143,7 +143,7 @@ export async function runEvaluation(
     // Sum cost (guard against undefined/NaN from malformed responses)
     for (const cr of categoryResults) {
       for (const r of cr.results) {
-        if (r.metadata && typeof r.metadata.costUsd === 'number' && !Number.isNaN(r.metadata.costUsd)) {
+        if (r.metadata && typeof r.metadata.costUsd === 'number' && Number.isFinite(r.metadata.costUsd)) {
           totalCostUsd += r.metadata.costUsd;
         }
       }
@@ -323,6 +323,27 @@ function buildConsensus(
 
       for (const result of results) {
         if (!result.response) continue;
+
+        // M11: Warn when evaluations array is empty or missing expected cities
+        if (!result.response.evaluations || result.response.evaluations.length === 0) {
+          console.warn(
+            `[EvalOrchestrator] ${result.model} returned empty evaluations array for metric ${metric.id}. ` +
+            `Expected cities: ${cities.map(c => c.location).join(', ')}`
+          );
+          continue;
+        }
+
+        const returnedCityKeys = new Set(
+          result.response.evaluations.map(e => `${e.location}|${e.country}`)
+        );
+        const expectedKey = `${city.location}|${city.country}`;
+        if (!returnedCityKeys.has(expectedKey)) {
+          console.warn(
+            `[EvalOrchestrator] ${result.model} evaluations missing city "${city.location}, ${city.country}" ` +
+            `for metric ${metric.id}. Returned cities: ${result.response.evaluations.map(e => e.location).join(', ')}`
+          );
+        }
+
         const cityEval = result.response.evaluations.find(
           e => e.location === city.location && e.country === city.country
         );
@@ -339,6 +360,9 @@ function buildConsensus(
       }
 
       const scoreValues = scores.map(s => s.score);
+      if (scoreValues.length === 0) {
+        console.warn(`[EvalOrchestrator] No LLM scores for metric ${metric.id} in ${city.location}, ${city.country}. Defaulting to 0.`);
+      }
       const mean = scoreValues.length > 0
         ? Math.round(scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length)
         : 0;

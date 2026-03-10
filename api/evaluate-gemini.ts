@@ -16,9 +16,9 @@
  *
  * Fires from Tier 4 (Evaluated) onwards per tierEngine.ts.
  *
- * Pricing (per 1M tokens):
- *   - Input:  $1.25
- *   - Output: $10.00
+ * Pricing (per 1M tokens, March 2026):
+ *   - Input:  $2.00
+ *   - Output: $12.00
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -77,12 +77,13 @@ async function trackCost(entry: {
   }
 }
 
-// ─── Gemini Token Rates (per 1M tokens) ──────────────────────
-const GEMINI_INPUT_RATE = 1.25;
-const GEMINI_OUTPUT_RATE = 10.00;
+// ─── Gemini Token Rates (per 1M tokens, March 2026) ──────────
+const GEMINI_INPUT_RATE = 2.00;
+const GEMINI_OUTPUT_RATE = 12.00;
 
 function calculateGeminiCost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * GEMINI_INPUT_RATE + outputTokens * GEMINI_OUTPUT_RATE) / 1_000_000;
+  const cost = (inputTokens * GEMINI_INPUT_RATE + outputTokens * GEMINI_OUTPUT_RATE) / 1_000_000;
+  return Number.isFinite(cost) ? cost : 0;
 }
 
 // ─── Build the evaluation prompt ─────────────────────────────
@@ -294,7 +295,11 @@ export default async function handler(
       evaluation = JSON.parse(rawText);
     } catch {
       const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      evaluation = JSON.parse(cleaned);
+      try {
+        evaluation = JSON.parse(cleaned);
+      } catch (parseErr) {
+        throw new Error(`Failed to parse Gemini JSON response: ${parseErr instanceof Error ? parseErr.message : 'Unknown parse error'}`);
+      }
     }
 
     // ─── Validate required fields ────────────────────────────

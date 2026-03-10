@@ -223,9 +223,10 @@ async function trackCost(entry: {
         session_id: entry.sessionId,
         model: 'tavily',
         endpoint: entry.endpoint,
+        // input_tokens repurposed: stores searches_executed for Tavily (not LLM tokens)
         input_tokens: entry.searchesExecuted,
         output_tokens: 0,
-        cost_usd: 0,
+        cost_usd: 0, // Tavily cost tracked separately via API dashboard
         duration_ms: entry.durationMs,
       }),
     });
@@ -300,7 +301,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
           // Cache
           if (hasCache) {
-            setCache(queryHash, query, response, supabaseUrl!, supabaseKey!);
+            await setCache(queryHash, query, response, supabaseUrl!, supabaseKey!);
           }
 
           return buildMetricResult(metricId, query, city, response, Date.now() - searchStart);

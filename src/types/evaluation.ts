@@ -17,6 +17,7 @@ export interface EvaluationMetric {
   source_paragraph: number;   // Which paragraph (1-30)
   data_type: 'numeric' | 'boolean' | 'ranking' | 'index';
   research_query: string;     // What Tavily searched for this metric
+  source?: string;             // Data source attribution (e.g., "Tavily: Portugal Interior Ministry Report 2026")
   threshold?: {
     operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
     value: number | [number, number];

@@ -222,9 +222,17 @@ async function recommendWithModel(
 
     const data = await response.json();
 
+    // Validate response structure before using
+    const recommendations = data.recommendations;
+    const validatedResponse: LLMRecommendationResponse = {
+      recommended_cities: Array.isArray(recommendations?.recommended_cities) ? recommendations.recommended_cities : [],
+      recommended_towns: Array.isArray(recommendations?.recommended_towns) ? recommendations.recommended_towns : [],
+      reasoning_summary: recommendations?.reasoning_summary ?? '',
+    };
+
     return {
       model,
-      response: data.recommendations as LLMRecommendationResponse,
+      response: validatedResponse,
       error: null,
       durationMs: Date.now() - startTime,
     };

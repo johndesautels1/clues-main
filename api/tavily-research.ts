@@ -252,6 +252,7 @@ async function trackCost(entry: {
         session_id: entry.sessionId,
         model: 'tavily',
         endpoint: entry.endpoint,
+        // input_tokens repurposed: stores queries_executed for Tavily (not LLM tokens)
         input_tokens: entry.queriesExecuted,
         output_tokens: 0,
         cost_usd: 0, // Tavily cost tracked separately via API dashboard
@@ -324,7 +325,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
           // Cache the result
           if (hasCache) {
-            setCachedResearch(queryHash, query, response, supabaseUrl!, supabaseKey!);
+            await setCachedResearch(queryHash, query, response, supabaseUrl!, supabaseKey!);
           }
 
           return { topic, response, fromCache: false, queryHash, query };

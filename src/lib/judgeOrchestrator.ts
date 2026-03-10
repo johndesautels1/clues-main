@@ -92,7 +92,7 @@ export async function runJudge(
     invocationCount++;
 
     try {
-      const baseUrl = typeof window !== 'undefined' ? '' : (import.meta.env.VITE_VERCEL_URL ? `https://${import.meta.env.VITE_VERCEL_URL}` : 'http://localhost:3000');
+      const baseUrl = typeof window !== 'undefined' ? '' : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
       const response = await fetch(`${baseUrl}/api/judge-opus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -391,7 +391,7 @@ function applySafeguards(
     : allBatches
         .filter(b => b.isUsable)
         .flatMap(b => b.consensus)
-        .reduce((sum, c, _, arr) => sum + c.stdDev / arr.length, 0);
+        .reduce((sum, c) => sum + c.stdDev, 0) / (allBatches.filter(b => b.isUsable).flatMap(b => b.consensus).length || 1);
 
   const computedConfidence: JudgeSummary['overallConfidence'] =
     avgStdDev <= 5 ? 'high' :
@@ -403,10 +403,10 @@ function applySafeguards(
     report.summaryOfFindings.overallConfidence !== computedConfidence
   ) {
     // Only flag if Opus is MORE confident than the data warrants
-    const confidenceRank = { high: 3, medium: 2, low: 1 };
+    const confidenceRank: Record<string, number> = { high: 3, medium: 2, low: 1 };
     if (
-      confidenceRank[report.summaryOfFindings.overallConfidence] >
-      confidenceRank[computedConfidence]
+      (confidenceRank[report.summaryOfFindings.overallConfidence] ?? 0) >
+      (confidenceRank[computedConfidence] ?? 0)
     ) {
       corrections.push({
         type: 'confidence_override',

@@ -297,9 +297,17 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
       break;
     }
 
-    // No questions left in this module — mark complete, try next
+    // No questions left in this module — mark complete, then null the
+    // reference so the next iteration picks a fresh module.
     activeModule.isComplete = true;
+    const completedId = activeModule.moduleId;
     activeModule = undefined;
+
+    // Guard: if the activeModuleId pointed to the module we just completed,
+    // clear it so we don't re-select the same module.
+    if (state.activeModuleId === completedId) {
+      state.activeModuleId = null;
+    }
   }
 
   if (!activeModule || !nextBelief) return null;

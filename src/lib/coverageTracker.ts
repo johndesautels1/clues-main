@@ -148,7 +148,7 @@ export function initializeCoverage(): CoverageState {
     moduleName: mod.name,
     dataPoints: 0,
     signalStrength: 0,
-    signalConsistency: 1,  // No contradictions when no data
+    signalConsistency: 0,  // No data yet — consistency unknown
     weight: 1 / MODULES.length, // Equal weight until we know the user
     moeContribution: 1 / MODULES.length, // Equal contribution initially
     sources: [],
@@ -301,7 +301,7 @@ export function applyCoverageFromDNW(
     const strength = dnw.severity * 0.1;
 
     // Look up question by number → use its modules field directly
-    const questionNumber = parseInt(dnw.questionId, 10);
+    const questionNumber = parseInt(dnw.questionId.replace(/\D/g, ''), 10);
     const question = !isNaN(questionNumber) ? getMainModuleQuestion(questionNumber) : undefined;
     const matchedModules = new Set<string>(question?.modules ?? []);
 
@@ -348,7 +348,7 @@ export function applyCoverageFromMH(
     const strength = mh.importance * 0.1;
 
     // Look up question by number → use its modules field directly
-    const questionNumber = parseInt(mh.questionId, 10);
+    const questionNumber = parseInt(mh.questionId.replace(/\D/g, ''), 10);
     const question = !isNaN(questionNumber) ? getMainModuleQuestion(questionNumber) : undefined;
     const matchedModules = new Set<string>(question?.modules ?? []);
 

@@ -90,6 +90,7 @@ export function mergeAllMetrics(
     source_paragraph: gm.source_paragraph,
     data_type: gm.data_type,
     research_query: gm.research_query,
+    source: gm.source,
     threshold: gm.threshold,
   }));
 
@@ -287,6 +288,7 @@ export function buildMetricsForEvaluation(params: {
       source_paragraph: gm.source_paragraph,
       data_type: gm.data_type,
       research_query: gm.research_query,
+      source: gm.source,
       threshold: gm.threshold,
     })));
   } else {

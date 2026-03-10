@@ -54,7 +54,7 @@ function getScoreColor(score: number): string {
   if (score >= 60) return 'var(--score-blue, #3b82f6)';
   if (score >= 40) return 'var(--score-yellow, #eab308)';
   if (score >= 20) return 'var(--score-orange, #f97316)';
-  return 'var(--score-red, #ef4444)';
+  return 'var(--score-red, #f87171)';
 }
 
 function ScoreBar({ score, label }: { score: number; label: string }) {

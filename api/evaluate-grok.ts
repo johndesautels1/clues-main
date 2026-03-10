@@ -77,7 +77,8 @@ const GROK_INPUT_RATE = 0.20;
 const GROK_OUTPUT_RATE = 0.50;
 
 function calculateGrokCost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * GROK_INPUT_RATE + outputTokens * GROK_OUTPUT_RATE) / 1_000_000;
+  const cost = (inputTokens * GROK_INPUT_RATE + outputTokens * GROK_OUTPUT_RATE) / 1_000_000;
+  return Number.isFinite(cost) ? cost : 0;
 }
 
 // ─── Build the evaluation prompt ─────────────────────────────
@@ -226,33 +227,51 @@ export default async function handler(
       Array.isArray(body.tavilyResearch) ? body.tavilyResearch : []
     );
 
-    const grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'grok-4-1-fast-reasoning',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a precise quantitative analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 32768,
-        response_format: { type: 'json_object' },
-      }),
+    const requestBody = JSON.stringify({
+      model: 'grok-4-1-fast-reasoning',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a precise quantitative analyst. Return only valid JSON. No markdown fences. No explanation outside the JSON.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 32768,
+      response_format: { type: 'json_object' },
     });
 
-    if (!grokResponse.ok) {
+    // Retry with exponential backoff on 429 (rate limit) and 5xx errors
+    let grokResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: requestBody,
+      });
+
+      if (grokResponse.ok) break;
+
+      const status = grokResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        const backoffMs = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
       const errText = await grokResponse.text();
-      throw new Error(`xAI API returned ${grokResponse.status}: ${errText}`);
+      throw new Error(`xAI API returned ${status}: ${errText}`);
+    }
+
+    if (!grokResponse || !grokResponse.ok) {
+      throw new Error('xAI API request failed after retries');
     }
 
     const grokResult = await grokResponse.json();
@@ -271,7 +290,11 @@ export default async function handler(
       evaluation = JSON.parse(rawText);
     } catch {
       const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      evaluation = JSON.parse(cleaned);
+      try {
+        evaluation = JSON.parse(cleaned);
+      } catch (parseErr) {
+        throw new Error(`Failed to parse Grok JSON response: ${parseErr instanceof Error ? parseErr.message : 'Unknown parse error'}`);
+      }
     }
 
     // ─── Validate required fields ────────────────────────────

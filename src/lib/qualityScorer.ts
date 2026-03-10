@@ -20,7 +20,7 @@ import type { CoverageState } from './coverageTracker';
 import { MODULES } from '../data/modules';
 
 /** Total module count — used for scoring denominators */
-const MODULE_COUNT = MODULES.length; // 24
+const MODULE_COUNT = MODULES.length; // 23
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -231,7 +231,7 @@ function scoreModuleQuality(mod: ModuleProfile, coverage: CoverageState): Module
 
   // Depth: how many distinct sources contribute
   const activeSources = Object.values(mod.sourceBreakdown).filter(c => c > 0).length;
-  const sourceScore = Math.min(100, Math.round((activeSources / 4) * 100)); // 4+ sources = 100%
+  const sourceScore = Math.min(100, Math.round((activeSources / 7) * 100)); // 7 sources total
 
   // Combine with signal strength from coverage tracker
   const depth = Math.round(
