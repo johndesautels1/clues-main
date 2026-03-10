@@ -197,6 +197,14 @@ function calculatePredictionUncertainty(
   return clamp(baseUncertainty * sourceDiscount * dataDiscount, 0.05, 0.95);
 }
 
+// ─── Constants ─────────────────────────────────────────────────────
+
+/** L2 fix: Named constant for MOE reduction per answer (was magic number 0.15) */
+const MOE_REDUCTION_PER_ANSWER = 0.15;
+
+/** L2 fix: Pre-fills provide ~67% of a full answer's information gain */
+const MOE_REDUCTION_PER_PREFILL = 0.10;
+
 // ─── Core Engine ──────────────────────────────────────────────────
 
 /**
@@ -318,11 +326,8 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
 
   if (!activeModule || !nextBelief) return null;
 
-  // Look up the actual QuestionItem from the question library
-  const questionModule = getModuleById(activeModule.moduleId);
-  const questionItem = questionModule?.sections
-    .flatMap((s: QuestionSection) => s.questions)
-    .find((q: QuestionItem) => q.number === nextBelief.questionNumber) ?? null;
+  // L3 fix: Use cached lookup instead of re-flattening sections
+  const questionItem = getQuestionByModuleAndNumber(activeModule.moduleId, nextBelief.questionNumber) ?? null;
 
   if (!questionItem) return null;
 
@@ -350,6 +355,10 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
 /**
  * Record an answer and update the adaptive state.
  * Recalculates EIG for remaining questions based on new information.
+ *
+ * L4 note: Uses structuredClone for React immutability (required by useState).
+ * With ~100 questions per module × ~5 modules ≈ 500 beliefs, clone cost is
+ * ~0.1ms — acceptable for a user-initiated action (answer submission).
  */
 export function recordAnswer(
   state: AdaptiveState,
@@ -370,8 +379,8 @@ export function recordAnswer(
   module.answeredCount++;
   updated.totalAnswered++;
 
-  // Reduce module MOE based on the question's information gain
-  const moeReduction = belief.eig * 0.15; // Each answer reduces MOE
+  // L2 fix: Reduce module MOE based on the question's information gain
+  const moeReduction = belief.eig * MOE_REDUCTION_PER_ANSWER;
   module.moduleMOE = Math.max(0, module.moduleMOE - moeReduction);
 
   // Check if module is now complete (MOE target reached)
@@ -426,11 +435,15 @@ export function markPreFilled(
   belief.preFillValue = preFillValue;
   belief.skipReason = 'Pre-filled from upstream data';
   belief.answered = true;
+  // L1 fix: Pre-fills contribute data (partial answer), so count them as answered
+  // They're also skipped (user didn't manually answer), so increment both.
+  module.answeredCount++;
   module.skippedCount++;
+  updated.totalAnswered++;
   updated.totalSkipped++;
 
-  // Pre-fills provide partial information gain (~67% of full answer's 0.15 factor)
-  const partialReduction = belief.eig * 0.1;
+  // L2 fix: Pre-fills provide partial information gain
+  const partialReduction = belief.eig * MOE_REDUCTION_PER_PREFILL;
   module.moduleMOE = Math.max(0, module.moduleMOE - partialReduction);
 
   // Check if module is now complete (MOE target reached)

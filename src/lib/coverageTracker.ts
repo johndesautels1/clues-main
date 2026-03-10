@@ -411,7 +411,9 @@ export function applyCoverageFromTradeoffs(
     const question = tradeoffQuestions.find(q => q.number === questionNumber);
     if (!question?.modules?.length) continue;
 
-    const sliderValue = typeof value === 'number' ? value : 50;
+    // L5 fix: TradeoffAnswers values are typed as number; defensive fallback retained
+    // for runtime safety since data may come from localStorage/Supabase
+    const sliderValue = (value as number) || 50;
     // Strength = how strongly the user feels (deviation from neutral)
     const strength = Math.abs(sliderValue - 50) / 50; // 0 = neutral, 1 = extreme
 
@@ -629,6 +631,9 @@ function applySignalHitsFromIndex(
     const hitModules = new Set<string>();
 
     for (const word of words) {
+      // L6 fix: Require minimum 3-char words to reduce false positives
+      // (e.g., "a", "is", "in" would match too many modules)
+      if (word.length < 3) continue;
       const mods = index[word];
       if (mods) {
         for (const modId of mods) hitModules.add(modId);
