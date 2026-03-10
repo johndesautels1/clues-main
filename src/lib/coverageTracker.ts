@@ -231,6 +231,9 @@ export function applyCoverageFromParagraphical(
 /**
  * Update coverage from Demographics answers.
  * Certain demographic facts deterministically boost module relevance.
+ *
+ * Keys match the questionnaire storage format: "q{number}" (e.g., q8, q30).
+ * Values may be string, number, boolean, or string[] (Multi-select at runtime).
  */
 export function applyCoverageFromDemographics(
   state: CoverageState,
@@ -238,33 +241,50 @@ export function applyCoverageFromDemographics(
 ): CoverageState {
   const updated = structuredClone(state);
 
+  // Helper: check if a value (which may be string[] at runtime for Multi-select)
+  // contains a substring. Handles string, string[], boolean, and number.
+  const valIncludes = (val: unknown, target: string): boolean => {
+    if (val === undefined || val === null) return false;
+    if (Array.isArray(val)) return val.some(v => String(v).toLowerCase().includes(target));
+    return String(val).toLowerCase().includes(target);
+  };
+
+  const isTruthy = (val: unknown): boolean =>
+    val === true || val === 'true' || val === 'Yes' || val === 'yes';
+
   const boosts: Array<{ moduleId: string; strength: number }> = [];
 
-  // Has children → family_children, education_learning
-  if (demographics.has_children || demographics.children_count) {
+  // Q8: "Do you have children?" (Yes/No) → family_children, education_learning
+  if (isTruthy(demographics.q8)) {
     boosts.push({ moduleId: 'family_children', strength: 0.4 });
     boosts.push({ moduleId: 'education_learning', strength: 0.3 });
   }
 
-  // Has pets → pets_animals
-  if (demographics.has_pets || demographics.pet_type) {
+  // Q30: "Do you have pets that would relocate with you?" (Yes/No) → pets_animals
+  if (isTruthy(demographics.q30)) {
     boosts.push({ moduleId: 'pets_animals', strength: 0.4 });
   }
 
-  // Remote work → technology_connectivity, professional_career
-  if (demographics.employment_type === 'remote' || demographics.employment === 'remote') {
+  // Q19: "Preferred work arrangement?" (Single-select: "fully remote", "hybrid", etc.)
+  // Q17: "Employment plan in new location?" (Multi-select: "remote work", etc.)
+  // → technology_connectivity, professional_career
+  if (valIncludes(demographics.q19, 'remote') || valIncludes(demographics.q17, 'remote')) {
     boosts.push({ moduleId: 'technology_connectivity', strength: 0.3 });
     boosts.push({ moduleId: 'professional_career', strength: 0.3 });
   }
 
-  // Retiree → health_wellness up, professional_career down
-  if (demographics.employment_type === 'retired' || demographics.employment === 'retired') {
+  // Q16: "Current employment status?" (Multi-select: includes "retired")
+  // Q17: "Employment plan?" (Multi-select: includes "retired")
+  // → health_wellness up, professional_career down
+  if (valIncludes(demographics.q16, 'retired') || valIncludes(demographics.q17, 'retired')) {
     boosts.push({ moduleId: 'health_wellness', strength: 0.3 });
     boosts.push({ moduleId: 'professional_career', strength: -0.2 });
   }
 
-  // Has partner → housing needs increase
-  if (demographics.relationship_status === 'partnered' || demographics.relationship_status === 'married') {
+  // Q5: "Relationship status?" (Single-select: "married", "domestic partnership", etc.)
+  // → housing needs increase
+  const q5 = String(demographics.q5 ?? '').toLowerCase();
+  if (q5 === 'married' || q5 === 'domestic partnership' || q5 === 'in a relationship') {
     boosts.push({ moduleId: 'housing_property', strength: 0.15 });
   }
 
