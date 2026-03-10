@@ -161,9 +161,17 @@ export function aggregateProfile(session: UserSession): AggregatedProfile {
     allSignals.push(...moduleSignals);
   }
 
+  // M1 fix: Group signals by moduleId using a Map (O(N) instead of O(N×M))
+  const signalsByModule = new Map<string, ProfileSignal[]>();
+  for (const s of allSignals) {
+    const arr = signalsByModule.get(s.moduleId);
+    if (arr) arr.push(s);
+    else signalsByModule.set(s.moduleId, [s]);
+  }
+
   // ─── Build per-module profiles ──────────────────────────────
   const moduleProfiles: ModuleProfile[] = MODULES.map(mod => {
-    const signals = allSignals.filter(s => s.moduleId === mod.id);
+    const signals = signalsByModule.get(mod.id) ?? [];
     signals.sort((a, b) => b.confidence - a.confidence);
 
     const sourceBreakdown: Record<SignalSource, number> = {
@@ -174,9 +182,14 @@ export function aggregateProfile(session: UserSession): AggregatedProfile {
       sourceBreakdown[s.source]++;
     }
 
-    const avgSignalValue = signals.length > 0
-      ? signals.reduce((sum, s) => sum + s.value, 0) / signals.length
-      : 0;
+    // M4 fix: Confidence-weighted average signal value
+    let avgSignalValue = 0;
+    if (signals.length > 0) {
+      const totalConfidence = signals.reduce((sum, s) => sum + s.confidence, 0);
+      avgSignalValue = totalConfidence > 0
+        ? signals.reduce((sum, s) => sum + s.value * s.confidence, 0) / totalConfidence
+        : signals.reduce((sum, s) => sum + s.value, 0) / signals.length;
+    }
 
     return {
       moduleId: mod.id,
@@ -208,7 +221,10 @@ export function aggregateProfile(session: UserSession): AggregatedProfile {
     sourceCounts,
     completedModuleIds: [...session.completedModules],
     globeRegion: session.globe?.region ?? null,
-    aggregatedAt: new Date().toISOString(),
+    // L1 fix: Deterministic fingerprint based on data count (not wall clock)
+    // so memoization can detect actual data changes. Consumers needing a
+    // "when" timestamp can record it at persist time.
+    aggregatedAt: `${allSignals.length}_${session.completedModules.length}_${session.currentTier}`,
   };
 }
 
@@ -223,7 +239,7 @@ function extractParagraphicalSignals(extraction: GeminiExtraction): ProfileSigna
     signals.push({
       moduleId: metric.category,
       key: `metric_${metric.id}`,
-      value: metric.score / 100, // Normalize 0-100 → 0-1
+      value: Math.min(1, Math.max(0, metric.score / 100)), // M2 fix: Clamp to 0-1 range
       source: 'paragraphical',
       confidence: 0.7, // Gemini extraction confidence
       rawValue: metric.score,
@@ -242,12 +258,19 @@ function extractParagraphicalSignals(extraction: GeminiExtraction): ProfileSigna
     });
   }
 
+  // H1 fix: DNW/MH paragraph signal matching uses word-boundary regex
+  // instead of naive substring includes to prevent false positives
+  // (e.g. "Art" matching "Starting", "Health" matching "healthcare").
+  // Only match shortNames ≥ 4 chars to avoid noisy short matches.
+
   // DNW signals from paragraph text
   if (extraction.dnw_signals) {
     for (const signal of extraction.dnw_signals) {
-      // Spread across matching modules using keyword matching
+      const signalLower = signal.toLowerCase();
       for (const mod of MODULES) {
-        if (signal.toLowerCase().includes(mod.shortName.toLowerCase())) {
+        if (mod.shortName.length < 4) continue; // Skip short names to avoid false positives
+        const pattern = new RegExp(`\\b${mod.shortName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        if (pattern.test(signalLower)) {
           signals.push({
             moduleId: mod.id,
             key: `para_dnw_${signal.slice(0, 30)}`,
@@ -264,8 +287,11 @@ function extractParagraphicalSignals(extraction: GeminiExtraction): ProfileSigna
   // MH signals from paragraph text
   if (extraction.mh_signals) {
     for (const signal of extraction.mh_signals) {
+      const signalLower = signal.toLowerCase();
       for (const mod of MODULES) {
-        if (signal.toLowerCase().includes(mod.shortName.toLowerCase())) {
+        if (mod.shortName.length < 4) continue;
+        const pattern = new RegExp(`\\b${mod.shortName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        if (pattern.test(signalLower)) {
           signals.push({
             moduleId: mod.id,
             key: `para_mh_${signal.slice(0, 30)}`,
@@ -286,31 +312,40 @@ function extractParagraphicalSignals(extraction: GeminiExtraction): ProfileSigna
 function extractDemographicSignals(demo: DemographicAnswers): ProfileSignal[] {
   const signals: ProfileSignal[] = [];
 
-  // Map known demographic fields to modules
-  const demoRules: Array<{ key: string; test: (v: unknown) => boolean; moduleId: string; value: number }> = [
-    { key: 'has_children', test: v => v === true || v === 'true' || v === 'yes', moduleId: 'family_children', value: 0.8 },
-    { key: 'has_pets', test: v => v === true || v === 'true' || v === 'yes', moduleId: 'pets_animals', value: 0.8 },
-    { key: 'employment', test: v => v === 'remote', moduleId: 'technology_connectivity', value: 0.7 },
-    { key: 'employment', test: v => v === 'retired', moduleId: 'health_wellness', value: 0.6 },
-    { key: 'relationship', test: v => typeof v === 'string' && ['married', 'partnered'].includes(v), moduleId: 'housing_property', value: 0.5 },
+  // C1 fix: Map known demographic fields to modules.
+  // Runtime data uses semantic keys (has_children, employment_type, relationship_status etc.)
+  // matching coverageTracker.ts and moduleRelevanceEngine.ts patterns.
+  // Each rule checks both primary and alternate key names for robustness.
+  const demoRules: Array<{ keys: string[]; test: (v: unknown) => boolean; moduleId: string; value: number }> = [
+    { keys: ['has_children'], test: v => v === true || v === 'true' || v === 'yes', moduleId: 'family_children', value: 0.8 },
+    { keys: ['has_pets'], test: v => v === true || v === 'true' || v === 'yes', moduleId: 'pets_animals', value: 0.8 },
+    { keys: ['employment_type', 'employment'], test: v => v === 'remote', moduleId: 'technology_connectivity', value: 0.7 },
+    { keys: ['employment_type', 'employment'], test: v => v === 'retired', moduleId: 'health_wellness', value: 0.6 },
+    { keys: ['relationship_status', 'relationship'], test: v => typeof v === 'string' && ['married', 'partnered'].includes(v), moduleId: 'housing_property', value: 0.5 },
   ];
 
   for (const rule of demoRules) {
-    const rawValue = demo[rule.key];
-    if (rawValue !== undefined && rule.test(rawValue)) {
-      signals.push({
-        moduleId: rule.moduleId,
-        key: `demo_${rule.key}`,
-        value: rule.value,
-        source: 'demographics',
-        confidence: 0.9, // Demographics are factual
-        rawValue: rawValue as string | number | boolean,
-      });
+    // C1 fix: Try each key variant until a match is found
+    for (const key of rule.keys) {
+      const rawValue = demo[key];
+      if (rawValue !== undefined && rule.test(rawValue)) {
+        signals.push({
+          moduleId: rule.moduleId,
+          key: `demo_${key}`,
+          value: rule.value,
+          source: 'demographics',
+          confidence: 0.9, // Demographics are factual
+          rawValue: rawValue as string | number | boolean,
+        });
+        break; // Only one signal per rule
+      }
     }
   }
 
   // All demographics contribute a baseline signal to every module
-  const TOTAL_DEMO_QUESTIONS = 34; // Demographics section has 34 questions (q1-q34)
+  // L2 fix: Derive count from actual question data instead of hardcoding
+  const demoQuestions = getModuleQuestions('main_module').filter((q: QuestionItem) => q.number <= 34);
+  const TOTAL_DEMO_QUESTIONS = demoQuestions.length || 34; // fallback to 34 if lookup fails
   const demoCount = Object.keys(demo).length;
   if (demoCount > 0) {
     for (const mod of MODULES) {
@@ -334,10 +369,10 @@ function extractDNWSignals(dnw: DNWAnswers): ProfileSignal[] {
   const mainQuestions = getModuleQuestions('main_module');
 
   for (const answer of dnw) {
-    const qNum = parseInt(answer.questionId.replace(/\D/g, ''), 10);
+    const qNum = parseInt((answer.questionId.match(/(\d+)$/) ?? ['0'])[0], 10);
     const question = mainQuestions.find((q: QuestionItem) => q.number === qNum);
     const moduleIds = question?.modules ?? [];
-    const normalizedSeverity = answer.severity / 5; // 1-5 → 0.2-1.0
+    const normalizedSeverity = (answer.severity - 1) / 4; // L3 fix: 1-5 → 0.0-1.0 (full range)
 
     for (const moduleId of moduleIds) {
       signals.push({
@@ -360,10 +395,10 @@ function extractMHSignals(mh: MHAnswers): ProfileSignal[] {
   const mainQuestions = getModuleQuestions('main_module');
 
   for (const answer of mh) {
-    const qNum = parseInt(answer.questionId.replace(/\D/g, ''), 10);
+    const qNum = parseInt((answer.questionId.match(/(\d+)$/) ?? ['0'])[0], 10);
     const question = mainQuestions.find((q: QuestionItem) => q.number === qNum);
     const moduleIds = question?.modules ?? [];
-    const normalizedImportance = answer.importance / 5;
+    const normalizedImportance = (answer.importance - 1) / 4; // L3 fix: 1-5 → 0.0-1.0
 
     for (const moduleId of moduleIds) {
       signals.push({
@@ -386,10 +421,13 @@ function extractTradeoffSignals(tradeoffs: TradeoffAnswers): ProfileSignal[] {
   const tradeoffQuestions = getModuleQuestions('tradeoff_questions');
 
   for (const [key, sliderValue] of Object.entries(tradeoffs)) {
-    const qNum = parseInt(key.replace(/\D/g, ''), 10);
+    const qNum = parseInt((key.match(/(\d+)$/) ?? ['0'])[0], 10);
     const question = tradeoffQuestions.find((q: QuestionItem) => q.number === qNum);
     const moduleIds = question?.modules ?? [];
     const strength = Math.abs(sliderValue - 50) / 50;
+
+    // M3 fix: Skip neutral tradeoffs (slider=50, strength=0) — no signal information
+    if (strength === 0) continue;
 
     for (const moduleId of moduleIds) {
       signals.push({
@@ -412,7 +450,7 @@ function extractGeneralSignals(general: GeneralAnswers): ProfileSignal[] {
   const generalQuestions = getModuleQuestions('general_questions');
 
   for (const [key, value] of Object.entries(general)) {
-    const qNum = parseInt(key.replace(/\D/g, ''), 10);
+    const qNum = parseInt((key.match(/(\d+)$/) ?? ['0'])[0], 10);
     const question = generalQuestions.find((q: QuestionItem) => q.number === qNum);
     const moduleIds = question?.modules ?? [];
 
@@ -452,15 +490,31 @@ function extractMiniModuleSignals(moduleId: string): ProfileSignal[] {
     if (!stored) return signals;
 
     const answers = JSON.parse(stored) as Record<string, string | number | boolean | string[]>;
-    const keys = Object.keys(answers).filter(k => k.startsWith(`${moduleId}__q`));
+    // L5 fix: Match any key starting with the moduleId prefix (not just __q)
+    const keys = Object.keys(answers).filter(k => k.startsWith(`${moduleId}__`));
 
     for (const key of keys) {
       const rawValue = answers[key];
       let normalized = 0.5;
 
       if (typeof rawValue === 'number') {
-        // Slider (0-100) or Likert (1-5)
-        normalized = rawValue <= 5 ? rawValue / 5 : rawValue / 100;
+        // H3 fix: More robust number normalization.
+        // 0-1 range: already normalized → use as-is
+        // 1-5 range: Likert scale → divide by 5
+        // 6-10 range: Likert-10 scale → divide by 10
+        // 11-100 range: Slider → divide by 100
+        // > 100: Clamp to 1.0 (unexpected scale)
+        if (rawValue >= 0 && rawValue <= 1) {
+          normalized = rawValue;
+        } else if (rawValue <= 5) {
+          normalized = rawValue / 5;
+        } else if (rawValue <= 10) {
+          normalized = rawValue / 10;
+        } else if (rawValue <= 100) {
+          normalized = rawValue / 100;
+        } else {
+          normalized = 1.0; // Clamp unexpected large values
+        }
       } else if (typeof rawValue === 'boolean') {
         normalized = rawValue ? 0.8 : 0.2;
       } else if (rawValue === 'true' || rawValue === 'yes') {

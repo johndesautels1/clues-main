@@ -144,7 +144,8 @@ export function determineWinner(
     ? Math.round((winner.overallScore - runnerUp.overallScore) * 100) / 100
     : winner.overallScore;
 
-  const isTie = runnerUp !== null && Math.abs(scoreDifference) < CITY_TIE_THRESHOLD;
+  // scoreDifference is always >= 0 (rankings sorted descending)
+  const isTie = runnerUp !== null && scoreDifference < CITY_TIE_THRESHOLD;
 
   // Identify advantage categories
   const winnerAdvantageCategories: string[] = [];

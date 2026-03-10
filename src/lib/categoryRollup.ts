@@ -34,8 +34,15 @@ import { MODULES } from '../data/modules';
 
 // ─── Category Weight Derivation ──────────────────────────────
 
-/** All 23 category IDs from modules.ts */
+/** All category IDs from modules.ts (derived at module load time) */
 const ALL_CATEGORY_IDS = MODULES.map((m) => m.id);
+
+// L1: Runtime check — catch if modules.ts count drifts from DEFAULT_CATEGORY_COUNT
+if (ALL_CATEGORY_IDS.length !== DEFAULT_CATEGORY_COUNT) {
+  console.warn(
+    `[CategoryRollup] Module count mismatch: MODULES has ${ALL_CATEGORY_IDS.length} entries but DEFAULT_CATEGORY_COUNT is ${DEFAULT_CATEGORY_COUNT}. Update smartScore.ts DEFAULT_CATEGORY_COUNT.`
+  );
+}
 
 /**
  * Derive category weights from persona preset and/or paragraph emphasis.

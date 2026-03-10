@@ -32,6 +32,7 @@ import type {
 } from '../src/types/judge';
 // EvaluatorModel used for VALID_MODELS set below
 import type { EvaluatorModel } from '../src/types/evaluation';
+import { handleCors, stripThinkTags } from './_shared/evaluation-utils';
 
 // ─── Cost tracking helper (server-side, writes to Supabase directly) ──
 async function trackCost(entry: {
@@ -77,7 +78,8 @@ const OPUS_INPUT_RATE = 15.00;
 const OPUS_OUTPUT_RATE = 75.00;
 
 function calculateOpusCost(inputTokens: number, outputTokens: number): number {
-  return (inputTokens * OPUS_INPUT_RATE + outputTokens * OPUS_OUTPUT_RATE) / 1_000_000;
+  const cost = (inputTokens * OPUS_INPUT_RATE + outputTokens * OPUS_OUTPUT_RATE) / 1_000_000;
+  return Number.isFinite(cost) ? cost : 0;
 }
 
 // ─── Build the judge prompt ──────────────────────────────────
@@ -209,6 +211,8 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
+  if (handleCors(req, res)) return;
+
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -256,7 +260,7 @@ export default async function handler(
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
+          'anthropic-version': '2024-10-22',
         },
         body: JSON.stringify({
           model: 'claude-opus-4-6',
@@ -294,12 +298,15 @@ export default async function handler(
     const textBlock = contentBlocks.find((b: { type: string }) => b.type === 'text');
     const rawText = textBlock?.text ?? '';
 
+    // Strip <think> tags (defensive — Opus may emit them in some configurations)
+    const cleanedText = stripThinkTags(rawText);
+
     let judgeResponse: Omit<JudgeReport, 'reportId' | 'judgedAt'>;
     try {
-      judgeResponse = JSON.parse(rawText);
+      judgeResponse = JSON.parse(cleanedText);
     } catch {
       try {
-        const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const cleaned = cleanedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         judgeResponse = JSON.parse(cleaned);
       } catch (retryErr) {
         throw new Error(
@@ -353,8 +360,8 @@ export default async function handler(
     const outputTokens = usage?.output_tokens ?? 0;
     const costUsd = calculateOpusCost(inputTokens, outputTokens);
 
-    // Track cost (non-blocking)
-    trackCost({
+    // Track cost (fire-and-forget — trackCost handles its own errors with console.warn)
+    void trackCost({
       sessionId: body.sessionId,
       model: 'claude-opus-4-6',
       endpoint: '/api/judge-opus',
@@ -362,7 +369,7 @@ export default async function handler(
       outputTokens,
       costUsd,
       durationMs,
-    }).catch(() => {});
+    });
 
     // ─── Return report + metadata ────────────────────────────
     res.status(200).json({
@@ -384,7 +391,6 @@ export default async function handler(
     console.error('[/api/judge-opus] Opus 4.6 judge failed:', message);
     res.status(500).json({
       error: 'Opus judge failed',
-      detail: message,
       durationMs,
     });
   }

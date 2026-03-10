@@ -48,7 +48,7 @@ function getModuleAccent(moduleId: string): string {
     technology_connectivity: '#06b6d4', transportation_mobility: '#06b6d4', education_learning: '#06b6d4', social_values_governance: '#06b6d4',
     food_dining: '#f59e0b', shopping_services: '#f59e0b', outdoor_recreation: '#f59e0b', entertainment_nightlife: '#f59e0b',
     family_children: '#22c55e', neighborhood_urban_design: '#22c55e', environment_community_appearance: '#22c55e',
-    religion_spirituality: '#a855f7', sexual_beliefs_practices_laws: '#a855f7', arts_culture: '#a855f7', cultural_heritage_traditions: '#a855f7', pets_animals: '#a855f7',
+    religion_spirituality: '#c084fc', sexual_beliefs_practices_laws: '#c084fc', arts_culture: '#c084fc', cultural_heritage_traditions: '#c084fc', pets_animals: '#c084fc',
   };
   return tierColors[moduleId] || '#60a5fa';
 }
@@ -124,10 +124,10 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
       greenLightShownRef.current = true;
       toast.success(
         'Congratulations! Your data is now comprehensive enough for a full evaluation report. You can keep refining or head to your Dashboard.',
-        { duration: 8000, icon: '\u2728' }
+        { duration: 8000, icon: '\u2713' }
       );
     }
-  }, [coverage?.isReportReady, phase]);
+  }, [coverage, phase]);
 
   // Auto-detect returning user
   useEffect(() => {
@@ -231,7 +231,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
     };
   }, [ms.nav.questionIndex, ms.visibleQuestions.length, ms.currentSection.title, ms.progress, moduleData.moduleName]);
 
-  const oliviaSection = {
+  const oliviaSection = useMemo(() => ({
     id: ms.nav.sectionIndex,
     title: ms.currentSection.title,
     cat: moduleData.moduleName,
@@ -240,9 +240,9 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
     icon: moduleDef?.icon ?? '',
     hint: '',
     oliviaContext,
-  };
+  }), [ms.nav.sectionIndex, ms.currentSection.title, moduleData.moduleName, ms.currentQuestion?.question, accent, moduleDef?.icon, oliviaContext]);
 
-  const currentAnswer = String(ms.getAnswer(ms.currentQuestion?.number ?? 0) || '');
+  const currentAnswer = String(ms.getAnswer(ms.currentQuestion?.number ?? 0) ?? '');
 
   // ═══════════════════════════════════════════════════════════════
   // WELCOME PHASE
@@ -259,7 +259,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
           <div className="mq-welcome-card" style={{ animation: 'mq-float 0s' }}>
             <div style={{ marginBottom: 4 }}>
               <span style={{ fontFamily: "'Cormorant',serif", fontSize: 'clamp(36px,5vw,50px)', fontWeight: 300, color: C.textPrimary, letterSpacing: '0.18em' }}>CLUES</span>
-              <span style={{ fontFamily: "'Cormorant',serif", fontSize: 'clamp(20px,3vw,28px)', color: '#C4A87A', verticalAlign: 'super', marginLeft: 2 }}>&trade;</span>
+              <span style={{ fontFamily: "'Cormorant',serif", fontSize: 'clamp(20px,3vw,28px)', color: 'var(--clues-gold)', verticalAlign: 'super', marginLeft: 2 }}>&trade;</span>
             </div>
             <p style={{ fontFamily: "'Outfit',sans-serif", fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.textMuted, marginBottom: 36 }}>
               {moduleData.moduleName}
@@ -299,7 +299,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '6px 12px', background: 'rgba(196,168,122,0.06)',
                   border: '1px solid rgba(196,168,122,0.16)', borderRadius: 20,
-                  fontFamily: "'Outfit',sans-serif", fontSize: 11, color: '#C4A87A', letterSpacing: '0.06em',
+                  fontFamily: "'Outfit',sans-serif", fontSize: 11, color: 'var(--clues-gold)', letterSpacing: '0.06em',
                 }}>
                   <span style={{ fontSize: 12 }}>{f.icon}</span>{f.label}
                 </div>
@@ -437,9 +437,9 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
                 onClick={() => { setPhase('active'); setContentVisible(true); }}
                 style={{
                   padding: '12px 24px',
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid #1f2937',
+                  background: 'var(--bg-glass)', border: '1px solid var(--border-glass)',
                   borderRadius: 12, fontFamily: "'Outfit',sans-serif", fontSize: 13,
-                  color: C.textSecondary, cursor: 'pointer',
+                  color: C.textSecondary, cursor: 'pointer', minHeight: 44,
                 }}
               >
                 Back to Questions
@@ -451,11 +451,11 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
                   background: 'linear-gradient(135deg,rgba(34,197,94,0.15) 0%,rgba(34,197,94,0.07) 100%)',
                   border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12,
                   fontFamily: "'Outfit',sans-serif", fontSize: 14, fontWeight: 500,
-                  color: '#22c55e', cursor: 'pointer', letterSpacing: '0.06em',
-                  display: 'flex', alignItems: 'center', gap: 8,
+                  color: 'var(--score-green)', cursor: 'pointer', letterSpacing: '0.06em',
+                  display: 'flex', alignItems: 'center', gap: 8, minHeight: 44,
                 }}
               >
-                Submit &amp; Continue to Dashboard <span aria-hidden="true">&rarr;</span>
+                Submit & Continue to Dashboard <span aria-hidden="true">&rarr;</span>
               </button>
             </div>
           </div>
@@ -517,7 +517,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
           {/* Progress ring */}
           <div className="mq-progress-ring">
             <svg width="28" height="28" aria-hidden="true" style={{ transform: 'rotate(-90deg)' }}>
-              <circle cx="14" cy="14" r="11" fill="none" stroke="#1f2937" strokeWidth="2.5" />
+              <circle cx="14" cy="14" r="11" fill="none" stroke="var(--border-glass)" strokeWidth="2.5" />
               <circle cx="14" cy="14" r="11" fill="none" stroke={accent} strokeWidth="2.5"
                 strokeDasharray={2 * Math.PI * 11} strokeDashoffset={2 * Math.PI * 11 * (1 - ms.progress.percentage / 100)}
                 strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(0.22,1,0.36,1), stroke 0.5s ease' }}
@@ -531,7 +531,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
           {/* Close */}
           <button
             onClick={() => navigate('/')} className="mq-icon-btn" aria-label="Close"
-            style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)', color: '#f87171', fontSize: 18 }}
+            style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.2)', color: 'var(--score-red, #f87171)', fontSize: 18 }}
           >&times;</button>
         </div>
       </header>
@@ -567,7 +567,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
       {/* ─── PROGRESS BAR ─── */}
       <div role="progressbar" aria-valuenow={ms.progress.answeredCount} aria-valuemin={0} aria-valuemax={ms.progress.totalQuestions}
         aria-label={`${ms.progress.answeredCount} of ${ms.progress.totalQuestions} questions answered`}
-        style={{ position: 'fixed', top: 96, left: 0, right: 0, zIndex: 98, height: 2, background: 'rgba(255,255,255,0.04)' }}
+        style={{ position: 'fixed', top: 96, left: 0, right: 0, zIndex: 98, height: 2, background: 'var(--border-glass)' }}
       >
         <div style={{
           height: '100%', borderRadius: '0 1px 1px 0',
@@ -584,7 +584,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
           position: 'fixed', top: 100, left: 0, right: 0, zIndex: 97,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
           padding: '6px 20px',
-          background: 'rgba(10,14,26,0.85)', backdropFilter: 'blur(8px)',
+          background: 'var(--bg-glass-heavy, rgba(10,14,26,0.85))', backdropFilter: 'blur(8px)',
           borderBottom: '1px solid rgba(96,165,250,0.12)',
         }}>
           {/* EIG priority badge */}
@@ -712,7 +712,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               <QuestionRenderer
                 question={ms.currentQuestion}
                 value={ms.getAnswer(ms.currentQuestion.number)}
-                onChange={(val) => handleAnswerWithAdaptive(ms.currentQuestion.number, val)}
+                onChange={(val) => handleAnswerWithAdaptive(ms.currentQuestion!.number, val)}
                 accent={accent}
               />
 
@@ -720,7 +720,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               {skipLogic.getSkipInfo(ms.currentQuestion.number) && (
                 <SkipIndicator
                   skipInfo={skipLogic.getSkipInfo(ms.currentQuestion.number)!}
-                  onSkip={() => handleSkipQuestion(ms.currentQuestion.number)}
+                  onSkip={() => handleSkipQuestion(ms.currentQuestion!.number)}
                 />
               )}
             </div>

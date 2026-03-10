@@ -197,6 +197,14 @@ function calculatePredictionUncertainty(
   return clamp(baseUncertainty * sourceDiscount * dataDiscount, 0.05, 0.95);
 }
 
+// ─── Constants ─────────────────────────────────────────────────────
+
+/** L2 fix: Named constant for MOE reduction per answer (was magic number 0.15) */
+const MOE_REDUCTION_PER_ANSWER = 0.15;
+
+/** L2 fix: Pre-fills provide ~67% of a full answer's information gain */
+const MOE_REDUCTION_PER_PREFILL = 0.10;
+
 // ─── Core Engine ──────────────────────────────────────────────────
 
 /**
@@ -285,15 +293,21 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
   activeModule = state.modules.find(m => m.moduleId === state.activeModuleId && !m.isComplete);
 
   // Search through modules for one with unanswered questions
-  for (let attempts = 0; attempts < state.modules.length; attempts++) {
+  // NOTE: This function is READ-ONLY — it must not mutate the passed state.
+  // It marks modules as complete locally to avoid re-selecting them in the loop,
+  // but these mutations are on the cloned reference only when called via setState.
+  const stateClone = structuredClone(state);
+  activeModule = stateClone.modules.find(m => m.moduleId === stateClone.activeModuleId && !m.isComplete);
+
+  for (let attempts = 0; attempts < stateClone.modules.length; attempts++) {
     if (!activeModule) {
-      activeModule = state.modules.find(m => !m.isComplete);
+      activeModule = stateClone.modules.find(m => !m.isComplete);
       if (!activeModule) return null; // All modules complete
     }
 
     nextBelief = activeModule.questions.find(q => !q.answered && !q.skipReason);
     if (nextBelief) {
-      state.activeModuleId = activeModule.moduleId;
+      stateClone.activeModuleId = activeModule.moduleId;
       break;
     }
 
@@ -305,18 +319,15 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
 
     // Guard: if the activeModuleId pointed to the module we just completed,
     // clear it so we don't re-select the same module.
-    if (state.activeModuleId === completedId) {
-      state.activeModuleId = null;
+    if (stateClone.activeModuleId === completedId) {
+      stateClone.activeModuleId = null;
     }
   }
 
   if (!activeModule || !nextBelief) return null;
 
-  // Look up the actual QuestionItem from the question library
-  const questionModule = getModuleById(activeModule.moduleId);
-  const questionItem = questionModule?.sections
-    .flatMap((s: QuestionSection) => s.questions)
-    .find((q: QuestionItem) => q.number === nextBelief.questionNumber) ?? null;
+  // L3 fix: Use cached lookup instead of re-flattening sections
+  const questionItem = getQuestionByModuleAndNumber(activeModule.moduleId, nextBelief.questionNumber) ?? null;
 
   if (!questionItem) return null;
 
@@ -344,6 +355,10 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
 /**
  * Record an answer and update the adaptive state.
  * Recalculates EIG for remaining questions based on new information.
+ *
+ * L4 note: Uses structuredClone for React immutability (required by useState).
+ * With ~100 questions per module × ~5 modules ≈ 500 beliefs, clone cost is
+ * ~0.1ms — acceptable for a user-initiated action (answer submission).
  */
 export function recordAnswer(
   state: AdaptiveState,
@@ -364,8 +379,8 @@ export function recordAnswer(
   module.answeredCount++;
   updated.totalAnswered++;
 
-  // Reduce module MOE based on the question's information gain
-  const moeReduction = belief.eig * 0.15; // Each answer reduces MOE
+  // L2 fix: Reduce module MOE based on the question's information gain
+  const moeReduction = belief.eig * MOE_REDUCTION_PER_ANSWER;
   module.moduleMOE = Math.max(0, module.moduleMOE - moeReduction);
 
   // Check if module is now complete (MOE target reached)
@@ -420,12 +435,33 @@ export function markPreFilled(
   belief.preFillValue = preFillValue;
   belief.skipReason = 'Pre-filled from upstream data';
   belief.answered = true;
+  // L1 fix: Pre-fills contribute data (partial answer), so count them as answered
+  // They're also skipped (user didn't manually answer), so increment both.
+  module.answeredCount++;
   module.skippedCount++;
+  updated.totalAnswered++;
   updated.totalSkipped++;
 
-  // Pre-fills provide partial information gain (~67% of full answer's 0.15 factor)
-  const partialReduction = belief.eig * 0.1;
+  // L2 fix: Pre-fills provide partial information gain
+  const partialReduction = belief.eig * MOE_REDUCTION_PER_PREFILL;
   module.moduleMOE = Math.max(0, module.moduleMOE - partialReduction);
+
+  // Check if module is now complete (MOE target reached)
+  if (module.moduleMOE <= 0.02) {
+    module.isComplete = true;
+    for (const q of module.questions) {
+      if (!q.answered) {
+        q.skipReason = 'Module confidence target reached';
+        module.skippedCount++;
+        updated.totalSkipped++;
+      }
+    }
+  }
+
+  // Recalculate overall state (same as recordAnswer)
+  updated.overallMOE = calculateOverallMOE(updated);
+  updated.estimatedRemaining = estimateRemainingQuestions(updated.modules);
+  updated.isSessionComplete = updated.overallMOE <= 0.02;
 
   return updated;
 }
@@ -451,16 +487,27 @@ export function skipQuestion(
   module.skippedCount++;
   updated.totalSkipped++;
 
-  // No MOE reduction for skipped questions
+  // No MOE reduction for skipped questions, but recalculate estimated remaining
+  updated.estimatedRemaining = estimateRemainingQuestions(updated.modules);
+
   return updated;
 }
 
 // ─── Internal Helpers ─────────────────────────────────────────────
 
-/** Look up a QuestionItem by module and question number (for cross-module overlap checks) */
+/** M3 fix: Cached question lookup — avoids re-flattening sections on every call */
+const _questionCache = new Map<string, Map<number, QuestionItem>>();
 function getQuestionByModuleAndNumber(moduleId: string, questionNumber: number): QuestionItem | undefined {
-  const questions = getModuleQuestions(moduleId);
-  return questions.find(q => q.number === questionNumber);
+  let moduleMap = _questionCache.get(moduleId);
+  if (!moduleMap) {
+    moduleMap = new Map();
+    const questions = getModuleQuestions(moduleId);
+    for (const q of questions) {
+      moduleMap.set(q.number, q);
+    }
+    _questionCache.set(moduleId, moduleMap);
+  }
+  return moduleMap.get(questionNumber);
 }
 
 /**
@@ -515,14 +562,15 @@ function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: Quest
 function calculateOverallMOE(state: AdaptiveState): number {
   if (state.modules.length === 0) return 0;
 
-  let totalMOE = 0;
-  let count = 0;
+  // M2 fix: Use weighted average by moduleWeight instead of simple average
+  let totalWeightedMOE = 0;
+  let totalWeight = 0;
   for (const module of state.modules) {
-    totalMOE += module.moduleMOE;
-    count++;
+    totalWeightedMOE += module.moduleMOE * module.moduleWeight;
+    totalWeight += module.moduleWeight;
   }
 
-  return count > 0 ? totalMOE / count : 0;
+  return totalWeight > 0 ? totalWeightedMOE / totalWeight : 0;
 }
 
 function estimateRemainingQuestions(modules: ModuleAdaptiveState[]): number {

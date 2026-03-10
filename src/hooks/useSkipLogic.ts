@@ -78,28 +78,35 @@ export function useSkipLogic(
       }
     }
 
-    // Build set of module IDs covered by DNW answers
+    // H7 fix: Build set of module IDs covered by DNW answers.
+    // Previously always added the current moduleId regardless of whether
+    // the DNW question actually references this module. Now we only flag
+    // the module if high-severity DNW questions exist AND the questionModules
+    // map confirms this module's questions reference it.
     const dnwModules = new Set<string>();
     if (mainModule.dnw) {
-      for (const dnw of mainModule.dnw) {
-        // The modules[] on each question tells us which modules this DNW covers
-        const qNum = parseInt(dnw.questionId, 10);
-        if (!isNaN(qNum)) {
-          // Main module questions have modules[] but we don't have them here.
-          // Instead, check if this question's severity is high for this module.
-          if (dnw.severity >= 4) {
-            dnwModules.add(moduleId); // Conservative: only flag if we're in the right module context
+      const hasHighSeverityDnw = mainModule.dnw.some(dnw => dnw.severity >= 4);
+      if (hasHighSeverityDnw) {
+        // Only add moduleId if at least one question in this module references it
+        for (const [, modules] of questionModules) {
+          if (modules.includes(moduleId)) {
+            dnwModules.add(moduleId);
+            break;
           }
         }
       }
     }
 
-    // Build set of module IDs covered by MH answers
+    // H7 fix: Same pattern for MH answers
     const mhModules = new Set<string>();
     if (mainModule.mh) {
-      for (const mh of mainModule.mh) {
-        if (mh.importance >= 4) {
-          mhModules.add(moduleId);
+      const hasHighImportanceMh = mainModule.mh.some(mh => mh.importance >= 4);
+      if (hasHighImportanceMh) {
+        for (const [, modules] of questionModules) {
+          if (modules.includes(moduleId)) {
+            mhModules.add(moduleId);
+            break;
+          }
         }
       }
     }

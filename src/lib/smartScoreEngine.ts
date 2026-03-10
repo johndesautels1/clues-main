@@ -51,7 +51,9 @@ export function getConfidenceLevel(stdDev: number): ConfidenceLevel {
 // ─── Score Normalization ─────────────────────────────────────
 
 /**
- * Clamp a score to the 0-100 range.
+ * Clamp a score to the 0-100 range, rounded to 2 decimal places.
+ * Note: evaluationOrchestrator uses integer rounding (Math.round) for consensus
+ * scores; this retains 2-decimal precision for weighted/averaged Smart Scores.
  */
 export function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(score * 100) / 100));
@@ -217,14 +219,24 @@ export function computeMetricSmartScore(
 
 /**
  * Extract source citations from a LocationConsensus.
- * In the current pipeline, sources come from LLM evaluations via Tavily.
- * We produce a placeholder structure; actual URLs come from upstream data.
+ *
+ * M1 KNOWN GAP: This is a stub. Returns [] for every metric.
+ *
+ * The raw LLM evaluation responses DO contain source strings (each LLM's
+ * `data_justification` and `source` fields are populated via Tavily research).
+ * Those strings survive into JudgeLLMScore.source for judge review. However,
+ * no code currently transforms them into MetricSource[] objects ({ name, url,
+ * excerpt }) at the Smart Score level.
+ *
+ * To fix: LocationConsensus needs to carry forward aggregated source strings
+ * from the evaluation phase. Then this function should parse URLs from those
+ * strings and build MetricSource[] objects. Until then, the `sources` field
+ * on every MetricSmartScore is always [].
  */
 function extractSources(_locationConsensus: LocationConsensus): MetricSource[] {
-  // Sources are populated during the evaluation phase and stored in the
-  // LLM responses. At the Smart Score level, we carry forward what the
-  // orchestrator collected. The actual URL extraction happens upstream
-  // in the evaluation endpoints.
+  // TODO: Aggregate source citations from upstream LLM evaluation responses.
+  // The data exists in EvaluatorResult.response.evaluations[].metric_scores[].source
+  // but LocationConsensus does not currently carry it through.
   return [];
 }
 
@@ -316,12 +328,22 @@ export function median(values: number[]): number {
 }
 
 /**
- * Compute standard deviation of an array of numbers.
+ * Compute sample standard deviation (Bessel's correction: n-1).
+ *
+ * Why n-1, not n: With 3-5 LLMs responding per metric, the scores are a
+ * sample of the full evaluator panel (not all 5 always respond). Population
+ * stdDev (÷n) underestimates true spread by 10-20% at n=3, which can let
+ * genuinely disputed metrics slip past the σ>15 judge-review threshold.
+ * Using n-1 is the conservative choice — it inflates σ slightly, sending
+ * borderline metrics to Opus judge review rather than letting them pass.
+ *
+ * This matches evaluationOrchestrator.computeStdDev() (M1 fix).
+ * Both functions MUST use the same divisor to prevent confidence drift.
  */
 export function stdDev(values: number[]): number {
   const valid = values.filter((v) => !isNaN(v));
   if (valid.length < 2) return 0;
   const avg = mean(valid);
   const squaredDiffs = valid.map((v) => (v - avg) ** 2);
-  return Math.sqrt(squaredDiffs.reduce((s, d) => s + d, 0) / valid.length);
+  return Math.sqrt(squaredDiffs.reduce((s, d) => s + d, 0) / (valid.length - 1));
 }

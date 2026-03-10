@@ -2,8 +2,9 @@
 /* WCAG 2.1 AA: all text ≥ 11px, contrast verified against #0a0e1a + #ffffff */
 
 .readiness {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  /* M13 fix: Use CSS custom properties instead of raw rgba for design system consistency */
+  background: var(--bg-glass, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.06));
   border-radius: 16px;
   padding: 24px;
   backdrop-filter: blur(8px);
@@ -50,7 +51,8 @@
 /* Progress bar */
 .readiness__bar {
   height: 4px;
-  background: rgba(255, 255, 255, 0.06);
+  /* M14 fix: Use CSS custom property instead of raw rgba */
+  background: var(--bg-card, rgba(255, 255, 255, 0.06));
   border-radius: 2px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -94,7 +96,8 @@
 .readiness__steps {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  /* L11 fix: Use CSS custom property instead of raw rgba */
+  border-top: 1px solid var(--border-glass, rgba(255, 255, 255, 0.06));
 }
 
 .readiness__steps-title {

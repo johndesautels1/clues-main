@@ -356,7 +356,7 @@ export function getTierConfig(tier: CompletionTier): TierConfig {
         llmCount: 5,
         llmModels: ['gemini-3.1-pro-preview', 'claude-sonnet-4-6', 'gpt-5.4', 'grok-4-1-fast-reasoning', 'sonar-reasoning-pro-high'],
         useJudge: true,
-        tavilySearches: 200, // +20 per completed module, handled by evaluation endpoint
+        tavilySearches: 200, // L7 fix: Hard cap is 200 in api/tavily-search.ts. No per-module bonus at API level.
       };
   }
 }

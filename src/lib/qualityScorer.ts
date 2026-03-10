@@ -19,7 +19,7 @@ import type { AggregatedProfile, SignalSource, ModuleProfile } from './answerAgg
 import type { CoverageState } from './coverageTracker';
 import { MODULES } from '../data/modules';
 
-/** Total module count — used for scoring denominators */
+/** Total module count — used for scoring denominators. L6: Safe at module scope since MODULES is a frozen constant. */
 const MODULE_COUNT = MODULES.length; // 23
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ export interface QualityReport {
   /** Human-readable readiness label */
   readinessLabel: string;
 
-  /** Per-module quality assessments (24 entries) */
+  /** Per-module quality assessments (23 entries — one per MODULES) */
   modules: ModuleQuality[];
 
   /** Per-source quality assessments (7 entries) */
@@ -153,7 +153,9 @@ export function scoreQuality(
   //   30% average module depth
   //   20% MOE-based coverage (from coverageTracker)
   //   10% completed module bonus
-  const moeCoverage = Math.max(0, Math.min(100, Math.round((1 - coverage.overallMOE) * 100)));
+  // M6 fix: Use coverage.isReportReady as a floor — if coverage says ready, at least 80%
+  const rawMoeCoverage = Math.max(0, Math.min(100, Math.round((1 - coverage.overallMOE) * 100)));
+  const moeCoverage = coverage.isReportReady ? Math.max(80, rawMoeCoverage) : rawMoeCoverage;
   const completedBonus = Math.min(100, Math.round((profile.completedModuleIds.length / MODULE_COUNT) * 100));
 
   const overallReadiness = Math.max(0, Math.min(100, Math.round(
@@ -194,17 +196,18 @@ function scoreSourceQuality(profile: AggregatedProfile): SourceQuality[] {
     const count = profile.sourceCounts[source] ?? 0;
     const hasData = count > 0;
 
-    // Rating scales per source (expected signal counts vary)
+    // M7 fix: Rating scales per source — expected counts are calibrated upper-mid estimates.
+    // Rating is clamped 0-100; reaching 100% means the source is well-represented.
     let rating = 0;
     if (hasData) {
       const expected: Record<SignalSource, number> = {
-        paragraphical: 150,  // 100-250 metrics + relevance weights
-        demographics: 50,    // 34 questions + baseline per module
-        dnw: 30,             // ~33 questions × modules
-        mh: 30,              // ~33 questions × modules
-        tradeoffs: 40,       // 50 sliders × modules
-        general: 40,         // ~50 questions × modules
-        mini_module: 200,    // 100 per module × completed modules
+        paragraphical: 120,  // 100-250 metrics + relevance weights (lowered from 150)
+        demographics: 40,    // 34 questions + baseline per module (lowered from 50)
+        dnw: 25,             // ~33 questions × modules (lowered from 30)
+        mh: 25,              // ~33 questions × modules (lowered from 30)
+        tradeoffs: 30,       // 50 sliders × modules (lowered from 40)
+        general: 30,         // ~50 questions × modules (lowered from 40)
+        mini_module: 100,    // ~100 per completed module (lowered from 200)
       };
       rating = Math.min(100, Math.round((count / expected[source]) * 100));
     }
@@ -224,9 +227,10 @@ function scoreModuleQuality(mod: ModuleProfile, coverage: CoverageState): Module
   const signalStrength = dim?.signalStrength ?? 0;
   const weight = dim?.weight ?? 1 / MODULE_COUNT;
 
-  // Completeness: based on signal count relative to weight
-  // Higher-weight modules need more data points
-  const expectedSignals = Math.max(5, Math.round(weight * 200));
+  // H5 fix: Completeness based on signal count relative to weight.
+  // Cap expectedSignals at 20 to prevent boosted modules from becoming unreachable.
+  // Base = weight * 200, but clamped to [5, 20] for reasonable thresholds.
+  const expectedSignals = Math.max(5, Math.min(20, Math.round(weight * 200)));
   const completeness = Math.min(100, Math.round((mod.dataPointCount / expectedSignals) * 100));
 
   // Depth: how many distinct sources contribute
@@ -248,8 +252,10 @@ function scoreModuleQuality(mod: ModuleProfile, coverage: CoverageState): Module
   else if (depth < 75) status = 'good';
   else status = 'excellent';
 
-  // Gap detection: important module with insufficient data
-  const isGap = weight > 0.03 && (status === 'empty' || status === 'sparse');
+  // L7 fix: Gap detection threshold derived from module count instead of hardcoded 0.03.
+  // Any module with weight above half the equal-distribution weight is considered important.
+  const gapWeightThreshold = (1 / MODULE_COUNT) * 0.5; // ~0.022 for 23 modules
+  const isGap = weight > gapWeightThreshold && (status === 'empty' || status === 'sparse');
 
   return {
     moduleId: mod.moduleId,
@@ -302,8 +308,11 @@ function generateNextSteps(
 
   for (const gap of gaps.slice(0, 5)) { // Top 5 gaps
     const dim = coverage.gapAnalysis.find(g => g.moduleId === gap.moduleId);
+    // M8 fix: Estimate questions from depth if gapAnalysis doesn't have this module
+    const estQuestions = dim?.estimatedQuestionsToResolve
+      ?? Math.max(3, Math.round((100 - gap.depth) / 10)); // Scale from depth
     steps.push({
-      action: `Answer ${dim?.estimatedQuestionsToResolve ?? 10} more questions in ${gap.moduleName}`,
+      action: `Answer ${estQuestions} more questions in ${gap.moduleName}`,
       target: gap.moduleId,
       impactEstimate: 5,
       priority: 0,
@@ -324,19 +333,18 @@ function generateNextSteps(
     });
   }
 
-  // Completed modules bonus
-  if (profile.completedModuleIds.length < 5 && profile.completedModuleIds.length > 0) {
+  // L8 fix: Show completed modules bonus for any user who hasn't done half the modules
+  const completedCount = profile.completedModuleIds.length;
+  if (completedCount > 0 && completedCount < Math.ceil(MODULE_COUNT / 2)) {
     steps.push({
-      action: 'Complete more mini modules to reach precision tier',
+      action: `Complete more mini modules to reach precision tier (${completedCount}/${MODULE_COUNT} done)`,
       target: 'mini_modules',
       impactEstimate: 4,
       priority: 0,
     });
   }
 
-  // Sort by impact and assign priority ranks
+  // M9 fix: Sort by impact and assign priority ranks (immutable)
   steps.sort((a, b) => b.impactEstimate - a.impactEstimate);
-  steps.forEach((s, i) => { s.priority = i + 1; });
-
-  return steps;
+  return steps.map((s, i) => ({ ...s, priority: i + 1 }));
 }

@@ -20,14 +20,13 @@
  */
 
 import type { UserSession } from '../types';
-import type { CityCandidate, OrchestrationResult, EvaluationWave } from '../types/evaluation';
+import type { CityCandidate, OrchestrationResult, EvaluationWave, TavilyResult } from '../types/evaluation';
 import { aggregateProfile } from './answerAggregator';
-import type { ProfileSignal } from './answerAggregator';
 import { buildMetricsForEvaluation } from './profileSignalBridge';
 import { recommendCities, buildSignalSummary } from './cityRecommendationOrchestrator';
 import type { CityRecommendationResult } from './cityRecommendationOrchestrator';
 import { runEvaluation } from './evaluationOrchestrator';
-import { calculateTier, calculateConfidence, getTierConfig } from './tierEngine';
+import { calculateTier, calculateConfidence } from './tierEngine';
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -73,7 +72,7 @@ export interface PipelineCallbacks {
  */
 export async function runPipeline(
   session: UserSession,
-  tavilyByMetric: Record<string, unknown>,
+  tavilyByMetric: Record<string, TavilyResult>, // H5 fix: Proper type instead of unknown
   callbacks?: PipelineCallbacks
 ): Promise<PipelineResult> {
   const startTime = Date.now();
@@ -188,12 +187,14 @@ export async function runPipeline(
     session.id,
     metricsByCategory,
     cities,
-    tavilyByMetric as Record<string, never>,
+    tavilyByMetric, // H5 fix: No cast needed with proper typing
     callbacks?.onWaveComplete
   );
 
   // ─── Done ────────────────────────────────────────────────────
   const totalDurationMs = Date.now() - startTime;
+  // Note: cityRecommendation cost is approximate ($0.005/response) since
+  // the recommendation endpoints don't yet return actual token-based costs.
   const totalCostUsd = evaluation.totalCostUsd + (cityRecommendation
     ? cityRecommendation.individualResults.reduce((sum, r) => sum + (r.response ? 0.005 : 0), 0)
     : 0);

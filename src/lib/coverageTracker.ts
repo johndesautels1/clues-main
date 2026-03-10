@@ -209,6 +209,8 @@ export function applyCoverageFromParagraphical(
       dim.sources.push(paragraphicalSource);
       dim.dataPoints += count;
       dim.signalStrength = Math.min(1, dim.signalStrength + paragraphicalSource.avgStrength * 0.6);
+      // H1 fix: Update signalConsistency from paragraphical source
+      updateSignalConsistency(dim);
     }
   }
 
@@ -229,6 +231,9 @@ export function applyCoverageFromParagraphical(
 /**
  * Update coverage from Demographics answers.
  * Certain demographic facts deterministically boost module relevance.
+ *
+ * Keys match the questionnaire storage format: "q{number}" (e.g., q8, q30).
+ * Values may be string, number, boolean, or string[] (Multi-select at runtime).
  */
 export function applyCoverageFromDemographics(
   state: CoverageState,
@@ -236,33 +241,50 @@ export function applyCoverageFromDemographics(
 ): CoverageState {
   const updated = structuredClone(state);
 
+  // Helper: check if a value (which may be string[] at runtime for Multi-select)
+  // contains a substring. Handles string, string[], boolean, and number.
+  const valIncludes = (val: unknown, target: string): boolean => {
+    if (val === undefined || val === null) return false;
+    if (Array.isArray(val)) return val.some(v => String(v).toLowerCase().includes(target));
+    return String(val).toLowerCase().includes(target);
+  };
+
+  const isTruthy = (val: unknown): boolean =>
+    val === true || val === 'true' || val === 'Yes' || val === 'yes';
+
   const boosts: Array<{ moduleId: string; strength: number }> = [];
 
-  // Has children → family_children, education_learning
-  if (demographics.has_children || demographics.children_count) {
+  // Q8: "Do you have children?" (Yes/No) → family_children, education_learning
+  if (isTruthy(demographics.q8)) {
     boosts.push({ moduleId: 'family_children', strength: 0.4 });
     boosts.push({ moduleId: 'education_learning', strength: 0.3 });
   }
 
-  // Has pets → pets_animals
-  if (demographics.has_pets || demographics.pet_type) {
+  // Q30: "Do you have pets that would relocate with you?" (Yes/No) → pets_animals
+  if (isTruthy(demographics.q30)) {
     boosts.push({ moduleId: 'pets_animals', strength: 0.4 });
   }
 
-  // Remote work → technology_connectivity, professional_career
-  if (demographics.employment_type === 'remote' || demographics.employment === 'remote') {
+  // Q19: "Preferred work arrangement?" (Single-select: "fully remote", "hybrid", etc.)
+  // Q17: "Employment plan in new location?" (Multi-select: "remote work", etc.)
+  // → technology_connectivity, professional_career
+  if (valIncludes(demographics.q19, 'remote') || valIncludes(demographics.q17, 'remote')) {
     boosts.push({ moduleId: 'technology_connectivity', strength: 0.3 });
     boosts.push({ moduleId: 'professional_career', strength: 0.3 });
   }
 
-  // Retiree → health_wellness up, professional_career down
-  if (demographics.employment_type === 'retired' || demographics.employment === 'retired') {
+  // Q16: "Current employment status?" (Multi-select: includes "retired")
+  // Q17: "Employment plan?" (Multi-select: includes "retired")
+  // → health_wellness up, professional_career down
+  if (valIncludes(demographics.q16, 'retired') || valIncludes(demographics.q17, 'retired')) {
     boosts.push({ moduleId: 'health_wellness', strength: 0.3 });
     boosts.push({ moduleId: 'professional_career', strength: -0.2 });
   }
 
-  // Has partner → housing needs increase
-  if (demographics.relationship_status === 'partnered' || demographics.relationship_status === 'married') {
+  // Q5: "Relationship status?" (Single-select: "married", "domestic partnership", etc.)
+  // → housing needs increase
+  const q5 = String(demographics.q5 ?? '').toLowerCase();
+  if (q5 === 'married' || q5 === 'domestic partnership' || q5 === 'in a relationship') {
     boosts.push({ moduleId: 'housing_property', strength: 0.15 });
   }
 
@@ -280,8 +302,12 @@ export function applyCoverageFromDemographics(
   for (const dim of updated.dimensions) {
     dim.dataPoints += 1; // Everyone gets 1 point from demographics
     addOrUpdateSource(dim, 'demographics', 1, 0.1);
+    // H1 fix: Update signalConsistency for demographics (deterministic rules = high consistency)
+    updateSignalConsistency(dim);
   }
 
+  // M7 fix: Normalize weights after demographic boosts (consistent with DNW/MH/tradeoffs)
+  normalizeWeights(updated);
   recalculateMOE(updated);
   return updated;
 }
@@ -324,6 +350,8 @@ export function applyCoverageFromDNW(
           dim.weight = Math.min(1, dim.weight * 1.5);
         }
         addOrUpdateSource(dim, 'dnw', 1, strength);
+        // H1 fix: Update signalConsistency from DNW source
+        updateSignalConsistency(dim);
       }
     }
   }
@@ -370,6 +398,8 @@ export function applyCoverageFromMH(
           dim.weight = Math.min(1, dim.weight * 1.3);
         }
         addOrUpdateSource(dim, 'mh', 1, strength);
+        // H1 fix: Update signalConsistency from MH source
+        updateSignalConsistency(dim);
       }
     }
   }
@@ -401,9 +431,14 @@ export function applyCoverageFromTradeoffs(
     const question = tradeoffQuestions.find(q => q.number === questionNumber);
     if (!question?.modules?.length) continue;
 
-    const sliderValue = typeof value === 'number' ? value : 50;
+    // L5 fix: TradeoffAnswers values are typed as number; defensive fallback retained
+    // for runtime safety since data may come from localStorage/Supabase
+    const sliderValue = (value as number) || 50;
     // Strength = how strongly the user feels (deviation from neutral)
     const strength = Math.abs(sliderValue - 50) / 50; // 0 = neutral, 1 = extreme
+
+    // M6 fix: Skip neutral answers (strength=0) to avoid polluting source list
+    if (strength < 0.01) continue;
 
     // A non-neutral answer signals these modules matter to the user
     for (const modId of question.modules) {
@@ -412,6 +447,8 @@ export function applyCoverageFromTradeoffs(
         dim.weight = Math.max(0.05, dim.weight * (0.5 + 0.5 * (1 + strength)));
         dim.dataPoints += 1;
         addOrUpdateSource(dim, 'tradeoffs', 1, strength);
+        // H1 fix: Update signalConsistency from tradeoff source
+        updateSignalConsistency(dim);
       }
     }
   }
@@ -438,6 +475,8 @@ export function applyCoverageFromGeneral(
     dim.dataPoints += Math.ceil(answerCount / MODULES.length);
     dim.signalStrength = Math.min(1, dim.signalStrength + strengthPerQuestion * answerCount * 0.1);
     addOrUpdateSource(dim, 'general', Math.ceil(answerCount / MODULES.length), 0.2);
+    // H1 fix: Update signalConsistency from general source
+    updateSignalConsistency(dim);
   }
 
   recalculateMOE(updated);
@@ -521,6 +560,33 @@ export function analyzeGaps(state: CoverageState): CoverageGap[] {
 
 // ─── Internal Helpers ─────────────────────────────────────────────
 
+/**
+ * H1 fix: Update signalConsistency based on multiple sources.
+ * Multiple independent sources agreeing = high consistency.
+ * Single source = lower consistency (less corroboration).
+ * Formula: base from source count + bonus if strengths are similar.
+ */
+function updateSignalConsistency(dim: DimensionCoverage): void {
+  const sources = dim.sources;
+  if (sources.length === 0) {
+    dim.signalConsistency = 0;
+    return;
+  }
+  if (sources.length === 1) {
+    // Single source: consistency = source strength * 0.5 (no corroboration)
+    dim.signalConsistency = Math.max(dim.signalConsistency, sources[0].avgStrength * 0.5);
+    return;
+  }
+  // Multiple sources: base consistency from count (2 sources = 0.6, 3+ = 0.8+)
+  const countBase = Math.min(0.9, 0.4 + sources.length * 0.15);
+  // Bonus: if source strengths are similar, signals are consistent
+  const strengths = sources.map(s => s.avgStrength);
+  const mean = strengths.reduce((a, b) => a + b, 0) / strengths.length;
+  const variance = strengths.reduce((sum, s) => sum + (s - mean) ** 2, 0) / strengths.length;
+  const agreementBonus = Math.max(0, 0.1 * (1 - variance * 4)); // Low variance = bonus
+  dim.signalConsistency = Math.max(dim.signalConsistency, Math.min(1, countBase + agreementBonus));
+}
+
 function recalculateMOE(state: CoverageState): void {
   let totalWeightedUncertainty = 0;
   let totalWeight = 0;
@@ -585,6 +651,9 @@ function applySignalHitsFromIndex(
     const hitModules = new Set<string>();
 
     for (const word of words) {
+      // L6 fix: Require minimum 3-char words to reduce false positives
+      // (e.g., "a", "is", "in" would match too many modules)
+      if (word.length < 3) continue;
       const mods = index[word];
       if (mods) {
         for (const modId of mods) hitModules.add(modId);

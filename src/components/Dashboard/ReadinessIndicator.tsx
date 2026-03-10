@@ -4,7 +4,7 @@
  * Displays:
  * - Readiness percentage with animated progress bar
  * - Source completeness (X/7 sources)
- * - Module coverage (X/24 adequate)
+ * - Module coverage (X/23 adequate)
  * - Top 3 next steps for the user
  * - "Report Ready" celebration state at ≥ 80%
  *
@@ -15,8 +15,8 @@
  * - role="status" for live readiness updates
  */
 
-import { useMemo } from 'react';
 import { useAggregatedProfile } from '../../hooks/useAggregatedProfile';
+import { MODULES } from '../../data/modules';
 import './ReadinessIndicator.css';
 
 // CSS custom properties auto-switch between dark and light mode via globals.css
@@ -38,10 +38,8 @@ export function ReadinessIndicator() {
   const isReady = readiness >= 80;
   const accentColor = isReady ? C.scoreGreen : readiness >= 50 ? C.gold : C.textAccent;
 
-  // Top 3 next steps
-  const topSteps = useMemo(() => {
-    return quality.nextSteps.slice(0, 3);
-  }, [quality.nextSteps]);
+  // M12 fix: Removed unnecessary useMemo for trivial .slice(0, 3)
+  const topSteps = quality.nextSteps.slice(0, 3);
 
   return (
     <div className="readiness" role="status" aria-label={`Report readiness: ${readiness}% — ${readinessLabel}`}>
@@ -81,7 +79,7 @@ export function ReadinessIndicator() {
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{quality.adequateModuleCount}</span>
-          <span className="readiness__stat-label">/24 modules</span>
+          <span className="readiness__stat-label">/{MODULES.length} modules</span>
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{totalSignals}</span>
@@ -100,8 +98,8 @@ export function ReadinessIndicator() {
         <div className="readiness__steps">
           <p className="readiness__steps-title">Next Steps</p>
           <ul className="readiness__steps-list">
-            {topSteps.map((step, i) => (
-              <li key={i} className="readiness__step">
+            {topSteps.map((step) => (
+              <li key={`${step.target}_${step.priority}`} className="readiness__step">
                 <span className="readiness__step-priority">{step.priority}</span>
                 <span className="readiness__step-action">{step.action}</span>
                 <span className="readiness__step-impact" style={{ color: C.scoreGreen }}>

@@ -149,6 +149,13 @@ export async function runEvaluation(
       }
     }
 
+    // H3 fix: Persist results to Supabase after each wave (fire-and-forget)
+    for (const batch of categoryResults) {
+      if (batch.isUsable) {
+        void persistEvaluationResults(sessionId, batch);
+      }
+    }
+
     const wave: EvaluationWave = {
       waveNumber: i + 1,
       categories: waveCategories,
@@ -261,27 +268,36 @@ async function evaluateWithModel(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionId,
-        category,
-        metrics,
-        cities,
-        tavilyResearch,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timer);
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          category,
+          metrics,
+          cities,
+          tavilyResearch,
+        }),
+        signal: controller.signal,
+      });
+    } finally {
+      // H4 fix: Always clear timer, even on network error / abort
+      clearTimeout(timer);
+    }
 
     if (!response.ok) {
-      const errText = await response.text();
+      const errText = await response.text().catch(() => response.statusText);
       throw new Error(`${model} returned ${response.status}: ${errText}`);
     }
 
     const data: EvaluateResponse = await response.json();
+
+    // H2 fix: Validate response shape before accepting
+    if (!data.evaluation || !Array.isArray(data.evaluation.evaluations)) {
+      throw new Error(`${model} returned invalid evaluation structure`);
+    }
 
     return {
       model,
@@ -351,10 +367,11 @@ function buildConsensus(
           ms => ms.metric_id === metric.id
         );
         if (metricScore) {
+          // H1 fix: Clamp LLM scores to valid ranges (untrusted LLM output)
           scores.push({
             model: result.model,
-            score: metricScore.score,
-            confidence: metricScore.confidence,
+            score: Math.max(0, Math.min(100, Math.round(metricScore.score))),
+            confidence: Math.max(0, Math.min(1, metricScore.confidence)),
           });
         }
       }
@@ -414,11 +431,13 @@ function computeMedian(values: number[]): number {
     : sorted[mid];
 }
 
+// M1 fix: Use sample standard deviation (Bessel's correction: n-1)
+// With only 3-5 LLMs, population stddev underestimates true spread by 10-20%
 function computeStdDev(values: number[]): number {
   if (values.length < 2) return 0;
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
   const squaredDiffs = values.map(v => (v - mean) ** 2);
-  return Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / values.length);
+  return Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / (values.length - 1));
 }
 
 function sleep(ms: number): Promise<void> {

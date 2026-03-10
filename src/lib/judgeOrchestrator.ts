@@ -35,11 +35,26 @@ import type {
   JudgeReportRow,
 } from '../types/judge';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { MODULES } from '../data/modules';
 
 // ─── Constants ───────────────────────────────────────────────
 
 /** Max metrics per Opus call (token budget) */
 const MAX_METRICS_PER_CALL = 30;
+
+/** Timeout for each judge-opus API call (matches Opus endpoint's own 120s timeout) */
+const JUDGE_TIMEOUT_MS = 120_000;
+
+/**
+ * Resolve base URL for API calls.
+ * Browser: relative paths. SSR/Node: VERCEL_URL or localhost.
+ */
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined') return '';
+  const vercelUrl = import.meta.env.VITE_VERCEL_URL;
+  if (vercelUrl) return `https://${vercelUrl}`;
+  return 'http://localhost:3000';
+}
 
 // ─── Main Orchestrator ───────────────────────────────────────
 
@@ -92,17 +107,25 @@ export async function runJudge(
     invocationCount++;
 
     try {
-      const baseUrl = typeof window !== 'undefined' ? '' : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-      const response = await fetch(`${baseUrl}/api/judge-opus`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          metrics: batch,
-          categoryResults,
-          userContext,
-        }),
-      });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), JUDGE_TIMEOUT_MS);
+
+      let response: Response;
+      try {
+        response = await fetch(`${getBaseUrl()}/api/judge-opus`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            metrics: batch,
+            categoryResults,
+            userContext,
+          }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
 
       if (!response.ok) {
         const errText = await response.text();
@@ -155,6 +178,9 @@ function collectAllBatches(result: OrchestrationResult): CategoryBatchResult[] {
 // ─── Helper: Build category summaries for judge context ──────
 
 function buildCategorySummaries(batches: CategoryBatchResult[]): JudgeCategorySummary[] {
+  // Use canonical module names from modules.ts (consistent with categoryRollup.ts)
+  const moduleMap = new Map(MODULES.map(m => [m.id, m.name]));
+
   return batches
     .filter(b => b.isUsable)
     .map(batch => {
@@ -180,7 +206,7 @@ function buildCategorySummaries(batches: CategoryBatchResult[]): JudgeCategorySu
 
       return {
         categoryId: batch.category,
-        categoryName: batch.category.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        categoryName: moduleMap.get(batch.category) ?? batch.category.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
         metricCount: batch.consensus.length,
         locationScores,
         highDisagreementCount: batch.consensus.filter(c => c.needsJudgeReview).length,
@@ -272,21 +298,17 @@ function mergeReports(reports: JudgeReport[], sessionId: string): JudgeReport {
 
   if (reports.length === 1) return reports[0];
 
-  // Use the last report's executive summary (each batch only sees its own 30 metrics,
-  // so multi-batch runs may have an incomplete executive summary — known limitation)
   const lastReport = reports[reports.length - 1];
 
   // Merge overrides and confirmed metrics from all reports
   const allOverrides: MetricOverride[] = [];
   const allConfirmed: string[] = [];
   let totalReviewed = 0;
-  let totalOverridden = 0;
 
   for (const r of reports) {
     allOverrides.push(...(r.metricOverrides ?? []));
     allConfirmed.push(...(r.confirmedMetrics ?? []));
     totalReviewed += r.summaryOfFindings?.metricsReviewed ?? 0;
-    totalOverridden += r.summaryOfFindings?.metricsOverridden ?? 0;
   }
 
   // Merge category analyses (dedupe by categoryId, prefer later reports)
@@ -297,19 +319,102 @@ function mergeReports(reports: JudgeReport[], sessionId: string): JudgeReport {
     }
   }
 
+  // M2 fix: Synthesize executive summary from ALL batch reports.
+  // Each batch's Opus call only sees its own ≤30 metrics, so no single batch
+  // has the full picture. We merge keyFactors from all batches (deduped),
+  // concatenate rationales, use the recommendation from the batch with the
+  // most overrides (it saw the most contentious data), and combine outlooks.
+  const synthesizedExecutiveSummary = synthesizeExecutiveSummary(reports);
+
+  // Merge location scores from all summaryOfFindings (dedupe by location)
+  const locationScoreMap = new Map<string, typeof lastReport.summaryOfFindings.locationScores[0]>();
+  for (const r of reports) {
+    for (const ls of r.summaryOfFindings?.locationScores ?? []) {
+      const key = `${ls.location}|${ls.country}`;
+      // Prefer scores from reports with more overrides (more data reviewed)
+      if (!locationScoreMap.has(key)) {
+        locationScoreMap.set(key, ls);
+      }
+    }
+  }
+
   return {
     reportId: lastReport.reportId,
     summaryOfFindings: {
-      ...lastReport.summaryOfFindings,
+      locationScores: Array.from(locationScoreMap.values()),
+      overallConfidence: lastReport.summaryOfFindings?.overallConfidence ?? 'low',
       metricsReviewed: totalReviewed,
       // Use actual array length as ground truth, not Opus's self-reported count
       metricsOverridden: allOverrides.length,
     },
     categoryAnalysis: Array.from(categoryMap.values()),
-    executiveSummary: lastReport.executiveSummary,
+    executiveSummary: synthesizedExecutiveSummary,
     metricOverrides: allOverrides,
     confirmedMetrics: [...new Set(allConfirmed)],
     judgedAt: lastReport.judgedAt,
+  };
+}
+
+/**
+ * M2 fix: Synthesize a unified executive summary from multiple batch reports.
+ *
+ * Strategy:
+ * - recommendation: from the batch with the most metric overrides (most contentious)
+ * - rationale: concatenate all batch rationales (each covers different metrics)
+ * - keyFactors: merge + dedupe across all batches
+ * - futureOutlook: concatenate all batch outlooks (each may cover different trends)
+ */
+function synthesizeExecutiveSummary(
+  reports: JudgeReport[]
+): JudgeReport['executiveSummary'] {
+  // Find the batch that reviewed the most contentious metrics
+  let mostOverridesReport = reports[0];
+  let maxOverrides = 0;
+  for (const r of reports) {
+    const count = r.metricOverrides?.length ?? 0;
+    if (count >= maxOverrides) {
+      maxOverrides = count;
+      mostOverridesReport = r;
+    }
+  }
+
+  // Merge keyFactors from all batches, dedupe by lowercase content
+  const seenFactors = new Set<string>();
+  const allKeyFactors: string[] = [];
+  for (const r of reports) {
+    for (const factor of r.executiveSummary?.keyFactors ?? []) {
+      const normalized = factor.toLowerCase().trim();
+      if (!seenFactors.has(normalized)) {
+        seenFactors.add(normalized);
+        allKeyFactors.push(factor);
+      }
+    }
+  }
+
+  // Concatenate rationales from all batches
+  const rationales = reports
+    .map(r => r.executiveSummary?.rationale)
+    .filter((r): r is string => !!r && r.trim().length > 0);
+  const mergedRationale = rationales.length > 1
+    ? rationales.join('\n\n')
+    : rationales[0] ?? '';
+
+  // Concatenate future outlooks from all batches (dedupe identical ones)
+  const outlookSet = new Set<string>();
+  const outlooks: string[] = [];
+  for (const r of reports) {
+    const outlook = r.executiveSummary?.futureOutlook?.trim();
+    if (outlook && !outlookSet.has(outlook)) {
+      outlookSet.add(outlook);
+      outlooks.push(outlook);
+    }
+  }
+
+  return {
+    recommendation: mostOverridesReport.executiveSummary?.recommendation ?? '',
+    rationale: mergedRationale,
+    keyFactors: allKeyFactors,
+    futureOutlook: outlooks.join('\n\n'),
   };
 }
 
@@ -386,16 +491,16 @@ function applySafeguards(
     .filter(b => b.isUsable)
     .flatMap(b => b.consensus)
     .filter(c => c.needsJudgeReview);
-  const avgStdDev = disputedMetrics.length > 0
-    ? disputedMetrics.reduce((sum, c) => sum + c.stdDev, 0) / disputedMetrics.length
+  const maxStdDev = disputedMetrics.length > 0
+    ? Math.max(...disputedMetrics.map(c => c.stdDev))
     : allBatches
         .filter(b => b.isUsable)
         .flatMap(b => b.consensus)
         .reduce((sum, c) => sum + c.stdDev, 0) / (allBatches.filter(b => b.isUsable).flatMap(b => b.consensus).length || 1);
 
   const computedConfidence: JudgeSummary['overallConfidence'] =
-    avgStdDev <= 5 ? 'high' :
-    avgStdDev <= 15 ? 'medium' :
+    maxStdDev <= 5 ? 'high' :
+    maxStdDev <= 15 ? 'medium' :
     'low';
 
   if (
@@ -410,7 +515,7 @@ function applySafeguards(
     ) {
       corrections.push({
         type: 'confidence_override',
-        description: `Opus claimed "${report.summaryOfFindings.overallConfidence}" confidence but average σ=${avgStdDev.toFixed(1)} warrants "${computedConfidence}". Force-corrected.`,
+        description: `Opus claimed "${report.summaryOfFindings.overallConfidence}" confidence but max σ=${maxStdDev.toFixed(1)} warrants "${computedConfidence}". Force-corrected.`,
         opusValue: report.summaryOfFindings.overallConfidence,
         computedValue: computedConfidence,
       });

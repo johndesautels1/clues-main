@@ -27,7 +27,7 @@ export interface TavilySearchResponse {
   query: string;
   answer?: string;
   results: TavilySearchResult[];
-  response_time: number; // seconds
+  response_time: number; // seconds (Tavily API returns seconds; convert to ms via * 1000 if needed)
 }
 
 /** A single search result from Tavily */
@@ -153,7 +153,12 @@ export interface TavilyMetricSearchResponse {
 
 // ─── Cache Types ─────────────────────────────────────────────────
 
-/** Cache entry for tavily_cache Supabase table (matches schema.sql columns) */
+/**
+ * Cache entry for tavily_cache Supabase table (matches schema.sql columns).
+ * L8 fix: response field stores the raw Tavily API response which matches
+ * TavilySearchResponse structurally. The serverless endpoints use an inlined
+ * TavilyAPIResponse type (identical structure) defined in api/_shared/tavily-utils.ts.
+ */
 export interface TavilyCacheEntry {
   id?: string;
   query_hash: string;      // SHA-256 of normalized query (UNIQUE)
