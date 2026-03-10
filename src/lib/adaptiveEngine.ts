@@ -285,15 +285,21 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
   activeModule = state.modules.find(m => m.moduleId === state.activeModuleId && !m.isComplete);
 
   // Search through modules for one with unanswered questions
-  for (let attempts = 0; attempts < state.modules.length; attempts++) {
+  // NOTE: This function is READ-ONLY — it must not mutate the passed state.
+  // It marks modules as complete locally to avoid re-selecting them in the loop,
+  // but these mutations are on the cloned reference only when called via setState.
+  const stateClone = structuredClone(state);
+  activeModule = stateClone.modules.find(m => m.moduleId === stateClone.activeModuleId && !m.isComplete);
+
+  for (let attempts = 0; attempts < stateClone.modules.length; attempts++) {
     if (!activeModule) {
-      activeModule = state.modules.find(m => !m.isComplete);
+      activeModule = stateClone.modules.find(m => !m.isComplete);
       if (!activeModule) return null; // All modules complete
     }
 
     nextBelief = activeModule.questions.find(q => !q.answered && !q.skipReason);
     if (nextBelief) {
-      state.activeModuleId = activeModule.moduleId;
+      stateClone.activeModuleId = activeModule.moduleId;
       break;
     }
 
@@ -305,8 +311,8 @@ export function selectNextQuestion(state: AdaptiveState): NextQuestionResult | n
 
     // Guard: if the activeModuleId pointed to the module we just completed,
     // clear it so we don't re-select the same module.
-    if (state.activeModuleId === completedId) {
-      state.activeModuleId = null;
+    if (stateClone.activeModuleId === completedId) {
+      stateClone.activeModuleId = null;
     }
   }
 
@@ -427,6 +433,23 @@ export function markPreFilled(
   const partialReduction = belief.eig * 0.1;
   module.moduleMOE = Math.max(0, module.moduleMOE - partialReduction);
 
+  // Check if module is now complete (MOE target reached)
+  if (module.moduleMOE <= 0.02) {
+    module.isComplete = true;
+    for (const q of module.questions) {
+      if (!q.answered) {
+        q.skipReason = 'Module confidence target reached';
+        module.skippedCount++;
+        updated.totalSkipped++;
+      }
+    }
+  }
+
+  // Recalculate overall state (same as recordAnswer)
+  updated.overallMOE = calculateOverallMOE(updated);
+  updated.estimatedRemaining = estimateRemainingQuestions(updated.modules);
+  updated.isSessionComplete = updated.overallMOE <= 0.02;
+
   return updated;
 }
 
@@ -451,7 +474,9 @@ export function skipQuestion(
   module.skippedCount++;
   updated.totalSkipped++;
 
-  // No MOE reduction for skipped questions
+  // No MOE reduction for skipped questions, but recalculate estimated remaining
+  updated.estimatedRemaining = estimateRemainingQuestions(updated.modules);
+
   return updated;
 }
 
@@ -515,14 +540,15 @@ function recalculateModuleEIG(module: ModuleAdaptiveState, answeredBelief: Quest
 function calculateOverallMOE(state: AdaptiveState): number {
   if (state.modules.length === 0) return 0;
 
-  let totalMOE = 0;
-  let count = 0;
+  // M2 fix: Use weighted average by moduleWeight instead of simple average
+  let totalWeightedMOE = 0;
+  let totalWeight = 0;
   for (const module of state.modules) {
-    totalMOE += module.moduleMOE;
-    count++;
+    totalWeightedMOE += module.moduleMOE * module.moduleWeight;
+    totalWeight += module.moduleWeight;
   }
 
-  return count > 0 ? totalMOE / count : 0;
+  return totalWeight > 0 ? totalWeightedMOE / totalWeight : 0;
 }
 
 function estimateRemainingQuestions(modules: ModuleAdaptiveState[]): number {

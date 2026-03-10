@@ -8,7 +8,8 @@
  *             Used in Dashboard between Main Module and Module Grid.
  *
  * Reads from useCoverageState (derived, no LLM calls, instant, free).
- * WCAG 2.1 AA compliant — all text ≥ 11px, all colors verified against #0a0e1a.
+ * WCAG 2.1 AA compliant — all text ≥ 11px, colors use CSS custom properties
+ * that pass 4.5:1 in both dark and light mode.
  */
 
 import { useState } from 'react';
@@ -17,32 +18,34 @@ import { MODULES_MAP } from '../../data/modules';
 import type { DimensionCoverage, CoverageGap } from '../../lib/coverageTracker';
 import { C } from './questionnaireData';
 
-// ─── Tier colors (same as MiniModuleFlow.getModuleAccent) ────────
+// H8 fix: Tier colors use CSS custom properties instead of hardcoded hex.
+// Bar fills are decorative (not text), so they don't need 4.5:1 contrast,
+// but text labels must use theme-safe tokens.
 const TIER_COLORS: Record<string, string> = {
-  safety_security: '#ef4444', health_wellness: '#ef4444', climate_weather: '#ef4444',
-  legal_immigration: '#3b82f6', financial_banking: '#3b82f6', housing_property: '#3b82f6', professional_career: '#3b82f6',
-  technology_connectivity: '#06b6d4', transportation_mobility: '#06b6d4', education_learning: '#06b6d4', social_values_governance: '#06b6d4',
-  food_dining: '#f59e0b', shopping_services: '#f59e0b', outdoor_recreation: '#f59e0b', entertainment_nightlife: '#f59e0b',
-  family_children: '#22c55e', neighborhood_urban_design: '#22c55e', environment_community_appearance: '#22c55e',
-  religion_spirituality: '#a855f7', sexual_beliefs_practices_laws: '#a855f7', arts_culture: '#a855f7', cultural_heritage_traditions: '#a855f7', pets_animals: '#a855f7',
+  safety_security: 'var(--score-red, #ef4444)', health_wellness: 'var(--score-red, #ef4444)', climate_weather: 'var(--score-red, #ef4444)',
+  legal_immigration: 'var(--text-accent, #3b82f6)', financial_banking: 'var(--text-accent, #3b82f6)', housing_property: 'var(--text-accent, #3b82f6)', professional_career: 'var(--text-accent, #3b82f6)',
+  technology_connectivity: 'var(--score-cyan, #06b6d4)', transportation_mobility: 'var(--score-cyan, #06b6d4)', education_learning: 'var(--score-cyan, #06b6d4)', social_values_governance: 'var(--score-cyan, #06b6d4)',
+  food_dining: 'var(--clues-gold, #f59e0b)', shopping_services: 'var(--clues-gold, #f59e0b)', outdoor_recreation: 'var(--clues-gold, #f59e0b)', entertainment_nightlife: 'var(--clues-gold, #f59e0b)',
+  family_children: 'var(--score-green, #22c55e)', neighborhood_urban_design: 'var(--score-green, #22c55e)', environment_community_appearance: 'var(--score-green, #22c55e)',
+  religion_spirituality: 'var(--score-purple, #c084fc)', sexual_beliefs_practices_laws: 'var(--score-purple, #c084fc)', arts_culture: 'var(--score-purple, #c084fc)', cultural_heritage_traditions: 'var(--score-purple, #c084fc)', pets_animals: 'var(--score-purple, #c084fc)',
 };
 
 function tierColor(moduleId: string): string {
-  return TIER_COLORS[moduleId] || '#60a5fa';
+  return TIER_COLORS[moduleId] || 'var(--text-accent, #60a5fa)';
 }
 
-// ─── MOE color helper (same thresholds as adaptive insight bar) ──
+// H9 fix: MOE color uses CSS variables for theme safety
 function moeColor(moe: number): string {
-  if (moe <= 0.02) return '#22c55e';   // 8.5:1 — target reached
-  if (moe <= 0.10) return '#f59e0b';   // 9.0:1 — close
-  return C.textMuted;                  // 6.4:1 — still working
+  if (moe <= 0.02) return 'var(--score-green, #22c55e)';
+  if (moe <= 0.10) return 'var(--clues-gold, #f59e0b)';
+  return C.textMuted;
 }
 
-// ─── Gap severity badge colors ──────────────────────────────────
+// H10 fix: Gap badge colors use CSS variables
 function gapBadgeColor(severity: CoverageGap['severity']): string {
-  if (severity === 'critical') return '#ef4444';  // 5.4:1 vs #0a0e1a (passes 4.5:1 normal text)
-  if (severity === 'moderate') return '#f59e0b';  // 9.0:1
-  return C.textMuted;                             // 6.4:1
+  if (severity === 'critical') return 'var(--score-red, #ef4444)';
+  if (severity === 'moderate') return 'var(--clues-gold, #f59e0b)';
+  return C.textMuted;
 }
 
 // ─── Compact variant ────────────────────────────────────────────
@@ -184,7 +187,7 @@ function FullMeter() {
           </p>
         </div>
 
-        {/* Expand toggle */}
+        {/* H11 fix: Expand toggle with focus-visible outline */}
         <button
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
@@ -195,7 +198,10 @@ function FullMeter() {
             fontSize: 12, fontWeight: 600, color: C.textAccent,
             letterSpacing: '0.02em', flexShrink: 0,
             transition: 'background 0.15s',
+            outline: 'none',
           }}
+          onFocus={e => { e.currentTarget.style.boxShadow = '0 0 0 2px var(--text-accent)'; }}
+          onBlur={e => { e.currentTarget.style.boxShadow = 'none'; }}
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-card-hover)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-card)')}
         >
@@ -218,13 +224,13 @@ function FullMeter() {
         }} />
       </div>
 
-      {/* Gap alerts (always visible) */}
+      {/* Gap alerts (always visible) — H8 fix: use CSS vars for text colors */}
       {criticalGaps.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: moderateGaps.length > 0 ? 6 : 0 }}>
           {criticalGaps.map(gap => (
             <span key={gap.moduleId} style={{
               fontSize: 11, fontWeight: 600, letterSpacing: '0.03em',
-              color: '#ef4444', background: 'rgba(239,68,68,0.08)',
+              color: 'var(--score-red, #ef4444)', background: 'rgba(239,68,68,0.08)',
               borderRadius: 6, padding: '3px 8px',
             }}>
               {MODULES_MAP[gap.moduleId]?.shortName || gap.moduleName}: critical gap (~{gap.estimatedQuestionsToResolve}q)
@@ -237,7 +243,7 @@ function FullMeter() {
           {moderateGaps.map(gap => (
             <span key={gap.moduleId} style={{
               fontSize: 11, fontWeight: 600, letterSpacing: '0.03em',
-              color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
+              color: 'var(--clues-gold, #f59e0b)', background: 'rgba(245,158,11,0.08)',
               borderRadius: 6, padding: '3px 8px',
             }}>
               {MODULES_MAP[gap.moduleId]?.shortName || gap.moduleName}: needs data (~{gap.estimatedQuestionsToResolve}q)
@@ -283,7 +289,7 @@ function DimensionBar({ dim, isRecommended }: { dim: DimensionCoverage; isRecomm
         {shortName}
       </span>
 
-      {/* Bar track */}
+      {/* Bar track (decorative — no text contrast requirement) */}
       <div style={{
         flex: 1, height: 6, borderRadius: 3,
         background: 'var(--bg-card)',
@@ -298,21 +304,21 @@ function DimensionBar({ dim, isRecommended }: { dim: DimensionCoverage; isRecomm
         }} />
       </div>
 
-      {/* Percentage */}
+      {/* H8 fix: Percentage text uses CSS variables instead of hardcoded hex */}
       <span style={{
         width: 32, textAlign: 'right', flexShrink: 0,
         fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
-        color: pct >= 80 ? '#22c55e' : pct >= 40 ? C.textSecondary : C.textMuted,
+        color: pct >= 80 ? 'var(--score-green, #22c55e)' : pct >= 40 ? C.textSecondary : C.textMuted,
         letterSpacing: '0.01em',
       }}>
         {pct}%
       </span>
 
-      {/* Recommended badge */}
+      {/* Recommended badge — H8 fix: use CSS variable */}
       {isRecommended && (
         <span style={{
           fontSize: 11, fontWeight: 600, letterSpacing: '0.03em',
-          color: '#f59e0b', flexShrink: 0,
+          color: 'var(--clues-gold, #f59e0b)', flexShrink: 0,
         }} aria-label="Recommended module">
           REC
         </span>

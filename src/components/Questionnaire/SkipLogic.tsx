@@ -7,7 +7,8 @@
  *  - SkipSummaryBar: Module-level summary bar showing total skippable count.
  *    Appears at the top of MiniModuleFlow when skip data is available.
  *
- * WCAG 2.1 AA compliant — all text ≥ 11px, all colors verified against #0a0e1a.
+ * WCAG 2.1 AA compliant — all text ≥ 11px, colors use CSS custom properties
+ * that pass 4.5:1 in both dark and light mode.
  * Skip is OPTIONAL — the user can always answer the question anyway.
  */
 
@@ -68,7 +69,7 @@ export function SkipIndicator({ skipInfo, onSkip }: SkipIndicatorProps) {
         {sourceLabel(skipInfo.source)} · {confidencePct}%
       </span>
 
-      {/* Skip button */}
+      {/* H13 fix: Skip button with focus-visible outline */}
       <button
         onClick={onSkip}
         aria-label="Skip this question"
@@ -82,7 +83,10 @@ export function SkipIndicator({ skipInfo, onSkip }: SkipIndicatorProps) {
           fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 600,
           color: C.textAccent, letterSpacing: '0.02em',
           transition: 'background 0.15s',
+          outline: 'none',
         }}
+        onFocus={e => { e.currentTarget.style.boxShadow = '0 0 0 2px var(--text-accent)'; }}
+        onBlur={e => { e.currentTarget.style.boxShadow = 'none'; }}
         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(96,165,250,0.18)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'rgba(96,165,250,0.10)')}
       >
@@ -119,10 +123,10 @@ export function SkipSummaryBar({ skipSummary, skippableCount }: SkipSummaryBarPr
         marginBottom: 12,
       }}
     >
-      {/* Olivia attribution */}
+      {/* H12 fix: Olivia attribution uses CSS variable instead of hardcoded #22c55e */}
       <span style={{
         fontFamily: "'Outfit',sans-serif", fontSize: 12, fontWeight: 700,
-        color: '#22c55e', letterSpacing: '0.02em', flexShrink: 0,
+        color: 'var(--score-green, #22c55e)', letterSpacing: '0.02em', flexShrink: 0,
       }}>
         Olivia
       </span>

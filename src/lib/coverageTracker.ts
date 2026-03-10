@@ -209,6 +209,8 @@ export function applyCoverageFromParagraphical(
       dim.sources.push(paragraphicalSource);
       dim.dataPoints += count;
       dim.signalStrength = Math.min(1, dim.signalStrength + paragraphicalSource.avgStrength * 0.6);
+      // H1 fix: Update signalConsistency from paragraphical source
+      updateSignalConsistency(dim);
     }
   }
 
@@ -280,6 +282,8 @@ export function applyCoverageFromDemographics(
   for (const dim of updated.dimensions) {
     dim.dataPoints += 1; // Everyone gets 1 point from demographics
     addOrUpdateSource(dim, 'demographics', 1, 0.1);
+    // H1 fix: Update signalConsistency for demographics (deterministic rules = high consistency)
+    updateSignalConsistency(dim);
   }
 
   recalculateMOE(updated);
@@ -324,6 +328,8 @@ export function applyCoverageFromDNW(
           dim.weight = Math.min(1, dim.weight * 1.5);
         }
         addOrUpdateSource(dim, 'dnw', 1, strength);
+        // H1 fix: Update signalConsistency from DNW source
+        updateSignalConsistency(dim);
       }
     }
   }
@@ -370,6 +376,8 @@ export function applyCoverageFromMH(
           dim.weight = Math.min(1, dim.weight * 1.3);
         }
         addOrUpdateSource(dim, 'mh', 1, strength);
+        // H1 fix: Update signalConsistency from MH source
+        updateSignalConsistency(dim);
       }
     }
   }
@@ -412,6 +420,8 @@ export function applyCoverageFromTradeoffs(
         dim.weight = Math.max(0.05, dim.weight * (0.5 + 0.5 * (1 + strength)));
         dim.dataPoints += 1;
         addOrUpdateSource(dim, 'tradeoffs', 1, strength);
+        // H1 fix: Update signalConsistency from tradeoff source
+        updateSignalConsistency(dim);
       }
     }
   }
@@ -438,6 +448,8 @@ export function applyCoverageFromGeneral(
     dim.dataPoints += Math.ceil(answerCount / MODULES.length);
     dim.signalStrength = Math.min(1, dim.signalStrength + strengthPerQuestion * answerCount * 0.1);
     addOrUpdateSource(dim, 'general', Math.ceil(answerCount / MODULES.length), 0.2);
+    // H1 fix: Update signalConsistency from general source
+    updateSignalConsistency(dim);
   }
 
   recalculateMOE(updated);
@@ -520,6 +532,33 @@ export function analyzeGaps(state: CoverageState): CoverageGap[] {
 }
 
 // ─── Internal Helpers ─────────────────────────────────────────────
+
+/**
+ * H1 fix: Update signalConsistency based on multiple sources.
+ * Multiple independent sources agreeing = high consistency.
+ * Single source = lower consistency (less corroboration).
+ * Formula: base from source count + bonus if strengths are similar.
+ */
+function updateSignalConsistency(dim: DimensionCoverage): void {
+  const sources = dim.sources;
+  if (sources.length === 0) {
+    dim.signalConsistency = 0;
+    return;
+  }
+  if (sources.length === 1) {
+    // Single source: consistency = source strength * 0.5 (no corroboration)
+    dim.signalConsistency = Math.max(dim.signalConsistency, sources[0].avgStrength * 0.5);
+    return;
+  }
+  // Multiple sources: base consistency from count (2 sources = 0.6, 3+ = 0.8+)
+  const countBase = Math.min(0.9, 0.4 + sources.length * 0.15);
+  // Bonus: if source strengths are similar, signals are consistent
+  const strengths = sources.map(s => s.avgStrength);
+  const mean = strengths.reduce((a, b) => a + b, 0) / strengths.length;
+  const variance = strengths.reduce((sum, s) => sum + (s - mean) ** 2, 0) / strengths.length;
+  const agreementBonus = Math.max(0, 0.1 * (1 - variance * 4)); // Low variance = bonus
+  dim.signalConsistency = Math.max(dim.signalConsistency, Math.min(1, countBase + agreementBonus));
+}
 
 function recalculateMOE(state: CoverageState): void {
   let totalWeightedUncertainty = 0;

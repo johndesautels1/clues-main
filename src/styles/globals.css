@@ -24,6 +24,8 @@
   --score-yellow: #eab308;
   --score-blue: #3b82f6;
   --score-green: #22c55e;
+  --score-cyan: #22d3ee;
+  --score-purple: #c084fc;
 
   /* Neutral Palette */
   --gray-50: #f9fafb;
@@ -146,9 +148,12 @@
     --text-accent: #2563eb;       /* 5.3:1 vs #fff */
 
     /* SMART Score Colors — darkened for light mode to meet 4.5:1 vs #fff */
+    --score-red: #dc2626;         /* 4.6:1 vs #fff (was #f87171 = 2.4:1) */
     --score-green: #16a34a;       /* 4.5:1 vs #fff (was #22c55e = 3.0:1) */
     --score-orange: #c2410c;      /* 5.1:1 vs #fff (was #f97316 = 2.8:1) */
     --score-yellow: #a16207;      /* 5.2:1 vs #fff (was #eab308 = 1.9:1) */
+    --score-cyan: #0e7490;        /* 4.7:1 vs #fff (was #22d3ee = 1.8:1) */
+    --score-purple: #7c3aed;      /* 5.4:1 vs #fff (was #c084fc = 2.6:1) */
     --clues-orange: #c2410c;      /* 5.1:1 vs #fff */
     --clues-gold: #92400e;        /* 6.7:1 vs #fff (was #f59e0b = 2.1:1) */
     --clues-sapphire-light: #2563eb; /* 5.3:1 vs #fff (was #3b82f6 = 3.6:1) */

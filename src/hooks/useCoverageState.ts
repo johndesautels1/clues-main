@@ -67,42 +67,60 @@ export function useCoverageState(): UseCoverageReturn {
   const coverage = useMemo((): CoverageState => {
     let state = initializeCoverage();
 
-    // 1. Paragraphical extraction (weights + metric signals)
-    if (paragraphical.extraction) {
-      state = applyCoverageFromParagraphical(state, paragraphical.extraction);
-    }
+    // H5/M11 fix: Wrap each applyCoverage* call in try/catch to prevent
+    // one corrupt data source from breaking the entire coverage computation.
+    // If any source throws, we skip it and continue with remaining sources.
+    try {
+      // 1. Paragraphical extraction (weights + metric signals)
+      if (paragraphical.extraction) {
+        state = applyCoverageFromParagraphical(state, paragraphical.extraction);
+      }
+    } catch (e) { console.warn('Coverage: Paragraphical application failed', e); }
 
-    // 2. Demographics
-    if (mainModule.demographics && Object.keys(mainModule.demographics).length > 0) {
-      state = applyCoverageFromDemographics(state, mainModule.demographics);
-    }
+    try {
+      // 2. Demographics
+      if (mainModule.demographics && Object.keys(mainModule.demographics).length > 0) {
+        state = applyCoverageFromDemographics(state, mainModule.demographics);
+      }
+    } catch (e) { console.warn('Coverage: Demographics application failed', e); }
 
-    // 3. DNW
-    if (mainModule.dnw && mainModule.dnw.length > 0) {
-      state = applyCoverageFromDNW(state, mainModule.dnw);
-    }
+    try {
+      // 3. DNW
+      if (mainModule.dnw && mainModule.dnw.length > 0) {
+        state = applyCoverageFromDNW(state, mainModule.dnw);
+      }
+    } catch (e) { console.warn('Coverage: DNW application failed', e); }
 
-    // 4. MH
-    if (mainModule.mh && mainModule.mh.length > 0) {
-      state = applyCoverageFromMH(state, mainModule.mh);
-    }
+    try {
+      // 4. MH
+      if (mainModule.mh && mainModule.mh.length > 0) {
+        state = applyCoverageFromMH(state, mainModule.mh);
+      }
+    } catch (e) { console.warn('Coverage: MH application failed', e); }
 
-    // 5. Tradeoffs
-    if (mainModule.tradeoffAnswers && Object.keys(mainModule.tradeoffAnswers).length > 0) {
-      state = applyCoverageFromTradeoffs(state, mainModule.tradeoffAnswers);
-    }
+    try {
+      // 5. Tradeoffs
+      if (mainModule.tradeoffAnswers && Object.keys(mainModule.tradeoffAnswers).length > 0) {
+        state = applyCoverageFromTradeoffs(state, mainModule.tradeoffAnswers);
+      }
+    } catch (e) { console.warn('Coverage: Tradeoffs application failed', e); }
 
-    // 6. General
-    if (mainModule.generalAnswers && Object.keys(mainModule.generalAnswers).length > 0) {
-      state = applyCoverageFromGeneral(state, mainModule.generalAnswers);
-    }
+    try {
+      // 6. General
+      if (mainModule.generalAnswers && Object.keys(mainModule.generalAnswers).length > 0) {
+        state = applyCoverageFromGeneral(state, mainModule.generalAnswers);
+      }
+    } catch (e) { console.warn('Coverage: General application failed', e); }
 
     // 7. Mini module answers (from localStorage)
+    // H6: completedModules in deps ensures recompute when modules complete
     const miniCounts = getMiniModuleAnswerCounts();
     for (const [modId, count] of Object.entries(miniCounts)) {
       const mod = MODULES.find(m => m.id === modId);
       if (mod) {
-        state = applyCoverageFromMiniModule(state, modId, count, mod.questionCount);
+        try {
+          state = applyCoverageFromMiniModule(state, modId, count, mod.questionCount);
+        } catch (e) { console.warn(`Coverage: Mini module ${modId} application failed`, e); }
       }
     }
 

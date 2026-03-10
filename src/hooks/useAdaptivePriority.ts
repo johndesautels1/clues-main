@@ -112,61 +112,64 @@ export function useAdaptivePriority(
 
   const isAdaptivePriority = eigSequence.length > 0;
 
+  // H3 fix: Destructure stable references from ms to avoid entire-object dependency
+  const { getAnswer, currentQuestion, nav, goNext, goPrev, goToQuestion, isFirstQuestion } = ms;
+
   // ─── Find next unanswered question in EIG order ────────────────
   const findNextUnanswered = useCallback((): QuestionLocation | null => {
     for (const loc of eigSequence) {
-      if (ms.getAnswer(loc.questionNumber) === undefined) {
+      if (getAnswer(loc.questionNumber) === undefined) {
         return loc;
       }
     }
     return null; // All answered
-  }, [eigSequence, ms]);
+  }, [eigSequence, getAnswer]);
 
   // ─── Count answered in prioritized sequence ────────────────────
   const answeredPrioritized = useMemo(() => {
     let count = 0;
     for (const loc of eigSequence) {
-      if (ms.getAnswer(loc.questionNumber) !== undefined) count++;
+      if (getAnswer(loc.questionNumber) !== undefined) count++;
     }
     return count;
-  }, [eigSequence, ms]);
+  }, [eigSequence, getAnswer]);
 
   // ─── Current question's EIG rank ───────────────────────────────
   const eigRank = useMemo((): number | null => {
-    if (!isAdaptivePriority || !ms.currentQuestion) return null;
-    const idx = eigSequence.findIndex(l => l.questionNumber === ms.currentQuestion!.number);
+    if (!isAdaptivePriority || !currentQuestion) return null;
+    const idx = eigSequence.findIndex(l => l.questionNumber === currentQuestion.number);
     return idx >= 0 ? idx + 1 : null;
-  }, [isAdaptivePriority, eigSequence, ms.currentQuestion]);
+  }, [isAdaptivePriority, eigSequence, currentQuestion]);
 
   // ─── Adaptive "Next" — jump to highest-EIG unanswered ─────────
   const goNextAdaptive = useCallback(() => {
     if (!isAdaptivePriority) {
-      ms.goNext();
+      goNext();
       return;
     }
 
     // Push current position to history before navigating away
-    if (ms.currentQuestion) {
+    if (currentQuestion) {
       const currentLoc: QuestionLocation = {
-        sectionIndex: ms.nav.sectionIndex,
-        questionIndex: ms.nav.questionIndex,
-        questionNumber: ms.currentQuestion.number,
-        eig: eigSequence.find(l => l.questionNumber === ms.currentQuestion!.number)?.eig ?? 0,
+        sectionIndex: nav.sectionIndex,
+        questionIndex: nav.questionIndex,
+        questionNumber: currentQuestion.number,
+        eig: eigSequence.find(l => l.questionNumber === currentQuestion.number)?.eig ?? 0,
       };
       setHistory(prev => [...prev, currentLoc]);
     }
 
     const next = findNextUnanswered();
     if (next) {
-      ms.goToQuestion(next.sectionIndex, next.questionIndex);
+      goToQuestion(next.sectionIndex, next.questionIndex);
     }
     // If null, all answered — MiniModuleFlow will detect isLastQuestion or isAllComplete
-  }, [isAdaptivePriority, ms, eigSequence, findNextUnanswered]);
+  }, [isAdaptivePriority, goNext, currentQuestion, nav, eigSequence, findNextUnanswered, goToQuestion]);
 
   // ─── Adaptive "Prev" — retrace visited-question history ────────
   const goPrevAdaptive = useCallback(() => {
     if (!isAdaptivePriority) {
-      ms.goPrev();
+      goPrev();
       return;
     }
 
@@ -175,16 +178,19 @@ export function useAdaptivePriority(
 
     const prev = h[h.length - 1];
     setHistory(h.slice(0, -1));
-    ms.goToQuestion(prev.sectionIndex, prev.questionIndex);
-  }, [isAdaptivePriority, ms]);
+    goToQuestion(prev.sectionIndex, prev.questionIndex);
+  }, [isAdaptivePriority, goPrev, goToQuestion]);
 
-  // ─── Completion detection ──────────────────────────────────────
-  const isAdaptiveComplete = isAdaptivePriority && findNextUnanswered() === null;
+  // H4 fix: Memoize completion detection (was calling findNextUnanswered in render path)
+  const isAdaptiveComplete = useMemo(
+    () => isAdaptivePriority && findNextUnanswered() === null,
+    [isAdaptivePriority, findNextUnanswered]
+  );
 
   return {
     goNextAdaptive,
     goPrevAdaptive,
-    isFirstInHistory: isAdaptivePriority ? history.length === 0 : ms.isFirstQuestion,
+    isFirstInHistory: isAdaptivePriority ? history.length === 0 : isFirstQuestion,
     isAdaptiveComplete,
     isAdaptivePriority,
     eigRank,
