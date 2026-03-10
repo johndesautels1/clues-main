@@ -95,7 +95,7 @@ export async function saveQuestionnaireAnswers(
       rows.push({
         session_id: session.id,
         section: 'dnw',
-        question_number: parseInt(a.questionId, 10),
+        question_number: parseInt(a.questionId.replace(/\D/g, ''), 10),
         question_key: `q${a.questionId}`,
         answer_text: a.value,
         answer_number: a.severity,
@@ -115,7 +115,7 @@ export async function saveQuestionnaireAnswers(
       rows.push({
         session_id: session.id,
         section: 'mh',
-        question_number: parseInt(a.questionId, 10),
+        question_number: parseInt(a.questionId.replace(/\D/g, ''), 10),
         question_key: `q${a.questionId}`,
         answer_text: a.value,
         answer_number: a.importance,
