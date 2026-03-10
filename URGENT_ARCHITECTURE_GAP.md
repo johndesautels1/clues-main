@@ -2,7 +2,34 @@
 
 **Date**: 2026-03-10
 **Priority**: CRITICAL — Must be built before Results Dashboard
-**Status**: GAP IDENTIFIED — No code exists for this bridge
+**Status**: BRIDGE BUILT ✅ (2026-03-10) — Audit pending, then Results Dashboard
+
+---
+
+## 0. CURRENT SESSION STATE (READ THIS FIRST IF COMPRESSED)
+
+**Branch**: `claude/build-results-dashboard-dBiO7`
+**Last commit**: `daef09b` — Build ProfileSignal → EvaluationMetric bridge + 5-LLM city recommendation
+
+### What was built this session (8 new files, 1,898 lines):
+| File | Purpose |
+|------|---------|
+| `src/lib/profileSignalBridge.ts` | ProfileSignal[] → EvaluationMetric[] converter + merge with Gemini metrics |
+| `src/lib/cityRecommendationOrchestrator.ts` | 5-LLM city recommendation with consensus voting (NOT Gemini-only) |
+| `src/lib/evaluationPipeline.ts` | Single entry point: auto-detects data path, wires bridge → cities → evaluation |
+| `api/recommend-sonnet.ts` | Claude Sonnet 4.6 city recommender |
+| `api/recommend-gemini.ts` | Gemini 3.1 Pro Preview city recommender (Google Search grounding) |
+| `api/recommend-gpt54.ts` | GPT-5.4 city recommender |
+| `api/recommend-grok.ts` | Grok 4.1 Fast Reasoning city recommender |
+| `api/recommend-perplexity.ts` | Sonar Reasoning Pro High city recommender (native web search) |
+
+### Zero existing files were modified.
+
+### What's next (IN ORDER):
+1. **AUDIT** — Full codebase audit from conv 1-2 through current. Bug report table created, awaiting owner review.
+2. **FIX BUGS** — Only after owner approves which bugs to fix.
+3. **BUILD RESULTS DASHBOARD** — The UI that calls `runPipeline()` and displays results from any entry point.
+4. **UPDATE BUILD_SCHEDULE.md** — Section 8 "LAST COMPLETED"
 
 ---
 
