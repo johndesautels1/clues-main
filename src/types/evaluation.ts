@@ -101,6 +101,12 @@ export interface EvaluateResponse {
   metadata: EvaluationMetadata;
 }
 
+/** Error response shape from any evaluation endpoint */
+export interface EvaluateErrorResponse {
+  error: string;
+  durationMs: number;
+}
+
 // ─── Orchestrator Types ───────────────────────────────────────
 
 /** Which LLM model to use for evaluation */
