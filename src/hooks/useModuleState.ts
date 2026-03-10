@@ -32,7 +32,7 @@ export interface UseModuleStateReturn {
   nav: ModuleNav;
   saveStatus: SaveStatus;
   currentSection: { title: string; questions: QuestionItem[] };
-  currentQuestion: QuestionItem;
+  currentQuestion: QuestionItem | undefined;
   visibleQuestions: QuestionItem[];
   progress: ModuleProgress;
   isFirstQuestion: boolean;
@@ -68,7 +68,7 @@ export function useModuleState(moduleData: QuestionModule): UseModuleStateReturn
     try {
       const stored = localStorage.getItem(storageKey(moduleId));
       if (stored) return JSON.parse(stored);
-    } catch { /* ignore */ }
+    } catch (e) { console.warn('[useModuleState] localStorage read failed:', e); }
     return {};
   }, [moduleId]);
 
@@ -95,7 +95,7 @@ export function useModuleState(moduleData: QuestionModule): UseModuleStateReturn
   useEffect(() => {
     try {
       localStorage.setItem(storageKey(moduleId), JSON.stringify(answers));
-    } catch { /* quota exceeded — ignore */ }
+    } catch (e) { console.warn('[useModuleState] localStorage write failed:', e); }
   }, [answers, moduleId]);
 
   // Debounced persist to UserContext (→ Supabase)
@@ -229,6 +229,7 @@ export function useModuleState(moduleData: QuestionModule): UseModuleStateReturn
   const isFirstQuestion = nav.sectionIndex === 0 && nav.questionIndex === 0;
 
   const isLastQuestion = useMemo(() => {
+    if (sections.length === 0) return true;
     const lastSec = sections.length - 1;
     if (nav.sectionIndex < lastSec) return false;
     return nav.questionIndex >= sections[lastSec].questions.length - 1;
