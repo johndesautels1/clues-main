@@ -35,11 +35,26 @@ import type {
   JudgeReportRow,
 } from '../types/judge';
 import { supabase, isSupabaseConfigured } from './supabase';
+import { MODULES } from '../data/modules';
 
 // ─── Constants ───────────────────────────────────────────────
 
 /** Max metrics per Opus call (token budget) */
 const MAX_METRICS_PER_CALL = 30;
+
+/** Timeout for each judge-opus API call (matches Opus endpoint's own 120s timeout) */
+const JUDGE_TIMEOUT_MS = 120_000;
+
+/**
+ * Resolve base URL for API calls.
+ * Browser: relative paths. SSR/Node: VERCEL_URL or localhost.
+ */
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined') return '';
+  const vercelUrl = import.meta.env.VITE_VERCEL_URL;
+  if (vercelUrl) return `https://${vercelUrl}`;
+  return 'http://localhost:3000';
+}
 
 // ─── Main Orchestrator ───────────────────────────────────────
 
@@ -92,18 +107,25 @@ export async function runJudge(
     invocationCount++;
 
     try {
-      // Client-side: use relative URL; server-side: use VERCEL_URL or localhost
-      const baseUrl = typeof window !== 'undefined' ? '' : '';
-      const response = await fetch(`${baseUrl}/api/judge-opus`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          metrics: batch,
-          categoryResults,
-          userContext,
-        }),
-      });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), JUDGE_TIMEOUT_MS);
+
+      let response: Response;
+      try {
+        response = await fetch(`${getBaseUrl()}/api/judge-opus`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            metrics: batch,
+            categoryResults,
+            userContext,
+          }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
 
       if (!response.ok) {
         const errText = await response.text();
@@ -156,6 +178,9 @@ function collectAllBatches(result: OrchestrationResult): CategoryBatchResult[] {
 // ─── Helper: Build category summaries for judge context ──────
 
 function buildCategorySummaries(batches: CategoryBatchResult[]): JudgeCategorySummary[] {
+  // Use canonical module names from modules.ts (consistent with categoryRollup.ts)
+  const moduleMap = new Map(MODULES.map(m => [m.id, m.name]));
+
   return batches
     .filter(b => b.isUsable)
     .map(batch => {
@@ -181,7 +206,7 @@ function buildCategorySummaries(batches: CategoryBatchResult[]): JudgeCategorySu
 
       return {
         categoryId: batch.category,
-        categoryName: batch.category.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        categoryName: moduleMap.get(batch.category) ?? batch.category.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
         metricCount: batch.consensus.length,
         locationScores,
         highDisagreementCount: batch.consensus.filter(c => c.needsJudgeReview).length,
@@ -387,16 +412,16 @@ function applySafeguards(
     .filter(b => b.isUsable)
     .flatMap(b => b.consensus)
     .filter(c => c.needsJudgeReview);
-  const avgStdDev = disputedMetrics.length > 0
-    ? disputedMetrics.reduce((sum, c) => sum + c.stdDev, 0) / disputedMetrics.length
+  const maxStdDev = disputedMetrics.length > 0
+    ? Math.max(...disputedMetrics.map(c => c.stdDev))
     : allBatches
         .filter(b => b.isUsable)
         .flatMap(b => b.consensus)
         .reduce((sum, c) => sum + c.stdDev, 0) / (allBatches.filter(b => b.isUsable).flatMap(b => b.consensus).length || 1);
 
   const computedConfidence: JudgeSummary['overallConfidence'] =
-    avgStdDev <= 5 ? 'high' :
-    avgStdDev <= 15 ? 'medium' :
+    maxStdDev <= 5 ? 'high' :
+    maxStdDev <= 15 ? 'medium' :
     'low';
 
   if (
@@ -411,7 +436,7 @@ function applySafeguards(
     ) {
       corrections.push({
         type: 'confidence_override',
-        description: `Opus claimed "${report.summaryOfFindings.overallConfidence}" confidence but average σ=${avgStdDev.toFixed(1)} warrants "${computedConfidence}". Force-corrected.`,
+        description: `Opus claimed "${report.summaryOfFindings.overallConfidence}" confidence but max σ=${maxStdDev.toFixed(1)} warrants "${computedConfidence}". Force-corrected.`,
         opusValue: report.summaryOfFindings.overallConfidence,
         computedValue: computedConfidence,
       });

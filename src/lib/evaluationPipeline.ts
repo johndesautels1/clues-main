@@ -193,6 +193,8 @@ export async function runPipeline(
 
   // ─── Done ────────────────────────────────────────────────────
   const totalDurationMs = Date.now() - startTime;
+  // Note: cityRecommendation cost is approximate ($0.005/response) since
+  // the recommendation endpoints don't yet return actual token-based costs.
   const totalCostUsd = evaluation.totalCostUsd + (cityRecommendation
     ? cityRecommendation.individualResults.reduce((sum, r) => sum + (r.response ? 0.005 : 0), 0)
     : 0);

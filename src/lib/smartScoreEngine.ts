@@ -51,7 +51,9 @@ export function getConfidenceLevel(stdDev: number): ConfidenceLevel {
 // ─── Score Normalization ─────────────────────────────────────
 
 /**
- * Clamp a score to the 0-100 range.
+ * Clamp a score to the 0-100 range, rounded to 2 decimal places.
+ * Note: evaluationOrchestrator uses integer rounding (Math.round) for consensus
+ * scores; this retains 2-decimal precision for weighted/averaged Smart Scores.
  */
 export function clampScore(score: number): number {
   return Math.max(0, Math.min(100, Math.round(score * 100) / 100));
