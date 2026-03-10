@@ -318,12 +318,22 @@ export function median(values: number[]): number {
 }
 
 /**
- * Compute standard deviation of an array of numbers.
+ * Compute sample standard deviation (Bessel's correction: n-1).
+ *
+ * Why n-1, not n: With 3-5 LLMs responding per metric, the scores are a
+ * sample of the full evaluator panel (not all 5 always respond). Population
+ * stdDev (÷n) underestimates true spread by 10-20% at n=3, which can let
+ * genuinely disputed metrics slip past the σ>15 judge-review threshold.
+ * Using n-1 is the conservative choice — it inflates σ slightly, sending
+ * borderline metrics to Opus judge review rather than letting them pass.
+ *
+ * This matches evaluationOrchestrator.computeStdDev() (M1 fix).
+ * Both functions MUST use the same divisor to prevent confidence drift.
  */
 export function stdDev(values: number[]): number {
   const valid = values.filter((v) => !isNaN(v));
   if (valid.length < 2) return 0;
   const avg = mean(valid);
   const squaredDiffs = valid.map((v) => (v - avg) ** 2);
-  return Math.sqrt(squaredDiffs.reduce((s, d) => s + d, 0) / valid.length);
+  return Math.sqrt(squaredDiffs.reduce((s, d) => s + d, 0) / (valid.length - 1));
 }
