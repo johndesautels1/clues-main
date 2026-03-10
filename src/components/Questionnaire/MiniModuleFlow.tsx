@@ -124,7 +124,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
       greenLightShownRef.current = true;
       toast.success(
         'Congratulations! Your data is now comprehensive enough for a full evaluation report. You can keep refining or head to your Dashboard.',
-        { duration: 8000, icon: '\u2728' }
+        { duration: 8000, icon: '\u2713' }
       );
     }
   }, [coverage, phase]);

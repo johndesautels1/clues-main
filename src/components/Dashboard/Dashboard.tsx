@@ -4,7 +4,7 @@
  * Reads/writes from UserContext (centralized state with Supabase auto-save).
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroHeading } from './HeroHeading';
 import { GlobeExplorer } from './GlobeExplorer';
@@ -46,6 +46,19 @@ export function Dashboard() {
 
   const { globe, paragraphical, mainModule, completedModules } = session;
 
+  // M15 fix: Track localStorage changes so enrichedModules re-computes
+  // when partial mini module answers are saved.
+  const [lsRevision, setLsRevision] = useState(0);
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key?.startsWith('clues-module-')) {
+        setLsRevision(r => r + 1);
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
+
   // Enrich static MODULES with dynamic status from engines + session
   const enrichedModules = useMemo((): ModuleDefinition[] => {
     return MODULES.map(mod => {
@@ -61,7 +74,7 @@ export function Dashboard() {
 
       return { ...mod, status };
     });
-  }, [completedModules, isRecommended]);
+  }, [completedModules, isRecommended, lsRevision]);
 
   // Globe region selected
   const handleRegionSelected = (region: string, lat: number, lng: number, zoomLevel: number) => {
@@ -89,13 +102,13 @@ export function Dashboard() {
     navigate(`/questionnaire?section=${section}`);
   };
 
-  // Main module overall status
-  const getMainModuleStatus = (): ModuleStatus => {
+  // L12 fix: Memoize main module status computation
+  const mainModuleStatus = useMemo((): ModuleStatus => {
     const statuses = Object.values(mainModule.subSectionStatus);
     if (statuses.every(s => s === 'completed')) return 'completed';
     if (statuses.some(s => s === 'in_progress')) return 'in_progress';
     return 'not_started';
-  };
+  }, [mainModule.subSectionStatus]);
 
   const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
 
@@ -167,7 +180,7 @@ export function Dashboard() {
           style={{ animationDelay: '350ms' }}
         >
           <MainModuleExpander
-            status={getMainModuleStatus()}
+            status={mainModuleStatus}
             expanded={mainModuleExpanded}
             onToggle={() => setMainModuleExpanded(!mainModuleExpanded)}
             subSectionStatus={mainModule.subSectionStatus}
