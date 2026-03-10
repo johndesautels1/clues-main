@@ -92,7 +92,8 @@ export async function runJudge(
     invocationCount++;
 
     try {
-      const baseUrl = typeof window !== 'undefined' ? '' : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+      // Client-side: use relative URL; server-side: use VERCEL_URL or localhost
+      const baseUrl = typeof window !== 'undefined' ? '' : '';
       const response = await fetch(`${baseUrl}/api/judge-opus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

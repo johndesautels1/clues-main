@@ -42,7 +42,7 @@
 
 .para-flow__back-btn:hover {
   color: var(--text-primary);
-  border-color: var(--border-glass-accent);
+  border-color: var(--border-accent);
 }
 
 /* Progress bar */
@@ -324,7 +324,7 @@
 }
 
 .para-flow__btn:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   cursor: not-allowed;
   filter: grayscale(0.4);
 }

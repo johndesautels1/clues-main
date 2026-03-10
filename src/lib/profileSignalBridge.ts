@@ -15,7 +15,7 @@
 
 import type { EvaluationMetric } from '../types/evaluation';
 import type { GeminiMetricObject, DNWAnswers, MHAnswers } from '../types';
-import type { ProfileSignal, SignalSource } from './answerAggregator';
+import type { ProfileSignal } from './answerAggregator';
 import { MODULES } from '../data/modules';
 import { getModuleQuestions } from '../data/questions';
 import type { QuestionItem } from '../data/questions/types';

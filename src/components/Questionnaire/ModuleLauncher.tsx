@@ -33,15 +33,15 @@ export function ModuleLauncher() {
             Module Not Found
           </h2>
           <p style={{ fontFamily: "'Crimson Pro',serif", fontSize: 15, color: C.textSecondary, lineHeight: 1.7, marginBottom: 24 }}>
-            The module <code style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: 4, fontSize: 14 }}>{moduleId || '(none)'}</code> does not exist.
+            The module <code style={{ background: 'var(--bg-glass, rgba(255,255,255,0.06))', padding: '2px 8px', borderRadius: 4, fontSize: 14 }}>{moduleId || '(none)'}</code> does not exist.
           </p>
           <button
             onClick={() => navigate('/')}
             style={{
               background: 'linear-gradient(135deg,rgba(96,165,250,0.14) 0%,rgba(96,165,250,0.06) 100%)',
-              border: '1px solid rgba(96,165,250,0.28)', borderRadius: 14,
+              border: '1px solid var(--border-accent, rgba(96,165,250,0.28))', borderRadius: 14,
               padding: '12px 28px', fontFamily: "'Outfit',sans-serif", fontSize: 14,
-              color: '#60a5fa', cursor: 'pointer', minHeight: 44,
+              color: 'var(--text-accent)', cursor: 'pointer', minHeight: 44,
             }}
           >
             Back to Dashboard

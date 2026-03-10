@@ -14,7 +14,7 @@
  * Pure math, no LLM calls, client-side, instant, free.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useUser } from '../context/UserContext';
 import {
   initializeRelevance,
@@ -100,11 +100,21 @@ export function useRelevanceState(): UseRelevanceReturn {
     return map;
   }, [relevance.modules]);
 
+  const isRecommended = useCallback(
+    (moduleId: string) => recommendedSet.has(moduleId),
+    [recommendedSet]
+  );
+
+  const getRelevance = useCallback(
+    (moduleId: string) => relevanceMap[moduleId] ?? 0.5,
+    [relevanceMap]
+  );
+
   return {
     relevance,
     recommendedModules: relevance.recommendedModules,
-    isRecommended: (moduleId: string) => recommendedSet.has(moduleId),
-    getRelevance: (moduleId: string) => relevanceMap[moduleId] ?? 0.5,
+    isRecommended,
+    getRelevance,
     estimatedQuestions: relevance.estimatedTotalQuestions,
   };
 }

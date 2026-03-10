@@ -22,12 +22,11 @@
 import type { UserSession } from '../types';
 import type { CityCandidate, OrchestrationResult, EvaluationWave } from '../types/evaluation';
 import { aggregateProfile } from './answerAggregator';
-import type { ProfileSignal } from './answerAggregator';
 import { buildMetricsForEvaluation } from './profileSignalBridge';
 import { recommendCities, buildSignalSummary } from './cityRecommendationOrchestrator';
 import type { CityRecommendationResult } from './cityRecommendationOrchestrator';
 import { runEvaluation } from './evaluationOrchestrator';
-import { calculateTier, calculateConfidence, getTierConfig } from './tierEngine';
+import { calculateTier, calculateConfidence } from './tierEngine';
 
 // ─── Types ──────────────────────────────────────────────────────
 

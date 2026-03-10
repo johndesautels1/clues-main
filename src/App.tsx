@@ -75,12 +75,22 @@ function App() {
               }
             />
 
-            {/* Admin — Question Library Dashboard */}
+            {/* Admin — Question Library Dashboard (requires authentication) */}
             <Route
               path="/admin/questions"
               element={
-                <ProtectedRoute allowAnonymous>
+                <ProtectedRoute>
                   <QuestionLibrary />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 404 catch-all */}
+            <Route
+              path="*"
+              element={
+                <ProtectedRoute allowAnonymous>
+                  <Dashboard />
                 </ProtectedRoute>
               }
             />

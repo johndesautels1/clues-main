@@ -80,7 +80,8 @@ const RECOMMEND_ENDPOINTS: Record<EvaluatorModel, string> = {
   'sonar-reasoning-pro-high': '/api/recommend-perplexity',
 };
 
-const ALL_RECOMMENDERS: EvaluatorModel[] = [
+// Available recommender models (used dynamically by orchestration config)
+export const ALL_RECOMMENDERS: EvaluatorModel[] = [
   'claude-sonnet-4-6',
   'gpt-5.4',
   'gemini-3.1-pro-preview',

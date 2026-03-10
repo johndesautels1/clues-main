@@ -134,7 +134,7 @@ export function useAdaptivePriority(
   // ─── Current question's EIG rank ───────────────────────────────
   const eigRank = useMemo((): number | null => {
     if (!isAdaptivePriority || !ms.currentQuestion) return null;
-    const idx = eigSequence.findIndex(l => l.questionNumber === ms.currentQuestion.number);
+    const idx = eigSequence.findIndex(l => l.questionNumber === ms.currentQuestion!.number);
     return idx >= 0 ? idx + 1 : null;
   }, [isAdaptivePriority, eigSequence, ms.currentQuestion]);
 
@@ -151,7 +151,7 @@ export function useAdaptivePriority(
         sectionIndex: ms.nav.sectionIndex,
         questionIndex: ms.nav.questionIndex,
         questionNumber: ms.currentQuestion.number,
-        eig: eigSequence.find(l => l.questionNumber === ms.currentQuestion.number)?.eig ?? 0,
+        eig: eigSequence.find(l => l.questionNumber === ms.currentQuestion!.number)?.eig ?? 0,
       };
       setHistory(prev => [...prev, currentLoc]);
     }

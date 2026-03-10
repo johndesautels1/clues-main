@@ -50,7 +50,7 @@ export function ModuleButton({ module }: Props) {
         <div className="module-btn__meter">
           <div
             className="module-btn__meter-fill"
-            style={{ width: `${module.score}%` }}
+            style={{ width: `${Math.min(100, Math.max(0, module.score))}%` }}
           />
         </div>
       )}
@@ -62,13 +62,13 @@ export function ModuleButton({ module }: Props) {
 
       {/* Status badges */}
       {status === 'completed' && (
-        <span className="module-btn__badge module-btn__badge--completed">{'\u2705'}</span>
+        <span className="module-btn__badge module-btn__badge--completed" aria-label="Completed">{'\u2705'}</span>
       )}
       {status === 'recommended' && (
-        <span className="module-btn__badge module-btn__badge--recommended">{'\u2B50'}</span>
+        <span className="module-btn__badge module-btn__badge--recommended" aria-label="Recommended">{'\u2B50'}</span>
       )}
       {status === 'locked' && (
-        <span className="module-btn__badge module-btn__badge--locked">{'\u{1F512}'}</span>
+        <span className="module-btn__badge module-btn__badge--locked" aria-label="Locked">{'\u{1F512}'}</span>
       )}
     </button>
   );

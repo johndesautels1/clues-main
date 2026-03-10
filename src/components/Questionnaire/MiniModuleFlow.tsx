@@ -48,7 +48,7 @@ function getModuleAccent(moduleId: string): string {
     technology_connectivity: '#06b6d4', transportation_mobility: '#06b6d4', education_learning: '#06b6d4', social_values_governance: '#06b6d4',
     food_dining: '#f59e0b', shopping_services: '#f59e0b', outdoor_recreation: '#f59e0b', entertainment_nightlife: '#f59e0b',
     family_children: '#22c55e', neighborhood_urban_design: '#22c55e', environment_community_appearance: '#22c55e',
-    religion_spirituality: '#a855f7', sexual_beliefs_practices_laws: '#a855f7', arts_culture: '#a855f7', cultural_heritage_traditions: '#a855f7', pets_animals: '#a855f7',
+    religion_spirituality: '#c084fc', sexual_beliefs_practices_laws: '#c084fc', arts_culture: '#c084fc', cultural_heritage_traditions: '#c084fc', pets_animals: '#c084fc',
   };
   return tierColors[moduleId] || '#60a5fa';
 }
@@ -712,7 +712,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               <QuestionRenderer
                 question={ms.currentQuestion}
                 value={ms.getAnswer(ms.currentQuestion.number)}
-                onChange={(val) => handleAnswerWithAdaptive(ms.currentQuestion.number, val)}
+                onChange={(val) => handleAnswerWithAdaptive(ms.currentQuestion!.number, val)}
                 accent={accent}
               />
 
@@ -720,7 +720,7 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               {skipLogic.getSkipInfo(ms.currentQuestion.number) && (
                 <SkipIndicator
                   skipInfo={skipLogic.getSkipInfo(ms.currentQuestion.number)!}
-                  onSkip={() => handleSkipQuestion(ms.currentQuestion.number)}
+                  onSkip={() => handleSkipQuestion(ms.currentQuestion!.number)}
                 />
               )}
             </div>

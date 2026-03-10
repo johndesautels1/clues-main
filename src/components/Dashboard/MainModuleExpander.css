@@ -23,6 +23,16 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+.main-module__header:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: -2px;
+}
+
+.sub-section:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: -2px;
+}
+
 .main-module__header-left {
   display: flex;
   align-items: center;
@@ -155,9 +165,21 @@
   border-color: rgba(34, 197, 94, 0.3);
 }
 
+/* Locked — per-property dimming, not whole-element opacity (WCAG 2.1 AA) */
 .sub-section--locked {
-  opacity: 0.6;
   filter: grayscale(0.4);
+}
+
+.sub-section--locked .sub-section__title {
+  color: var(--text-muted);
+}
+
+.sub-section--locked .sub-section__description {
+  color: var(--text-muted);
+}
+
+.sub-section--locked .sub-section__icon {
+  opacity: 0.55;
 }
 
 /* Main module status styles */
