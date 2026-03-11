@@ -143,7 +143,13 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Completion detection ──────────────────────────────────
-  const isAllAnswered = ms.isAllComplete;
+  // Adaptive mode: the Bayesian engine may funnel fewer questions than the
+  // full module (e.g. 44 of 100). Completion means the *prioritized* set is
+  // answered, NOT every question in the module.
+  // Sequential mode: all questions in the module must be answered.
+  const isReadyToComplete = priority.isAdaptivePriority
+    ? priority.isAdaptiveComplete
+    : ms.isAllComplete;
 
   // ─── Navigation with Transitions ──────────────────────────────
   const navigateQuestion = useCallback(
@@ -759,12 +765,12 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               })}
             </div>
 
-            {!ms.isLastQuestion && (
+            {(!ms.isLastQuestion || (priority.isAdaptivePriority && !priority.isAdaptiveComplete)) && (
               <button onClick={handleNext} className="mq-nav-btn" aria-label="Next question">
                 Next <span>&rarr;</span>
               </button>
             )}
-            {isAllAnswered && (
+            {isReadyToComplete && (
               <button
                 onClick={() => setPhase('complete')}
                 className="mq-nav-btn accent"
