@@ -1176,6 +1176,83 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 ---
 
+## Timeout Audit Map (Current State — Pre-Adjustment)
+
+> **Audited 2026-03-11.** Every timeout, delay, debounce, cache TTL, and polling interval in the codebase.
+
+### API & Server-Side
+
+| Constant | File | Line | Value | Purpose |
+|----------|------|------|-------|---------|
+| `SEARCH_TIMEOUT_MS` | `api/_shared/tavily-utils.ts` | 106 | 20s | Per Tavily search call |
+| `RETRY_DELAYS` | `api/_shared/tavily-utils.ts` | 105 | 2s, 4s, 8s | Tavily exponential backoff |
+| `REQUEST_TIMEOUT_MS` | `api/_shared/evaluation-utils.ts` | 294 | 90s | Per LLM evaluation API call |
+| Backoff | `api/_shared/evaluation-utils.ts` | 321 | 1s, 2s, 4s, 8s | LLM eval retry (2^n × 1000) |
+| Inline timeout | `api/judge-opus.ts` | 254 | 120s | Opus judge call |
+| `SESSION_TIMEOUT_MS` | `api/gpt-realtime.ts` | 24 | 15s | GPT Realtime session creation |
+| Backoff | `api/recommend-gemini.ts` | 132 | 1s, 2s, 4s | Gemini 429/5xx retry |
+
+### Orchestration
+
+| Constant | File | Line | Value | Purpose |
+|----------|------|------|-------|---------|
+| `JUDGE_TIMEOUT_MS` | `src/lib/judgeOrchestrator.ts` | 46 | 120s | Judge batch call |
+| `RECOMMEND_TIMEOUT_MS` | `src/lib/cityRecommendationOrchestrator.ts` | 93 | 90s | City recommendation call |
+| `WAVE_DELAY_MS` | `src/lib/evaluationOrchestrator.ts` | 95 | 1s | Breathing room between category waves |
+| Dynamic timeout | `src/lib/evaluationOrchestrator.ts` | 222 | 120s base + 5s/metric, max 300s | Scales with metric count |
+
+### Cache TTLs
+
+| Constant | File | Line | Value | Purpose |
+|----------|------|------|-------|---------|
+| Cache TTL | `api/_shared/tavily-utils.ts` | 230 | 30 min | Supabase tavily_cache expiry |
+| `CACHE_TTL_MS` | `src/lib/tavilyClient.ts` | 26 | 30 min | In-memory Tavily cache |
+| `EVICTION_INTERVAL_MS` | `src/lib/tavilyClient.ts` | 76 | 60s | Lazy eviction sweep interval |
+
+### Data Persistence (Debounce)
+
+| Constant | File | Line | Value | Purpose |
+|----------|------|------|-------|---------|
+| `SAVE_DEBOUNCE_MS` | `src/hooks/useSessionPersistence.ts` | 18 | 1.5s | Session → Supabase |
+| `SAVE_DEBOUNCE_MS` | `src/hooks/useModuleState.ts` | 52 | 1.5s | Module answers → Supabase |
+| Inline debounce | `src/hooks/useQuestionnaireState.ts` | — | 1.5s | Questionnaire → Supabase |
+| Inline debounce | `src/hooks/useAggregatedProfile.ts` | 168 | 3s | Aggregated profile → Supabase |
+| Inline debounce | `src/components/Discovery/DiscoveryFlow.tsx` | 138 | 1.5s | Discovery → UserContext |
+
+### Video Pipeline (Polling)
+
+| Constant | File | Line | Value | Purpose |
+|----------|------|------|-------|---------|
+| `POLL_INTERVAL_MS` | `src/components/Results/CristianoVideoPlayer.tsx` | 40 | 5s | HeyGen render status poll |
+| `MAX_POLL_DURATION_MS` | `src/components/Results/CristianoVideoPlayer.tsx` | 41 | 300s (5 min) | Max polling before timeout |
+
+### UI Feedback & Animations
+
+| Constant | File | Line | Value | Purpose |
+|----------|------|------|-------|---------|
+| Save status display | `src/hooks/useModuleState.ts` | 116 | 1.2s | "Saved" indicator fade |
+| Save status display | `src/hooks/useQuestionnaireState.ts` | 290 | 2s | "Saved" indicator fade |
+| Save status display | `src/components/Discovery/DiscoveryFlow.tsx` | 137 | 2s | "Saved" indicator fade |
+| Share flash | `src/components/Discovery/DiscoveryFlow.tsx` | 316 | 2s | Share confirmation flash |
+| Toast notifications | Multiple files | — | 3–4s | Toast auto-dismiss |
+| Welcome message | `src/hooks/useOliviaTutor.ts` | 135 | 600ms | Olivia welcome delay |
+| `DEBOUNCE_MS` | `src/hooks/useOliviaTutor.ts` | 39 | 3s | Coverage target detection |
+| Welcome toast | `src/components/Discovery/DiscoveryFlow.tsx` | 99 | 600ms | "Welcome back" delay |
+| Texture load retry | `src/components/Dashboard/GlobeExplorer.tsx` | 148–150 | 1s, 3s, 6s | Globe texture staggered retry |
+| Zoom animation | `src/components/Dashboard/GlobeExplorer.tsx` | 162/215 | 1.2–1.5s | Globe zoom transition |
+| Admin toast | `src/components/Admin/QuestionLibrary.tsx` | 211 | 3s | Toast dismiss |
+
+### Key Patterns
+
+1. **Persistence debounce** is 1.5s everywhere except aggregated profile (3s)
+2. **LLM timeouts** are 90s for evaluators, 120s for Opus judge (heavier reasoning)
+3. **Cache** is universally 30 min (both Supabase and in-memory)
+4. **Retry backoff** is always exponential (2^n × 1000ms)
+5. **Save status indicator** is inconsistent: 1.2s in module state vs 2s in questionnaire/discovery
+6. **No `maxDuration`** is set in `vercel.json` — relies on Vercel defaults (currently 60s for Pro serverless functions, must be explicitly configured up to 300s)
+
+---
+
 ## Development
 
 See `CLAUDE.md` for WCAG 2.1 AA compliance rules, build rules, and development guidelines.
