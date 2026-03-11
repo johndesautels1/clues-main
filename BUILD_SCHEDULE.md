@@ -522,7 +522,35 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-11 — Session 15 (Conv 17-20: Results + Cristiano Judge UI + Video — COMPLETE)
+### Latest Update: 2026-03-11 — Session 16 (Bridge Code Audit + Fixes)
+
+**What was done this conversation (2 commits):**
+
+1. **Full audit of bridge code (1,917 lines, 8 files)** — profileSignalBridge.ts (456), cityRecommendationOrchestrator.ts (304), evaluationPipeline.ts (215), plus all 5 recommend-* API endpoints. Type safety verified (zero mismatches), security verified (no vulnerabilities), model IDs verified (all correct).
+
+2. **Three bugs fixed across 6 files:**
+   - Added runtime signal validation on all 5 recommend-* endpoints (returns clean 400 for malformed requests instead of crashing in prompt builder)
+   - Added retry with exponential backoff (3 retries, 429/5xx) to Sonnet, GPT-5.4, Grok, Perplexity endpoints (matching existing Gemini pattern)
+   - Wrapped `import.meta.env` access in try-catch in cityRecommendationOrchestrator.ts for non-Vite safety
+
+**Bridge audit status:** PASS — Code is well-built, type-safe, architecturally sound. Zero type mismatches, zero security issues.
+
+**Known bugs & wiring issues (full list from audit):**
+
+| Priority | Issue | File(s) | Description |
+|----------|-------|---------|-------------|
+| **CRITICAL** | Pipeline disconnected from UI | `evaluationPipeline.ts` | `runPipeline()` is exported but never called anywhere. No component, hook, or page triggers it. The entire evaluation cascade is orphaned. **This is the #1 integration task for Conv 21-22.** |
+| **CRITICAL** | Judge not wired into pipeline | `evaluationPipeline.ts` | Doc comment mentions `judgeOrchestrator.ts` but `runJudge()` is never imported or called. Pipeline runs evaluation but skips the judge step entirely. |
+| **MODERATE** | 5 unused exports in bridge | `profileSignalBridge.ts` | `convertSignalsToMetrics`, `mergeAllMetrics`, `convertDNWToMetrics`, `convertMHToMetrics`, `groupMetricsByCategory` — all exported but only used internally by `buildMetricsForEvaluation()`. Either make them private or wire direct consumers. |
+| **MODERATE** | `ALL_RECOMMENDERS` unused | `cityRecommendationOrchestrator.ts:87` | Exported constant never imported. Orchestrator correctly uses `getTierConfig().llmModels` instead. Dead export. |
+| **MODERATE** | ~200 lines duplicated across endpoints | `api/recommend-*.ts` | `RecommendRequest` interface, `trackCost()`, `buildRecommendationPrompt()` copy-pasted in all 5 files. Should extract to `api/_shared/recommend-utils.ts`. |
+| **LOW** | `smartScoreEngine.ts:237` | `smartScoreEngine.ts` | TODO: implement source citation aggregation (carried forward) |
+| **LOW** | `oliviaTutor.ts:81` | `oliviaTutor.ts` | TODO: build `/api/olivia-tutor` endpoint (carried forward) |
+| **LOW** | 3 hardcoded "USD" strings | questions data | Currency should be dynamic (carried forward) |
+
+**What's next**: Conv 21-22 — Report Generation. **But first**: wire `runPipeline()` into a hook/component so the evaluation cascade actually fires. Then build reportDataAssembler.ts, gammaReportGenerator.ts, ReportDownload.tsx, report versioning, PDF export fallback.
+
+### Previous: 2026-03-11 — Session 15 (Conv 17-20: Results + Cristiano Judge UI + Video — COMPLETE)
 
 **What was done this conversation — Conv 19-20 (8 commits, 6 new files, 3 updated):**
 
@@ -550,7 +578,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
 - `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
 - 3 hardcoded "USD" strings in questions
-- Bridge code (1,898 lines) needs formal audit pass
+- ~~Bridge code (1,898 lines) needs formal audit pass~~ — **DONE** (Session 16)
 
 **What's next**: Conv 21-22 — Report Generation. Build reportDataAssembler.ts, gammaReportGenerator.ts, ReportDownload.tsx, report versioning, PDF export fallback.
 
@@ -586,7 +614,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
 - `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
 - 3 hardcoded "USD" strings in questions
-- Bridge code (1,898 lines) needs formal audit pass
+- ~~Bridge code (1,898 lines) needs formal audit pass~~ — **DONE** (Session 16)
 
 **What's next**: Conv 19-20 — Cristiano Judge UI + Video. Build JudgeVerdict.tsx (MI6 Briefing Room styled verdict), CourtOrder.tsx (per-category judicial analysis), SimliQuickVerdict.tsx (real-time avatar narration), api/cristiano-storyboard.ts (Sonnet 4.6 generates 7-scene storyboard).
 
