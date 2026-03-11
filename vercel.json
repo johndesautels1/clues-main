@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 300
+    }
+  },
   "rewrites": [
     { "source": "/api/ls/:path*", "destination": "https://clueslifescore.com/api/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

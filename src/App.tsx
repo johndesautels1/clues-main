@@ -8,7 +8,7 @@
  *  /paragraphical   → 30-paragraph input flow
  *  /questionnaire/* → Demographics, DNW, MH, General questions
  *  /module/:moduleId → Mini module questionnaire (23 modules × 100 Q)
- *  /results         → Evaluation results (future)
+ *  /results         → Evaluation results (ResultsDashboard)
  *  /reports         → Report viewer (future)
  *
  * Auth wrapping:
@@ -26,6 +26,7 @@ import { LoginPage } from './components/Auth/LoginPage';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { QuestionLibrary } from './components/Admin/QuestionLibrary';
 import { MainQuestionnaire, ModuleLauncher } from './components/Questionnaire';
+import { ResultsPage } from './components/Results/ResultsPage';
 
 function App() {
   return (
@@ -71,6 +72,16 @@ function App() {
               element={
                 <ProtectedRoute allowAnonymous>
                   <ModuleLauncher />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Results — Evaluation results with Smart Scores (anonymous OK) */}
+            <Route
+              path="/results"
+              element={
+                <ProtectedRoute allowAnonymous>
+                  <ResultsPage />
                 </ProtectedRoute>
               }
             />

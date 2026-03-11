@@ -386,8 +386,8 @@ Rules:
 }
 
 // ─── Gemini Token Rates (per 1M tokens, March 2026) ─────────────────
-const GEMINI_INPUT_RATE = 2.00;
-const GEMINI_OUTPUT_RATE = 12.00;
+const GEMINI_INPUT_RATE = 1.25;
+const GEMINI_OUTPUT_RATE = 10.00;
 
 const GEMINI_THINKING_RATE = 12.00; // Thinking tokens billed at output rate
 
