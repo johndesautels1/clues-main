@@ -1,3 +1,11 @@
+export { ResultsPage } from './ResultsPage';
+export { ResultsDashboard } from './ResultsDashboard';
+export { WinnerHero } from './WinnerHero';
+export { CityComparisonGrid } from './CityComparisonGrid';
+export { CategoryBreakdown } from './CategoryBreakdown';
+export { MetricDetailTable } from './MetricDetailTable';
+export { EvidencePanel } from './EvidencePanel';
+export { TownNeighborhoodDrilldown } from './TownNeighborhoodDrilldown';
 export { ReasoningTrace } from './ReasoningTrace';
 export { SideBySideMetricView } from './SideBySideMetricView';
 export { ReactiveJustification, ParagraphHighlightPanel } from './ReactiveJustification';
