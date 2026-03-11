@@ -142,10 +142,8 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Completion detection (adaptive or sequential) ──────────
-  const isComplete = priority.isAdaptivePriority
-    ? priority.isAdaptiveComplete
-    : ms.isLastQuestion;
+  // ─── Completion detection ──────────────────────────────────
+  const isAllAnswered = ms.isAllComplete;
 
   // ─── Navigation with Transitions ──────────────────────────────
   const navigateQuestion = useCallback(
@@ -155,23 +153,24 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
       setContentVisible(false);
       setTransitioning(true);
       setTimeout(() => {
-        if (dir > 0 && isComplete) {
-          setPhase('complete');
-        } else {
-          goFn();
-        }
+        goFn();
         setTimeout(() => {
           setContentVisible(true);
           setTransitioning(false);
         }, 80);
       }, 300);
     },
-    [transitioning, isComplete]
+    [transitioning]
   );
 
-  // Use EIG-priority navigation when available, else sequential
-  const goNext = priority.isAdaptivePriority ? priority.goNextAdaptive : ms.goNext;
-  const goPrev = priority.isAdaptivePriority ? priority.goPrevAdaptive : ms.goPrev;
+  // When adaptive is complete (all EIG questions answered), fall back to
+  // sequential navigation so the user can still browse all questions.
+  const goNext = priority.isAdaptivePriority
+    ? (priority.isAdaptiveComplete ? ms.goNext : priority.goNextAdaptive)
+    : ms.goNext;
+  const goPrev = priority.isAdaptivePriority
+    ? (priority.isAdaptiveComplete ? ms.goPrev : priority.goPrevAdaptive)
+    : ms.goPrev;
 
   const handleNext = useCallback(() => navigateQuestion(goNext, 1), [navigateQuestion, goNext]);
   const handlePrev = useCallback(() => navigateQuestion(goPrev, -1), [navigateQuestion, goPrev]);
@@ -760,13 +759,14 @@ export function MiniModuleFlow({ moduleData }: MiniModuleFlowProps) {
               })}
             </div>
 
-            {!isComplete ? (
+            {!ms.isLastQuestion && (
               <button onClick={handleNext} className="mq-nav-btn" aria-label="Next question">
                 Next <span>&rarr;</span>
               </button>
-            ) : (
+            )}
+            {isAllAnswered && (
               <button
-                onClick={handleNext}
+                onClick={() => setPhase('complete')}
                 className="mq-nav-btn accent"
                 aria-label="Complete module"
               >
