@@ -35,6 +35,8 @@ import type {
   GeneralAnswers,
   EvaluationResult,
 } from '../types';
+import type { SmartScoreOutput } from '../types/smartScore';
+import type { JudgeReport, JudgeOrchestrationResult } from '../types/judge';
 
 // ─── Actions ─────────────────────────────────────────────────────
 type Action =
@@ -51,6 +53,9 @@ type Action =
   | { type: 'SET_GENERAL_ANSWERS'; payload: GeneralAnswers }
   | { type: 'COMPLETE_MODULE'; payload: string }
   | { type: 'SET_EVALUATION'; payload: EvaluationResult }
+  | { type: 'SET_SMART_SCORES'; payload: SmartScoreOutput }
+  | { type: 'SET_JUDGE_REPORT'; payload: { report: JudgeReport; orchestration: JudgeOrchestrationResult } }
+  | { type: 'SET_CRISTIANO_VIDEO_URL'; payload: string }
   | { type: 'SET_TIER'; payload: { tier: CompletionTier; confidence: number } }
   | { type: 'SET_USER'; payload: { userId: string; email: string } }
   | { type: 'LOAD_SESSION'; payload: UserSession }
@@ -176,6 +181,20 @@ function sessionReducer(state: UserSession, action: Action): UserSession {
 
     case 'SET_EVALUATION':
       return { ...state, evaluation: action.payload, updatedAt: now };
+
+    case 'SET_SMART_SCORES':
+      return { ...state, smartScoreOutput: action.payload, updatedAt: now };
+
+    case 'SET_JUDGE_REPORT':
+      return {
+        ...state,
+        judgeReport: action.payload.report,
+        judgeOrchestration: action.payload.orchestration,
+        updatedAt: now,
+      };
+
+    case 'SET_CRISTIANO_VIDEO_URL':
+      return { ...state, cristianoVideoUrl: action.payload, updatedAt: now };
 
     case 'SET_TIER':
       return {
