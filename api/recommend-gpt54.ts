@@ -106,30 +106,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.status(400).json({ error: 'Missing sessionId, globeRegion, or signals' }); return;
   }
 
+  const invalidSignal = body.signals.find(
+    s => typeof s.moduleId !== 'string' || typeof s.key !== 'string' ||
+         typeof s.value !== 'number' || typeof s.source !== 'string' ||
+         s.rawValue === undefined
+  );
+  if (invalidSignal) {
+    res.status(400).json({ error: 'Malformed signal object: each signal must have moduleId (string), key (string), value (number), source (string), and rawValue' }); return;
+  }
+
   const startTime = Date.now();
 
   try {
     const prompt = buildRecommendationPrompt(body);
 
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'gpt-5.4',
-        messages: [
-          { role: 'system', content: 'You are a world-class relocation analyst. Return only valid JSON. No markdown fences.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.4,
-        max_tokens: 16384,
-        response_format: { type: 'json_object' },
-      }),
-    });
-
-    if (!openaiResponse.ok) {
+    let openaiResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'gpt-5.4',
+          messages: [
+            { role: 'system', content: 'You are a world-class relocation analyst. Return only valid JSON. No markdown fences.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.4,
+          max_tokens: 16384,
+          response_format: { type: 'json_object' },
+        }),
+      });
+      if (openaiResponse.ok) break;
+      const status = openaiResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        continue;
+      }
       const errText = await openaiResponse.text();
-      throw new Error(`OpenAI API returned ${openaiResponse.status}: ${errText}`);
+      throw new Error(`OpenAI API returned ${status}: ${errText}`);
     }
+
+    if (!openaiResponse || !openaiResponse.ok) throw new Error('OpenAI API request failed after retries');
 
     const result = await openaiResponse.json();
     const durationMs = Date.now() - startTime;

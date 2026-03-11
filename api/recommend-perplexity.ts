@@ -107,29 +107,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.status(400).json({ error: 'Missing sessionId, globeRegion, or signals' }); return;
   }
 
+  const invalidSignal = body.signals.find(
+    s => typeof s.moduleId !== 'string' || typeof s.key !== 'string' ||
+         typeof s.value !== 'number' || typeof s.source !== 'string' ||
+         s.rawValue === undefined
+  );
+  if (invalidSignal) {
+    res.status(400).json({ error: 'Malformed signal object: each signal must have moduleId (string), key (string), value (number), source (string), and rawValue' }); return;
+  }
+
   const startTime = Date.now();
 
   try {
     const prompt = buildRecommendationPrompt(body);
 
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'sonar-reasoning-pro-high',
-        messages: [
-          { role: 'system', content: 'You are a world-class relocation analyst with native web search. Return only valid JSON. No markdown fences.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.4,
-        max_tokens: 16384,
-      }),
-    });
-
-    if (!perplexityResponse.ok) {
+    let perplexityResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'sonar-reasoning-pro-high',
+          messages: [
+            { role: 'system', content: 'You are a world-class relocation analyst with native web search. Return only valid JSON. No markdown fences.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.4,
+          max_tokens: 16384,
+        }),
+      });
+      if (perplexityResponse.ok) break;
+      const status = perplexityResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        continue;
+      }
       const errText = await perplexityResponse.text();
-      throw new Error(`Perplexity API returned ${perplexityResponse.status}: ${errText}`);
+      throw new Error(`Perplexity API returned ${status}: ${errText}`);
     }
+
+    if (!perplexityResponse || !perplexityResponse.ok) throw new Error('Perplexity API request failed after retries');
 
     const result = await perplexityResponse.json();
     const durationMs = Date.now() - startTime;

@@ -67,8 +67,12 @@ export interface CityRecommendationResult {
 
 function getBaseUrl(): string {
   if (typeof window !== 'undefined') return '';
-  const vercelUrl = import.meta.env.VITE_VERCEL_URL;
-  if (vercelUrl) return `https://${vercelUrl}`;
+  try {
+    const vercelUrl = import.meta.env?.VITE_VERCEL_URL;
+    if (vercelUrl) return `https://${vercelUrl}`;
+  } catch {
+    // import.meta.env may not exist outside Vite contexts
+  }
   return 'http://localhost:3000';
 }
 
