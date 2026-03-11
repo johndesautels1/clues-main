@@ -161,6 +161,11 @@ export function ResultsPage() {
   const extraction = session.paragraphical?.extraction;
   const paragraphs = session.paragraphical?.paragraphs;
 
+  // Extract judge report if available
+  const judgeReport = (sessionAny.judgeReport as import('../../types/judge').JudgeReport) ?? undefined;
+  const judgeOrchestration = (sessionAny.judgeOrchestration as import('../../types/judge').JudgeOrchestrationResult) ?? undefined;
+  const existingVideoUrl = (sessionAny.cristianoVideoUrl as string) ?? undefined;
+
   return (
     <ResultsDashboard
       smartScores={smartScores}
@@ -176,6 +181,10 @@ export function ResultsPage() {
       recommendedCity={extraction?.recommended_cities?.[0] ?? null}
       recommendedTown={extraction?.recommended_towns?.[0] ?? null}
       recommendedNeighborhood={extraction?.recommended_neighborhoods?.[0] ?? null}
+      judgeReport={judgeReport}
+      judgeOrchestration={judgeOrchestration}
+      sessionId={session.id}
+      existingVideoUrl={existingVideoUrl}
     />
   );
 }

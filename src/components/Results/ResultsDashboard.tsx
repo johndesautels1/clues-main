@@ -1,10 +1,8 @@
 /**
  * ResultsDashboard — Main results page orchestrator.
  *
- * Conv 17-18: Results Page Assembly.
- * Wires WinnerHero, CityComparisonGrid, CategoryBreakdown,
- * EvidencePanel, TownNeighborhoodDrilldown, and existing
- * ThinkingDetailsPanel + SideBySideMetricView + ReactiveJustification.
+ * Conv 17-20: Results Page Assembly + Cristiano Judge UI + Video.
+ * Wires all Results + Judge + Video components into a unified flow.
  *
  * Data flow: reads SmartScoreOutput from UserContext (session.evaluation)
  * and renders the full results experience.
@@ -15,11 +13,16 @@
 import { useState } from 'react';
 import type { SmartScoreOutput, CitySmartScore } from '../../types/smartScore';
 import type { ThinkingStep, ParagraphEntry, LocationMetrics } from '../../types';
+import type { JudgeReport, JudgeOrchestrationResult } from '../../types/judge';
 import { WinnerHero } from './WinnerHero';
 import { CityComparisonGrid } from './CityComparisonGrid';
 import { CategoryBreakdown } from './CategoryBreakdown';
 import { EvidencePanel } from './EvidencePanel';
 import { TownNeighborhoodDrilldown } from './TownNeighborhoodDrilldown';
+import { JudgeVerdict } from './JudgeVerdict';
+import { CourtOrder } from './CourtOrder';
+import { SimliQuickVerdict } from './SimliQuickVerdict';
+import { CristianoVideoPlayer } from './CristianoVideoPlayer';
 import { ThinkingDetailsPanel } from './ThinkingDetailsPanel';
 import { SideBySideMetricView } from './SideBySideMetricView';
 import { ParagraphHighlightPanel } from './ReactiveJustification';
@@ -47,6 +50,14 @@ interface ResultsDashboardProps {
   recommendedCity?: LocationMetrics | null;
   recommendedTown?: LocationMetrics | null;
   recommendedNeighborhood?: LocationMetrics | null;
+  /** Opus Judge report */
+  judgeReport?: JudgeReport;
+  /** Full judge orchestration result (for safeguard info) */
+  judgeOrchestration?: JudgeOrchestrationResult;
+  /** Session ID for video pipeline */
+  sessionId?: string;
+  /** Pre-rendered video URL (if available) */
+  existingVideoUrl?: string;
 }
 
 export function ResultsDashboard({
@@ -57,6 +68,10 @@ export function ResultsDashboard({
   recommendedCity,
   recommendedTown,
   recommendedNeighborhood,
+  judgeReport,
+  judgeOrchestration,
+  sessionId,
+  existingVideoUrl,
 }: ResultsDashboardProps) {
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
 
@@ -96,7 +111,40 @@ export function ResultsDashboard({
         <SectionDivider text="Evidence &amp; Sources" />
         <EvidencePanel cities={cityScores} />
 
-        {/* 5. Towns & Neighborhoods */}
+        {/* 5. Cristiano's Judicial Verdict */}
+        {judgeReport && (
+          <>
+            <SectionDivider text="Cristiano&apos;s Verdict" />
+
+            {/* Quick Verdict — Simli real-time narration */}
+            <SimliQuickVerdict report={judgeReport} />
+
+            {/* Full Judicial Briefing */}
+            <div style={{ marginTop: 'var(--space-4)' }}>
+              <JudgeVerdict report={judgeReport} orchestration={judgeOrchestration} />
+            </div>
+
+            {/* Per-category Court Orders */}
+            <div style={{ marginTop: 'var(--space-4)' }}>
+              <CourtOrder report={judgeReport} />
+            </div>
+          </>
+        )}
+
+        {/* 6. Cinematic Video — "Your New Life in [City]" */}
+        {judgeReport && sessionId && (
+          <>
+            <SectionDivider text="Cinematic Verdict" />
+            <CristianoVideoPlayer
+              report={judgeReport}
+              winnerCity={winner.winner}
+              sessionId={sessionId}
+              existingVideoUrl={existingVideoUrl}
+            />
+          </>
+        )}
+
+        {/* 7. Towns & Neighborhoods */}
         {(towns.length > 0 || neighborhoods.length > 0) && (
           <>
             <SectionDivider text="Towns &amp; Neighborhoods" />
