@@ -522,7 +522,34 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued + Build Fix)
+### Latest Update: 2026-03-11 — Session 14 (Full Codebase Audit + Bug Fixes)
+
+**What was done this conversation:**
+
+1. **Full codebase audit** — comprehensive review of all code vs documentation claims:
+   - Verified all 16 conversation groups (Conv 1-16) are fully built and match BUILD_SCHEDULE checklists
+   - Verified Gemini model ID (`gemini-3.1-pro-preview`) is correct across 60+ references
+   - Verified 30 paragraphs (P1-P30) in 6 phases
+   - Verified 5-LLM pipeline, Opus Judge, Smart Score Engine integrity
+   - Discovered undocumented Phase 2.5 bridge work from 2026-03-10 (profileSignalBridge.ts, cityRecommendationOrchestrator.ts, evaluationPipeline.ts, 5 recommend-*.ts endpoints)
+
+2. **Bug fixes (10 issues across 6 files):**
+   - `QuestionLibrary.css`: 6× `font-size: 10px` → `11px` (WCAG minimum violation)
+   - `ParagraphicalButton.css`: `opacity: 0.55` → `0.6` on locked icon (WCAG disabled state)
+   - `ModuleButton.css`: `opacity: 0.55` → `0.6` on locked icon (WCAG disabled state)
+   - `MainModuleExpander.css`: `opacity: 0.55` → `0.6` on locked icon (WCAG disabled state)
+   - `Discovery.css`: keyframe `opacity: 0.4` → `0.6` (WCAG minimum)
+   - `api/paragraphical.ts`: Gemini rates `$2.00/$12.00` → `$1.25/$10.00` (pricing mismatch)
+
+**Known items NOT fixed (deferred to owner decision):**
+- `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
+- `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
+- 3 questions in `main_module.ts` / `financial_banking.ts` hardcode "USD" in question text
+- Bridge code (1,898 lines from 2026-03-10) needs formal audit pass
+
+**What's next**: Conv 17-18 — Results Page Assembly. Wire existing Results components (ReasoningTrace, SideBySideMetricView, ThinkingDetailsPanel, ReactiveJustification) into /results route. Build ResultsDashboard orchestrator.
+
+### Previous Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued + Build Fix)
 
 **What was done this conversation (4 commits):**
 
