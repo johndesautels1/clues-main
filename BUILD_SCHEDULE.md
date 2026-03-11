@@ -186,15 +186,15 @@
 *Displaying results and generating deliverables. Depends on Phase 2 evaluation working.*
 
 #### Conv 17-18: Results Page Assembly
-- [ ] Wire existing Results components into `/results` route
-- [ ] `src/components/Results/ResultsDashboard.tsx` — main results page layout
-- [ ] `src/components/Results/WinnerHero.tsx` — full-width winner declaration
-- [ ] `src/components/Results/CategoryBreakdown.tsx` — collapsible category sections with score bars
-- [ ] `src/components/Results/MetricDetailTable.tsx` — per-metric scores, sources, confidence dots
-- [ ] `src/components/Results/EvidencePanel.tsx` — source citations with filter buttons
-- [ ] `src/components/Results/CityComparisonGrid.tsx` — side-by-side city scoring grid
-- [ ] `src/components/Results/TownNeighborhoodDrilldown.tsx` — town + neighborhood sections
-- [ ] Connect ReasoningTrace, SideBySideMetricView, ThinkingDetailsPanel
+- [x] Wire existing Results components into `/results` route
+- [x] `src/components/Results/ResultsDashboard.tsx` — main results page layout
+- [x] `src/components/Results/WinnerHero.tsx` — full-width winner declaration
+- [x] `src/components/Results/CategoryBreakdown.tsx` — collapsible category sections with score bars
+- [x] `src/components/Results/MetricDetailTable.tsx` — per-metric scores, sources, confidence dots
+- [x] `src/components/Results/EvidencePanel.tsx` — source citations with filter buttons
+- [x] `src/components/Results/CityComparisonGrid.tsx` — side-by-side city scoring grid
+- [x] `src/components/Results/TownNeighborhoodDrilldown.tsx` — town + neighborhood sections
+- [x] Connect ReasoningTrace, SideBySideMetricView, ThinkingDetailsPanel
 
 #### Conv 19-20: Cristiano Judge UI + Video
 - [ ] `src/components/Results/JudgeVerdict.tsx` — MI6 Briefing Room styled verdict display
@@ -522,7 +522,43 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-11 — Session 14 (Full Codebase Audit + Bug Fixes)
+### Latest Update: 2026-03-11 — Session 15 (Conv 17-18: Results Page Assembly — COMPLETE)
+
+**What was done this conversation (9 commits, 10 new files):**
+
+1. **Results.css** (991 lines) — Full WCAG 2.1 AA stylesheet for Results page, dark + light mode compliant. Styles for WinnerHero, CityComparisonGrid, CategoryBreakdown, MetricDetailTable, EvidencePanel, TownNeighborhoodDrilldown, section dividers, score color utilities.
+
+2. **WinnerHero.tsx** — Full-width winner declaration with gold score ring, trophy, advantage category tags, tie detection badge, runner-up row with scores.
+
+3. **CityComparisonGrid.tsx** — Side-by-side city cards with rank badges (gold/silver/bronze), overall Smart Score, confidence badges (unanimous/strong/moderate/split), top category score bars with colored fills, metrics count.
+
+4. **MetricDetailTable.tsx** — Per-metric table with expandable rows. Shows metric ID, description, score with color, source count, confidence dots + text labels. Expanded view: raw value, consensus vs judge score, judge override explanation, dual scores (legal/enforcement), source citations with links, stdDev, contributing models.
+
+5. **CategoryBreakdown.tsx** — 23 collapsible category sections sorted by weight. Each shows comparison bars across all cities, confidence dots, judge analysis, trend notes. Embeds MetricDetailTable for per-metric drill-down.
+
+6. **EvidencePanel.tsx** — Aggregates all MetricSource citations across cities/metrics. Category filter tabs with counts, evidence cards with metric ID, excerpt, clickable source links, domain extraction. Caps display at 50.
+
+7. **TownNeighborhoodDrilldown.tsx** — Two-level drill-down: towns in winning city, neighborhoods in winning town. Cards with rank, score, parent location, top 3 category highlights. Expandable to full category bar breakdown.
+
+8. **ResultsDashboard.tsx** — Main orchestrator wiring all components in order: WinnerHero → CityComparisonGrid → CategoryBreakdown → EvidencePanel → TownNeighborhoodDrilldown → ThinkingDetailsPanel → SideBySideMetricView + ParagraphHighlightPanel. Section dividers between blocks.
+
+9. **ResultsPage.tsx** — Route-level wrapper bridging UserContext to ResultsDashboard. Loading spinner, "no results yet" empty state with CTA to Paragraphical, tier/confidence display.
+
+10. **App.tsx** — `/results` route added with `ProtectedRoute allowAnonymous`.
+
+11. **index.ts** — Barrel exports updated: 13 components total.
+
+**Build status:** `tsc --noEmit` — 0 errors.
+
+**Known items still deferred:**
+- `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
+- `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
+- 3 hardcoded "USD" strings in questions
+- Bridge code (1,898 lines) needs formal audit pass
+
+**What's next**: Conv 19-20 — Cristiano Judge UI + Video. Build JudgeVerdict.tsx (MI6 Briefing Room styled verdict), CourtOrder.tsx (per-category judicial analysis), SimliQuickVerdict.tsx (real-time avatar narration), api/cristiano-storyboard.ts (Sonnet 4.6 generates 7-scene storyboard).
+
+### Previous Update: 2026-03-11 — Session 14 (Full Codebase Audit + Bug Fixes)
 
 **What was done this conversation:**
 
@@ -547,7 +583,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - 3 questions in `main_module.ts` / `financial_banking.ts` hardcode "USD" in question text
 - Bridge code (1,898 lines from 2026-03-10) needs formal audit pass
 
-**What's next**: Conv 17-18 — Results Page Assembly. Wire existing Results components (ReasoningTrace, SideBySideMetricView, ThinkingDetailsPanel, ReactiveJustification) into /results route. Build ResultsDashboard orchestrator.
+**What's next**: Conv 17-18 — Results Page Assembly (DONE in Session 15).
 
 ### Previous Update: 2026-03-09 — Session 12 (Phase 1 Audit Fix Pass — Continued + Build Fix)
 
