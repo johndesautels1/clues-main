@@ -89,8 +89,8 @@ export const ALL_RECOMMENDERS: EvaluatorModel[] = [
   'sonar-reasoning-pro-high',
 ];
 
-/** Timeout for city recommendation calls (90s — simpler than full eval) */
-const RECOMMEND_TIMEOUT_MS = 90_000;
+/** Timeout for city recommendation calls (120s — Gemini thinking_level:high needs headroom) */
+const RECOMMEND_TIMEOUT_MS = 120_000;
 
 /** Minimum LLMs needed for a usable recommendation set */
 const MIN_USABLE_RECOMMENDERS = 2;

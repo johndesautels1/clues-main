@@ -1176,30 +1176,37 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 ---
 
-## Timeout Audit Map (Current State — Pre-Adjustment)
+## Timeout Audit Map (Revised — Post-Adjustment)
 
-> **Audited 2026-03-11.** Every timeout, delay, debounce, cache TTL, and polling interval in the codebase.
+> **Audited & adjusted 2026-03-11.** Every timeout, delay, debounce, cache TTL, and polling interval in the codebase.
+> Changes marked with ✅ were applied in this audit.
+
+### Vercel Configuration
+
+| Setting | File | Value | Notes |
+|---------|------|-------|-------|
+| ✅ `maxDuration` | `vercel.json` | **300s** | Added — Vercel Pro allows up to 300s; prevents mid-execution kills on LLM calls |
 
 ### API & Server-Side
 
 | Constant | File | Line | Value | Purpose |
 |----------|------|------|-------|---------|
-| `SEARCH_TIMEOUT_MS` | `api/_shared/tavily-utils.ts` | 106 | 20s | Per Tavily search call |
+| `SEARCH_TIMEOUT_MS` | `api/_shared/tavily-utils.ts` | 106 | 20s | Per Tavily search call — adequate (retries add headroom) |
 | `RETRY_DELAYS` | `api/_shared/tavily-utils.ts` | 105 | 2s, 4s, 8s | Tavily exponential backoff |
-| `REQUEST_TIMEOUT_MS` | `api/_shared/evaluation-utils.ts` | 294 | 90s | Per LLM evaluation API call |
+| ✅ `REQUEST_TIMEOUT_MS` | `api/_shared/evaluation-utils.ts` | 294 | **120s** ← was 90s | Per LLM evaluation API call — raised to match judge timeout |
 | Backoff | `api/_shared/evaluation-utils.ts` | 321 | 1s, 2s, 4s, 8s | LLM eval retry (2^n × 1000) |
-| Inline timeout | `api/judge-opus.ts` | 254 | 120s | Opus judge call |
-| `SESSION_TIMEOUT_MS` | `api/gpt-realtime.ts` | 24 | 15s | GPT Realtime session creation |
+| Inline timeout | `api/judge-opus.ts` | 254 | 120s | Opus judge call — adequate |
+| `SESSION_TIMEOUT_MS` | `api/gpt-realtime.ts` | 24 | 15s | GPT Realtime session creation — adequate (lightweight handshake) |
 | Backoff | `api/recommend-gemini.ts` | 132 | 1s, 2s, 4s | Gemini 429/5xx retry |
 
 ### Orchestration
 
 | Constant | File | Line | Value | Purpose |
 |----------|------|------|-------|---------|
-| `JUDGE_TIMEOUT_MS` | `src/lib/judgeOrchestrator.ts` | 46 | 120s | Judge batch call |
-| `RECOMMEND_TIMEOUT_MS` | `src/lib/cityRecommendationOrchestrator.ts` | 93 | 90s | City recommendation call |
+| `JUDGE_TIMEOUT_MS` | `src/lib/judgeOrchestrator.ts` | 46 | 120s | Judge batch call — adequate |
+| ✅ `RECOMMEND_TIMEOUT_MS` | `src/lib/cityRecommendationOrchestrator.ts` | 93 | **120s** ← was 90s | City recommendation — raised for Gemini thinking_level:high |
 | `WAVE_DELAY_MS` | `src/lib/evaluationOrchestrator.ts` | 95 | 1s | Breathing room between category waves |
-| Dynamic timeout | `src/lib/evaluationOrchestrator.ts` | 222 | 120s base + 5s/metric, max 300s | Scales with metric count |
+| Dynamic timeout | `src/lib/evaluationOrchestrator.ts` | 222 | 120s base + 5s/metric, max 300s | Scales with metric count — adequate (client-side orchestration) |
 
 ### Cache TTLs
 
@@ -1230,7 +1237,7 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 | Constant | File | Line | Value | Purpose |
 |----------|------|------|-------|---------|
-| Save status display | `src/hooks/useModuleState.ts` | 116 | 1.2s | "Saved" indicator fade |
+| ✅ Save status display | `src/hooks/useModuleState.ts` | 116 | **2s** ← was 1.2s | "Saved" indicator — standardized with other components |
 | Save status display | `src/hooks/useQuestionnaireState.ts` | 290 | 2s | "Saved" indicator fade |
 | Save status display | `src/components/Discovery/DiscoveryFlow.tsx` | 137 | 2s | "Saved" indicator fade |
 | Share flash | `src/components/Discovery/DiscoveryFlow.tsx` | 316 | 2s | Share confirmation flash |
@@ -1242,14 +1249,23 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 | Zoom animation | `src/components/Dashboard/GlobeExplorer.tsx` | 162/215 | 1.2–1.5s | Globe zoom transition |
 | Admin toast | `src/components/Admin/QuestionLibrary.tsx` | 211 | 3s | Toast dismiss |
 
-### Key Patterns
+### Changes Summary
+
+| # | Change | Old | New | Reason |
+|---|--------|-----|-----|--------|
+| 1 | `vercel.json` `maxDuration` | Not set (60s default) | **300s** | Vercel Pro allows 300s; LLM calls were silently killed at 60s |
+| 2 | `REQUEST_TIMEOUT_MS` | 90s | **120s** | 100-page cascade: evaluations under load can exceed 90s |
+| 3 | `RECOMMEND_TIMEOUT_MS` | 90s | **120s** | Gemini thinking_level:high + Google Search grounding needs headroom |
+| 4 | Save status (useModuleState) | 1.2s | **2s** | Inconsistent with questionnaire/discovery (both 2s) |
+
+### Key Patterns (Post-Adjustment)
 
 1. **Persistence debounce** is 1.5s everywhere except aggregated profile (3s)
-2. **LLM timeouts** are 90s for evaluators, 120s for Opus judge (heavier reasoning)
+2. **LLM timeouts** are now uniformly 120s across all LLM calls (evaluators, judge, recommendations)
 3. **Cache** is universally 30 min (both Supabase and in-memory)
 4. **Retry backoff** is always exponential (2^n × 1000ms)
-5. **Save status indicator** is inconsistent: 1.2s in module state vs 2s in questionnaire/discovery
-6. **No `maxDuration`** is set in `vercel.json` — relies on Vercel defaults (currently 60s for Pro serverless functions, must be explicitly configured up to 300s)
+5. **Save status indicator** is now uniformly 2s across all components
+6. **Vercel `maxDuration`** is explicitly set to 300s for all API functions
 
 ---
 

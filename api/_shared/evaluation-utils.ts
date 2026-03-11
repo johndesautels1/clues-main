@@ -291,7 +291,7 @@ export function parseEvaluationResponse(
 
 // ─── Fetch with Timeout ─────────────────────────────────────────
 
-const REQUEST_TIMEOUT_MS = 90_000; // 90s per LLM API call
+const REQUEST_TIMEOUT_MS = 120_000; // 120s per LLM API call (Vercel Pro maxDuration=300s)
 
 /**
  * Fetch with AbortController timeout and retry on 429/5xx.

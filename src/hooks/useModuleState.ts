@@ -113,7 +113,7 @@ export function useModuleState(moduleData: QuestionModule): UseModuleStateReturn
       }
 
       setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 1200);
+      setTimeout(() => setSaveStatus('idle'), 2000);
     }, SAVE_DEBOUNCE_MS);
   }, [moduleId, moduleData.sections, dispatch]);
 
