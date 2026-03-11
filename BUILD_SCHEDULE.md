@@ -197,13 +197,13 @@
 - [x] Connect ReasoningTrace, SideBySideMetricView, ThinkingDetailsPanel
 
 #### Conv 19-20: Cristiano Judge UI + Video
-- [ ] `src/components/Results/JudgeVerdict.tsx` — MI6 Briefing Room styled verdict display
-- [ ] `src/components/Results/CourtOrder.tsx` — per-category judicial analysis with real-world examples
-- [ ] `src/components/Results/SimliQuickVerdict.tsx` — real-time avatar narration
-- [ ] `api/cristiano-storyboard.ts` — Sonnet 4.6 generates 7-scene storyboard
-- [ ] `api/heygen-render.ts` — HeyGen Video Agent V2 cinematic render
-- [ ] Video polling + Supabase Storage save
-- [ ] Cristiano avatar integration
+- [x] `src/components/Results/JudgeVerdict.tsx` — MI6 Briefing Room styled verdict display
+- [x] `src/components/Results/CourtOrder.tsx` — per-category judicial analysis with real-world examples
+- [x] `src/components/Results/SimliQuickVerdict.tsx` — real-time avatar narration
+- [x] `api/cristiano-storyboard.ts` — Sonnet 4.6 generates 7-scene storyboard
+- [x] `api/heygen-render.ts` — HeyGen Video Agent V2 cinematic render
+- [x] Video polling + Supabase Storage save (`CristianoVideoPlayer.tsx`)
+- [x] Cristiano avatar integration (wired into ResultsDashboard)
 
 #### Conv 21-22: Report Generation
 - [ ] `src/lib/reportDataAssembler.ts` — assemble all evaluation data into report structure
@@ -522,7 +522,39 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-11 — Session 15 (Conv 17-18: Results Page Assembly — COMPLETE)
+### Latest Update: 2026-03-11 — Session 15 (Conv 17-20: Results + Cristiano Judge UI + Video — COMPLETE)
+
+**What was done this conversation — Conv 19-20 (8 commits, 6 new files, 3 updated):**
+
+1. **JudgeVerdict.tsx** (399 lines) — MI6 Briefing Room styled verdict. Midnight navy + gold glassmorphic design. Executive summary, key factors, future outlook, location scores with trend arrows, confidence badge, safeguard alerts, orchestration metadata.
+
+2. **CourtOrder.tsx** (366 lines) — Per-category judicial analysis. Collapsible MI6-styled cards with per-location analysis, trend notes, metric overrides showing before→after scores with judge explanations and trusted model attribution.
+
+3. **SimliQuickVerdict.tsx** (372 lines) — Real-time Simli avatar narration. Auto-generates spoken script from JudgeReport. Play/pause/retry controls, speaking indicator with audio bars, transcript toggle, graceful error fallback.
+
+4. **api/cristiano-storyboard.ts** (314 lines) — Sonnet 4.6 storyboard generator per §15.13. 7 scenes, A-ROLL/B-ROLL structure, 105-120s duration, 200-250 words. Strict QA validation with up to 2 retries. Cost tracking.
+
+5. **api/heygen-render.ts** (228 lines) — HeyGen Video Agent V2 render. POST submits storyboard, GET polls video_id for completion. Cristiano avatar for A-ROLL, stock footage keywords for B-ROLL, MI6 midnight background. Cost tracking per minute.
+
+6. **CristianoVideoPlayer.tsx** (435 lines) — Full 3-stage pipeline: storyboard → HeyGen render → poll → playback. States: idle, storyboard, rendering, ready, error. Video player with poster thumbnail. Auto-saves to Supabase Storage.
+
+7. **ResultsDashboard.tsx** — Updated to accept judgeReport, judgeOrchestration, sessionId, existingVideoUrl. Renders SimliQuickVerdict → JudgeVerdict → CourtOrder → CristianoVideoPlayer between Evidence and Towns sections.
+
+8. **ResultsPage.tsx** — Bridges judge data from session to dashboard.
+
+9. **index.ts** — Barrel exports updated: 17 components total.
+
+**Build status:** `tsc --noEmit` — 0 errors.
+
+**Known items still deferred:**
+- `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
+- `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
+- 3 hardcoded "USD" strings in questions
+- Bridge code (1,898 lines) needs formal audit pass
+
+**What's next**: Conv 21-22 — Report Generation. Build reportDataAssembler.ts, gammaReportGenerator.ts, ReportDownload.tsx, report versioning, PDF export fallback.
+
+### Previous: 2026-03-11 — Session 15 (Conv 17-18: Results Page Assembly — COMPLETE)
 
 **What was done this conversation (9 commits, 10 new files):**
 
