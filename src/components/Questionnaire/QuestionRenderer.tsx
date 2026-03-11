@@ -259,11 +259,12 @@ export function QuestionRenderer({ question, value, onChange, accent }: Question
   if (type === 'Slider') {
     const numVal = typeof value === 'number' ? value : 50;
     const sliderColor = numVal <= 20 ? '#ef4444' : numVal <= 40 ? '#f97316' : numVal <= 60 ? '#eab308' : numVal <= 80 ? '#60a5fa' : '#22c55e';
+    const sliderLabel = numVal <= 20 ? 'Low' : numVal <= 40 ? 'Below avg' : numVal <= 60 ? 'Moderate' : numVal <= 80 ? 'Above avg' : 'High';
     return (
       <div className="qr-slider">
         <div className="qr-slider-labels">
           <span style={{ color: C.textMuted }}>{question.sliderLeft || 'Strongly disagree'}</span>
-          <span style={{ color: sliderColor, fontWeight: 600, fontSize: '1.25rem' }}>{numVal}</span>
+          <span style={{ color: sliderColor, fontWeight: 600, fontSize: '1.25rem' }}>{numVal} <span style={{ fontSize: '0.75rem', fontWeight: 400, color: C.textSecondary }}>{sliderLabel}</span></span>
           <span style={{ color: C.textMuted }}>{question.sliderRight || 'Strongly agree'}</span>
         </div>
         <input

@@ -281,6 +281,6 @@
   }
 
   .header__toolbar-label {
-    font-size: 0.625rem; /* 10px — still readable, icon supplements */
+    font-size: 0.6875rem; /* 11px — WCAG minimum */
   }
 }
