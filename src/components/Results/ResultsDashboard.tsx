@@ -11,7 +11,7 @@
  */
 
 import { useState } from 'react';
-import type { SmartScoreOutput, CitySmartScore } from '../../types/smartScore';
+import type { SmartScoreOutput } from '../../types/smartScore';
 import type { ThinkingStep, ParagraphEntry, LocationMetrics, GeminiExtraction, CompletionTier } from '../../types';
 import type { JudgeReport, JudgeOrchestrationResult } from '../../types/judge';
 import type { OrchestrationResult } from '../../types/evaluation';

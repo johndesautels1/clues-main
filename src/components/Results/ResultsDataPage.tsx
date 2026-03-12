@@ -19,9 +19,8 @@ import type { ReportData, ReportMetricLine, ReportCategoryRollup, LLMStatusEntry
 // ─── Sub-Components ──────────────────────────────────────────
 
 /** Stats overview cards */
-function StatsOverview({ stats, currency }: {
+function StatsOverview({ stats }: {
   stats: ReportData['stats'];
-  currency: ReportData['currency'];
 }) {
   const cards = [
     { label: 'Total Metrics', value: stats.totalMetrics.toString() },
@@ -341,7 +340,7 @@ export function ResultsDataPage({
       </header>
 
       {/* Stats Overview */}
-      <StatsOverview stats={reportData.stats} currency={reportData.currency} />
+      <StatsOverview stats={reportData.stats} />
 
       {/* Winner Banner */}
       <div className="rdp-winner-banner" role="status">

@@ -62,7 +62,7 @@ export function ResultsPage() {
   // Check for SmartScoreOutput in session
   // The Smart Score Engine stores its output on the session when complete.
   // We cast the evaluation to access smartScoreOutput if present.
-  const sessionAny = session as Record<string, unknown>;
+  const sessionAny = session as unknown as Record<string, unknown>;
   const smartScores = sessionAny.smartScoreOutput as SmartScoreOutput | undefined;
 
   // No results yet
