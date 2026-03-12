@@ -573,6 +573,10 @@ Target: < 10KB. Everything else lives in specialized docs.
 
 7. **Results.css** — Added ~450 lines of WCAG 2.1 AA compliant styles for Results Data Page: stats grid, winner banner, tables, confidence badges, source links, expanded rows, filter bar, judge summary, Gamma button, PDF fallback, error states, report history, light mode overrides. All text ≥ 4.5:1, interactive elements 44×44px, focus-visible outlines.
 
+8. **testPersona.ts** (~500 lines) — Complete test persona: Marcus & Elena, 30 paragraphs, demographics, DNW, MH, tradeoffs, general answers, GeminiExtraction (10 metrics, 3 cities, 2 towns, 2 neighborhoods, thinking details), 12 completed modules with 600 answers (injected into localStorage). Functions: `buildTestPersonaSession()`, `injectTestModuleAnswers()`, `clearTestModuleAnswers()`.
+
+9. **Dashboard.tsx** — DEV-only "Inject Test Persona" button (guarded by `import.meta.env.DEV`). Dispatches LOAD_SESSION with full test data + injects module answers into localStorage. Clear button to reset. Styled with WCAG 2.1 AA compliant CSS.
+
 **Build status:** `tsc --noEmit` — 0 errors.
 
 **Known items still deferred:**
@@ -581,7 +585,6 @@ Target: < 10KB. Everything else lives in specialized docs.
 - 3 hardcoded "USD" strings in questions
 - Bridge code (1,898 lines) needs formal audit pass
 - `/api/gamma-generate` edge function not yet built (Gamma API integration endpoint)
-- Test Persona injection system (pre-loaded data to skip questionnaire during dev)
 
 **What's next**: Conv 23-24 — Phase 4: Monetization & Polish. Payments, tier gating, light mode, production hardening.
 
