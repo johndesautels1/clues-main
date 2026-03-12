@@ -68,7 +68,7 @@ export interface GammaGenerationResult {
  * On subsequent calls, updates status, URLs, etc.
  */
 export async function saveReportRow(row: ReportRow): Promise<string | null> {
-  if (!isSupabaseConfigured()) return null;
+  if (!isSupabaseConfigured) return null;
 
   if (row.id) {
     // Update existing row
@@ -117,7 +117,7 @@ export async function saveReportRow(row: ReportRow): Promise<string | null> {
  * Returns 0 if no reports exist.
  */
 export async function getLatestVersion(sessionId: string): Promise<number> {
-  if (!isSupabaseConfigured()) return 0;
+  if (!isSupabaseConfigured) return 0;
 
   const { data, error } = await supabase
     .from('reports')
@@ -135,7 +135,7 @@ export async function getLatestVersion(sessionId: string): Promise<number> {
  * Get all report versions for a session.
  */
 export async function getReportHistory(sessionId: string): Promise<ReportRow[]> {
-  if (!isSupabaseConfigured()) return [];
+  if (!isSupabaseConfigured) return [];
 
   const { data, error } = await supabase
     .from('reports')
@@ -450,7 +450,7 @@ export function triggerPDFExport(reportData: ReportData): void {
 export async function saveResultsDataReport(
   reportData: ReportData
 ): Promise<string | null> {
-  if (!isSupabaseConfigured()) return null;
+  if (!isSupabaseConfigured) return null;
 
   const { data, error } = await supabase
     .from('reports')

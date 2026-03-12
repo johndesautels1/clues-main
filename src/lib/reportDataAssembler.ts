@@ -14,17 +14,13 @@
  * Outputs: ReportData — consumed by ResultsDataPage and GammaReportGenerator.
  */
 
-import type { SmartScoreOutput, CitySmartScore, MetricSmartScore, MetricSource } from '../types/smartScore';
-import type { JudgeReport, MetricOverride, JudgeOrchestrationResult } from '../types/judge';
+import type { SmartScoreOutput, MetricSource } from '../types/smartScore';
+import type { JudgeReport, JudgeOrchestrationResult } from '../types/judge';
 import type {
   OrchestrationResult,
   EvaluatorModel,
-  MetricConsensus,
-  CategoryBatchResult,
-  EvaluatorResult,
 } from '../types/evaluation';
-import type { GeminiExtraction, CompletionTier, LocationMetrics } from '../types';
-import type { AggregatedProfile } from './answerAggregator';
+import type { GeminiExtraction, CompletionTier } from '../types';
 import type { CoverageState } from './coverageTracker';
 import type { QualityReport } from './qualityScorer';
 
