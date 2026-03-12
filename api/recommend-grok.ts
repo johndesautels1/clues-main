@@ -106,30 +106,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.status(400).json({ error: 'Missing sessionId, globeRegion, or signals' }); return;
   }
 
+  const invalidSignal = body.signals.find(
+    s => typeof s.moduleId !== 'string' || typeof s.key !== 'string' ||
+         typeof s.value !== 'number' || typeof s.source !== 'string' ||
+         s.rawValue === undefined
+  );
+  if (invalidSignal) {
+    res.status(400).json({ error: 'Malformed signal object: each signal must have moduleId (string), key (string), value (number), source (string), and rawValue' }); return;
+  }
+
   const startTime = Date.now();
 
   try {
     const prompt = buildRecommendationPrompt(body);
 
-    const grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'grok-4-1-fast-reasoning',
-        messages: [
-          { role: 'system', content: 'You are a world-class relocation analyst with quantitative expertise. Return only valid JSON. No markdown fences.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.4,
-        max_tokens: 16384,
-        response_format: { type: 'json_object' },
-      }),
-    });
-
-    if (!grokResponse.ok) {
+    let grokResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'grok-4-1-fast-reasoning',
+          messages: [
+            { role: 'system', content: 'You are a world-class relocation analyst with quantitative expertise. Return only valid JSON. No markdown fences.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.4,
+          max_tokens: 16384,
+          response_format: { type: 'json_object' },
+        }),
+      });
+      if (grokResponse.ok) break;
+      const status = grokResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        continue;
+      }
       const errText = await grokResponse.text();
-      throw new Error(`xAI API returned ${grokResponse.status}: ${errText}`);
+      throw new Error(`xAI API returned ${status}: ${errText}`);
     }
+
+    if (!grokResponse || !grokResponse.ok) throw new Error('xAI API request failed after retries');
 
     const result = await grokResponse.json();
     const durationMs = Date.now() - startTime;

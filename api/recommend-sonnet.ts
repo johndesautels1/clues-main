@@ -191,31 +191,50 @@ export default async function handler(
     return;
   }
 
+  const invalidSignal = body.signals.find(
+    s => typeof s.moduleId !== 'string' || typeof s.key !== 'string' ||
+         typeof s.value !== 'number' || typeof s.source !== 'string' ||
+         s.rawValue === undefined
+  );
+  if (invalidSignal) {
+    res.status(400).json({ error: 'Malformed signal object: each signal must have moduleId (string), key (string), value (number), source (string), and rawValue' });
+    return;
+  }
+
   const startTime = Date.now();
 
   try {
     const prompt = buildRecommendationPrompt(body);
 
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 16384,
-        messages: [{ role: 'user', content: prompt }],
-        system: 'You are a world-class relocation analyst. Return only valid JSON. No markdown fences.',
-        temperature: 0.4,
-      }),
-    });
-
-    if (!anthropicResponse.ok) {
+    let anthropicResponse: Response | undefined;
+    const MAX_RETRIES = 3;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 16384,
+          messages: [{ role: 'user', content: prompt }],
+          system: 'You are a world-class relocation analyst. Return only valid JSON. No markdown fences.',
+          temperature: 0.4,
+        }),
+      });
+      if (anthropicResponse.ok) break;
+      const status = anthropicResponse.status;
+      if ((status === 429 || status >= 500) && attempt < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        continue;
+      }
       const errText = await anthropicResponse.text();
-      throw new Error(`Anthropic API returned ${anthropicResponse.status}: ${errText}`);
+      throw new Error(`Anthropic API returned ${status}: ${errText}`);
     }
+
+    if (!anthropicResponse || !anthropicResponse.ok) throw new Error('Anthropic API request failed after retries');
 
     const result = await anthropicResponse.json();
     const durationMs = Date.now() - startTime;

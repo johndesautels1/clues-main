@@ -22,6 +22,7 @@ import { ReadinessIndicator } from './ReadinessIndicator';
 import { MODULES } from '../../data/modules';
 import type { ModuleDefinition, ModuleStatus } from '../../data/modules';
 import type { SubSection } from '../../types';
+import { buildTestPersonaSession, injectTestModuleAnswers, clearTestModuleAnswers } from '../../data/testPersona';
 import './Dashboard.css';
 
 export type { SubSection };
@@ -111,6 +112,24 @@ export function Dashboard() {
   }, [mainModule.subSectionStatus]);
 
   const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
+  const [testPersonaInjected, setTestPersonaInjected] = useState(false);
+
+  // Dev-only: Inject test persona with complete data
+  const handleInjectTestPersona = () => {
+    const testSession = buildTestPersonaSession();
+    injectTestModuleAnswers();
+    dispatch({ type: 'LOAD_SESSION', payload: testSession });
+    setTestPersonaInjected(true);
+    setLsRevision(r => r + 1); // trigger module grid refresh
+  };
+
+  // Dev-only: Clear test persona
+  const handleClearTestPersona = () => {
+    clearTestModuleAnswers();
+    dispatch({ type: 'RESET' });
+    setTestPersonaInjected(false);
+    setLsRevision(r => r + 1);
+  };
 
   if (isLoading) {
     return (
@@ -202,6 +221,35 @@ export function Dashboard() {
           style={{ animationDelay: '450ms' }}
         >
           <ReadinessIndicator />
+        </section>
+
+        {/* Inject Test Persona — visible until production launch */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '500ms' }}
+        >
+          <div className="dashboard__test-persona">
+            {!testPersonaInjected ? (
+              <button
+                className="dashboard__test-persona-btn"
+                onClick={handleInjectTestPersona}
+                type="button"
+              >
+                Inject Test Persona
+              </button>
+            ) : (
+              <button
+                className="dashboard__test-persona-btn dashboard__test-persona-btn--active"
+                onClick={handleClearTestPersona}
+                type="button"
+              >
+                Clear Test Persona
+              </button>
+            )}
+            <span className="dashboard__test-persona-label">
+              Loads Marcus &amp; Elena (30 paragraphs, 200 answers, 12 modules, Gemini extraction)
+            </span>
+          </div>
         </section>
 
         {/* 23 Module Grid */}

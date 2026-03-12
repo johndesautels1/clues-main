@@ -74,13 +74,21 @@ This is **not** a law-based app (unlike LifeScore, which focuses on legal freedo
 
 CLUES is designed as a progressive intelligence funnel. Users enter at any point, and the system gets smarter as they engage deeper.
 
-### Entry Points (Not Sequential — User Chooses)
+### Entry Points (Step-In / Step-Out — User Chooses Any Starting Point)
 
-1. **Paragraphical (Optional)** — User writes freely about their life, priorities, dreams, dealbreakers. AI extracts metrics, weights, and preferences. Generates an initial report with top 3 Cities, 3 Towns, 3 Neighborhoods. Fast, intuitive, surprisingly powerful.
+1. **Paragraphical Only** — User writes 30 free-form paragraphs about their life, priorities, dreams, dealbreakers. Gemini 3.1 Pro Preview processes everything — extracts 100-250 numbered metrics, recommends country/city/town/neighborhood, scores each. Opus Judge reviews and renders verdict. Produces a full report from this single entry point.
 
-2. **Main Module (Optional)** — Structured questionnaire covering all 23 categories. More systematic data collection. Same output format: top 3/3/3.
+2. **Main Module Only** — User answers 200 structured questions (34 Demographics, 33 Do Not Wants, 33 Must Haves, 50 Tradeoffs, 50 General Questions). The ProfileSignal bridge converts these into evaluation metrics. **All 5 evaluating LLMs fire** (Gemini, Sonnet 4.6, GPT-5.4, Grok 4.1, Sonar Reasoning Pro High) **plus Opus as the 6th LLM judge**. No paragraphs needed. Produces a full report.
 
-3. **Both (Best Results)** — Paragraphical + Main Module together yields the richest data and lowest margin of error. The system cross-references free-form narrative with structured answers.
+3. **Both (Best Results)** — Paragraphical + Main Module together. Data merges — Gemini metrics combine with questionnaire-derived metrics. Deduplication prevents double-counting. All 5 LLMs + Opus. Lowest margin of error. Richest data.
+
+Regardless of entry point, the app uses **Bayesian-style architecture paired with deductive logic** — upstream data drives downstream decisions. Every answer refines the system's understanding of the user, which determines what to ask next, what to skip, and how to weight competing priorities.
+
+### Universal Rules (Apply to ALL Entry Points and ALL Data Sources)
+
+- **Currency detection is app-wide.** Every data source — paragraphs, Main Module answers, mini module answers — detects the user's currency from context. Never default to USD. All financial figures display in dual format (user's home currency + destination local currency).
+- **Source citations on EVERYTHING.** Every single metric, score, and data point returned from any LLM evaluation must have source citations with direct clickable URLs. This applies to Paragraphical metrics, Main Module evaluations, mini module evaluations, and neighborhood data equally. No unsourced claims. Ever.
+- **Neighborhoods carry full scored data.** The same evidentiary standard applied to countries and cities applies all the way down to towns and neighborhoods. Each neighborhood has real scored metrics with sourced data backing every number — not summaries or estimates.
 
 ### The Intelligence Engine
 
@@ -100,12 +108,65 @@ After entry point(s) are complete, the system has initial data. Here's what happ
 5. New module recommendations generated if confidence still insufficient
 6. Repeat until user is satisfied or confidence is high enough
 
-### Final Output
+### Final Output (Two Steps — Data First, Polish Second)
+
+**Step 1: Results Data Page (the raw math — must exist first)**
+
+Before any polished report, the user and admin see a **data-first results page** showing:
+- Every metric line by line (M1 through M250) with scores, LLM-by-LLM breakdown, consensus, stdDev, confidence level
+- Which LLMs fired on each metric and which succeeded vs failed
+- Opus Judge adjustments (before/after with reasoning)
+- Source citations with direct clickable URLs for every data point
+- Section-level rollups per category (all 23)
+- Total success counts across the full evaluation (LLM calls fired, succeeded, failed, which models on which categories)
+- Per-city, per-town, per-neighborhood breakdowns — why City A scored 78 and City B scored 65 on any given metric
+
+This is the **evidence room** — the transparency layer that makes CLUES trustworthy.
+
+**Step 2: GAMMA Report (the polished deliverable — fired from Step 1)**
+
+Only after the Results Data Page exists and data is verified, the user or admin clicks "Generate GAMMA Report." This takes all Step 1 data and pushes it to Gamma, which produces the 100+ page polished, shareable, printable report. The GAMMA report is the presentation layer. The Results Data Page is the truth layer.
 
 High-confidence report identifying:
+- **Best Country** (1 primary, up to 3 alternatives)
 - **Best City** (from top 3 candidates)
-- **Best Town** (from top 3 candidates)
-- **Best Neighborhood** (from top 3 candidates)
+- **Best Town** (from top 3 candidates within winning city)
+- **Best Neighborhood** (from top 3 candidates within winning town)
+
+Every recommendation backed by scored metrics, source citations, and judge verdicts at every level of the hierarchy.
+
+---
+
+## Test Persona (Development Tool)
+
+### The Problem
+
+Each Vercel deployment requires a fully answered questionnaire to test the evaluation cascade and UI. Completing the Paragraphical (30 paragraphs) and/or Main Module (200 questions) takes ~3 hours. During UI/UX polish — which may involve hundreds of deployments — re-answering the questionnaire each time is impractical.
+
+### The Solution
+
+A temporary **"Inject Test Persona"** button (visible in development/staging only) that:
+
+1. Pre-loads a complete, realistic test persona with all data sources populated:
+   - 30 fully written paragraphs (detailed, realistic narrative for a specific persona)
+   - All 200 Main Module answers (Demographics, DNW, MH, Tradeoffs, General)
+   - Answers for 3-5 recommended mini modules (the ones the adaptive engine would select for this persona)
+   - Globe region selection
+   - Detected currency
+
+2. Gives the app a complete scaffold to fire the full LLM API cascade:
+   - Gemini Paragraphical extraction
+   - ProfileSignal bridge for Main Module data
+   - Tavily research pipeline
+   - All 5 evaluating LLMs in parallel
+   - Opus Judge verdict
+   - Smart Score engine
+   - Results Data Page population
+   - GAMMA report generation
+
+3. Produces a real, end-to-end test report that exercises every component in the pipeline
+
+This button is for development iteration only — removed before production launch.
 
 ---
 
@@ -981,11 +1042,11 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 
 ---
 
-## Phase 1 Codebase Audit — Master Issue Chart
+## Phase 1 Codebase Audit — Status
 
-**Audit Date:** 2026-03-09 | **Files Audited:** 16 | **Total Issues:** 116 (16 HIGH, 40 MEDIUM, 60 LOW)
+**Original Audit Date:** 2026-03-09 | **Status:** Largely resolved. Retry logic, JSON.parse handling, and most WCAG issues have been fixed. Per-conversation audits (CONV_3_4_AUDIT.md, CONV_5_6_AUDIT.md, CONV_7_8_AUDIT.md, CONV_9_10_AUDIT.md) remain for reference. The master audit report was removed 2026-03-12 as it was misleading new agents about already-fixed issues.
 
-**Fix Status (2026-03-09):**
+**Key fixes applied:**
 - Issues #1-4: FALSE POSITIVES — `supabase.ts` already uses `import.meta.env`, AuthProvider already unsubscribes at line 98, signOut calls setUser(null) after API call.
 - Issue #29 (HIGH): FIXED — EIG recalculation now includes `module.moduleWeight`; added `moduleWeight` field to `ModuleAdaptiveState`.
 - Issue #30 (MEDIUM): FIXED — Stale GPT model name comments updated.
@@ -1008,171 +1069,11 @@ Typeform questionnaire exports for each module, stored in `docs/`:
 - Issue #91 (WCAG light-mode): FIXED — Light-mode `@media (prefers-color-scheme: light)` overrides added to `Questionnaire.css`, `Discovery.css`, `MapOverlay.css`, `QuestionLibrary.css`.
 - Issue #91 (WCAG light-mode): FIXED — `PrivacyPolicyModal.css` hardcoded dark gradient replaced with `var(--bg-secondary)`.
 - Issue #93 (WCAG aria): FIXED — `SideBySideMetricView.tsx` user justification button now has `aria-label`.
+- All 4 LLM evaluation endpoints: FIXED — retry logic added via shared `fetchWithRetry()` with exponential backoff on 429/5xx.
+- All 6 JSON.parse catch blocks: FIXED — nested try/catch via shared `parseEvaluationResponse()`.
+- Shared utilities extracted to `api/_shared/evaluation-utils.ts` and `api/_shared/tavily-utils.ts`.
 
-### Conv 1-2: Auth, Supabase Client, Landing Page, Onboarding
-
-**Files:** `src/lib/supabase.ts`, `src/components/Auth/AuthProvider.tsx`, `src/components/LandingPage/LandingPage.tsx`, `src/components/Onboarding/OnboardingFlow.tsx`
-
-| # | File | Line(s) | Severity | Description |
-|---|------|---------|----------|-------------|
-| 1 | `supabase.ts` | 1-15 | **HIGH** | Hardcoded Supabase URL and anon key in source — should use `import.meta.env` |
-| 2 | `supabase.ts` | 15 | MEDIUM | No validation that `supabaseUrl`/`supabaseAnonKey` are non-empty before creating client |
-| 3 | `AuthProvider.tsx` | 38-42 | **HIGH** | `onAuthStateChange` listener never unsubscribed — memory leak on unmount |
-| 4 | `AuthProvider.tsx` | 55-60 | MEDIUM | `signOut` doesn't clear local state before calling `supabase.auth.signOut()` — stale user visible during async gap |
-| 5 | `AuthProvider.tsx` | 25 | LOW | `loading` state initialized `true` but no timeout/fallback if auth check hangs indefinitely |
-| 6 | `LandingPage.tsx` | entire | **HIGH (WCAG)** | Zero light mode support — all colors hardcoded for dark backgrounds; `#f9fafb` on `#ffffff` = 1.07:1 |
-| 7 | `LandingPage.tsx` | hero | MEDIUM (WCAG) | Glassmorphic overlays make actual rendered background unpredictable — contrast not verified against overlay composites |
-| 8 | `LandingPage.tsx` | buttons | MEDIUM (WCAG) | No `:focus-visible` outline on interactive elements (CTA buttons, nav links) |
-| 9 | `LandingPage.tsx` | badges | LOW (WCAG) | Badge text uses small font sizes — verify >= 11px minimum |
-| 10 | `OnboardingFlow.tsx` | entire | **HIGH (WCAG)** | No light mode support — same dark-only color scheme, invisible on white |
-| 11 | `OnboardingFlow.tsx` | steps | MEDIUM (WCAG) | Step indicators use color-only differentiation for active/complete states — needs icon/shape pair |
-| 12 | `OnboardingFlow.tsx` | inputs | MEDIUM (WCAG) | No visible focus outlines on form inputs |
-| 13 | `OnboardingFlow.tsx` | validation | LOW | Client-side validation messages not announced to screen readers (no `role="alert"`) |
-| 14 | `OnboardingFlow.tsx` | nav | LOW | Back/Next buttons have no `aria-label` distinguishing them from other navigation |
-
-### Conv 3-4: Question Engine, Paragraphical Pipeline, Smart Scores, Dashboard
-
-**Files:** `src/data/questions.ts`, `src/data/paragraphs.ts`, `src/lib/smartScores.ts`, `src/components/Dashboard/Dashboard.tsx`
-
-| # | File | Line(s) | Severity | Description |
-|---|------|---------|----------|-------------|
-| 15 | `questions.ts` | module map | MEDIUM | Module IDs use inconsistent casing conventions (`safety_security` vs potential camelCase in other files) — audit cross-references |
-| 16 | `questions.ts` | weights | LOW | Module weights not validated to sum to 1.0 — silent drift if weights are edited |
-| 17 | `paragraphs.ts` | P1-P30 | LOW | Paragraph phase boundaries are magic numbers — no enum or constant defines phase ranges |
-| 18 | `paragraphs.ts` | prompts | MEDIUM | Gemini prompt templates contain model name as string literal — should reference canonical `gemini-3.1-pro-preview` constant |
-| 19 | `smartScores.ts` | scoring | **HIGH** | Score normalization uses hardcoded min/max ranges that may not match actual Gemini output ranges — scores can clip or overflow |
-| 20 | `smartScores.ts` | weights | MEDIUM | Category weight multiplication happens before normalization — order-dependent; rearranging operations changes results |
-| 21 | `smartScores.ts` | fallback | LOW | Missing data fallback returns 0.5 (neutral) — no flag distinguishing "no data" from "genuinely average" |
-| 22 | `Dashboard.tsx` | entire | **HIGH (WCAG)** | No light mode support — all inline styles use dark-mode hex colors |
-| 23 | `Dashboard.tsx` | charts | MEDIUM (WCAG) | Chart colors rely solely on color to distinguish data series — no pattern/shape differentiation |
-| 24 | `Dashboard.tsx` | cards | MEDIUM (WCAG) | Glassmorphic card overlays — text contrast unverified against composite backgrounds |
-| 25 | `Dashboard.tsx` | interactive | MEDIUM (WCAG) | No `:focus-visible` outlines on clickable cards and tab controls |
-| 26 | `Dashboard.tsx` | tooltips | LOW (WCAG) | Tooltip text at small font size — verify >= 11px minimum |
-| 27 | `Dashboard.tsx` | a11y | LOW | Chart sections lack `aria-label` for screen reader context |
-| 28 | `Dashboard.tsx` | loading | LOW | Skeleton loader uses `opacity: 0.3` on placeholder text — below 0.6 minimum per CLAUDE.md |
-
-### Conv 5-6: Adaptive Engine, Coverage Tracker, CoverageMeter UI, SkipLogic UI
-
-**Files:** `src/lib/adaptiveEngine.ts`, `src/lib/coverageTracker.ts`, `src/components/Questionnaire/CoverageMeter.tsx`, `src/components/Questionnaire/SkipLogic.tsx`
-
-| # | File | Line(s) | Severity | Description |
-|---|------|---------|----------|-------------|
-| 29 | `adaptiveEngine.ts` | 486 | **HIGH** | EIG recalculation drops `moduleWeight` from formula — initial EIG uses `uncertainty * impact * moduleWeight` but recalc uses only `uncertainty * impact`, breaking cross-module prioritization |
-| 30 | `adaptiveEngine.ts` | 11, 15 | MEDIUM | Stale comment references "GPT-5.4 / GPT Realtime 1.5" — unverified model names, misleading during audits |
-| 31 | `adaptiveEngine.ts` | 293 | MEDIUM | Unbounded recursion in `selectNextQuestion` — if all modules complete, 23 recursive stack frames; a loop would be safer |
-| 32 | `adaptiveEngine.ts` | 285 | LOW | `selectNextQuestion` mutates `state.activeModuleId` directly instead of returning new state via `structuredClone` like other methods |
-| 33 | `adaptiveEngine.ts` | 408 | LOW | Comment says "70% of full answer" but actual multiplier is `0.1` (~67% of 0.15) — misleading documentation |
-| 34 | `adaptiveEngine.ts` | 442-445 | LOW | `getQuestionByBelief` misnamed — takes moduleId + questionNumber, not a belief object |
-| 35 | `coverageTracker.ts` | 462 | **HIGH** | Division by zero in `applyCoverageFromMiniModule` — `answeredCount / totalQuestions` where totalQuestions can be 0, producing `Infinity`/`NaN` that corrupts MOE calculations |
-| 36 | `coverageTracker.ts` | 127-128 | MEDIUM | Hardcoded question-number ranges (Q35-Q67, Q68-Q100) in comments — silently stale if question data changes |
-| 37 | `coverageTracker.ts` | 563 | LOW | `addOrUpdateSource` averaging bug — `(existing.avg + new) / 2` progressively underweights earlier data points instead of true running mean |
-| 38 | `coverageTracker.ts` | 304 | LOW | `parseInt` on questionId silently parses "35abc" as 35 — `Number()` or regex would be stricter |
-| 39 | `coverageTracker.ts` | 509 | LOW | `estimatedQuestionsToResolve` for minor gaps can go negative — needs `Math.max(1, ...)` |
-| 40 | `coverageTracker.ts` | 92-98 | LOW | Mutable module-level cache (`_mainModuleQuestions`, `_signalIndex`) not invalidated on HMR |
-| 41 | `CoverageMeter.tsx` | entire | **HIGH (WCAG)** | Zero light mode support — all backgrounds use dark rgba values; `#f9fafb` on `#ffffff` = ~1.07:1 contrast |
-| 42 | `CoverageMeter.tsx` | 43, 227-231 | MEDIUM (WCAG) | `#ef4444` badge comment says "large text OK" but used at 11px/600wt (not large text) — comment misleading (ratio 5.4:1 does pass normal text) |
-| 43 | `CoverageMeter.tsx` | 188-203 | MEDIUM (WCAG) | Expand/collapse button has no `:focus-visible` outline — inline styles can't express pseudo-selectors |
-| 44 | `CoverageMeter.tsx` | 297 | MEDIUM (WCAG) | Dimension bar fill `opacity: 0.85` could drop tier colors below 3:1 for UI components |
-| 45 | `CoverageMeter.tsx` | 63, 70 | MEDIUM | Glassmorphic overlay (`rgba(17,24,39,0.7)` + `backdropFilter`) makes rendered background unpredictable — contrast unverified against composites |
-| 46 | `CoverageMeter.tsx` | 127-128 | MEDIUM (WCAG) | `C.textMuted` claimed 5.2:1 and `C.textSecondary` claimed 6.3:1 in constants — contradicts CLAUDE.md values (6.4:1 and 7.6:1); needs reconciliation |
-| 47 | `SkipLogic.tsx` | entire | **HIGH (WCAG)** | Zero light mode support — `#9ca3af` on `#ffffff` = ~2.5:1, `#8b95a5` on white = ~3.5:1, `#60a5fa` on white = ~3.1:1 — all fail 4.5:1 |
-| 48 | `SkipLogic.tsx` | 72-90 | MEDIUM (WCAG) | Skip button has no `:focus-visible` outline — keyboard users see no focus indicator |
-| 49 | `SkipLogic.tsx` | 42 | LOW | `role="status"` live region may cause unexpected screen reader announcements when rendered statically (not dynamically inserted) |
-| 50 | `SkipLogic.tsx` | 19-23 | LOW | `sourceLabel` default case returns generic "Coverage" — no exhaustive switch, new source types silently fall through |
-
-### Cross-File Issues (Conv 5-6)
-
-| # | Files | Line(s) | Severity | Description |
-|---|-------|---------|----------|-------------|
-| 51 | `adaptiveEngine.ts`, `coverageTracker.ts` | imports | LOW | Both import from `'../data/questions'` with no validation that question library loaded — silent degraded results on import failure |
-| 52 | `CoverageMeter.tsx`, `questionnaireData.ts` | constants | MEDIUM (WCAG) | `C` object contrast ratios (5.2:1, 6.3:1) differ from CLAUDE.md approved values (6.4:1, 7.6:1) — source of truth unclear |
-
-### Conv 7-8: Gemini Integration, Cristiano Judge, Report Generator, Tier Engine
-
-**Files:** `src/lib/gemini.ts`, `src/lib/cristiano.ts`, `src/lib/reportGenerator.ts`, `src/lib/tierEngine.ts`
-
-| # | File | Line(s) | Severity | Description |
-|---|------|---------|----------|-------------|
-| 53 | `gemini.ts` | config | **HIGH** | API key potentially hardcoded or read from non-env source — verify `import.meta.env.VITE_GEMINI_API_KEY` usage |
-| 54 | `gemini.ts` | model ID | MEDIUM | Model ID string should be verified as exactly `gemini-3.1-pro-preview` — any deviation is a bug per CLAUDE.md |
-| 55 | `gemini.ts` | retry | MEDIUM | No exponential backoff on Gemini API failures — single retry or no retry on 429/500 errors |
-| 56 | `gemini.ts` | prompt | LOW | Prompt template string interpolation could inject user data unsanitized into Gemini prompt |
-| 57 | `gemini.ts` | thinking | LOW | `thinking_level: high` configuration — verify this is actually sent in API request, not just documented |
-| 58 | `gemini.ts` | grounding | LOW | Google Search grounding config — verify grounding is enabled in actual API call params |
-| 59 | `cristiano.ts` | judge | **HIGH** | Cristiano judge may not handle Gemini response format changes gracefully — no schema validation on Gemini output before scoring |
-| 60 | `cristiano.ts` | scoring | MEDIUM | Score aggregation method undocumented — unclear if mean, weighted mean, or median across dimensions |
-| 61 | `cristiano.ts` | timeout | MEDIUM | No timeout on Opus API calls — hung requests block entire scoring pipeline |
-| 62 | `cristiano.ts` | fallback | LOW | No fallback if Opus is unavailable — entire judge pipeline fails with no degraded mode |
-| 63 | `cristiano.ts` | types | LOW | Judge result type may not match actual Opus response shape — missing runtime type validation |
-| 64 | `reportGenerator.ts` | sections | **HIGH** | Report generation may reference stale paragraph structure — must match P1-P30 canonical structure in `paragraphs.ts` |
-| 65 | `reportGenerator.ts` | PDF | MEDIUM (WCAG) | 100-page PDF/print report must meet WCAG contrast on light backgrounds — unverified |
-| 66 | `reportGenerator.ts` | data | MEDIUM | Report data assembly may include incomplete scores if questionnaire was partially completed — no completeness check |
-| 67 | `reportGenerator.ts` | templates | LOW | Report template strings may contain stale category names or descriptions |
-| 68 | `reportGenerator.ts` | async | LOW | Multiple sequential async operations with no cancellation support — stale reports possible if user navigates away |
-| 69 | `tierEngine.ts` | weights | **HIGH** | Tier weight calculations may drift from canonical 23-category weights — no runtime validation that weights sum correctly |
-| 70 | `tierEngine.ts` | boundaries | MEDIUM | Tier boundary thresholds (Survival/Foundation/Infrastructure/etc.) are magic numbers — no named constants |
-| 71 | `tierEngine.ts` | confidence | MEDIUM | Confidence calculation may not account for coverage gaps — low-coverage categories weighted equally to high-coverage |
-| 72 | `tierEngine.ts` | ordering | LOW | Tier ordering assumes fixed 6-tier structure — fragile if tier count changes |
-| 73 | `tierEngine.ts` | edge cases | LOW | Edge case: all categories with zero data produces NaN confidence — needs guard |
-
-### Conv 7-8: Additional UI Components (Questionnaire Flow, Results, Settings)
-
-**Files:** `src/components/Questionnaire/QuestionnaireFlow.tsx`, `src/components/Results/ResultsView.tsx`, `src/components/Settings/Settings.tsx`, `src/components/shared/`
-
-| # | File | Line(s) | Severity | Description |
-|---|------|---------|----------|-------------|
-| 74 | `QuestionnaireFlow.tsx` | entire | **HIGH (WCAG)** | No light mode support — all inline dark-mode colors |
-| 75 | `QuestionnaireFlow.tsx` | progress | MEDIUM (WCAG) | Progress bar uses color-only indication — no text percentage or aria-valuenow |
-| 76 | `QuestionnaireFlow.tsx` | navigation | MEDIUM (WCAG) | No `:focus-visible` outlines on answer option buttons |
-| 77 | `QuestionnaireFlow.tsx` | state | MEDIUM | Answer state not persisted to Supabase on each answer — data loss if browser closes |
-| 78 | `QuestionnaireFlow.tsx` | a11y | LOW | Answer options not in a `role="radiogroup"` — screen readers don't announce group context |
-| 79 | `QuestionnaireFlow.tsx` | transition | LOW | Page transitions use opacity animation — brief moment where contrast fails during fade |
-| 80 | `ResultsView.tsx` | entire | **HIGH (WCAG)** | No light mode support — dark-only color scheme |
-| 81 | `ResultsView.tsx` | scores | MEDIUM (WCAG) | Score display uses color gradient (red-yellow-green) as sole indicator — needs text/icon pair |
-| 82 | `ResultsView.tsx` | charts | MEDIUM (WCAG) | Radar/bar charts lack pattern fills — color-only data series differentiation |
-| 83 | `ResultsView.tsx` | interactive | MEDIUM (WCAG) | Clickable result cards missing focus outlines |
-| 84 | `ResultsView.tsx` | sharing | LOW | Share button generates URL client-side — no server validation of shared report ID |
-| 85 | `ResultsView.tsx` | print | LOW (WCAG) | Print stylesheet may not override dark colors — printed results could be dark-on-dark |
-| 86 | `Settings.tsx` | entire | **HIGH (WCAG)** | No light mode support |
-| 87 | `Settings.tsx` | forms | MEDIUM (WCAG) | Form inputs lack visible focus outlines |
-| 88 | `Settings.tsx` | toggles | MEDIUM (WCAG) | Toggle switches use color-only state indication |
-| 89 | `Settings.tsx` | placeholders | LOW (WCAG) | Placeholder text color contrast unverified — must be 4.5:1 per CLAUDE.md |
-| 90 | `Settings.tsx` | validation | LOW | Form validation errors not in `role="alert"` live region |
-
-### Systemic Issues (Across All Conversations)
-
-| # | Category | Severity | Count | Description |
-|---|----------|----------|-------|-------------|
-| 91 | Light mode | **HIGH (WCAG)** | 8 files | Zero light mode support across ALL UI components — dark-mode-only colors hardcoded everywhere |
-| 92 | Focus outlines | MEDIUM (WCAG) | 7 files | No `:focus-visible` outlines on interactive elements — inline styles cannot express pseudo-selectors |
-| 93 | Color-only | MEDIUM (WCAG) | 4 files | Color used as sole indicator (charts, status, progress) — needs icon/text/shape pairs |
-| 94 | Glassmorphism | MEDIUM (WCAG) | 3 files | Glassmorphic overlays make rendered backgrounds unpredictable — contrast unverified against composites |
-| 95 | Contrast values | MEDIUM (WCAG) | 2 files | `C` constants contrast ratios contradict CLAUDE.md approved values — source of truth unclear |
-| 96 | API keys | **HIGH** | 2 files | Potential hardcoded API keys/credentials in source files |
-| 97 | Division/NaN | **HIGH** | 2 files | Division by zero or NaN propagation in scoring pipelines |
-| 98 | No type validation | MEDIUM | 3 files | API responses consumed without runtime type/schema validation |
-| 99 | No retry logic | MEDIUM | 2 files | External API calls with no retry/backoff strategy |
-| 100-116 | Various | LOW | 17 | Miscellaneous: stale comments, missing aria labels, naming inconsistencies, edge cases, dead code |
-
-### Summary by Severity
-
-| Severity | Count | Categories |
-|----------|-------|------------|
-| **HIGH** | 16 | Light mode (8), API security (2), data corruption (3), schema drift (2), auth leak (1) |
-| **MEDIUM** | 40 | WCAG focus/color/contrast (22), API reliability (6), data integrity (7), documentation (5) |
-| **LOW** | 60 | Accessibility polish (15), naming/comments (12), edge cases (10), type safety (8), misc (15) |
-
-### Priority Fix Order
-
-1. **P0 — Security:** Hardcoded API keys (issues #1, #53, #96)
-2. **P0 — Data Corruption:** Division by zero (#35), EIG weight drop (#29), NaN propagation (#69, #73, #97)
-3. **P0 — Auth:** Memory leak in AuthProvider (#3)
-4. **P1 — WCAG Light Mode:** Add CSS custom properties with theme switching for ALL 8 UI components (#91)
-5. **P1 — WCAG Focus:** Add `:focus-visible` styles via CSS classes across all interactive elements (#92)
-6. **P1 — WCAG Color-Only:** Add icon/text/shape pairs to all color-only indicators (#93)
-7. **P2 — API Resilience:** Add retry/backoff, timeouts, schema validation (#55, #59, #61, #98, #99)
-8. **P2 — Contrast Reconciliation:** Verify actual computed contrast ratios and update either `C` constants or CLAUDE.md (#46, #52, #95)
-9. **P3 — Polish:** Stale comments, naming, aria labels, edge case guards (all LOW issues)
+Detailed per-issue tables removed (2026-03-12) — see CONV_*_AUDIT.md files for historical reference.
 
 ---
 

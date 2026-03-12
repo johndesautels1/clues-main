@@ -315,6 +315,14 @@ export interface UserSession {
   currentTier: CompletionTier;
   confidence: number;
   evaluation?: EvaluationResult;
+  /** Smart Score output from the evaluation pipeline (cities + winner) */
+  smartScoreOutput?: import('./smartScore').SmartScoreOutput;
+  /** Opus judge report (for disputed metrics) */
+  judgeReport?: import('./judge').JudgeReport;
+  /** Full judge orchestration result (safeguard info) */
+  judgeOrchestration?: import('./judge').JudgeOrchestrationResult;
+  /** Pre-rendered Cristiano video URL */
+  cristianoVideoUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

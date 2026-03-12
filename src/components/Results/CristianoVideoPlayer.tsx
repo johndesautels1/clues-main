@@ -409,7 +409,7 @@ export function CristianoVideoPlayer({
 // ─── Supabase Storage ──────────────────────────────────────────
 
 async function saveVideoToStorage(videoUrl: string, sessionId: string): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+  if (!isSupabaseConfigured) return;
 
   try {
     // Download video

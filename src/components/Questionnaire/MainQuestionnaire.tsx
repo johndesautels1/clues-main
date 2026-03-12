@@ -82,11 +82,7 @@ export function MainQuestionnaire() {
       setContentVisible(false);
       setTransitioning(true);
       setTimeout(() => {
-        const moved = goFn();
-        if (!moved && dir > 0) {
-          // Reached end
-          setPhase('complete');
-        }
+        goFn();
         setTimeout(() => {
           setContentVisible(true);
           setTransitioning(false);
@@ -677,13 +673,14 @@ export function MainQuestionnaire() {
               })}
             </div>
 
-            {!qs.isLastQuestion ? (
+            {!qs.isLastQuestion && (
               <button onClick={handleNext} className="mq-nav-btn" aria-label="Next question">
                 Next <span>&rarr;</span>
               </button>
-            ) : (
+            )}
+            {qs.isAllComplete && (
               <button
-                onClick={handleNext}
+                onClick={() => setPhase('complete')}
                 className="mq-nav-btn accent"
                 aria-label="Complete questionnaire"
               >
