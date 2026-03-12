@@ -166,7 +166,7 @@ export function useEvaluationPipeline() {
       dispatch({ type: 'SET_SMART_SCORES', payload: pipelineResult.smartScores });
       dispatch({
         type: 'SET_TIER',
-        payload: { tier: pipelineResult.tier as 'discovery' | 'navigator' | 'sovereign', confidence: pipelineResult.confidence },
+        payload: { tier: pipelineResult.tier as import('../types').CompletionTier, confidence: pipelineResult.confidence },
       });
 
       if (pipelineResult.judgeResult) {

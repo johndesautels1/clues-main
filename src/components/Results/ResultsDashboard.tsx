@@ -12,10 +12,11 @@
 
 import { useState } from 'react';
 import type { SmartScoreOutput } from '../../types/smartScore';
-import type { ThinkingStep, ParagraphEntry, LocationMetrics, GeminiExtraction, CompletionTier } from '../../types';
+import type { ThinkingStep, ParagraphEntry, LocationMetrics, GeminiExtraction, CompletionTier, UserSession } from '../../types';
 import type { JudgeReport, JudgeOrchestrationResult } from '../../types/judge';
 import type { OrchestrationResult } from '../../types/evaluation';
 import type { CoverageState } from '../../lib/coverageTracker';
+import type { PipelineResult } from '../../lib/evaluationPipeline';
 import { WinnerHero } from './WinnerHero';
 import { CityComparisonGrid } from './CityComparisonGrid';
 import { CategoryBreakdown } from './CategoryBreakdown';
@@ -69,6 +70,10 @@ interface ResultsDashboardProps {
   coverage?: CoverageState | null;
   /** Current completion tier */
   tier?: CompletionTier;
+  /** Pipeline result for report generation */
+  pipelineResult?: PipelineResult | null;
+  /** User session for report generation */
+  session?: UserSession;
 }
 
 export function ResultsDashboard({
@@ -87,6 +92,8 @@ export function ResultsDashboard({
   orchestration,
   coverage,
   tier,
+  pipelineResult,
+  session,
 }: ResultsDashboardProps) {
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
 
@@ -196,18 +203,12 @@ export function ResultsDashboard({
         )}
 
         {/* 8. Report Generation — Evidence Room + Gamma */}
-        {sessionId && (
+        {session && (
           <>
             <SectionDivider text="Report Generation" />
             <ReportDownload
-              sessionId={sessionId}
-              tier={tier ?? 'discovery'}
-              smartScores={smartScores}
-              geminiExtraction={geminiExtraction}
-              orchestration={orchestration}
-              judgeReport={judgeReport}
-              judgeOrchestration={judgeOrchestration}
-              coverage={coverage}
+              pipelineResult={pipelineResult ?? null}
+              session={session}
             />
           </>
         )}

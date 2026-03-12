@@ -333,6 +333,8 @@ export function ResultsPage() {
       judgeOrchestration={session.judgeOrchestration}
       sessionId={session.id}
       existingVideoUrl={session.cristianoVideoUrl}
+      pipelineResult={pipeline.result}
+      session={session}
     />
   );
 }
