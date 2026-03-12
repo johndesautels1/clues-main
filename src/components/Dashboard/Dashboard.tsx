@@ -223,36 +223,34 @@ export function Dashboard() {
           <ReadinessIndicator />
         </section>
 
-        {/* Dev: Inject Test Persona */}
-        {import.meta.env.DEV && (
-          <section
-            className="dashboard__section"
-            style={{ animationDelay: '500ms' }}
-          >
-            <div className="dashboard__test-persona">
-              {!testPersonaInjected ? (
-                <button
-                  className="dashboard__test-persona-btn"
-                  onClick={handleInjectTestPersona}
-                  type="button"
-                >
-                  Inject Test Persona
-                </button>
-              ) : (
-                <button
-                  className="dashboard__test-persona-btn dashboard__test-persona-btn--active"
-                  onClick={handleClearTestPersona}
-                  type="button"
-                >
-                  Clear Test Persona
-                </button>
-              )}
-              <span className="dashboard__test-persona-label">
-                DEV ONLY — Loads Marcus &amp; Elena (30 paragraphs, 200 answers, 12 modules, Gemini extraction)
-              </span>
-            </div>
-          </section>
-        )}
+        {/* Inject Test Persona — visible until production launch */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '500ms' }}
+        >
+          <div className="dashboard__test-persona">
+            {!testPersonaInjected ? (
+              <button
+                className="dashboard__test-persona-btn"
+                onClick={handleInjectTestPersona}
+                type="button"
+              >
+                Inject Test Persona
+              </button>
+            ) : (
+              <button
+                className="dashboard__test-persona-btn dashboard__test-persona-btn--active"
+                onClick={handleClearTestPersona}
+                type="button"
+              >
+                Clear Test Persona
+              </button>
+            )}
+            <span className="dashboard__test-persona-label">
+              Loads Marcus &amp; Elena (30 paragraphs, 200 answers, 12 modules, Gemini extraction)
+            </span>
+          </div>
+        </section>
 
         {/* 23 Module Grid */}
         <section
