@@ -88,10 +88,6 @@ export function ResultsDashboard({
   judgeOrchestration,
   sessionId,
   existingVideoUrl,
-  geminiExtraction,
-  orchestration,
-  coverage,
-  tier,
   pipelineResult,
   session,
 }: ResultsDashboardProps) {
