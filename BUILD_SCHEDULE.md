@@ -523,7 +523,50 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-11 — Session 15 (Conv 17-20: Results + Cristiano Judge UI + Video — COMPLETE)
+### Latest Update: 2026-03-11 — Session 16 continued (Conv 21-22: Pipeline Wiring + Report Generation)
+
+**What was done this conversation (4 commits total for Session 16):**
+
+1. **Full audit of bridge code (1,917 lines, 8 files)** — profileSignalBridge.ts (456), cityRecommendationOrchestrator.ts (304), evaluationPipeline.ts (215), plus all 5 recommend-* API endpoints. Type safety verified (zero mismatches), security verified (no vulnerabilities), model IDs verified (all correct).
+
+2. **Three bugs fixed across 6 files** — runtime signal validation on all 5 recommend-* endpoints, retry with exponential backoff, defensive `import.meta.env` access.
+
+3. **Steps A-C: End-to-end pipeline wiring (1 commit):**
+   - **Step A**: Added `smartScoreOutput`, `judgeReport`, `judgeOrchestration`, `cristianoVideoUrl` to `UserSession` type. Added `SET_SMART_SCORES`, `SET_JUDGE_REPORT`, `SET_CRISTIANO_VIDEO_URL` reducer actions to `UserContext.tsx`.
+   - **Step A**: Created `useEvaluationPipeline` hook (~210 lines) — wraps `runPipeline()` with React state, Tavily research preflight, phase progress tracking, dispatches results to UserContext.
+   - **Step B**: Wired `runJudge()` + `computeSmartScores()` into `evaluationPipeline.ts` — Phase 7 (Opus judge on σ>15 disputes) and Phase 8 (Smart Score computation). Added `judgeResult` and `smartScores` to `PipelineResult`.
+   - **Step C**: Rewrote `ResultsPage.tsx` — reads typed `session.smartScoreOutput` directly (no more `sessionAny` cast). Three states: no data → run button → dashboard. Progress UI during pipeline execution. Error state with retry.
+
+4. **Step E: Report Generation pipeline (1 commit, 3 new files):**
+   - `reportDataAssembler.ts` (~270 lines) — Pure function `assembleReportData()` building structured `ReportData` with executive summary, city profiles, category comparisons, judge section, methodology.
+   - `gammaReportGenerator.ts` (~230 lines) — Gamma API integration with PDF fallback, Supabase report versioning, timeout handling. Fixed `isSupabaseConfigured` (const, not function).
+   - `ReportDownload.tsx` (~300 lines) — WCAG-compliant generate/download UI with progress spinner, version history, 44px touch targets.
+   - Updated `Results/index.ts` barrel with `ReportDownload` export.
+
+**Step D was explicitly rejected by founder** — do NOT extract `api/_shared/recommend-utils.ts`.
+
+**Bridge audit status:** PASS — Code is well-built, type-safe, architecturally sound.
+
+**Build status:** `tsc --noEmit` — 0 errors after all changes.
+
+**Known bugs & wiring issues (updated):**
+
+| Priority | Issue | File(s) | Status |
+|----------|-------|---------|--------|
+| ~~**CRITICAL**~~ | ~~Pipeline disconnected from UI~~ | `evaluationPipeline.ts` | **FIXED** — `useEvaluationPipeline` hook + ResultsPage trigger |
+| ~~**CRITICAL**~~ | ~~Judge not wired into pipeline~~ | `evaluationPipeline.ts` | **FIXED** — Phase 7 calls `runJudge()` |
+| **MODERATE** | 5 unused exports in bridge | `profileSignalBridge.ts` | Open — low priority cleanup |
+| **MODERATE** | `ALL_RECOMMENDERS` unused | `cityRecommendationOrchestrator.ts:87` | Open — dead export |
+| **MODERATE** | ~200 lines duplicated across endpoints | `api/recommend-*.ts` | **WILL NOT FIX** — founder rejected extraction |
+| **LOW** | `smartScoreEngine.ts:237` | `smartScoreEngine.ts` | Open — TODO: source citation aggregation |
+| **LOW** | `oliviaTutor.ts:81` | `oliviaTutor.ts` | Open — TODO: build `/api/olivia-tutor` endpoint |
+| **LOW** | 3 hardcoded "USD" strings | questions data | Open — currency should be dynamic |
+| **FUTURE** | `/api/gamma-report` endpoint | Not yet created | Needed for Gamma API integration |
+| **FUTURE** | `/api/report-pdf` endpoint | Not yet created | Needed for PDF fallback |
+
+**What's next**: Conv 23-24 — Build the actual API endpoints (`/api/gamma-report`, `/api/report-pdf`), wire `ReportDownload` into `ResultsDashboard`, implement Gamma API integration, build PDF export with jsPDF/html2pdf fallback.
+
+### Previous: 2026-03-11 — Session 15 (Conv 17-20: Results + Cristiano Judge UI + Video — COMPLETE)
 
 **What was done this conversation — Conv 19-20 (8 commits, 6 new files, 3 updated):**
 
@@ -551,7 +594,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
 - `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
 - 3 hardcoded "USD" strings in questions
-- Bridge code (1,898 lines) needs formal audit pass
+- ~~Bridge code (1,898 lines) needs formal audit pass~~ — **DONE** (Session 16)
 
 **What's next**: Conv 21-22 — Report Generation. Build reportDataAssembler.ts, gammaReportGenerator.ts, ReportDownload.tsx, report versioning, PDF export fallback.
 
@@ -620,7 +663,7 @@ Target: < 10KB. Everything else lives in specialized docs.
 - `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
 - `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
 - 3 hardcoded "USD" strings in questions
-- Bridge code (1,898 lines) needs formal audit pass
+- ~~Bridge code (1,898 lines) needs formal audit pass~~ — **DONE** (Session 16)
 
 **What's next**: Conv 19-20 — Cristiano Judge UI + Video. Build JudgeVerdict.tsx (MI6 Briefing Room styled verdict), CourtOrder.tsx (per-category judicial analysis), SimliQuickVerdict.tsx (real-time avatar narration), api/cristiano-storyboard.ts (Sonnet 4.6 generates 7-scene storyboard).
 

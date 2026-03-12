@@ -2,35 +2,36 @@
  * ResultsDataPage — The "Evidence Room"
  * Conv 21-22: Report Generation
  *
- * Shows line-by-line field metrics, per-LLM scores, success/fail counts,
- * standard deviations, confidence levels, Opus adjustments, source citations
- * with clickable URLs, section rollups, and total evaluation stats.
+ * Shows city profiles, category comparisons, judge verdicts,
+ * methodology transparency — all the raw data behind the report.
  *
- * This page MUST exist BEFORE Gamma report can be fired.
- * The user reviews raw math here, then clicks "Generate GAMMA Report".
+ * Adapted to work with the pipeline-integrated ReportData type.
  *
- * WCAG 2.1 AA: All text ≥ 4.5:1 contrast, tables fully accessible,
+ * WCAG 2.1 AA: All text >= 4.5:1 contrast, tables fully accessible,
  * focus management, both dark and light mode compliant.
  */
 
 import { useState, useMemo } from 'react';
-import type { ReportData, ReportMetricLine, ReportCategoryRollup, LLMStatusEntry } from '../../lib/reportDataAssembler';
+import type {
+  ReportData,
+  CityProfile,
+  CategoryComparison,
+} from '../../lib/reportDataAssembler';
 
 // ─── Sub-Components ──────────────────────────────────────────
 
 /** Stats overview cards */
-function StatsOverview({ stats }: {
-  stats: ReportData['stats'];
-}) {
+function StatsOverview({ data }: { data: ReportData }) {
+  const { meta, methodology } = data;
   const cards = [
-    { label: 'Total Metrics', value: stats.totalMetrics.toString() },
-    { label: 'Scored Metrics', value: stats.totalScoredMetrics.toString() },
-    { label: 'Locations', value: stats.totalLocations.toString() },
-    { label: 'Categories', value: `${stats.successfulCategories}/${stats.totalCategories}` },
-    { label: 'LLM Success', value: `${stats.totalLLMSuccesses}/${stats.totalLLMCalls}` },
-    { label: 'Margin of Error', value: `${(stats.overallMOE * 100).toFixed(1)}%` },
-    { label: 'Judge Overrides', value: `${stats.metricsOverriddenByJudge}/${stats.metricsReviewedByJudge}` },
-    { label: 'Total Cost', value: `$${stats.totalCostUsd.toFixed(2)}` },
+    { label: 'Total Metrics', value: meta.totalMetrics.toString() },
+    { label: 'Cities Evaluated', value: meta.totalCities.toString() },
+    { label: 'LLMs Used', value: methodology.llmsUsed.length.toString() },
+    { label: 'Eval Waves', value: methodology.evaluationWaves.toString() },
+    { label: 'Categories', value: `${methodology.successfulCategories}/${methodology.successfulCategories + methodology.failedCategories.length}` },
+    { label: 'Confidence', value: `${meta.confidence}%` },
+    { label: 'Total Cost', value: `$${meta.totalCostUsd.toFixed(2)}` },
+    { label: 'Duration', value: `${(meta.pipelineDurationMs / 1000).toFixed(1)}s` },
   ];
 
   return (
@@ -45,59 +46,46 @@ function StatsOverview({ stats }: {
   );
 }
 
-/** LLM Status Table */
-function LLMStatusTable({ llmStatus }: { llmStatus: LLMStatusEntry[] }) {
-  if (llmStatus.length === 0) return null;
-
+/** City Profile Card */
+function CityProfileCard({ profile }: { profile: CityProfile }) {
   return (
-    <div className="rdp-section" role="region" aria-label="LLM status breakdown">
-      <h3 className="rdp-section-title">LLM Pipeline Status</h3>
-      <div className="rdp-table-wrap">
-        <table className="rdp-table" aria-label="Per-LLM evaluation results">
-          <thead>
-            <tr>
-              <th scope="col">Model</th>
-              <th scope="col">Categories</th>
-              <th scope="col">Metrics Scored</th>
-              <th scope="col">Avg Duration</th>
-              <th scope="col">Cost</th>
-              <th scope="col">Errors</th>
-            </tr>
-          </thead>
-          <tbody>
-            {llmStatus.map(llm => (
-              <tr key={llm.model}>
-                <td className="rdp-model-name">{llm.model}</td>
-                <td>
-                  <span className={llm.categoriesSucceeded === llm.categoriesAttempted ? 'rdp-badge-success' : 'rdp-badge-warn'}>
-                    {llm.categoriesSucceeded}/{llm.categoriesAttempted}
-                  </span>
-                </td>
-                <td>{llm.totalMetricsScored}</td>
-                <td>{(llm.avgDurationMs / 1000).toFixed(1)}s</td>
-                <td>${llm.totalCostUsd.toFixed(3)}</td>
-                <td>{llm.errors.length > 0 ? llm.errors.length : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="rdp-section" role="region" aria-label={`${profile.location} profile`}>
+      <div className="rdp-city-header">
+        <span className="rdp-city-rank">#{profile.rank}</span>
+        <h4 className="rdp-city-name">{profile.location}, {profile.country}</h4>
+        <span className="rdp-city-score">{profile.overallScore.toFixed(1)}</span>
+        <span className={`rdp-confidence rdp-confidence--${profile.confidence}`}>
+          {profile.confidence}
+        </span>
+      </div>
+      <div className="rdp-city-categories">
+        <div className="rdp-city-top">
+          <strong>Strengths:</strong>{' '}
+          {profile.topCategories.map(c => `${c.name} (${c.score.toFixed(0)})`).join(', ')}
+        </div>
+        <div className="rdp-city-bottom">
+          <strong>Weaknesses:</strong>{' '}
+          {profile.bottomCategories.map(c => `${c.name} (${c.score.toFixed(0)})`).join(', ')}
+        </div>
+      </div>
+      <div className="rdp-city-meta">
+        {profile.scoredMetrics}/{profile.totalMetrics} metrics scored
+        {profile.judgeTrend && ` | Judge trend: ${profile.judgeTrend}`}
       </div>
     </div>
   );
 }
 
-/** Category Rollup Section */
-function CategoryRollupSection({ rollups, locations }: {
-  rollups: ReportCategoryRollup[];
+/** Category Comparison Table */
+function CategoryComparisonTable({ categories, locations }: {
+  categories: CategoryComparison[];
   locations: string[];
 }) {
-  const [expandedCat, setExpandedCat] = useState<string | null>(null);
-
   return (
-    <div className="rdp-section" role="region" aria-label="Category rollups">
-      <h3 className="rdp-section-title">Category Rollups ({rollups.length} categories)</h3>
+    <div className="rdp-section" role="region" aria-label="Category comparison">
+      <h3 className="rdp-section-title">Category Comparison ({categories.length} categories)</h3>
       <div className="rdp-table-wrap">
-        <table className="rdp-table" aria-label="Per-category score rollups">
+        <table className="rdp-table" aria-label="Per-category city comparison">
           <thead>
             <tr>
               <th scope="col">Category</th>
@@ -105,196 +93,29 @@ function CategoryRollupSection({ rollups, locations }: {
               {locations.map(loc => (
                 <th key={loc} scope="col">{loc}</th>
               ))}
-              <th scope="col">Avg σ</th>
-              <th scope="col">Confidence</th>
               <th scope="col">Metrics</th>
             </tr>
           </thead>
           <tbody>
-            {rollups.map(cat => (
-              <tr
-                key={cat.categoryId}
-                className={expandedCat === cat.categoryId ? 'rdp-row-expanded' : ''}
-                onClick={() => setExpandedCat(expandedCat === cat.categoryId ? null : cat.categoryId)}
-                style={{ cursor: 'pointer' }}
-                role="button"
-                tabIndex={0}
-                aria-expanded={expandedCat === cat.categoryId}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setExpandedCat(expandedCat === cat.categoryId ? null : cat.categoryId);
-                  }
-                }}
-              >
+            {categories.map(cat => (
+              <tr key={cat.categoryId}>
                 <td className="rdp-cat-name">{cat.categoryName}</td>
                 <td>{(cat.weight * 100).toFixed(1)}%</td>
                 {locations.map(loc => {
-                  const locScore = cat.locationScores.find(ls => ls.location === loc);
+                  const cityScore = cat.cityScores.find(cs => cs.location === loc);
                   return (
                     <td key={loc} className="rdp-score-cell">
-                      {locScore ? locScore.score.toFixed(1) : '—'}
+                      {cityScore ? cityScore.score.toFixed(1) : '—'}
                     </td>
                   );
                 })}
-                <td>{cat.avgStdDev.toFixed(1)}</td>
-                <td>
-                  <span className={`rdp-confidence rdp-confidence--${cat.confidence}`}>
-                    {cat.confidence}
-                  </span>
-                </td>
-                <td>{cat.scoredMetricCount}/{cat.metricCount}</td>
+                <td>{cat.metricCount}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
     </div>
-  );
-}
-
-/** Metric Lines Table — the core evidence */
-function MetricLinesTable({ metricLines, locations, filterCategory }: {
-  metricLines: ReportMetricLine[];
-  locations: string[];
-  filterCategory: string | null;
-}) {
-  const filtered = filterCategory
-    ? metricLines.filter(m => m.category === filterCategory)
-    : metricLines;
-
-  return (
-    <div className="rdp-section" role="region" aria-label="Metric details">
-      <h3 className="rdp-section-title">
-        Metric Evidence ({filtered.length} metrics)
-        {filterCategory && (
-          <span className="rdp-filter-badge"> — {filterCategory}</span>
-        )}
-      </h3>
-      <div className="rdp-table-wrap">
-        <table className="rdp-table rdp-table--metrics" aria-label="Line-by-line metric scores">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Description</th>
-              <th scope="col">Category</th>
-              {locations.map(loc => (
-                <th key={loc} scope="col">{loc}</th>
-              ))}
-              <th scope="col">σ</th>
-              <th scope="col">Conf</th>
-              <th scope="col">Judge</th>
-              <th scope="col">Sources</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(metric => (
-              <MetricRow key={metric.metricId} metric={metric} locations={locations} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/** Single metric row with expandable per-LLM scores */
-function MetricRow({ metric, locations }: {
-  metric: ReportMetricLine;
-  locations: string[];
-}) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <>
-      <tr
-        className={metric.judgeOverridden ? 'rdp-row-overridden' : ''}
-        onClick={() => setExpanded(!expanded)}
-        style={{ cursor: 'pointer' }}
-        role="button"
-        tabIndex={0}
-        aria-expanded={expanded}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setExpanded(!expanded);
-          }
-        }}
-      >
-        <td className="rdp-metric-id">{metric.metricId}</td>
-        <td className="rdp-metric-desc">{metric.description}</td>
-        <td className="rdp-metric-cat">{metric.category}</td>
-        {locations.map(loc => {
-          const ls = metric.locationScores.find(s => s.location === loc);
-          return (
-            <td key={loc} className="rdp-score-cell">
-              {ls ? ls.score.toFixed(1) : '—'}
-            </td>
-          );
-        })}
-        <td className={metric.stdDev > 15 ? 'rdp-high-sigma' : ''}>{metric.stdDev.toFixed(1)}</td>
-        <td>
-          <span className={`rdp-confidence rdp-confidence--${metric.confidenceLevel}`}>
-            {metric.confidenceLevel}
-          </span>
-        </td>
-        <td>{metric.judgeOverridden ? `${metric.judgeScore?.toFixed(0)}` : '—'}</td>
-        <td className="rdp-sources-cell">
-          {metric.sources.length > 0 ? (
-            metric.sources.map((s, i) => (
-              <a
-                key={i}
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rdp-source-link"
-                title={s.excerpt}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {s.name}
-              </a>
-            ))
-          ) : '—'}
-        </td>
-      </tr>
-      {expanded && (
-        <tr className="rdp-expanded-row">
-          <td colSpan={locations.length + 7}>
-            <div className="rdp-expanded-content">
-              {metric.judgeOverridden && metric.judgeExplanation && (
-                <div className="rdp-judge-note">
-                  <strong>Judge Override:</strong> {metric.judgeExplanation}
-                </div>
-              )}
-              <div className="rdp-per-llm-grid">
-                {metric.locationScores.map(ls => (
-                  <div key={ls.location} className="rdp-per-llm-location">
-                    <strong>{ls.location}</strong>
-                    <span className="rdp-raw-score">Raw consensus: {ls.rawConsensusScore.toFixed(1)}</span>
-                    {ls.perLLMScores.length > 0 && (
-                      <div className="rdp-llm-scores">
-                        {ls.perLLMScores.map((llm, i) => (
-                          <span key={i} className="rdp-llm-score-chip">
-                            {llm.model.split('-')[0]}: {llm.score.toFixed(0)}
-                            <span className="rdp-llm-conf">({(llm.confidence * 100).toFixed(0)}%)</span>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {metric.rawValue && (
-                <div className="rdp-raw-value">Raw value: {metric.rawValue}</div>
-              )}
-              <div className="rdp-contributing">
-                Contributing models: {metric.contributingModels.join(', ')}
-              </div>
-            </div>
-          </td>
-        </tr>
-      )}
-    </>
   );
 }
 
@@ -316,14 +137,18 @@ export function ResultsDataPage({
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
   const locations = useMemo(
-    () => reportData.rankings.map(r => r.location),
-    [reportData.rankings]
+    () => reportData.cityProfiles.map(c => c.location),
+    [reportData.cityProfiles]
   );
 
   const categories = useMemo(
-    () => reportData.categoryRollups.map(c => ({ id: c.categoryId, name: c.categoryName })),
-    [reportData.categoryRollups]
+    () => reportData.categoryComparison.map(c => ({ id: c.categoryId, name: c.categoryName })),
+    [reportData.categoryComparison]
   );
+
+  const filteredCategories = filterCategory
+    ? reportData.categoryComparison.filter(c => c.categoryId === filterCategory)
+    : reportData.categoryComparison;
 
   return (
     <div className="rdp-container" role="main" aria-label="Results Data Page">
@@ -331,29 +156,43 @@ export function ResultsDataPage({
       <header className="rdp-header">
         <h2 className="rdp-title">Results Data — Evidence Room</h2>
         <p className="rdp-subtitle">
-          v{reportData.version} | {reportData.entryPoints.tier} tier |{' '}
-          {reportData.entryPoints.paragraphical ? 'Paragraphical' : ''}
-          {reportData.entryPoints.paragraphical && reportData.entryPoints.mainModule ? ' + ' : ''}
-          {reportData.entryPoints.mainModule ? 'Main Module' : ''}
-          {reportData.entryPoints.judgeInvoked ? ' + Opus Judge' : ''}
+          v{reportData.meta.version} | {reportData.meta.tier} tier |{' '}
+          {reportData.meta.entryPath}
         </p>
       </header>
 
       {/* Stats Overview */}
-      <StatsOverview stats={reportData.stats} />
+      <StatsOverview data={reportData} />
 
       {/* Winner Banner */}
       <div className="rdp-winner-banner" role="status">
         <span className="rdp-winner-label">Winner:</span>
         <span className="rdp-winner-name">
-          {reportData.winner.location}, {reportData.winner.country}
+          {reportData.executive.winnerCity}, {reportData.executive.winnerCountry}
         </span>
-        <span className="rdp-winner-score">{reportData.winner.overallScore.toFixed(1)}</span>
-        {reportData.winner.isTie && <span className="rdp-tie-badge">TIE</span>}
+        <span className="rdp-winner-score">{reportData.executive.winnerScore.toFixed(1)}</span>
+        {reportData.executive.isTie && <span className="rdp-tie-badge">TIE</span>}
       </div>
 
-      {/* LLM Status */}
-      <LLMStatusTable llmStatus={reportData.llmStatus} />
+      {/* Key Findings */}
+      {reportData.executive.keyFindings.length > 0 && (
+        <div className="rdp-section" role="region" aria-label="Key findings">
+          <h3 className="rdp-section-title">Key Findings</h3>
+          <ul className="rdp-findings-list">
+            {reportData.executive.keyFindings.map((f, i) => (
+              <li key={i}>{f}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* City Profiles */}
+      <div className="rdp-section" role="region" aria-label="City profiles">
+        <h3 className="rdp-section-title">City Profiles ({reportData.cityProfiles.length})</h3>
+        {reportData.cityProfiles.map(profile => (
+          <CityProfileCard key={profile.location} profile={profile} />
+        ))}
+      </div>
 
       {/* Category Filter */}
       <div className="rdp-filter-bar" role="toolbar" aria-label="Category filter">
@@ -374,37 +213,51 @@ export function ResultsDataPage({
         ))}
       </div>
 
-      {/* Category Rollups */}
-      <CategoryRollupSection rollups={reportData.categoryRollups} locations={locations} />
+      {/* Category Comparison */}
+      <CategoryComparisonTable categories={filteredCategories} locations={locations} />
 
-      {/* Metric Lines — Core Evidence */}
-      <MetricLinesTable
-        metricLines={reportData.metricLines}
-        locations={locations}
-        filterCategory={filterCategory}
-      />
-
-      {/* Judge Executive Summary */}
-      {reportData.judgeExecutiveSummary && (
-        <div className="rdp-section rdp-judge-summary" role="region" aria-label="Judge executive summary">
-          <h3 className="rdp-section-title">Opus Judge Executive Summary</h3>
+      {/* Judge Section */}
+      {reportData.judgeSection && (
+        <div className="rdp-section rdp-judge-summary" role="region" aria-label="Judge verdict">
+          <h3 className="rdp-section-title">Opus Judge Verdict</h3>
           <div className="rdp-judge-content">
             <p className="rdp-judge-recommendation">
-              <strong>Recommendation:</strong> {reportData.judgeExecutiveSummary.recommendation}
+              <strong>Verdict:</strong> {reportData.judgeSection.executiveSummary}
             </p>
-            <p>{reportData.judgeExecutiveSummary.rationale}</p>
-            <h4>Key Factors</h4>
-            <ul>
-              {reportData.judgeExecutiveSummary.keyFactors.map((f, i) => (
-                <li key={i}>{f}</li>
-              ))}
-            </ul>
+            <p>
+              Metrics reviewed: {reportData.judgeSection.metricsReviewed} |
+              Overridden: {reportData.judgeSection.metricsOverridden}
+              {reportData.judgeSection.safeguardTriggered && ' | Safeguard triggered'}
+            </p>
+            {reportData.judgeSection.keyFactors.length > 0 && (
+              <>
+                <h4>Key Factors</h4>
+                <ul>
+                  {reportData.judgeSection.keyFactors.map((f, i) => (
+                    <li key={i}>{f}</li>
+                  ))}
+                </ul>
+              </>
+            )}
             <p className="rdp-judge-outlook">
-              <strong>Future Outlook:</strong> {reportData.judgeExecutiveSummary.futureOutlook}
+              <strong>Future Outlook:</strong> {reportData.judgeSection.futureOutlook}
             </p>
           </div>
         </div>
       )}
+
+      {/* Methodology */}
+      <div className="rdp-section" role="region" aria-label="Methodology">
+        <h3 className="rdp-section-title">Methodology</h3>
+        <div className="rdp-methodology">
+          <p><strong>LLMs:</strong> {reportData.methodology.llmsUsed.join(', ')}</p>
+          <p><strong>Data Source:</strong> {reportData.methodology.dataSource}</p>
+          <p><strong>Confidence:</strong> {reportData.methodology.confidenceExplanation}</p>
+          {reportData.methodology.failedCategories.length > 0 && (
+            <p><strong>Failed Categories:</strong> {reportData.methodology.failedCategories.join(', ')}</p>
+          )}
+        </div>
+      </div>
 
       {/* Generate Gamma Button */}
       <div className="rdp-actions">

@@ -14,6 +14,6 @@ export { ReasoningTrace } from './ReasoningTrace';
 export { SideBySideMetricView } from './SideBySideMetricView';
 export { ReactiveJustification, ParagraphHighlightPanel } from './ReactiveJustification';
 export { ThinkingDetailsPanel } from './ThinkingDetailsPanel';
+export { ReportDownload } from './ReportDownload';
 export { FileUpload } from './FileUpload';
 export { ResultsDataPage } from './ResultsDataPage';
-export { ReportDownload } from './ReportDownload';

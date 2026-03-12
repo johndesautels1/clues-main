@@ -1,25 +1,26 @@
 /**
  * ResultsPage — Route-level wrapper that bridges UserContext to ResultsDashboard.
  *
- * Conv 17-18: Results Page Assembly.
- * Reads evaluation data from the user session and passes it to
- * ResultsDashboard. Shows a loading/empty state when no evaluation
- * data is available yet.
+ * Conv 17-18 + Session 16: Results Page Assembly + Pipeline Integration.
  *
- * The SmartScoreOutput is expected to be stored on the session once
- * the Smart Score Engine runs. Until then, this page shows a
- * "no results yet" state directing users back to the Paragraphical.
+ * Three states:
+ *   1. No data → "Start Your Discovery" prompt
+ *   2. Has data, no scores → "Run Evaluation" button + progress phases
+ *   3. Has scores → Full ResultsDashboard
+ *
+ * WCAG 2.1 AA: All text ≥ 11px, contrast verified, focus management.
  */
 
 import { useUser } from '../../context/UserContext';
+import { useEvaluationPipeline } from '../../hooks/useEvaluationPipeline';
 import { ResultsDashboard } from './ResultsDashboard';
 import { Header } from '../Shared/Header';
 import { Footer } from '../Shared/Footer';
-import type { SmartScoreOutput } from '../../types/smartScore';
 import './Results.css';
 
 export function ResultsPage() {
   const { session, isLoading } = useUser();
+  const pipeline = useEvaluationPipeline();
 
   // Loading state
   if (isLoading) {
@@ -59,13 +60,140 @@ export function ResultsPage() {
     );
   }
 
-  // Check for SmartScoreOutput in session
-  // The Smart Score Engine stores its output on the session when complete.
-  // We cast the evaluation to access smartScoreOutput if present.
-  const sessionAny = session as unknown as Record<string, unknown>;
-  const smartScores = sessionAny.smartScoreOutput as SmartScoreOutput | undefined;
+  // Check for SmartScoreOutput on the session (properly typed now)
+  const smartScores = session.smartScoreOutput;
 
-  // No results yet
+  // Check if user has enough data to run evaluation
+  const hasParagraphical = !!session.paragraphical.extraction;
+  const hasMainModule = !!(
+    session.mainModule.demographics ||
+    session.mainModule.dnw ||
+    session.mainModule.mh ||
+    session.mainModule.generalAnswers ||
+    session.mainModule.tradeoffAnswers
+  );
+  const hasData = hasParagraphical || hasMainModule || session.completedModules.length > 0;
+
+  // Pipeline is running — show progress
+  if (pipeline.isRunning) {
+    return (
+      <>
+        <Header />
+        <main className="results-page" aria-label="Running Evaluation">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            textAlign: 'center',
+            maxWidth: 520,
+            margin: '0 auto',
+          }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              border: '3px solid rgba(255, 255, 255, 0.1)',
+              borderTopColor: 'var(--clues-sapphire, #2563eb)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              marginBottom: 20,
+            }} />
+            <h2 style={{
+              fontFamily: "'Cormorant', serif",
+              fontSize: 'var(--text-2xl)',
+              fontWeight: 300,
+              color: 'var(--text-primary)',
+              marginBottom: 8,
+            }}>
+              Evaluating Your Ideal Locations
+            </h2>
+            <p style={{
+              fontFamily: "'Crimson Pro', Georgia, serif",
+              fontSize: 'var(--text-base)',
+              color: 'var(--text-accent)',
+              lineHeight: 1.7,
+              marginBottom: 16,
+            }}>
+              {pipeline.progress.phaseLabel}
+            </p>
+            {pipeline.progress.wavesCompleted > 0 && (
+              <p style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 'var(--text-sm)',
+                color: 'var(--text-muted)',
+              }}>
+                {pipeline.progress.wavesCompleted} evaluation waves completed
+                {pipeline.progress.citiesFound > 0 && ` \u00B7 ${pipeline.progress.citiesFound} cities found`}
+              </p>
+            )}
+          </div>
+        </main>
+        <Footer />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </>
+    );
+  }
+
+  // Pipeline error
+  if (pipeline.hasError) {
+    return (
+      <>
+        <Header />
+        <main className="results-page" aria-label="Evaluation Error">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            textAlign: 'center',
+            maxWidth: 520,
+            margin: '0 auto',
+          }}>
+            <span style={{ fontSize: '2.5rem', marginBottom: 16 }} aria-hidden="true">&#x26A0;</span>
+            <h2 style={{
+              fontFamily: "'Cormorant', serif",
+              fontSize: 'var(--text-2xl)',
+              fontWeight: 300,
+              color: 'var(--text-primary)',
+              marginBottom: 8,
+            }}>
+              Evaluation Failed
+            </h2>
+            <p style={{
+              fontFamily: "'Crimson Pro', Georgia, serif",
+              fontSize: 'var(--text-base)',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.7,
+              marginBottom: 16,
+            }}>
+              {pipeline.progress.error}
+            </p>
+            <button
+              onClick={pipeline.run}
+              style={{
+                padding: '12px 24px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--clues-sapphire, #2563eb)',
+                color: '#ffffff',
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 'var(--text-base)',
+                fontWeight: 500,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Retry Evaluation
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // No results yet — show trigger or prompt
   if (!smartScores) {
     return (
       <>
@@ -82,7 +210,7 @@ export function ResultsPage() {
             margin: '0 auto',
           }}>
             <span style={{ fontSize: '3rem', marginBottom: 16 }} aria-hidden="true">
-              &#x1F50D;
+              {hasData ? '\u{1F680}' : '\u{1F50D}'}
             </span>
             <h1 style={{
               fontFamily: "'Cormorant', serif",
@@ -91,7 +219,7 @@ export function ResultsPage() {
               color: 'var(--text-primary)',
               marginBottom: 8,
             }}>
-              No Results Yet
+              {hasData ? 'Ready to Evaluate' : 'No Results Yet'}
             </h1>
             <p style={{
               fontFamily: "'Crimson Pro', Georgia, serif",
@@ -100,28 +228,53 @@ export function ResultsPage() {
               lineHeight: 1.7,
               marginBottom: 24,
             }}>
-              Complete the Paragraphical to tell us about your ideal life, then
-              run the evaluation to see your personalized city recommendations.
+              {hasData
+                ? 'Your profile data is ready. Run the full 5-LLM evaluation to discover your ideal cities.'
+                : 'Complete the Paragraphical to tell us about your ideal life, then run the evaluation to see your personalized city recommendations.'}
             </p>
-            <a
-              href="/paragraphical"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '12px 24px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--clues-sapphire, #2563eb)',
-                color: '#ffffff',
-                fontFamily: "'Outfit', sans-serif",
-                fontSize: 'var(--text-base)',
-                fontWeight: 500,
-                textDecoration: 'none',
-                transition: 'background var(--transition-fast)',
-              }}
-            >
-              Start Your Discovery
-            </a>
+
+            {hasData ? (
+              <button
+                onClick={pipeline.run}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '14px 28px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--clues-sapphire, #2563eb)',
+                  color: '#ffffff',
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: 'var(--text-base)',
+                  fontWeight: 500,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background var(--transition-fast)',
+                }}
+              >
+                Run Evaluation
+              </button>
+            ) : (
+              <a
+                href="/paragraphical"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '12px 24px',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--clues-sapphire, #2563eb)',
+                  color: '#ffffff',
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: 'var(--text-base)',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  transition: 'background var(--transition-fast)',
+                }}
+              >
+                Start Your Discovery
+              </a>
+            )}
 
             {/* Show completion status */}
             {session.currentTier && (
@@ -157,14 +310,9 @@ export function ResultsPage() {
     );
   }
 
-  // Extract supplementary data from session
+  // Has scores — render full dashboard
   const extraction = session.paragraphical?.extraction;
   const paragraphs = session.paragraphical?.paragraphs;
-
-  // Extract judge report if available
-  const judgeReport = (sessionAny.judgeReport as import('../../types/judge').JudgeReport) ?? undefined;
-  const judgeOrchestration = (sessionAny.judgeOrchestration as import('../../types/judge').JudgeOrchestrationResult) ?? undefined;
-  const existingVideoUrl = (sessionAny.cristianoVideoUrl as string) ?? undefined;
 
   return (
     <ResultsDashboard
@@ -181,10 +329,10 @@ export function ResultsPage() {
       recommendedCity={extraction?.recommended_cities?.[0] ?? null}
       recommendedTown={extraction?.recommended_towns?.[0] ?? null}
       recommendedNeighborhood={extraction?.recommended_neighborhoods?.[0] ?? null}
-      judgeReport={judgeReport}
-      judgeOrchestration={judgeOrchestration}
+      judgeReport={session.judgeReport}
+      judgeOrchestration={session.judgeOrchestration}
       sessionId={session.id}
-      existingVideoUrl={existingVideoUrl}
+      existingVideoUrl={session.cristianoVideoUrl}
     />
   );
 }

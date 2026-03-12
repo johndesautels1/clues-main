@@ -20,12 +20,17 @@
  */
 
 import type { UserSession } from '../types';
-import type { CityCandidate, OrchestrationResult, EvaluationWave, TavilyResult } from '../types/evaluation';
+import type { CityCandidate, OrchestrationResult, EvaluationMetric, EvaluationWave, TavilyResult } from '../types/evaluation';
+import type { JudgeOrchestrationResult } from '../types/judge';
+import type { SmartScoreOutput, CategoryWeights } from '../types/smartScore';
 import { aggregateProfile } from './answerAggregator';
 import { buildMetricsForEvaluation } from './profileSignalBridge';
 import { recommendCities, buildSignalSummary } from './cityRecommendationOrchestrator';
 import type { CityRecommendationResult } from './cityRecommendationOrchestrator';
 import { runEvaluation } from './evaluationOrchestrator';
+import { runJudge } from './judgeOrchestrator';
+import { computeSmartScores } from './relativeScoring';
+import { deriveCategoryWeights } from './categoryRollup';
 import { calculateTier, calculateConfidence } from './tierEngine';
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -45,6 +50,12 @@ export interface PipelineResult {
 
   /** Evaluation results from the 5-LLM cascade */
   evaluation: OrchestrationResult;
+
+  /** Judge orchestration result (null if no metrics needed review) */
+  judgeResult: JudgeOrchestrationResult | null;
+
+  /** Final Smart Scores (after judge + relative scoring) */
+  smartScores: SmartScoreOutput;
 
   /** Total metrics evaluated */
   totalMetrics: number;
@@ -191,13 +202,54 @@ export async function runPipeline(
     callbacks?.onWaveComplete
   );
 
+  // ─── Phase 7: Run the Opus Judge on disputed metrics ────────
+  callbacks?.onPhase?.('judging');
+
+  // Flatten all metrics for the judge's metricsMap
+  const allMetrics: EvaluationMetric[] = Object.values(metricsByCategory).flat();
+  const metricsMap: Record<string, EvaluationMetric> = {};
+  for (const m of allMetrics) {
+    metricsMap[m.id] = m;
+  }
+
+  let judgeResult: JudgeOrchestrationResult | null = null;
+  if (evaluation.metricsForJudge.length > 0) {
+    judgeResult = await runJudge(
+      session.id,
+      evaluation,
+      metricsMap,
+      {
+        globeRegion: session.globe?.region,
+        paragraphCount: session.paragraphical.paragraphs.length,
+        completedModules: session.completedModules,
+        tier,
+      }
+    );
+  }
+
+  // ─── Phase 8: Compute Smart Scores ────────────────────────
+  callbacks?.onPhase?.('scoring');
+
+  const categoryWeights: CategoryWeights = deriveCategoryWeights(
+    undefined, // persona detection is a future feature
+    session.paragraphical.extraction?.module_relevance
+  );
+
+  const smartScores = computeSmartScores({
+    orchestrationResult: evaluation,
+    judgeReport: judgeResult?.finalReport ?? null,
+    metrics: allMetrics,
+    cities,
+    categoryWeights,
+  });
+
   // ─── Done ────────────────────────────────────────────────────
   const totalDurationMs = Date.now() - startTime;
-  // Note: cityRecommendation cost is approximate ($0.005/response) since
-  // the recommendation endpoints don't yet return actual token-based costs.
-  const totalCostUsd = evaluation.totalCostUsd + (cityRecommendation
+  const judgeCostUsd = judgeResult?.totalCostUsd ?? 0;
+  const cityCostUsd = cityRecommendation
     ? cityRecommendation.individualResults.reduce((sum, r) => sum + (r.response ? 0.005 : 0), 0)
-    : 0);
+    : 0;
+  const totalCostUsd = evaluation.totalCostUsd + judgeCostUsd + cityCostUsd;
 
   return {
     entryPath,
@@ -207,6 +259,8 @@ export async function runPipeline(
     citySource,
     cityRecommendation,
     evaluation,
+    judgeResult,
+    smartScores,
     totalMetrics,
     totalCostUsd,
     totalDurationMs,

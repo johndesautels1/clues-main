@@ -107,6 +107,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.status(400).json({ error: 'Missing sessionId, globeRegion, or signals' }); return;
   }
 
+  const invalidSignal = body.signals.find(
+    s => typeof s.moduleId !== 'string' || typeof s.key !== 'string' ||
+         typeof s.value !== 'number' || typeof s.source !== 'string' ||
+         s.rawValue === undefined
+  );
+  if (invalidSignal) {
+    res.status(400).json({ error: 'Malformed signal object: each signal must have moduleId (string), key (string), value (number), source (string), and rawValue' }); return;
+  }
+
   const startTime = Date.now();
 
   try {
