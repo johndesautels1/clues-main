@@ -206,12 +206,13 @@
 - [x] Cristiano avatar integration (wired into ResultsDashboard)
 
 #### Conv 21-22: Report Generation
-- [ ] `src/lib/reportDataAssembler.ts` — assemble all evaluation data into report structure
-- [ ] `src/lib/gammaReportGenerator.ts` — push to Gamma API for 100+ page report
-- [ ] `src/components/Results/ReportDownload.tsx` — download/view Gamma report
-- [ ] Report versioning: re-evaluation produces new report version
-- [ ] PDF export fallback for offline use
-- [ ] Supabase: `reports` table (user_id, version, gamma_url, video_url, created_at)
+- [x] `src/lib/reportDataAssembler.ts` — assemble all evaluation data into report structure
+- [x] `src/lib/gammaReportGenerator.ts` — push to Gamma API for 100+ page report
+- [x] `src/components/Results/ReportDownload.tsx` — download/view Gamma report
+- [x] `src/components/Results/ResultsDataPage.tsx` — evidence room with line-by-line metrics
+- [x] Report versioning: re-evaluation produces new report version
+- [x] PDF export fallback for offline use
+- [x] Supabase: `reports` table (user_id, version, gamma_url, video_url, created_at)
 
 ### PHASE 4: MONETIZATION & POLISH (Conversations 23-28)
 *Payments, tier gating, light mode, and production hardening.*
@@ -554,7 +555,37 @@ Target: < 10KB. Everything else lives in specialized docs.
 
 **What's next**: Conv 21-22 — Report Generation. Build reportDataAssembler.ts, gammaReportGenerator.ts, ReportDownload.tsx, report versioning, PDF export fallback.
 
-### Previous: 2026-03-11 — Session 15 (Conv 17-18: Results Page Assembly — COMPLETE)
+### Latest Update: 2026-03-12 — Session 16 (Conv 21-22: Report Generation — COMPLETE)
+
+**What was done this conversation — Conv 21-22 (4 new files, 3 updated):**
+
+1. **reportDataAssembler.ts** (~340 lines) — Assembles ALL evaluation data from any entry point into unified ReportData structure. Handles Paragraphical-only, Main Module-only, or both. Produces: EntryPointSummary, LLMStatusEntry[], ReportMetricLine[] (line-by-line with per-LLM scores, sources, judge overrides), ReportCategoryRollup[], EvaluationStats, CurrencyInfo, winner/rankings, judge executive summary, paragraph summaries.
+
+2. **gammaReportGenerator.ts** (~320 lines) — Pushes ReportData to Gamma API via /api/gamma-generate. Report versioning (getLatestVersion, getReportHistory). Supabase `reports` table persistence (saveReportRow, saveResultsDataReport). PDF export fallback via browser print (triggerPDFExport). Status tracking: pending → generating → completed/failed.
+
+3. **ResultsDataPage.tsx** (~300 lines) — The "Evidence Room" UI. Stats overview grid (8 cards: metrics, locations, LLM success, MOE, judge overrides, cost). Winner banner. LLM pipeline status table (per-model categories/metrics/duration/cost/errors). Category rollup table with clickable expansion. Metric evidence table — every metric line by line with per-location scores, σ, confidence badges, judge override indicators, clickable source citation URLs. Expandable rows showing per-LLM individual scores. Category filter bar. Judge executive summary section. "Generate GAMMA Report" button.
+
+4. **ReportDownload.tsx** (~160 lines) — Orchestrator component. Assembles ReportData on mount (auto-increments version). Renders ResultsDataPage. Handles Gamma generation flow with status updates. PDF fallback on error. Report version history with links to previous Gamma reports. aria-live status for screen readers.
+
+5. **ResultsDashboard.tsx** — Updated with new props (geminiExtraction, orchestration, coverage, tier) and new Section 8: Report Generation rendering ReportDownload component.
+
+6. **index.ts** — Barrel exports updated: 19 components total.
+
+7. **Results.css** — Added ~450 lines of WCAG 2.1 AA compliant styles for Results Data Page: stats grid, winner banner, tables, confidence badges, source links, expanded rows, filter bar, judge summary, Gamma button, PDF fallback, error states, report history, light mode overrides. All text ≥ 4.5:1, interactive elements 44×44px, focus-visible outlines.
+
+**Build status:** `tsc --noEmit` — 0 errors.
+
+**Known items still deferred:**
+- `smartScoreEngine.ts:237` — TODO: implement source citation aggregation
+- `oliviaTutor.ts:81` — TODO: build `/api/olivia-tutor` endpoint
+- 3 hardcoded "USD" strings in questions
+- Bridge code (1,898 lines) needs formal audit pass
+- `/api/gamma-generate` edge function not yet built (Gamma API integration endpoint)
+- Test Persona injection system (pre-loaded data to skip questionnaire during dev)
+
+**What's next**: Conv 23-24 — Phase 4: Monetization & Polish. Payments, tier gating, light mode, production hardening.
+
+### Previous: 2026-03-11 — Session 15 (Conv 17-20: Results + Cristiano Judge UI + Video — COMPLETE)
 
 **What was done this conversation (9 commits, 10 new files):**
 

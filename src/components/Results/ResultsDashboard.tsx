@@ -12,8 +12,10 @@
 
 import { useState } from 'react';
 import type { SmartScoreOutput, CitySmartScore } from '../../types/smartScore';
-import type { ThinkingStep, ParagraphEntry, LocationMetrics } from '../../types';
+import type { ThinkingStep, ParagraphEntry, LocationMetrics, GeminiExtraction, CompletionTier } from '../../types';
 import type { JudgeReport, JudgeOrchestrationResult } from '../../types/judge';
+import type { OrchestrationResult } from '../../types/evaluation';
+import type { CoverageState } from '../../lib/coverageTracker';
 import { WinnerHero } from './WinnerHero';
 import { CityComparisonGrid } from './CityComparisonGrid';
 import { CategoryBreakdown } from './CategoryBreakdown';
@@ -26,6 +28,7 @@ import { CristianoVideoPlayer } from './CristianoVideoPlayer';
 import { ThinkingDetailsPanel } from './ThinkingDetailsPanel';
 import { SideBySideMetricView } from './SideBySideMetricView';
 import { ParagraphHighlightPanel } from './ReactiveJustification';
+import { ReportDownload } from './ReportDownload';
 import { Header } from '../Shared/Header';
 import { Footer } from '../Shared/Footer';
 import './Results.css';
@@ -58,6 +61,14 @@ interface ResultsDashboardProps {
   sessionId?: string;
   /** Pre-rendered video URL (if available) */
   existingVideoUrl?: string;
+  /** Gemini extraction (for report assembly) */
+  geminiExtraction?: GeminiExtraction | null;
+  /** Orchestration result (for report assembly) */
+  orchestration?: OrchestrationResult | null;
+  /** Coverage state (for MOE in report) */
+  coverage?: CoverageState | null;
+  /** Current completion tier */
+  tier?: CompletionTier;
 }
 
 export function ResultsDashboard({
@@ -72,6 +83,10 @@ export function ResultsDashboard({
   judgeOrchestration,
   sessionId,
   existingVideoUrl,
+  geminiExtraction,
+  orchestration,
+  coverage,
+  tier,
 }: ResultsDashboardProps) {
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
 
@@ -176,6 +191,23 @@ export function ResultsDashboard({
               town={recommendedTown ?? null}
               neighborhood={recommendedNeighborhood ?? null}
               onParagraphClick={(id) => setHighlightedParagraph(id)}
+            />
+          </>
+        )}
+
+        {/* 8. Report Generation — Evidence Room + Gamma */}
+        {sessionId && (
+          <>
+            <SectionDivider text="Report Generation" />
+            <ReportDownload
+              sessionId={sessionId}
+              tier={tier ?? 'discovery'}
+              smartScores={smartScores}
+              geminiExtraction={geminiExtraction}
+              orchestration={orchestration}
+              judgeReport={judgeReport}
+              judgeOrchestration={judgeOrchestration}
+              coverage={coverage}
             />
           </>
         )}
