@@ -452,7 +452,7 @@ const TEST_GENERAL: GeneralAnswers = {
   gq1: 'myself and partner equally',
   gq2: 85,  // Slider: very aligned
   gq3: 'Portugal (Cascais, Lisbon coast), Spain (Valencia, Barcelona coast), Italy (Sardinia, Puglia). Visited Portugal and Spain on vacation, lived in Italy briefly as a student.',
-  gq4: true,  // Family obligations
+  gq4: 'yes',  // Family obligations
   gq5: 'Parents in New York and Sao Paulo. Visit 2-3 times per year. Need direct flights or 1-stop to both cities.',
   // Personality & Psychology (Q6-Q12)
   gq6: 'ambivert',
@@ -466,7 +466,7 @@ const TEST_GENERAL: GeneralAnswers = {
   gq13: 'eager_to_learn',
   gq14: 70,  // Cultural flexibility: quite flexible
   gq15: 'mixed_local_and_expat',
-  gq16: true,  // Willing to learn language
+  gq16: 'yes',  // Willing to learn language
   gq17: 'immersive_integration',
   gq18: 55,  // Homesickness tolerance: moderate
   // Social Identity (Q19-Q24)
@@ -481,17 +481,17 @@ const TEST_GENERAL: GeneralAnswers = {
   gq26: 60,  // Material comfort importance: moderate
   gq27: 'mediterranean_slow_living',
   gq28: 'active_outdoor_lifestyle',
-  gq29: true,  // Interested in local food culture
+  gq29: 'yes',  // Interested in local food culture
   gq30: 'twice_weekly',
   gq31: 'hiking,cycling,swimming,gym',
   gq32: 'daily',  // Cooking frequency
   gq33: 75,  // Health consciousness: high
   gq34: 'moderate_drinker_wine',
-  gq35: false,  // Smoking
+  gq35: 'no',  // Smoking
   // Vision & Planning (Q36-Q42)
   gq36: 5,  // Years planning to stay: 5+ (permanent)
   gq37: 'rent_then_buy',
-  gq38: true,  // Open to multiple moves
+  gq38: 'yes',  // Open to multiple moves
   gq39: 'grow_business_internationally',
   gq40: 'bilingual_multicultural_kids',
   gq41: 80,  // Confidence in decision: high
