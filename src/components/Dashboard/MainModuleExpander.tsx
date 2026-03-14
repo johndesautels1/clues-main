@@ -79,7 +79,7 @@ export function MainModuleExpander({
   const totalSections = 5;
 
   return (
-    <div className={`main-module glass ${statusClass}`}>
+    <div className={`main-module glass-heavy ${statusClass}`}>
       {/* Header (always visible) */}
       <button
         className="main-module__header"
@@ -134,6 +134,16 @@ export function MainModuleExpander({
                 <p className="sub-section__description">{section.description}</p>
                 <div className="sub-section__footer">
                   <span className="sub-section__count">{section.questionCount} questions</span>
+                  <div className="sub-section__progress">
+                    <div
+                      className="sub-section__progress-fill"
+                      style={{
+                        width: sectionStatus === 'completed' ? '100%'
+                          : sectionStatus === 'in_progress' ? '40%'
+                          : '0%',
+                      }}
+                    />
+                  </div>
                 </div>
               </button>
             );
