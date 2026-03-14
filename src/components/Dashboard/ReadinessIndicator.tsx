@@ -71,24 +71,24 @@ export function ReadinessIndicator() {
         />
       </div>
 
-      {/* Stats row */}
+      {/* Stats row — user-friendly labels */}
       <div className="readiness__stats">
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{activeSourceCount}</span>
-          <span className="readiness__stat-label">/7 sources</span>
+          <span className="readiness__stat-label">/7 data sources completed</span>
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{quality.adequateModuleCount}</span>
-          <span className="readiness__stat-label">/{MODULES.length} modules</span>
+          <span className="readiness__stat-label">/{MODULES.length} categories covered</span>
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{totalSignals}</span>
-          <span className="readiness__stat-label">signals</span>
+          <span className="readiness__stat-label">data points collected</span>
         </div>
         {quality.gapModuleCount > 0 && (
           <div className="readiness__stat">
             <span className="readiness__stat-value" style={{ color: C.gold }}>{quality.gapModuleCount}</span>
-            <span className="readiness__stat-label">gaps</span>
+            <span className="readiness__stat-label">categories need more data</span>
           </div>
         )}
       </div>

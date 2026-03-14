@@ -1,20 +1,40 @@
-/* ReadinessIndicator — Report readiness dashboard widget */
-/* WCAG 2.1 AA: all text ≥ 11px, contrast verified against #0a0e1a + #ffffff */
+/* ReadinessIndicator — Premium Corporate Report Readiness Widget */
+/* WCAG 2.1 AA: all text >= 11px, contrast verified against #0a0e1a + #ffffff */
 
 .readiness {
-  /* M13 fix: Use CSS custom properties instead of raw rgba for design system consistency */
-  background: var(--bg-glass, rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--border-glass, rgba(255, 255, 255, 0.06));
-  border-radius: 16px;
-  padding: 24px;
-  backdrop-filter: blur(8px);
+  background: var(--bg-glass-heavy, rgba(255, 255, 255, 0.12));
+  border: 1px solid var(--border-glass-hover, rgba(255, 255, 255, 0.20));
+  border-radius: var(--radius-2xl, 24px);
+  padding: 28px 28px 24px;
+  backdrop-filter: blur(var(--blur-heavy, 40px));
+  -webkit-backdrop-filter: blur(var(--blur-heavy, 40px));
+  position: relative;
+  overflow: hidden;
 }
+
+/* Subtle gradient overlay */
+.readiness::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.04) 0%,
+    rgba(34, 197, 94, 0.03) 50%,
+    rgba(245, 158, 11, 0.02) 100%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ─── Header ──────────────────────────────────────────── */
 
 .readiness__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  position: relative;
 }
 
 .readiness__title-group {
@@ -24,16 +44,14 @@
 }
 
 .readiness__title {
-  font-family: 'Cormorant', serif;
   font-size: clamp(18px, 2.5vw, 22px);
-  font-weight: 400;
+  font-weight: 700;
   color: var(--text-primary, #f9fafb);
   margin: 0;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.02em;
 }
 
 .readiness__label {
-  font-family: 'Outfit', sans-serif;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -41,33 +59,33 @@
 }
 
 .readiness__percentage {
-  font-family: 'Outfit', sans-serif;
   font-size: clamp(28px, 4vw, 36px);
   font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
-/* Progress bar */
+/* ─── Progress bar ────────────────────────────────────── */
+
 .readiness__bar {
-  height: 4px;
-  /* M14 fix: Use CSS custom property instead of raw rgba */
+  height: 6px;
   background: var(--bg-card, rgba(255, 255, 255, 0.06));
-  border-radius: 2px;
+  border-radius: var(--radius-full, 9999px);
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .readiness__bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--radius-full, 9999px);
   transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Stats row */
+/* ─── Stats row ───────────────────────────────────────── */
+
 .readiness__stats {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   flex-wrap: wrap;
   margin-bottom: 4px;
 }
@@ -79,35 +97,33 @@
 }
 
 .readiness__stat-value {
-  font-family: 'Outfit', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .readiness__stat-label {
-  font-family: 'Outfit', sans-serif;
   font-size: 12px;
   color: var(--text-muted, #8b95a5);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
+  font-weight: 500;
 }
 
-/* Next steps */
+/* ─── Next steps ──────────────────────────────────────── */
+
 .readiness__steps {
-  margin-top: 16px;
-  padding-top: 16px;
-  /* L11 fix: Use CSS custom property instead of raw rgba */
-  border-top: 1px solid var(--border-glass, rgba(255, 255, 255, 0.06));
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-glass, rgba(255, 255, 255, 0.12));
 }
 
 .readiness__steps-title {
-  font-family: 'Outfit', sans-serif;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted, #8b95a5);
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 
 .readiness__steps-list {
@@ -116,32 +132,31 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .readiness__step {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .readiness__step-priority {
-  font-family: 'Outfit', sans-serif;
   font-size: 11px;
   font-weight: 700;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(96, 165, 250, 0.1);
+  background: rgba(96, 165, 250, 0.12);
   color: var(--text-accent, #60a5fa);
   flex-shrink: 0;
+  border: 1px solid rgba(96, 165, 250, 0.2);
 }
 
 .readiness__step-action {
-  font-family: 'Crimson Pro', Georgia, serif;
   font-size: 14px;
   color: var(--text-secondary, #9ca3af);
   line-height: 1.4;
@@ -149,28 +164,41 @@
 }
 
 .readiness__step-impact {
-  font-family: 'Outfit', sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 9999px);
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.15);
 }
 
-/* Celebration state */
+/* ─── Celebration state ───────────────────────────────── */
+
 .readiness__celebration {
-  margin: 16px 0 0;
-  padding-top: 16px;
-  border-top: 1px solid rgba(34, 197, 94, 0.15);
-  font-family: 'Crimson Pro', Georgia, serif;
+  margin: 18px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(34, 197, 94, 0.2);
   font-size: 15px;
   color: var(--text-secondary, #9ca3af);
   line-height: 1.6;
 }
 
-/* ─── Light mode ─── */
+/* ─── Light mode ──────────────────────────────────────── */
+
 @media (prefers-color-scheme: light) {
   .readiness {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .readiness::before {
+    background: linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.03) 0%,
+      rgba(34, 197, 94, 0.02) 50%,
+      rgba(245, 158, 11, 0.01) 100%
+    );
   }
 
   .readiness__title {
@@ -192,15 +220,21 @@
   .readiness__step-priority {
     background: rgba(37, 99, 235, 0.08);
     color: #2563eb;
+    border-color: rgba(37, 99, 235, 0.15);
   }
 
   .readiness__step-action {
     color: #4b5563;
   }
 
+  .readiness__step-impact {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.12);
+  }
+
   .readiness__celebration {
     color: #4b5563;
-    border-top-color: rgba(34, 197, 94, 0.2);
+    border-top-color: rgba(34, 197, 94, 0.15);
   }
 
   .readiness__steps {
