@@ -4,7 +4,7 @@
  * Reads/writes from UserContext (centralized state with Supabase auto-save).
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useTransition, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroHeading } from './HeroHeading';
 import { GlobeExplorer } from './GlobeExplorer';
@@ -114,23 +114,37 @@ export function Dashboard() {
 
   const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
   const [testPersonaInjected, setTestPersonaInjected] = useState(false);
+  const [, startTransition] = useTransition();
 
-  // Dev-only: Inject test persona with complete data
-  const handleInjectTestPersona = () => {
-    const testSession = buildTestPersonaSession();
+  // Wrap expander toggle in transition so React can yield to browser
+  const handleToggleExpander = useCallback(() => {
+    startTransition(() => {
+      setMainModuleExpanded(prev => !prev);
+    });
+  }, []);
+
+  // Dev-only: Inject test persona — defer heavy state updates
+  const handleInjectTestPersona = useCallback(() => {
+    // Do sync localStorage writes first (unavoidable)
     injectTestModuleAnswers();
-    dispatch({ type: 'LOAD_SESSION', payload: testSession });
-    setTestPersonaInjected(true);
-    setLsRevision(r => r + 1); // trigger module grid refresh
-  };
+    // Defer the expensive re-render cascade
+    startTransition(() => {
+      const testSession = buildTestPersonaSession();
+      dispatch({ type: 'LOAD_SESSION', payload: testSession });
+      setTestPersonaInjected(true);
+      setLsRevision(r => r + 1);
+    });
+  }, [dispatch]);
 
   // Dev-only: Clear test persona
-  const handleClearTestPersona = () => {
+  const handleClearTestPersona = useCallback(() => {
     clearTestModuleAnswers();
-    dispatch({ type: 'RESET' });
-    setTestPersonaInjected(false);
-    setLsRevision(r => r + 1);
-  };
+    startTransition(() => {
+      dispatch({ type: 'RESET' });
+      setTestPersonaInjected(false);
+      setLsRevision(r => r + 1);
+    });
+  }, [dispatch]);
 
   if (isLoading) {
     return (
@@ -212,7 +226,7 @@ export function Dashboard() {
           <MainModuleExpander
             status={mainModuleStatus}
             expanded={mainModuleExpanded}
-            onToggle={() => setMainModuleExpanded(!mainModuleExpanded)}
+            onToggle={handleToggleExpander}
             subSectionStatus={mainModule.subSectionStatus}
             onSubSectionClick={handleSubSectionClick}
           />
