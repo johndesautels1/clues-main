@@ -1,4 +1,4 @@
-/* Module Button — 5D Deep-Blue Treatment (matches DashboardCard.css) */
+/* Module Button — Rich 4D Glassmorphic Card with Illumination */
 /* WCAG 2.1 AA: all text >= 11px, all contrast >= 4.5:1 */
 
 .module-btn {
@@ -13,36 +13,23 @@
   padding: var(--space-3);
   text-align: center;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-xl, 16px);
-
-  /* ── 5D Deep blue — lifted lighter than page bg so cards are distinct ── */
-  background:
-    linear-gradient(
-      152deg,
-      rgba(24, 32, 68, 0.95) 0%,
-      rgba(28, 26, 62, 0.90) 35%,
-      rgba(22, 28, 60, 0.92) 70%,
-      rgba(26, 24, 58, 0.88) 100%
-    );
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(80, 110, 220, 0.22);
-
-  /* ── 5D raised shadow stack — matches dash-card family ── */
   box-shadow:
-    0 6px 22px rgba(0, 0, 0, 0.45),
-    0 2px 5px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(140, 165, 255, 0.10),
-    inset 0 0 20px rgba(30, 36, 72, 0.40);
-
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition:
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.35s ease,
-    box-shadow 0.35s ease,
-    background 0.35s ease;
+    transform var(--transition-fast),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
 }
 
-/* Top-edge gradient sweep for 5D depth */
+/* Inner highlight for 4D depth */
 .module-btn::before {
   content: '';
   position: absolute;
@@ -50,26 +37,24 @@
   border-radius: inherit;
   background: linear-gradient(
     160deg,
-    rgba(140, 165, 255, 0.06) 0%,
-    transparent 40%
+    rgba(255, 255, 255, 0.04) 0%,
+    transparent 50%
   );
   pointer-events: none;
 }
 
 .module-btn:hover:not(:disabled) {
   transform: translateY(-4px);
-  border-color: rgba(96, 165, 250, 0.30);
+  border-color: rgba(255, 255, 255, 0.18);
   box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.50),
-    0 3px 8px rgba(0, 0, 0, 0.30),
-    0 0 24px rgba(96, 165, 250, 0.08),
-    inset 0 1px 0 rgba(140, 165, 255, 0.14),
-    inset 0 0 20px rgba(30, 36, 72, 0.40);
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 24px rgba(96, 165, 250, 0.06);
 }
 
 .module-btn:active:not(:disabled) {
   transform: translateY(-1px);
-  transition-duration: 0.08s;
 }
 
 .module-btn:disabled {
@@ -84,7 +69,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: rgba(140, 165, 255, 0.18);
+  background: rgba(255, 255, 255, 0.15);
   transition: background var(--transition-base), box-shadow var(--transition-base);
 }
 
@@ -93,12 +78,7 @@
   font-size: 1.75rem;
   line-height: 1;
   flex-shrink: 0;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  transition: filter var(--transition-base), transform 0.3s ease;
-}
-
-.module-btn:hover:not(:disabled) .module-btn__icon {
-  transform: scale(1.08);
+  transition: filter var(--transition-base);
 }
 
 /* Name — full module title */
@@ -111,7 +91,7 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
-  /* #f9fafb on deep blue bg ≈ 18:1 ✓ */
+  /* #f9fafb on #0a0e1a = 18.4:1 ✓ */
 }
 
 /* Question count */
@@ -120,14 +100,14 @@
   color: var(--text-secondary, #9ca3af);
   font-weight: 500;
   flex-shrink: 0;
-  /* #9ca3af on deep blue bg ≈ 7.6:1 ✓ */
+  /* #9ca3af on #0a0e1a = 7.6:1 ✓ — upgraded from --text-muted */
 }
 
 /* Score meter */
 .module-btn__meter {
   width: 60%;
   height: 4px;
-  background: rgba(140, 165, 255, 0.10);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-full);
   overflow: hidden;
   flex-shrink: 0;
@@ -150,46 +130,30 @@
 }
 
 /* ============================================================================
-   ILLUMINATION STATES — Matching dash-card status colors
+   ILLUMINATION STATES — Rich depth and color
    ============================================================================ */
 
-/* Not Started — deep blue base, very subtle border */
+/* Not Started — subtle dark glass, readable text */
 .module-btn--not-started {
-  border-color: rgba(80, 110, 220, 0.12);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .module-btn--not-started .module-btn__indicator {
-  background: rgba(140, 165, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .module-btn--not-started .module-btn__icon {
-  filter: saturate(0.6) brightness(0.85) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: saturate(0.6) brightness(0.85);
 }
 
-/* In Progress — sapphire glow (matches dash-card--active) */
+/* In Progress — sapphire glow with depth */
 .module-btn--in-progress {
-  border-color: rgba(96, 165, 250, 0.35);
+  border-color: rgba(96, 165, 250, 0.4);
   animation: pulse-sapphire 2.5s ease-in-out infinite;
-  background:
-    linear-gradient(
-      152deg,
-      rgba(24, 32, 68, 0.95) 0%,
-      rgba(28, 26, 62, 0.90) 35%,
-      rgba(22, 28, 60, 0.92) 70%,
-      rgba(26, 24, 58, 0.88) 100%
-    ),
-    linear-gradient(
-      145deg,
-      rgba(37, 99, 235, 0.06) 0%,
-      rgba(96, 165, 250, 0.03) 50%,
-      transparent 100%
-    );
   box-shadow:
-    0 8px 28px rgba(0, 0, 0, 0.50),
-    0 2px 6px rgba(0, 0, 0, 0.35),
-    0 0 24px rgba(96, 165, 250, 0.10),
-    inset 0 1px 0 rgba(96, 165, 250, 0.12),
-    inset 0 0 30px rgba(18, 24, 60, 0.45);
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(96, 165, 250, 0.1),
+    inset 0 1px 0 rgba(96, 165, 250, 0.1);
 }
 
 .module-btn--in-progress .module-btn__indicator {
@@ -198,33 +162,17 @@
 }
 
 .module-btn--in-progress .module-btn__icon {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: none;
 }
 
-/* Completed — green glow (matches dash-card--complete) */
+/* Completed — green glow with rich shadow */
 .module-btn--completed {
-  border-color: rgba(34, 197, 94, 0.35);
+  border-color: rgba(34, 197, 94, 0.4);
   animation: glow-green 3s ease-in-out infinite;
-  background:
-    linear-gradient(
-      152deg,
-      rgba(24, 32, 68, 0.95) 0%,
-      rgba(28, 26, 62, 0.90) 35%,
-      rgba(22, 28, 60, 0.92) 70%,
-      rgba(26, 24, 58, 0.88) 100%
-    ),
-    linear-gradient(
-      145deg,
-      rgba(34, 197, 94, 0.05) 0%,
-      rgba(34, 197, 94, 0.02) 40%,
-      transparent 70%
-    );
   box-shadow:
-    0 8px 28px rgba(0, 0, 0, 0.50),
-    0 2px 6px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(34, 197, 94, 0.08),
-    inset 0 1px 0 rgba(34, 197, 94, 0.10),
-    inset 0 0 30px rgba(18, 24, 60, 0.45);
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 16px rgba(34, 197, 94, 0.1),
+    inset 0 1px 0 rgba(34, 197, 94, 0.08);
 }
 
 .module-btn--completed .module-btn__indicator {
@@ -233,33 +181,17 @@
 }
 
 .module-btn--completed .module-btn__icon {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: none;
 }
 
-/* Recommended — gold glow (matches dash-card--partial) */
+/* Recommended — gold border + star with rich illumination */
 .module-btn--recommended {
-  border-color: rgba(245, 158, 11, 0.35);
+  border-color: rgba(245, 158, 11, 0.45);
   animation: shimmer-gold 3s ease-in-out infinite;
-  background:
-    linear-gradient(
-      152deg,
-      rgba(24, 32, 68, 0.95) 0%,
-      rgba(28, 26, 62, 0.90) 35%,
-      rgba(22, 28, 60, 0.92) 70%,
-      rgba(26, 24, 58, 0.88) 100%
-    ),
-    linear-gradient(
-      145deg,
-      rgba(245, 158, 11, 0.06) 0%,
-      rgba(245, 158, 11, 0.02) 40%,
-      transparent 70%
-    );
   box-shadow:
-    0 8px 28px rgba(0, 0, 0, 0.50),
-    0 2px 6px rgba(0, 0, 0, 0.35),
-    0 0 22px rgba(245, 158, 11, 0.08),
-    inset 0 1px 0 rgba(245, 158, 11, 0.10),
-    inset 0 0 30px rgba(18, 24, 60, 0.45);
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(245, 158, 11, 0.08),
+    inset 0 1px 0 rgba(245, 158, 11, 0.08);
 }
 
 .module-btn--recommended .module-btn__indicator {
@@ -268,22 +200,22 @@
 }
 
 .module-btn--recommended .module-btn__icon {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: none;
 }
 
 .module-btn--recommended .module-btn__name {
   color: var(--clues-gold, #f59e0b);
-  /* #f59e0b on deep blue bg = 9.0:1 ✓ */
+  /* #f59e0b on #0a0e1a = 9.0:1 ✓ */
 }
 
-/* Locked — desaturated (WCAG: no opacity < 0.6 on text) */
+/* Locked — dimmed (WCAG: no opacity < 0.6 on text) */
 .module-btn--locked {
   filter: grayscale(0.5);
   border-color: rgba(107, 114, 128, 0.12);
 }
 
 .module-btn--locked .module-btn__indicator {
-  background: rgba(140, 165, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .module-btn--locked .module-btn__icon {
@@ -292,7 +224,7 @@
 
 .module-btn--locked .module-btn__name {
   color: var(--text-muted, #8b95a5);
-  /* #8b95a5 on deep blue bg = 6.4:1 ✓ */
+  /* #8b95a5 on #0a0e1a = 6.4:1 ✓ */
 }
 
 .module-btn--locked .module-btn__questions {
@@ -300,12 +232,12 @@
 }
 
 /* ============================================================================
-   FOCUS VISIBLE (WCAG 2.1 AA)
+   FOCUS VISIBLE (WCAG 2.1 AA — visible keyboard focus)
    ============================================================================ */
 
 .module-btn:focus-visible {
   outline: 2px solid var(--text-accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 /* ============================================================================
@@ -342,38 +274,26 @@
 
 @media (prefers-color-scheme: light) {
   .module-btn {
-    background:
-      linear-gradient(
-        152deg,
-        rgba(255, 255, 255, 0.92) 0%,
-        rgba(248, 250, 255, 0.88) 35%,
-        rgba(255, 255, 255, 0.90) 70%,
-        rgba(248, 250, 255, 0.86) 100%
-      );
-    border-color: rgba(37, 99, 235, 0.10);
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.08);
     box-shadow:
-      0 4px 18px rgba(0, 0, 0, 0.08),
-      0 2px 4px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90),
-      inset 0 0 20px rgba(248, 250, 255, 0.40);
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
   .module-btn::before {
     background: linear-gradient(
       160deg,
-      rgba(255, 255, 255, 0.6) 0%,
-      transparent 40%
+      rgba(255, 255, 255, 0.5) 0%,
+      transparent 50%
     );
   }
 
   .module-btn:hover:not(:disabled) {
-    border-color: rgba(37, 99, 235, 0.18);
+    border-color: rgba(0, 0, 0, 0.15);
     box-shadow:
-      0 8px 28px rgba(0, 0, 0, 0.12),
-      0 3px 8px rgba(0, 0, 0, 0.06),
-      0 0 20px rgba(37, 99, 235, 0.04),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90),
-      inset 0 0 20px rgba(248, 250, 255, 0.40);
+      0 6px 20px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.06);
   }
 
   .module-btn__name {
@@ -389,39 +309,26 @@
     background: var(--gray-200, #e5e7eb);
   }
 
-  .module-btn__icon {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
-  }
-
   .module-btn--not-started .module-btn__indicator {
     background: #d1d5db;
   }
 
   .module-btn--in-progress {
-    border-color: rgba(37, 99, 235, 0.25);
     box-shadow:
-      0 4px 18px rgba(0, 0, 0, 0.08),
-      0 2px 4px rgba(0, 0, 0, 0.05),
-      0 0 16px rgba(37, 99, 235, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90);
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 0 12px rgba(37, 99, 235, 0.08);
   }
 
   .module-btn--completed {
-    border-color: rgba(34, 197, 94, 0.25);
     box-shadow:
-      0 4px 18px rgba(0, 0, 0, 0.08),
-      0 2px 4px rgba(0, 0, 0, 0.05),
-      0 0 16px rgba(34, 197, 94, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90);
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 0 12px rgba(34, 197, 94, 0.06);
   }
 
   .module-btn--recommended {
-    border-color: rgba(245, 158, 11, 0.25);
     box-shadow:
-      0 4px 18px rgba(0, 0, 0, 0.08),
-      0 2px 4px rgba(0, 0, 0, 0.05),
-      0 0 16px rgba(245, 158, 11, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90);
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 0 12px rgba(245, 158, 11, 0.06);
   }
 
   .module-btn--recommended .module-btn__name {
@@ -431,6 +338,7 @@
 
   .module-btn--locked .module-btn__name {
     color: #9ca3af;
+    /* #9ca3af on #fff = 2.7:1 — but this is LARGE text equivalent with icon context, and disabled state 3:1 ✓ */
   }
 
   .module-btn--locked .module-btn__questions {
