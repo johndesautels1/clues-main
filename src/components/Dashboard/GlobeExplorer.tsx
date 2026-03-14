@@ -11,7 +11,7 @@
  *  - Scroll wheel: free zoom all the way down to street-level distance
  */
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useEffect, memo } from 'react';
 import Globe from 'react-globe.gl';
 import * as THREE from 'three';
 import { MapOverlay } from './MapOverlay';
@@ -74,7 +74,7 @@ interface Props {
   globeSelection: { region: string; lat: number; lng: number; zoomLevel: number } | null;
 }
 
-export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Props) {
+export const GlobeExplorer = memo(function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Props) {
   const globeRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isZooming, setIsZooming] = useState(false);
@@ -279,6 +279,7 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
           globeImageUrl="/textures/earth-8k.jpg"
           bumpImageUrl="/textures/earth-topology-4k.png"
           backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+          backgroundColor="#0a0e1a"
           atmosphereColor="#2563eb"
           atmosphereAltitude={0.2}
           onGlobeClick={handleGlobeClick}
@@ -381,4 +382,4 @@ export function GlobeExplorer({ onRegionSelected, onReset, globeSelection }: Pro
       )}
     </div>
   );
-}
+});

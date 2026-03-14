@@ -78,15 +78,15 @@ export function Dashboard() {
     });
   }, [completedModules, isRecommended, lsRevision]);
 
-  // Globe region selected
-  const handleRegionSelected = (region: string, lat: number, lng: number, zoomLevel: number) => {
+  // Globe region selected — memoized so GlobeExplorer (React.memo) doesn't re-render
+  const handleRegionSelected = useCallback((region: string, lat: number, lng: number, zoomLevel: number) => {
     dispatch({ type: 'SET_GLOBE', payload: { region, lat, lng, zoomLevel } });
-  };
+  }, [dispatch]);
 
-  // Reset globe
-  const handleGlobeReset = () => {
+  // Reset globe — memoized for same reason
+  const handleGlobeReset = useCallback(() => {
     dispatch({ type: 'CLEAR_GLOBE' });
-  };
+  }, [dispatch]);
 
   // Paragraphical click
   const handleParagraphicalClick = () => {
