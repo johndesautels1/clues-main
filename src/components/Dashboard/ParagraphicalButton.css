@@ -1,10 +1,12 @@
 /* Paragraphical Button — Layout & typography (base card from DashboardCard.css) */
 
 .paragraphical {
-  width: 100%;
-  padding: 36px 28px;
   text-align: center;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .paragraphical:disabled {
@@ -110,10 +112,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .paragraphical {
-    padding: 28px 22px;
-  }
-
   .paragraphical__title {
     font-size: var(--text-2xl, 24px);
   }
@@ -124,10 +122,6 @@
 }
 
 @media (max-width: 480px) {
-  .paragraphical {
-    padding: 22px 16px;
-  }
-
   .paragraphical__title {
     font-size: var(--text-xl, 20px);
   }

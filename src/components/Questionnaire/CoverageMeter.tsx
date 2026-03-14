@@ -154,7 +154,6 @@ function FullMeter() {
       aria-label="Coverage Meter"
       className={`dash-card ${cardStatus}`}
       style={{
-        padding: '24px 28px',
         fontFamily: "'Outfit',sans-serif",
       }}
     >

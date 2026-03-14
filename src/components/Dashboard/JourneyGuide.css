@@ -3,12 +3,17 @@
 
 /* ─── Bar Header (always visible) ────────────────────── */
 
+/* dash-card provides 28px padding, so header needs none of its own outer padding */
+.journey-bar.dash-card {
+  padding: 0;
+}
+
 .journey-bar__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 22px 28px;
+  padding: 28px;
   cursor: pointer;
   background: transparent;
   border: none;
@@ -99,7 +104,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 0 28px 24px;
+  padding: 0 28px 28px;
   position: relative;
   z-index: 1;
 }
@@ -232,11 +237,11 @@
 
 @media (max-width: 768px) {
   .journey-bar__header {
-    padding: 18px 20px;
+    padding: 22px;
   }
 
   .journey-bar__steps {
-    padding: 0 20px 20px;
+    padding: 0 22px 22px;
   }
 
   .journey-step {
@@ -264,7 +269,7 @@
 
 @media (max-width: 480px) {
   .journey-bar__header {
-    padding: 16px 14px;
+    padding: 18px;
     flex-wrap: wrap;
     gap: 8px;
   }
@@ -274,7 +279,7 @@
   }
 
   .journey-bar__steps {
-    padding: 0 14px 16px;
+    padding: 0 18px 18px;
   }
 }
 

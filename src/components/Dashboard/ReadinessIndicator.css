@@ -2,10 +2,7 @@
 /* WCAG 2.1 AA: all text >= 11px, contrast verified against #0a0e1a + #ffffff */
 
 /* ReadinessIndicator — Layout (base card from DashboardCard.css) */
-
-.readiness {
-  padding: 28px 28px 24px;
-}
+/* padding comes from .dash-card (28px) */
 
 /* ─── Header ──────────────────────────────────────────── */
 
