@@ -59,7 +59,7 @@ function CompactMeter() {
   return (
     <div
       role="status"
-      aria-label={`Coverage: ${overallPercentage}%, MOE: ${Math.round(moe * 100)}%`}
+      aria-label={`Coverage: ${overallPercentage}% complete, confidence margin: ±${Math.round(moe * 100)}%`}
       style={{
         display: 'flex', alignItems: 'center', gap: 16,
         padding: '10px 20px',
@@ -102,7 +102,7 @@ function CompactMeter() {
           fontFamily: "'Outfit',sans-serif", fontSize: 11,
           color: C.textMuted, letterSpacing: '0.03em',
         }}>
-          {coveredPct}% dimensions covered · {coverage.totalDataPoints} data points
+          {coveredPct}% of categories analyzed · {coverage.totalDataPoints} data points gathered
         </span>
       </div>
 
@@ -182,13 +182,13 @@ function FullMeter() {
             fontSize: 16, fontWeight: 700, color: C.textPrimary,
             margin: 0, letterSpacing: '-0.01em',
           }}>
-            {isReportReady ? 'Report Ready — All Dimensions Covered' : 'Coverage Meter'}
+            {isReportReady ? 'Report Ready — Full Coverage Achieved' : 'Data Coverage'}
           </h3>
           <p style={{
             fontSize: 13, color: C.textSecondary, margin: '4px 0 0',
             letterSpacing: '0.01em',
           }}>
-            {overallPercentage}% complete · MOE {Math.round(moe * 100)}% · {coverage.totalDataPoints} data points
+            {overallPercentage}% complete · Confidence margin ±{Math.round(moe * 100)}% · {coverage.totalDataPoints} data points
           </p>
         </div>
 
@@ -238,7 +238,7 @@ function FullMeter() {
               color: 'var(--score-red, #ef4444)', background: 'rgba(239,68,68,0.08)',
               borderRadius: 6, padding: '3px 8px',
             }}>
-              {MODULES_MAP[gap.moduleId]?.shortName || gap.moduleName}: critical gap (~{gap.estimatedQuestionsToResolve}q)
+              {MODULES_MAP[gap.moduleId]?.shortName || gap.moduleName}: needs attention ({gap.estimatedQuestionsToResolve} questions)
             </span>
           ))}
         </div>
@@ -251,7 +251,7 @@ function FullMeter() {
               color: 'var(--clues-gold, #f59e0b)', background: 'rgba(245,158,11,0.08)',
               borderRadius: 6, padding: '3px 8px',
             }}>
-              {MODULES_MAP[gap.moduleId]?.shortName || gap.moduleName}: needs data (~{gap.estimatedQuestionsToResolve}q)
+              {MODULES_MAP[gap.moduleId]?.shortName || gap.moduleName}: more data helpful ({gap.estimatedQuestionsToResolve} questions)
             </span>
           ))}
         </div>
