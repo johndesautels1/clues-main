@@ -247,7 +247,7 @@ export function Dashboard() {
               </button>
             )}
             <span className="dashboard__test-persona-label">
-              Loads Marcus &amp; Elena (30 paragraphs, 200 answers, 12 modules, Gemini extraction)
+              Loads Marcus &amp; Elena (30 paragraphs, all 200 main module Qs, all 23 modules x 100 Qs, Gemini extraction)
             </span>
           </div>
         </section>
