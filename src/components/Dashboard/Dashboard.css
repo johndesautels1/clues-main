@@ -1,4 +1,4 @@
-/* Dashboard Layout */
+/* Dashboard Layout — Premium Corporate Design */
 
 .dashboard {
   min-height: 100vh;
@@ -25,21 +25,45 @@
   padding: var(--space-4) 0;
 }
 
+/* ─── Section Titles — Corporate Gradient Style ───────── */
+
 .dashboard__section-title {
   font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 800;
+  letter-spacing: -0.03em;
   margin-bottom: var(--space-2);
-  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .dashboard__section-subtitle {
   font-size: var(--text-base);
   color: var(--text-secondary);
   margin-bottom: var(--space-6);
+  font-weight: 400;
+  line-height: 1.6;
 }
 
-/* Post-zoom prompt text */
+/* ─── Section Dividers ────────────────────────────────── */
+
+.dashboard__divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border-glass) 20%,
+    var(--border-glass-hover) 50%,
+    var(--border-glass) 80%,
+    transparent 100%
+  );
+  margin: var(--space-2) 0;
+}
+
+/* ─── Post-zoom prompt text ───────────────────────────── */
+
 .dashboard__zoom-prompt {
   text-align: center;
   font-size: var(--text-lg);
@@ -55,7 +79,8 @@
   font-size: var(--text-xl);
 }
 
-/* Loading state — session hydration */
+/* ─── Loading state ───────────────────────────────────── */
+
 .dashboard__loading {
   display: flex;
   flex-direction: column;
@@ -81,7 +106,8 @@
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* ─── Responsive ──────────────────────────────────────── */
+
 @media (max-width: 768px) {
   .dashboard__content {
     padding-top: var(--space-6);
@@ -97,6 +123,28 @@
   .dashboard__content {
     padding-top: var(--space-4);
     gap: var(--space-6);
+  }
+}
+
+/* ─── Light Mode ──────────────────────────────────────── */
+
+@media (prefers-color-scheme: light) {
+  .dashboard__section-title {
+    background: linear-gradient(135deg, #111827, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dashboard__divider {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.1) 20%,
+      rgba(0, 0, 0, 0.15) 50%,
+      rgba(0, 0, 0, 0.1) 80%,
+      transparent 100%
+    );
   }
 }
 

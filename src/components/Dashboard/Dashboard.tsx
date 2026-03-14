@@ -193,6 +193,8 @@ export function Dashboard() {
           />
         </section>
 
+        <div className="dashboard__divider" role="separator" />
+
         {/* Main Module Expander */}
         <section
           className="dashboard__section"
@@ -251,6 +253,8 @@ export function Dashboard() {
             </span>
           </div>
         </section>
+
+        <div className="dashboard__divider" role="separator" />
 
         {/* 23 Module Grid */}
         <section
