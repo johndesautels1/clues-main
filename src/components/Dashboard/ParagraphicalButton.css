@@ -3,7 +3,6 @@
 .paragraphical {
   position: relative;
   width: 100%;
-  max-width: 640px;
   padding: var(--space-10) var(--space-8);
   border-radius: var(--radius-2xl);
   overflow: hidden;

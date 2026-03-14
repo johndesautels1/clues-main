@@ -193,7 +193,7 @@ export function Dashboard() {
 
         {/* Paragraphical Button */}
         <section
-          className="dashboard__section dashboard__section--hero"
+          className="dashboard__section"
           style={{ animationDelay: '250ms' }}
         >
           <ParagraphicalButton

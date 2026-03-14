@@ -78,7 +78,7 @@ export function JourneyGuide() {
   const currentStep = steps.find(s => s.status === 'current');
 
   return (
-    <div className="journey-guide glass" role="navigation" aria-label="Your CLUES journey progress">
+    <div className="journey-guide" role="navigation" aria-label="Your CLUES journey progress">
       <div className="journey-guide__header">
         <h3 className="journey-guide__title">Your Journey</h3>
         {currentStep && (
