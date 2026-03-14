@@ -232,14 +232,6 @@ export function Dashboard() {
           />
         </section>
 
-        {/* Coverage Meter */}
-        <section
-          className="dashboard__section"
-          style={{ animationDelay: '400ms' }}
-        >
-          <CoverageMeter variant="full" />
-        </section>
-
         {/* Readiness Indicator (overall report readiness) */}
         <section
           className="dashboard__section"
@@ -260,6 +252,14 @@ export function Dashboard() {
             Complete modules to progressively narrow your ideal destinations
           </p>
           <ModuleGrid modules={enrichedModules} />
+        </section>
+
+        {/* Data Coverage — right below the modules */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '600ms' }}
+        >
+          <CoverageMeter variant="full" />
         </section>
 
         {/* Inject Test Persona — visible until production launch */}

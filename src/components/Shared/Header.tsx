@@ -81,7 +81,7 @@ export function Header() {
 
           {/* Statement tagline — centered */}
           <div className="header__statement">
-            The World&#39;s First AI-Powered Predictive Relocation Intelligence Platform
+            The World&#39;s Most Advanced AI-Powered Predictive Relocation Intelligence Platform
           </div>
 
           {/* Right side: notification badge + admin + auth */}

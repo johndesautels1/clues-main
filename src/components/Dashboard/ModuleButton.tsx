@@ -31,7 +31,7 @@ export function ModuleButton({ module }: Props) {
 
   return (
     <button
-      className={`module-btn glass ${statusClass}`}
+      className={`module-btn ${statusClass}`}
       onClick={handleClick}
       disabled={!isInteractive}
       aria-label={`${module.name} - ${status.replace('_', ' ')}`}
