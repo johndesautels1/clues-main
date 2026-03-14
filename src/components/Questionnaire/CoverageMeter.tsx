@@ -17,6 +17,7 @@ import { useCoverageState } from '../../hooks/useCoverageState';
 import { MODULES_MAP } from '../../data/modules';
 import type { DimensionCoverage, CoverageGap } from '../../lib/coverageTracker';
 import { C } from './questionnaireData';
+import '../Dashboard/DashboardCard.css';
 
 // H8 fix: Tier colors use CSS custom properties instead of hardcoded hex.
 // Bar fills are decorative (not text), so they don't need 4.5:1 contrast,
@@ -140,14 +141,20 @@ function FullMeter() {
   // Sort dimensions by signal strength (weakest first) for the bar chart
   const sortedDimensions = [...coverage.dimensions].sort((a, b) => a.signalStrength - b.signalStrength);
 
+  // Determine illumination status
+  const cardStatus = isReportReady
+    ? 'dash-card--completed'
+    : overallPercentage > 0
+      ? 'dash-card--in-progress'
+      : 'dash-card--not-started';
+
   return (
     <div
       role="region"
       aria-label="Coverage Meter"
+      className={`dash-card ${cardStatus}`}
       style={{
-        background: 'var(--bg-glass)', backdropFilter: 'blur(12px)',
-        borderRadius: 14, border: '1px solid rgba(96,165,250,0.10)',
-        padding: '20px 24px',
+        padding: '24px 28px',
         fontFamily: "'Outfit',sans-serif",
       }}
     >

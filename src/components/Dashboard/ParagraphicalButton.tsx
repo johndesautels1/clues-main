@@ -1,11 +1,12 @@
 /**
- * Paragraphical Button
- * Hero-level CTA that triggers the biographical essay flow.
- * Large, centered, gradient blue/orange with glassmorphic treatment.
+ * Paragraphical Button — dash-card treatment.
+ * Hero CTA that triggers the biographical essay flow.
+ * Uses unified dash-card 4D/5D base with status illumination.
  */
 
 import { useNavigate } from 'react-router-dom';
 import type { ModuleStatus } from '../../data/modules';
+import './DashboardCard.css';
 import './ParagraphicalButton.css';
 
 interface Props {
@@ -22,17 +23,21 @@ export function ParagraphicalButton({ status, onClick }: Props) {
       navigate('/paragraphical');
     }
   };
-  const statusClass = `paragraphical--${status.replace('_', '-')}`;
+
+  // Map module status to dash-card illumination
+  const cardStatus = status === 'completed'
+    ? 'dash-card--completed'
+    : status === 'in_progress'
+      ? 'dash-card--in-progress'
+      : 'dash-card--not-started';
 
   return (
     <button
-      className={`paragraphical glass-heavy ${statusClass}`}
+      className={`dash-card paragraphical ${cardStatus}`}
       onClick={handleClick}
       aria-label="Start your biographical essay - Tell us your story"
+      disabled={status === 'locked'}
     >
-      {/* Background gradient overlay */}
-      <div className="paragraphical__gradient" />
-
       {/* Content */}
       <div className="paragraphical__content">
         <div className="paragraphical__icon">

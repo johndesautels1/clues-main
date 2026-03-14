@@ -17,6 +17,7 @@
 
 import { useAggregatedProfile } from '../../hooks/useAggregatedProfile';
 import { MODULES } from '../../data/modules';
+import './DashboardCard.css';
 import './ReadinessIndicator.css';
 
 // CSS custom properties auto-switch between dark and light mode via globals.css
@@ -42,7 +43,7 @@ export function ReadinessIndicator() {
   const topSteps = quality.nextSteps.slice(0, 3);
 
   return (
-    <div className="readiness" role="status" aria-label={`Report readiness: ${readiness}% — ${readinessLabel}`}>
+    <div className={`dash-card readiness ${isReady ? 'dash-card--completed' : readiness > 0 ? 'dash-card--in-progress' : 'dash-card--not-started'}`} role="status" aria-label={`Report readiness: ${readiness}% — ${readinessLabel}`}>
       {/* Header row */}
       <div className="readiness__header">
         <div className="readiness__title-group">

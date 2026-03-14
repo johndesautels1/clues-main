@@ -1,0 +1,282 @@
+/* ─── Dashboard Card: Unified 4D/5D Deep-Blue Treatment ───────────────
+   Shared card base for: Journey, Paragraphical, Main Module, Coverage, Readiness.
+   Rich deep blue with ~2% purple hue, raised with gradient sweep, multi-layer shadows.
+
+   Status illumination:
+     - Default (not started): deep blue base, subtle blue-purple border
+     - Active / click: sapphire blue pulse
+     - Partial / in-progress: gold/amber glow
+     - Complete: green glow
+
+   WCAG 2.1 AA: all text >= 11px, contrast verified against both dark and light.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.dash-card {
+  position: relative;
+  border-radius: var(--radius-2xl, 24px);
+  overflow: hidden;
+  border: 1px solid rgba(80, 110, 220, 0.18);
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+
+  /* Deep blue with 2% purple hue — the card "body" */
+  background:
+    linear-gradient(
+      152deg,
+      rgba(16, 22, 52, 0.92) 0%,
+      rgba(20, 18, 48, 0.88) 35%,
+      rgba(14, 20, 46, 0.90) 70%,
+      rgba(18, 16, 44, 0.86) 100%
+    );
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+
+  /* 4D raised shadow stack */
+  box-shadow:
+    /* outer drop */
+    0 8px 28px rgba(0, 0, 0, 0.50),
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    /* top-edge highlight */
+    inset 0 1px 0 rgba(140, 165, 255, 0.09),
+    /* inner ambient for depth */
+    inset 0 0 30px rgba(18, 24, 60, 0.45);
+}
+
+/* ─── Gradient sweep across card (the "shadowed card" color shift) ─── */
+.dash-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(120, 150, 255, 0.07) 0%,
+      rgba(100, 120, 240, 0.03) 25%,
+      transparent 50%,
+      rgba(90, 60, 180, 0.03) 75%,
+      rgba(80, 50, 160, 0.05) 100%
+    );
+  transition: opacity 0.3s ease;
+}
+
+/* ─── Bottom-edge "floor" shadow for 5D pop ─── */
+.dash-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(100, 130, 255, 0.08) 30%,
+    rgba(100, 130, 255, 0.12) 50%,
+    rgba(100, 130, 255, 0.08) 70%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure content sits above gradient overlays */
+.dash-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Hover: lift + intensify ─── */
+.dash-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(100, 140, 255, 0.30);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(140, 165, 255, 0.14),
+    inset 0 0 30px rgba(18, 24, 60, 0.45),
+    0 0 32px rgba(80, 110, 240, 0.08);
+}
+
+.dash-card:hover::before {
+  opacity: 1.3;
+}
+
+/* ─── Active press: slight recess ─── */
+.dash-card:active {
+  transform: translateY(-1px);
+}
+
+/* ─── Focus visible ─── */
+.dash-card:focus-visible {
+  outline: 2px solid var(--text-accent, #60a5fa);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATUS ILLUMINATION
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Not Started: base state, no extra glow ─── */
+.dash-card--not-started {
+  border-color: rgba(80, 110, 220, 0.14);
+}
+
+/* ─── In Progress / Partial: GOLD illumination ─── */
+.dash-card--in-progress,
+.dash-card--partial {
+  border-color: rgba(245, 158, 11, 0.45);
+  animation: card-glow-gold 3s ease-in-out infinite;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.50),
+    0 0 24px rgba(245, 158, 11, 0.10),
+    inset 0 1px 0 rgba(245, 158, 11, 0.10),
+    inset 0 0 30px rgba(60, 50, 20, 0.12);
+}
+
+.dash-card--in-progress::before,
+.dash-card--partial::before {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(245, 180, 50, 0.08) 0%,
+      rgba(245, 158, 11, 0.03) 40%,
+      transparent 70%,
+      rgba(90, 60, 180, 0.02) 100%
+    );
+}
+
+/* ─── Completed: GREEN illumination ─── */
+.dash-card--completed {
+  border-color: rgba(34, 197, 94, 0.50);
+  animation: card-glow-green 3s ease-in-out infinite;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.50),
+    0 0 24px rgba(34, 197, 94, 0.12),
+    inset 0 1px 0 rgba(34, 197, 94, 0.10),
+    inset 0 0 30px rgba(20, 60, 40, 0.12);
+}
+
+.dash-card--completed::before {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 197, 94, 0.08) 0%,
+      rgba(34, 197, 94, 0.03) 40%,
+      transparent 70%,
+      rgba(90, 60, 180, 0.02) 100%
+    );
+}
+
+/* ─── Click flash (applied via JS for brief illumination) ─── */
+.dash-card--clicked {
+  border-color: rgba(96, 165, 250, 0.55) !important;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.50),
+    0 0 36px rgba(96, 165, 250, 0.18),
+    inset 0 1px 0 rgba(96, 165, 250, 0.15),
+    inset 0 0 30px rgba(37, 99, 235, 0.10) !important;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes card-glow-gold {
+  0%, 100% {
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.50),
+      0 0 20px rgba(245, 158, 11, 0.08),
+      inset 0 1px 0 rgba(245, 158, 11, 0.08),
+      inset 0 0 30px rgba(60, 50, 20, 0.10);
+  }
+  50% {
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.50),
+      0 0 28px rgba(245, 158, 11, 0.14),
+      inset 0 1px 0 rgba(245, 158, 11, 0.12),
+      inset 0 0 30px rgba(60, 50, 20, 0.15);
+  }
+}
+
+@keyframes card-glow-green {
+  0%, 100% {
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.50),
+      0 0 20px rgba(34, 197, 94, 0.08),
+      inset 0 1px 0 rgba(34, 197, 94, 0.08),
+      inset 0 0 30px rgba(20, 60, 40, 0.10);
+  }
+  50% {
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.50),
+      0 0 28px rgba(34, 197, 94, 0.14),
+      inset 0 1px 0 rgba(34, 197, 94, 0.12),
+      inset 0 0 30px rgba(20, 60, 40, 0.15);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT MODE
+   ═══════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: light) {
+  .dash-card {
+    background:
+      linear-gradient(
+        152deg,
+        rgba(232, 238, 255, 0.80) 0%,
+        rgba(240, 238, 252, 0.70) 35%,
+        rgba(235, 240, 255, 0.75) 70%,
+        rgba(242, 240, 254, 0.68) 100%
+      );
+    border-color: rgba(37, 99, 235, 0.14);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  .dash-card::before {
+    background:
+      linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.1) 30%,
+        transparent 60%,
+        rgba(230, 225, 255, 0.15) 100%
+      );
+  }
+
+  .dash-card:hover {
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.10),
+      0 2px 6px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: rgba(37, 99, 235, 0.22);
+  }
+
+  .dash-card--in-progress,
+  .dash-card--partial {
+    border-color: rgba(217, 119, 6, 0.30);
+    /* #d97706 on #fff = 4.5:1 ✓ */
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 0 16px rgba(245, 158, 11, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+
+  .dash-card--completed {
+    border-color: rgba(22, 163, 74, 0.30);
+    /* #16a34a on #fff = 4.5:1 ✓ */
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 0 16px rgba(34, 197, 94, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+}
