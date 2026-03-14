@@ -15,7 +15,9 @@
  * - role="status" for live readiness updates
  */
 
+import { useNavigate } from 'react-router-dom';
 import { useAggregatedProfile } from '../../hooks/useAggregatedProfile';
+import { useUser } from '../../context/UserContext';
 import { MODULES } from '../../data/modules';
 import './DashboardCard.css';
 import './ReadinessIndicator.css';
@@ -31,7 +33,10 @@ const C = {
 };
 
 export function ReadinessIndicator() {
+  const navigate = useNavigate();
+  const { session } = useUser();
   const { quality, readiness, readinessLabel, activeSourceCount, totalSignals, hasData } = useAggregatedProfile();
+  const hasExistingResults = !!session.smartScoreOutput;
 
   // Don't render if there's no data at all
   if (!hasData || !quality) return null;
@@ -112,11 +117,31 @@ export function ReadinessIndicator() {
         </div>
       )}
 
-      {/* Celebration state */}
+      {/* Celebration state + action button */}
       {isReady && (
-        <p className="readiness__celebration">
-          Your data is comprehensive enough to generate a full evaluation report.
-        </p>
+        <div className="readiness__celebration-block">
+          <p className="readiness__celebration">
+            Your data is comprehensive enough to generate a full evaluation report.
+          </p>
+          <button
+            className="readiness__action-btn"
+            onClick={() => navigate('/results')}
+            type="button"
+          >
+            {hasExistingResults ? 'View Results' : 'Generate Report'}
+          </button>
+        </div>
+      )}
+
+      {/* Quick link when results exist but readiness < 80% */}
+      {!isReady && hasExistingResults && (
+        <button
+          className="readiness__action-btn readiness__action-btn--secondary"
+          onClick={() => navigate('/results')}
+          type="button"
+        >
+          View Results
+        </button>
       )}
     </div>
   );

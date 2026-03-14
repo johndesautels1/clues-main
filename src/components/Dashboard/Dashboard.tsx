@@ -240,6 +240,22 @@ export function Dashboard() {
           <ReadinessIndicator />
         </section>
 
+        {/* Results CTA — visible when user has evaluation data or existing results */}
+        {session.smartScoreOutput && (
+          <section
+            className="dashboard__section"
+            style={{ animationDelay: '500ms' }}
+          >
+            <button
+              className="dashboard__results-cta"
+              onClick={() => navigate('/results')}
+              type="button"
+            >
+              View Your Evaluation Results
+            </button>
+          </section>
+        )}
+
         <div className="dashboard__divider" role="separator" />
 
         {/* 23 Module Grid */}

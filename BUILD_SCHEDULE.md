@@ -523,22 +523,35 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-14 — Session 18 (Dashboard Styling + Header Redesign)
+### Latest Update: 2026-03-14 — Session 19 (Blue Screen Fix + Results Navigation Wiring)
 
-**What was done this conversation (7 commits on `claude/review-clues-main-T1fSq`):**
+**What was done this conversation:**
 
-1. **Uniform dash-card sizing** (`DashboardCard.css`) — All 5 dashboard cards (Journey, Paragraphical, Main Module, Coverage, Readiness) now share `width: 100%`, `padding: 28px`, `min-height: 180px`, `box-sizing: border-box`. Removed conflicting padding from ParagraphicalButton, JourneyGuide, MainModuleExpander, ReadinessIndicator, CoverageMeter.
+1. **Blue screen on Inject Test Persona — FIXED (Session 18 critical bug):**
+   - Root cause: react-globe.gl default `backgroundColor` (#000011 dark blue) + `atmosphereColor` (#2563eb) flashed during massive re-render from `LOAD_SESSION` dispatch.
+   - Fix: Set `backgroundColor="#0a0e1a"` on Globe to match app body.
+   - Fix: Wrapped `GlobeExplorer` in `React.memo()` to prevent re-renders during inject cascade.
+   - Fix: Memoized `handleRegionSelected` / `handleGlobeReset` with `useCallback` so memo works.
+   - Fix: Added `ErrorBoundary` wrapping all Routes in `App.tsx` for crash recovery.
 
-2. **Header redesigned as two-row layout** (`Header.tsx`, `Header.css`) — Row 1: Brand left, statement center, actions right. Row 2: 5D toolbar buttons centered. Removed emoji icons from toolbar buttons (text-only). Buttons have sapphire gradient active state, hover lift, shimmer animation. No horizontal overflow.
+2. **Results page navigation wired up:**
+   - Header toolbar: "Results" and "Judges Report" buttons now navigate to `/results` route.
+   - ReadinessIndicator: Added "Generate Report" button (when readiness >= 80%) and "View Results" button (when results already exist). WCAG AA compliant with proper focus styles.
+   - Dashboard: Added "View Your Evaluation Results" CTA button (visible when `smartScoreOutput` exists on session).
 
-3. **Brand statement** — Tagline reads: "The World's Most Advanced AI-Powered Predictive Relocation Intelligence Platform" — uppercase, weight 700, sapphire-to-gold gradient text with shimmer animation.
+3. **Results pipeline verified as fully built:**
+   - `ResultsPage.tsx` (340 lines) — route wrapper with 4 states: loading, no-data, running, has-scores.
+   - `useEvaluationPipeline.ts` (209 lines) — full orchestration: Tavily → profile → metrics → cities → 5-LLM eval → judge → Smart Scores.
+   - `ResultsDashboard.tsx` (237 lines) — renders WinnerHero, CityComparisonGrid, CategoryBreakdown, EvidencePanel, JudgeVerdict, CourtOrder, CristianoVideoPlayer, ReportDownload.
+   - All 20 Results sub-components exist and are real implementations.
 
-4. **CoverageMeter moved** — Relocated from between MainModule/Readiness to directly below the Exploration Modules grid in `Dashboard.tsx`.
+**What's next:**
+- API edge functions for Gamma report generation (`/api/gamma-generate`, `/api/report-pdf`) — needed for PDF report download.
+- Supabase `reports` table schema verification.
+- Header toolbar remaining buttons (Compare, Visuals, Ask Olivia, Saved, About) — currently no-ops.
+- End-to-end test: Inject persona → navigate to /results → Run Evaluation → verify full pipeline.
 
-5. **ModuleButton.css reverted** — Attempted 5D deep-blue treatment on 23 module grid cards but it caused the screen to appear solid blue after test persona injection. Reverted to original 4D glassmorphic treatment with `glass` class.
-
-**CRITICAL BUG — NEXT SESSION MUST FIX:**
-- **When clicking "Inject Test Persona", the screen goes blank/solid blue.** The dashboard is fully visible before injection. After clicking the button, everything goes blue. This is NOT a ModuleButton.css issue (that was reverted). The problem is in the **persona injection process itself** — likely in the `LOAD_SESSION` dispatch cascade or the re-render triggered by `startTransition` in `handleInjectTestPersona` (`Dashboard.tsx:127-137`).
+### Previous: Session 18 (Dashboard Styling + Header Redesign)
 - Key files to investigate:
   - `src/components/Dashboard/Dashboard.tsx` lines 127-137 (injection handler)
   - `src/context/UserContext.tsx` lines 215-231 (`LOAD_SESSION` reducer)

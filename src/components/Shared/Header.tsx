@@ -58,6 +58,8 @@ export function Header() {
   const handleTabClick = (id: string) => {
     setActiveTab(id);
     const routeMap: Record<string, string> = {
+      results: '/results',
+      'judges-report': '/results',
       questions: '/admin/questions',
       paragraphical: '/paragraphical',
     };

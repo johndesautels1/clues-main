@@ -199,6 +199,41 @@
   line-height: 1.5;
 }
 
+/* ─── Results CTA button ─────────────────────────────── */
+
+.dashboard__results-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  border: none;
+  border-radius: var(--radius-full, 9999px);
+  background: linear-gradient(135deg, var(--clues-sapphire, #2563eb) 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  min-height: 48px;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.25);
+}
+
+.dashboard__results-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+}
+
+.dashboard__results-cta:focus-visible {
+  outline: 2px solid var(--text-accent, #60a5fa);
+  outline-offset: 2px;
+}
+
 @media (prefers-color-scheme: light) {
   .dashboard__test-persona {
     background: rgba(0, 0, 0, 0.02);
@@ -207,5 +242,9 @@
 
   .dashboard__test-persona-label {
     color: #6b7280;
+  }
+
+  .dashboard__results-cta {
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.15);
   }
 }
