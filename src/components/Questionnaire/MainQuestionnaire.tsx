@@ -17,6 +17,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useUser } from '../../context/UserContext';
 import { useQuestionnaireState } from '../../hooks/useQuestionnaireState';
+import { useCoverageState } from '../../hooks/useCoverageState';
+import { useMainModuleAdaptive } from '../../hooks/useMainModuleAdaptive';
 import { QUESTIONNAIRE_SECTIONS, getCleanQuestion, getSkippedQuestions, C } from './questionnaireData';
 import { QuestionRenderer } from './QuestionRenderer';
 import { ParticleField } from '../Discovery/ParticleField';
@@ -48,6 +50,11 @@ export function MainQuestionnaire() {
 
   // ─── Questionnaire State (answers, nav, persistence) ──────────
   const qs = useQuestionnaireState();
+
+  // ─── Adaptive / Bayesian Overlay ────────────────────────────────
+  const { coverage } = useCoverageState();
+  const skippedKeys = useMemo(() => getSkippedQuestions(qs.answers), [qs.answers]);
+  const adaptive = useMainModuleAdaptive(coverage, qs.answers, skippedKeys);
 
   // Jump to section from URL query param (e.g. /questionnaire?section=dnw)
   useEffect(() => {
@@ -447,6 +454,16 @@ export function MainQuestionnaire() {
   const qTotalInSection = qs.visibleQuestions.length;
   const cleanQuestion = getCleanQuestion(qs.currentQuestion.question);
 
+  // Build current question key for adaptive lookup
+  const currentSectionId = qs.currentSection.id;
+  const currentQuestionKey = currentSectionId === 'tradeoffs'
+    ? `tq${qs.currentQuestion.number}`
+    : currentSectionId === 'general'
+      ? `gq${qs.currentQuestion.number}`
+      : `q${qs.currentQuestion.number}`;
+  const currentPreFill = adaptive.getPreFillInfo(currentQuestionKey);
+  const currentEIG = adaptive.getQuestionEIG(currentQuestionKey);
+
   return (
     <div className="mq-universe" role="main">
       <ParticleField accent={accent} />
@@ -519,7 +536,8 @@ export function MainQuestionnaire() {
           const pct = sp.total > 0 ? Math.round((sp.answered / sp.total) * 100) : 0;
           const isActive = i === qs.nav.sectionIndex;
           const isComplete = sp.answered === sp.total && sp.total > 0;
-          const tabClass = `mq-section-tab${isActive ? ' active' : ''}${isComplete ? ' completed' : ''}`;
+          const isTopPriority = adaptive.isAvailable && adaptive.sectionPriorities.length > 0 && adaptive.sectionPriorities[0].sectionIndex === i && !isComplete;
+          const tabClass = `mq-section-tab${isActive ? ' active' : ''}${isComplete ? ' completed' : ''}${isTopPriority ? ' priority' : ''}`;
           return (
             <button
               key={s.id}
@@ -611,6 +629,9 @@ export function MainQuestionnaire() {
             {qs.skippedQuestions.size > 0 && (
               <span style={{ color: C.textMuted }}> &middot; {qs.skippedQuestions.size} skipped by smart logic</span>
             )}
+            {adaptive.isAvailable && adaptive.preFillCount > 0 && (
+              <span style={{ color: 'var(--text-accent, #60a5fa)' }}> &middot; {adaptive.preFillCount} informed by your story</span>
+            )}
           </p>
 
           {/* Question Card */}
@@ -619,8 +640,8 @@ export function MainQuestionnaire() {
 
             <div className="mq-q-divider" style={{ background: accent }} />
 
-            {/* Response Type Badge */}
-            <div style={{ marginBottom: 20 }}>
+            {/* Response Type + Adaptive Badges */}
+            <div style={{ marginBottom: 20, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{
                 fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
                 letterSpacing: '0.05em', padding: '3px 10px', borderRadius: 20,
@@ -628,6 +649,29 @@ export function MainQuestionnaire() {
               }}>
                 {qs.currentQuestion.type}
               </span>
+              {adaptive.isAvailable && currentEIG >= 0.5 && (
+                <span style={{
+                  fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
+                  letterSpacing: '0.05em', padding: '3px 10px', borderRadius: 20,
+                  background: 'rgba(34,197,94,0.08)', color: 'var(--score-green, #22c55e)',
+                  border: '1px solid rgba(34,197,94,0.2)',
+                }}>
+                  High Impact
+                </span>
+              )}
+              {currentPreFill && (
+                <span
+                  style={{
+                    fontFamily: "'Outfit',sans-serif", fontSize: 11, fontWeight: 600,
+                    letterSpacing: '0.05em', padding: '3px 10px', borderRadius: 20,
+                    background: 'rgba(96,165,250,0.08)', color: 'var(--text-accent, #60a5fa)',
+                    border: '1px solid rgba(96,165,250,0.2)',
+                  }}
+                  title={currentPreFill.reason}
+                >
+                  Informed by Paragraphs
+                </span>
+              )}
             </div>
 
             {/* The actual input control */}
