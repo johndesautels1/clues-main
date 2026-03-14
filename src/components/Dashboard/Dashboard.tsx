@@ -234,10 +234,24 @@ export function Dashboard() {
           <ReadinessIndicator />
         </section>
 
+        <div className="dashboard__divider" role="separator" />
+
+        {/* 23 Module Grid */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '550ms' }}
+        >
+          <h2 className="dashboard__section-title">Exploration Modules</h2>
+          <p className="dashboard__section-subtitle">
+            Complete modules to progressively narrow your ideal destinations
+          </p>
+          <ModuleGrid modules={enrichedModules} />
+        </section>
+
         {/* Inject Test Persona — visible until production launch */}
         <section
           className="dashboard__section"
-          style={{ animationDelay: '500ms' }}
+          style={{ animationDelay: '600ms' }}
         >
           <div className="dashboard__test-persona">
             {!testPersonaInjected ? (
@@ -261,20 +275,6 @@ export function Dashboard() {
               Loads Marcus &amp; Elena (30 paragraphs, all 200 main module Qs, all 23 modules x 100 Qs, Gemini extraction)
             </span>
           </div>
-        </section>
-
-        <div className="dashboard__divider" role="separator" />
-
-        {/* 23 Module Grid */}
-        <section
-          className="dashboard__section"
-          style={{ animationDelay: '550ms' }}
-        >
-          <h2 className="dashboard__section-title">Exploration Modules</h2>
-          <p className="dashboard__section-subtitle">
-            Complete modules to progressively narrow your ideal destinations
-          </p>
-          <ModuleGrid modules={enrichedModules} />
         </section>
       </main>
 
