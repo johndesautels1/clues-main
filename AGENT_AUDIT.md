@@ -30,59 +30,60 @@ A previous agent **falsely claimed** Conv 23-24 was complete. It is **100% unbui
 
 ---
 
-### 2. Test Persona is INCOMPLETE
+### 2. Test Persona — FIXED 2026-03-14
 
-The inject system (`src/data/testPersona.ts`) has gaps:
+The inject system (`src/data/testPersona.ts`) was rewritten to include ALL questions:
 
-| Data Source | Expected | Actual | Gap |
-|-------------|----------|--------|-----|
-| Paragraphs P1-P30 | 30 full paragraphs | 30 present | OK (but extraction is mocked, not real Gemini) |
-| Demographics | 34 questions | ~24 answers | ~10 questions missing |
-| DNW | 33 questions | 10 entries | 23 questions missing |
-| MH | 33 questions | 10 entries | 23 questions missing |
-| General | 50 questions | 16 entries | 34 questions missing |
-| Tradeoffs | 50 questions | 8 entries | 42 questions missing |
-| Mini Modules | 23 modules x 100 Qs | 12 modules x 50 Qs | 11 modules missing, each module only has 50/100 |
+| Data Source | Expected | Actual | Status |
+|-------------|----------|--------|--------|
+| Paragraphs P1-P30 | 30 full paragraphs | 30 present | ✅ (extraction is mocked, not real Gemini) |
+| Demographics | 34 questions | 34 answers | ✅ FIXED |
+| DNW | 33 questions | 33 entries | ✅ FIXED |
+| MH | 33 questions | 33 entries | ✅ FIXED |
+| General | 50 questions | 50 entries | ✅ FIXED |
+| Tradeoffs | 50 questions | 50 entries | ✅ FIXED |
+| Mini Modules | 23 modules x 100 Qs | 23 modules x 100 Qs | ✅ FIXED |
 
 **No pipeline results exist in the persona** — no `smartScoreOutput`, no `judgeReport`, no evaluation data.
 After injection, user must navigate to `/results` and click "Run Evaluation" (requires live API keys + costs real money).
 
 ---
 
-### 3. UI Design is INCONSISTENT
+### 3. UI Design — UNIFIED 2026-03-14
 
-Three different card designs on the Dashboard that don't match:
+Dashboard UI has been unified to premium corporate glassmorphic design:
 
-1. **ParagraphicalButton** — Premium glassmorphic hero card (`glass-heavy`, 40px blur, gradient overlay, gradient title text, animated glow)
-2. **MainModuleExpander** — Basic functional dropdown (`glass`, plain text, flat sub-section cards, no gradients or glow effects)
-3. **ModuleButton** (23 mini modules) — Rich illuminated cards (`glass`, status dots with glow, animated borders, score meters, recommendation badges)
-
-The Main Module section looks significantly less polished than the sections above and below it.
-
----
-
-### 4. No User Onboarding
-
-There is NO guided walkthrough for new users. Only:
-- Globe: "Zoom in to Your Dream Region" (one line)
-- Post-globe: "Now click on the Paragraphical below" (one line)
-- No explanation of the 3-stage journey
-- No explanation of how long it takes
-- No explanation of WHY each stage matters
-- No progress indicator showing overall journey stage
-- No tutorial or first-time-user experience
+1. **MainModuleExpander** — Upgraded to `glass-heavy` with gradient titles, progress micro-bars, hover glow effects
+2. **ReadinessIndicator** — Upgraded with glass-heavy container, gradient overlay, user-friendly labels
+3. **Section titles** — Gradient text (`background-clip: text`) with `font-weight: 800`
+4. **Section dividers** — Gradient fade-in/fade-out separators
+5. **Test persona section** — Glassmorphic with backdrop blur
+6. **CoverageMeter** — Developer jargon replaced with user-friendly language
+7. **JourneyGuide** — New onboarding stepper component with 4 contextual steps
 
 ---
 
-### 5. Bayesian/Adaptive Logic is ONLY in Mini Modules
+### 4. User Onboarding — ADDED 2026-03-14
 
-| Stage | Has Bayesian/Adaptive? | Reality |
-|-------|----------------------|---------|
-| Paragraphical (P1-P30) | NO | Strictly sequential, no skip, no reorder |
-| Main Module (200 Qs) | NO | Sequential with static skip rules only (no children -> skip child Qs) |
-| Mini Modules (23 x 100 Qs) | YES | Full CAT with EIG, MOE tracking, cross-module skip logic |
+`JourneyGuide` component added to Dashboard with 4 contextual steps:
+1. Choose Your Region (globe)
+2. Tell Your Story (paragraphical)
+3. Answer Key Questions (main module)
+4. Deep-Dive Modules (23 mini modules)
 
-Cross-stage data flow exists (Paragraphical -> relevance weights -> Mini Module recommendations) but the Paragraphical and Main Module themselves do not use adaptive question selection.
+Each step shows completed/current/upcoming status based on session state. Auto-hides when all milestones complete.
+
+---
+
+### 5. Bayesian/Adaptive Logic — EXTENDED 2026-03-14
+
+| Stage | Has Bayesian/Adaptive? | Status |
+|-------|----------------------|--------|
+| Paragraphical (P1-P30) | YES (priority overlay) | ✅ `useParagraphAdaptive` — EIG per paragraph, priority badges, suggested next |
+| Main Module (200 Qs) | YES (EIG overlay) | ✅ `useMainModuleAdaptive` — EIG per question, Paragraphical pre-fill detection, section priority |
+| Mini Modules (23 x 100 Qs) | YES (full CAT) | Already had full CAT with EIG, MOE tracking, cross-module skip logic |
+
+All three stages now have Bayesian intelligence. Paragraphical and Main Module use non-breaking overlays that preserve existing sequential navigation while showing priority hints.
 
 ---
 
@@ -110,12 +111,19 @@ Cross-stage data flow exists (Paragraphical -> relevance weights -> Mini Module 
 - **Build status**: `tsc --noEmit` passes with 0 errors
 - **Total commits**: 312
 
-## WORK IN PROGRESS (This Session)
+## COMPLETED THIS SESSION (2026-03-14)
 
-1. Writing this audit document (AGENT_AUDIT.md)
-2. Completing test persona with ALL questions
-3. Unifying Dashboard UI to high-end corporate design
-4. Adding onboarding instructions for every stage
-5. Adding Bayesian/adaptive logic to Paragraphical and Main Module
-6. Wiring Stripe integration (Conv 23-24)
-7. Cleaning up stale READMEs
+1. ✅ AGENT_AUDIT.md — This document
+2. ✅ Test persona — ALL questions across ALL sections and ALL 23 modules
+3. ✅ Dashboard UI — Unified premium corporate glassmorphic design
+4. ✅ JourneyGuide — 4-step contextual onboarding
+5. ✅ CoverageMeter — User-friendly language
+6. ✅ Bayesian/adaptive for Paragraphical — `useParagraphAdaptive` hook + UI badges
+7. ✅ Bayesian/adaptive for Main Module — `useMainModuleAdaptive` hook + UI badges
+
+## REMAINING WORK
+
+1. **Stripe integration (Conv 23-24)** — checkout, webhooks, pricing page, tier gating
+2. **Clean up stale docs** — CONV_*_AUDIT.md files reference old bugs (many fixed). URGENT_ARCHITECTURE_GAP.md marked ✅ but still present. Owner should review and decide which to archive.
+3. **Light Mode pass** — Verify all new components in light mode
+4. **UPDATE BUILD_SCHEDULE.md** — Required by CLAUDE.md before ending session

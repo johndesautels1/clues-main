@@ -523,7 +523,37 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-11 — Session 16 continued (Conv 21-22: Pipeline Wiring + Report Generation)
+### Latest Update: 2026-03-14 — Session 17 (UI Unification + Bayesian Extension + Onboarding)
+
+**What was done this conversation (10 commits on `claude/review-clues-main-T1fSq`):**
+
+1. **AGENT_AUDIT.md** — Comprehensive audit documenting: Stripe NOT built (previous agent lied), test persona incomplete, UI inconsistent, no onboarding, Bayesian only in mini modules. Rules for future agents.
+
+2. **Test persona rewrite** (`src/data/testPersona.ts`) — ALL 200 main module questions (Demographics 34, DNW 33, MH 33, Tradeoffs 50, General 50) + ALL 23 modules × 100 questions each. Correct data format matching actual questionnaire hooks.
+
+3. **Dashboard UI unification** — MainModuleExpander upgraded to `glass-heavy` with gradient titles and progress micro-bars. Section titles use gradient text. Dividers between sections. Test persona section glassmorphic.
+
+4. **ReadinessIndicator upgrade** — Glass-heavy container, gradient overlay, user-friendly stat labels ("data sources completed", "categories covered").
+
+5. **JourneyGuide onboarding** (`src/components/Dashboard/JourneyGuide.tsx` + `.css`) — 4-step contextual journey guide (Choose Region → Tell Story → Answer Questions → Deep-Dive Modules). Reads session state, shows completed/current/upcoming. Auto-hides on completion.
+
+6. **CoverageMeter text upgrade** — Replaced developer jargon (MOE, critical gap, ~12q) with user-friendly language.
+
+7. **Main Module Bayesian overlay** (`src/hooks/useMainModuleAdaptive.ts`) — Per-question EIG scores, Paragraphical pre-fill detection, section priority ranking. Wired into MainQuestionnaire.tsx with High Impact badges, Informed by Paragraphs badges, section priority indicators.
+
+8. **Paragraphical Bayesian overlay** (`src/hooks/useParagraphAdaptive.ts`) — Per-paragraph EIG based on coverage gaps and module relevance. Wired into ParagraphicalFlow.tsx with priority badges (★) in sidebar, adaptive hints above prompts, progress summary.
+
+9. **Full downstream verification** — `tsc --noEmit` passes with 0 errors across entire codebase. No circular dependencies. All imports clean.
+
+**What's next (in order):**
+1. Wire up Stripe integration (Conv 23-24) — checkout, webhooks, pricing page, tier gating
+2. Light mode verification pass for all new components
+3. Owner review of stale CONV_*_AUDIT.md files (may archive)
+4. Production hardening
+
+---
+
+### Previous Update: 2026-03-11 — Session 16 continued (Conv 21-22: Pipeline Wiring + Report Generation)
 
 **What was done this conversation (4 commits total for Session 16):**
 
