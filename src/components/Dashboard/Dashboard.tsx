@@ -19,6 +19,7 @@ import { useUser } from '../../context/UserContext';
 import { useRelevanceState } from '../../hooks/useRelevanceState';
 import { CoverageMeter } from '../Questionnaire/CoverageMeter';
 import { ReadinessIndicator } from './ReadinessIndicator';
+import { JourneyGuide } from './JourneyGuide';
 import { MODULES } from '../../data/modules';
 import type { ModuleDefinition, ModuleStatus } from '../../data/modules';
 import type { SubSection } from '../../types';
@@ -156,6 +157,14 @@ export function Dashboard() {
           style={{ animationDelay: '50ms' }}
         >
           <HeroHeading />
+        </section>
+
+        {/* Onboarding Journey Guide */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '100ms' }}
+        >
+          <JourneyGuide />
         </section>
 
         {/* Interactive 4D Globe */}
