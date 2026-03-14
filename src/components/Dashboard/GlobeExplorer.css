@@ -64,39 +64,32 @@
   margin-left: var(--space-1);
 }
 
-/* Zoom prompt overlay — before first click */
+/* Zoom prompt — below globe, centered */
 .globe-explorer__prompt {
-  position: absolute;
-  bottom: var(--space-6);
-  left: 50%;
-  transform: translateX(-50%);
   text-align: center;
-  padding: var(--space-4) var(--space-6);
-  background: rgba(10, 14, 26, 0.85);
-  backdrop-filter: blur(var(--blur-glass));
-  border: 1px solid var(--border-accent);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glow-sapphire);
+  padding: var(--space-3) var(--space-4);
   animation: fade-up 0.5s ease-out 0.8s both;
-  white-space: nowrap;
+  margin-top: var(--space-3);
 }
 
 .globe-explorer__prompt-icon {
-  font-size: 1.5rem;
-  margin-bottom: var(--space-2);
+  font-size: 1rem;
+  margin-bottom: var(--space-1);
 }
 
 .globe-explorer__prompt-text {
-  font-size: var(--text-md);
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.01em;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary, #9ca3af);
+  letter-spacing: 0.02em;
+  /* #9ca3af on #0a0e1a = 7.6:1 ✓ */
 }
 
 .globe-explorer__prompt-hint {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-muted, #8b95a5);
+  margin-top: 2px;
+  /* #8b95a5 on #0a0e1a = 6.4:1 ✓ */
 }
 
 /* Deeper-zoom hint — shown between clicks */

@@ -17,6 +17,7 @@
 
 import { useAggregatedProfile } from '../../hooks/useAggregatedProfile';
 import { MODULES } from '../../data/modules';
+import './DashboardCard.css';
 import './ReadinessIndicator.css';
 
 // CSS custom properties auto-switch between dark and light mode via globals.css
@@ -42,7 +43,7 @@ export function ReadinessIndicator() {
   const topSteps = quality.nextSteps.slice(0, 3);
 
   return (
-    <div className="readiness" role="status" aria-label={`Report readiness: ${readiness}% — ${readinessLabel}`}>
+    <div className={`dash-card readiness ${isReady ? 'dash-card--completed' : readiness > 0 ? 'dash-card--in-progress' : 'dash-card--not-started'}`} role="status" aria-label={`Report readiness: ${readiness}% — ${readinessLabel}`}>
       {/* Header row */}
       <div className="readiness__header">
         <div className="readiness__title-group">
@@ -71,24 +72,24 @@ export function ReadinessIndicator() {
         />
       </div>
 
-      {/* Stats row */}
+      {/* Stats row — user-friendly labels */}
       <div className="readiness__stats">
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{activeSourceCount}</span>
-          <span className="readiness__stat-label">/7 sources</span>
+          <span className="readiness__stat-label">/7 data sources completed</span>
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{quality.adequateModuleCount}</span>
-          <span className="readiness__stat-label">/{MODULES.length} modules</span>
+          <span className="readiness__stat-label">/{MODULES.length} categories covered</span>
         </div>
         <div className="readiness__stat">
           <span className="readiness__stat-value" style={{ color: accentColor }}>{totalSignals}</span>
-          <span className="readiness__stat-label">signals</span>
+          <span className="readiness__stat-label">data points collected</span>
         </div>
         {quality.gapModuleCount > 0 && (
           <div className="readiness__stat">
             <span className="readiness__stat-value" style={{ color: C.gold }}>{quality.gapModuleCount}</span>
-            <span className="readiness__stat-label">gaps</span>
+            <span className="readiness__stat-label">categories need more data</span>
           </div>
         )}
       </div>

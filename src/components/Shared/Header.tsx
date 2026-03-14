@@ -1,6 +1,6 @@
 /**
  * Dashboard Header
- * Brand logo + toolbar navigation matching freestanding modular apps
+ * Two-row layout: Brand bar on top, 5D toolbar buttons centered below
  * + auth state + admin cost tracking toggle
  */
 
@@ -26,18 +26,17 @@ function isAdminMode(): boolean {
 interface ToolbarItem {
   id: string;
   label: string;
-  icon: string;
 }
 
 const TOOLBAR_ITEMS: ToolbarItem[] = [
-  { id: 'compare',       label: 'Compare',        icon: '\u{1F4CA}' },
-  { id: 'results',       label: 'Results',         icon: '\u{1F4CB}' },
-  { id: 'judges-report', label: 'Judges Report',   icon: '\u{1F4C8}' },
-  { id: 'visuals',       label: 'Visuals',         icon: '\u{1F3A8}' },
-  { id: 'questions',     label: 'Questions',       icon: '\u{1F4DD}' },
-  { id: 'ask-olivia',    label: 'Ask Olivia',      icon: '\u{1F399}' },
-  { id: 'saved',         label: 'Saved',           icon: '\u{1F4BE}' },
-  { id: 'about',         label: 'About',           icon: '\u{2139}\uFE0F' },
+  { id: 'compare',       label: 'Compare'       },
+  { id: 'results',       label: 'Results'        },
+  { id: 'judges-report', label: 'Judges Report'  },
+  { id: 'visuals',       label: 'Visuals'        },
+  { id: 'questions',     label: 'Questions'      },
+  { id: 'ask-olivia',    label: 'Ask Olivia'     },
+  { id: 'saved',         label: 'Saved'          },
+  { id: 'about',         label: 'About'          },
 ];
 
 export function Header() {
@@ -72,30 +71,18 @@ export function Header() {
           Skip to content
         </a>
 
-        <div className="header__inner container">
+        {/* Row 1: Brand + Statement + Actions */}
+        <div className="header__top container">
           {/* Brand */}
           <div className="header__brand" onClick={() => navigate('/')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/'); }}>
             <span className="header__logo-icon">{'\u{1F30D}'}</span>
-            <div>
-              <h1 className="header__title">CLUES Intelligence</h1>
-              <span className="header__tagline">Find Your Place in the World</span>
-            </div>
+            <h1 className="header__title">CLUES Intelligence</h1>
           </div>
 
-          {/* Toolbar Navigation */}
-          <nav className="header__toolbar" aria-label="Main navigation">
-            {TOOLBAR_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                className={`header__toolbar-btn${activeTab === item.id ? ' header__toolbar-btn--active' : ''}`}
-                onClick={() => handleTabClick(item.id)}
-                type="button"
-              >
-                <span className="header__toolbar-icon" aria-hidden="true">{item.icon}</span>
-                <span className="header__toolbar-label">{item.label}</span>
-              </button>
-            ))}
-          </nav>
+          {/* Statement tagline — centered */}
+          <div className="header__statement">
+            The World&#39;s Most Advanced AI-Powered Predictive Relocation Intelligence Platform
+          </div>
 
           {/* Right side: notification badge + admin + auth */}
           <div className="header__actions">
@@ -151,6 +138,22 @@ export function Header() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Row 2: 5D Toolbar Navigation — centered */}
+        <div className="header__toolbar-row container">
+          <nav className="header__toolbar" aria-label="Main navigation">
+            {TOOLBAR_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                className={`header__toolbar-btn${activeTab === item.id ? ' header__toolbar-btn--active' : ''}`}
+                onClick={() => handleTabClick(item.id)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
       </header>
 

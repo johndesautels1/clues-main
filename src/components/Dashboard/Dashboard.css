@@ -1,4 +1,4 @@
-/* Dashboard Layout */
+/* Dashboard Layout — Premium Corporate Design */
 
 .dashboard {
   min-height: 100vh;
@@ -25,21 +25,45 @@
   padding: var(--space-4) 0;
 }
 
+/* ─── Section Titles — Corporate Gradient Style ───────── */
+
 .dashboard__section-title {
   font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 800;
+  letter-spacing: -0.03em;
   margin-bottom: var(--space-2);
-  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .dashboard__section-subtitle {
   font-size: var(--text-base);
   color: var(--text-secondary);
   margin-bottom: var(--space-6);
+  font-weight: 400;
+  line-height: 1.6;
 }
 
-/* Post-zoom prompt text */
+/* ─── Section Dividers ────────────────────────────────── */
+
+.dashboard__divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border-glass) 20%,
+    var(--border-glass-hover) 50%,
+    var(--border-glass) 80%,
+    transparent 100%
+  );
+  margin: var(--space-2) 0;
+}
+
+/* ─── Post-zoom prompt text ───────────────────────────── */
+
 .dashboard__zoom-prompt {
   text-align: center;
   font-size: var(--text-lg);
@@ -55,7 +79,8 @@
   font-size: var(--text-xl);
 }
 
-/* Loading state — session hydration */
+/* ─── Loading state ───────────────────────────────────── */
+
 .dashboard__loading {
   display: flex;
   flex-direction: column;
@@ -81,7 +106,8 @@
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* ─── Responsive ──────────────────────────────────────── */
+
 @media (max-width: 768px) {
   .dashboard__content {
     padding-top: var(--space-6);
@@ -100,35 +126,61 @@
   }
 }
 
+/* ─── Light Mode ──────────────────────────────────────── */
+
+@media (prefers-color-scheme: light) {
+  .dashboard__section-title {
+    background: linear-gradient(135deg, #111827, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dashboard__divider {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.1) 20%,
+      rgba(0, 0, 0, 0.15) 50%,
+      rgba(0, 0, 0, 0.1) 80%,
+      transparent 100%
+    );
+  }
+}
+
 /* ─── Test Persona (DEV ONLY) ────────────────────────────────── */
 
 .dashboard__test-persona {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: rgba(249, 115, 22, 0.06);
-  border: 1px dashed rgba(249, 115, 22, 0.4);
-  border-radius: var(--radius-lg);
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-glass, rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(var(--blur-glass, 20px));
+  -webkit-backdrop-filter: blur(var(--blur-glass, 20px));
 }
 
 .dashboard__test-persona-btn {
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--text-primary);
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  background: linear-gradient(135deg, var(--clues-orange) 0%, #ea580c 100%);
   border: none;
   border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-5);
   cursor: pointer;
   white-space: nowrap;
   min-height: 44px;
   min-width: 44px;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
 }
 
 .dashboard__test-persona-btn:hover {
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }
 
 .dashboard__test-persona-btn:focus-visible {
@@ -138,17 +190,19 @@
 
 .dashboard__test-persona-btn--active {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
 }
 
 .dashboard__test-persona-label {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 @media (prefers-color-scheme: light) {
   .dashboard__test-persona {
-    background: rgba(249, 115, 22, 0.04);
-    border-color: rgba(249, 115, 22, 0.3);
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(249, 115, 22, 0.2);
   }
 
   .dashboard__test-persona-label {

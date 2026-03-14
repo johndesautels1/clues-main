@@ -4,7 +4,7 @@
  * Reads/writes from UserContext (centralized state with Supabase auto-save).
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useTransition, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroHeading } from './HeroHeading';
 import { GlobeExplorer } from './GlobeExplorer';
@@ -19,6 +19,7 @@ import { useUser } from '../../context/UserContext';
 import { useRelevanceState } from '../../hooks/useRelevanceState';
 import { CoverageMeter } from '../Questionnaire/CoverageMeter';
 import { ReadinessIndicator } from './ReadinessIndicator';
+import { JourneyGuide } from './JourneyGuide';
 import { MODULES } from '../../data/modules';
 import type { ModuleDefinition, ModuleStatus } from '../../data/modules';
 import type { SubSection } from '../../types';
@@ -113,23 +114,37 @@ export function Dashboard() {
 
   const [mainModuleExpanded, setMainModuleExpanded] = useState(false);
   const [testPersonaInjected, setTestPersonaInjected] = useState(false);
+  const [, startTransition] = useTransition();
 
-  // Dev-only: Inject test persona with complete data
-  const handleInjectTestPersona = () => {
-    const testSession = buildTestPersonaSession();
+  // Wrap expander toggle in transition so React can yield to browser
+  const handleToggleExpander = useCallback(() => {
+    startTransition(() => {
+      setMainModuleExpanded(prev => !prev);
+    });
+  }, []);
+
+  // Dev-only: Inject test persona — defer heavy state updates
+  const handleInjectTestPersona = useCallback(() => {
+    // Do sync localStorage writes first (unavoidable)
     injectTestModuleAnswers();
-    dispatch({ type: 'LOAD_SESSION', payload: testSession });
-    setTestPersonaInjected(true);
-    setLsRevision(r => r + 1); // trigger module grid refresh
-  };
+    // Defer the expensive re-render cascade
+    startTransition(() => {
+      const testSession = buildTestPersonaSession();
+      dispatch({ type: 'LOAD_SESSION', payload: testSession });
+      setTestPersonaInjected(true);
+      setLsRevision(r => r + 1);
+    });
+  }, [dispatch]);
 
   // Dev-only: Clear test persona
-  const handleClearTestPersona = () => {
+  const handleClearTestPersona = useCallback(() => {
     clearTestModuleAnswers();
-    dispatch({ type: 'RESET' });
-    setTestPersonaInjected(false);
-    setLsRevision(r => r + 1);
-  };
+    startTransition(() => {
+      dispatch({ type: 'RESET' });
+      setTestPersonaInjected(false);
+      setLsRevision(r => r + 1);
+    });
+  }, [dispatch]);
 
   if (isLoading) {
     return (
@@ -158,6 +173,14 @@ export function Dashboard() {
           <HeroHeading />
         </section>
 
+        {/* Onboarding Journey Guide */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '100ms' }}
+        >
+          <JourneyGuide />
+        </section>
+
         {/* Interactive 4D Globe */}
         <section
           className="dashboard__section dashboard__section--hero"
@@ -184,7 +207,7 @@ export function Dashboard() {
 
         {/* Paragraphical Button */}
         <section
-          className="dashboard__section dashboard__section--hero"
+          className="dashboard__section"
           style={{ animationDelay: '250ms' }}
         >
           <ParagraphicalButton
@@ -192,6 +215,8 @@ export function Dashboard() {
             onClick={handleParagraphicalClick}
           />
         </section>
+
+        <div className="dashboard__divider" role="separator" />
 
         {/* Main Module Expander */}
         <section
@@ -201,18 +226,10 @@ export function Dashboard() {
           <MainModuleExpander
             status={mainModuleStatus}
             expanded={mainModuleExpanded}
-            onToggle={() => setMainModuleExpanded(!mainModuleExpanded)}
+            onToggle={handleToggleExpander}
             subSectionStatus={mainModule.subSectionStatus}
             onSubSectionClick={handleSubSectionClick}
           />
-        </section>
-
-        {/* Coverage Meter */}
-        <section
-          className="dashboard__section"
-          style={{ animationDelay: '400ms' }}
-        >
-          <CoverageMeter variant="full" />
         </section>
 
         {/* Readiness Indicator (overall report readiness) */}
@@ -223,10 +240,32 @@ export function Dashboard() {
           <ReadinessIndicator />
         </section>
 
+        <div className="dashboard__divider" role="separator" />
+
+        {/* 23 Module Grid */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '550ms' }}
+        >
+          <h2 className="dashboard__section-title">Exploration Modules</h2>
+          <p className="dashboard__section-subtitle">
+            Complete modules to progressively narrow your ideal destinations
+          </p>
+          <ModuleGrid modules={enrichedModules} />
+        </section>
+
+        {/* Data Coverage — right below the modules */}
+        <section
+          className="dashboard__section"
+          style={{ animationDelay: '600ms' }}
+        >
+          <CoverageMeter variant="full" />
+        </section>
+
         {/* Inject Test Persona — visible until production launch */}
         <section
           className="dashboard__section"
-          style={{ animationDelay: '500ms' }}
+          style={{ animationDelay: '600ms' }}
         >
           <div className="dashboard__test-persona">
             {!testPersonaInjected ? (
@@ -247,21 +286,9 @@ export function Dashboard() {
               </button>
             )}
             <span className="dashboard__test-persona-label">
-              Loads Marcus &amp; Elena (30 paragraphs, 200 answers, 12 modules, Gemini extraction)
+              Loads Marcus &amp; Elena (30 paragraphs, all 200 main module Qs, all 23 modules x 100 Qs, Gemini extraction)
             </span>
           </div>
-        </section>
-
-        {/* 23 Module Grid */}
-        <section
-          className="dashboard__section"
-          style={{ animationDelay: '550ms' }}
-        >
-          <h2 className="dashboard__section-title">Exploration Modules</h2>
-          <p className="dashboard__section-subtitle">
-            Complete modules to progressively narrow your ideal destinations
-          </p>
-          <ModuleGrid modules={enrichedModules} />
         </section>
       </main>
 

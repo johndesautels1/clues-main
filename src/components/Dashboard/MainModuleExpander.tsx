@@ -7,6 +7,7 @@
 import type { ModuleStatus, SubSection } from '../../types';
 import type { SubSectionStatus } from './Dashboard';
 import { StatusBadge } from './StatusBadge';
+import './DashboardCard.css';
 import './MainModuleExpander.css';
 
 interface Props {
@@ -74,12 +75,19 @@ export function MainModuleExpander({
   subSectionStatus,
   onSubSectionClick,
 }: Props) {
-  const statusClass = `main-module--${status.replace('_', '-')}`;
   const completedCount = Object.values(subSectionStatus).filter(s => s === 'completed').length;
   const totalSections = 5;
+  const anyInProgress = Object.values(subSectionStatus).some(s => s === 'in_progress');
+
+  // Map to dash-card illumination
+  const cardStatus = status === 'completed'
+    ? 'dash-card--completed'
+    : (status === 'in_progress' || anyInProgress)
+      ? 'dash-card--in-progress'
+      : 'dash-card--not-started';
 
   return (
-    <div className={`main-module glass ${statusClass}`}>
+    <div className={`dash-card main-module ${cardStatus}`}>
       {/* Header (always visible) */}
       <button
         className="main-module__header"
@@ -134,6 +142,16 @@ export function MainModuleExpander({
                 <p className="sub-section__description">{section.description}</p>
                 <div className="sub-section__footer">
                   <span className="sub-section__count">{section.questionCount} questions</span>
+                  <div className="sub-section__progress">
+                    <div
+                      className="sub-section__progress-fill"
+                      style={{
+                        width: sectionStatus === 'completed' ? '100%'
+                          : sectionStatus === 'in_progress' ? '40%'
+                          : '0%',
+                      }}
+                    />
+                  </div>
                 </div>
               </button>
             );

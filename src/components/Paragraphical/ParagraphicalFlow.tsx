@@ -15,6 +15,9 @@ import { recalculateTier } from '../../lib/tierEngine';
 import { Header } from '../Shared/Header';
 import { OliviaBubble } from '../Shared/OliviaBubble';
 import { useOliviaTutor } from '../../hooks/useOliviaTutor';
+import { useCoverageState } from '../../hooks/useCoverageState';
+import { useRelevanceState } from '../../hooks/useRelevanceState';
+import { useParagraphAdaptive } from '../../hooks/useParagraphAdaptive';
 import { getTargetsForParagraph } from '../../data/paragraphTargets';
 import './ParagraphicalFlow.css';
 
@@ -79,6 +82,11 @@ export function ParagraphicalFlow() {
 
   // Olivia Tutor — real-time keyword detection for coverage guidance
   const tutor = useOliviaTutor(activeId, draft);
+
+  // Adaptive paragraph priority (Bayesian overlay)
+  const { coverage } = useCoverageState();
+  const { relevance } = useRelevanceState();
+  const adaptive = useParagraphAdaptive(coverage, relevance);
 
   // Focus textarea on paragraph change
   useEffect(() => {
@@ -249,6 +257,11 @@ export function ParagraphicalFlow() {
             <span className="para-flow__progress-label">
               {completedCount}/{PARAGRAPH_COUNT} paragraphs
             </span>
+            {adaptive.isAvailable && adaptive.adaptiveSummary && (
+              <span className="para-flow__adaptive-summary">
+                {adaptive.adaptiveSummary}
+              </span>
+            )}
           </div>
 
           <nav className="para-flow__nav">
@@ -263,7 +276,7 @@ export function ParagraphicalFlow() {
                     return (
                       <li key={id}>
                         <button
-                          className={`para-flow__nav-item ${isActive ? 'para-flow__nav-item--active' : ''} ${done ? 'para-flow__nav-item--done' : ''}`}
+                          className={`para-flow__nav-item ${isActive ? 'para-flow__nav-item--active' : ''} ${done ? 'para-flow__nav-item--done' : ''}${adaptive.isHighPriority(id) && !done ? ' para-flow__nav-item--priority' : ''}`}
                           onClick={() => goTo(id)}
                           type="button"
                         >
@@ -271,6 +284,11 @@ export function ParagraphicalFlow() {
                           <span className="para-flow__nav-label">
                             P{id}: {def.heading}
                           </span>
+                          {adaptive.isHighPriority(id) && !done && (
+                            <span className="para-flow__priority-badge" title="High information value">
+                              ★
+                            </span>
+                          )}
                         </button>
                       </li>
                     );
@@ -291,6 +309,17 @@ export function ParagraphicalFlow() {
           </div>
 
           <h2 className="para-flow__heading">{activeDef.heading}</h2>
+
+          {/* Adaptive priority hint */}
+          {adaptive.isAvailable && adaptive.isHighPriority(activeId) && !hasContent(activeId) && (
+            <div className="para-flow__adaptive-hint">
+              <span className="para-flow__adaptive-hint-icon">★</span>
+              <span className="para-flow__adaptive-hint-text">
+                {adaptive.getPriority(activeId)?.reason ?? 'This paragraph has high information value'}
+              </span>
+            </div>
+          )}
+
           <p className="para-flow__prompt">{activeDef.prompt}</p>
 
           <textarea

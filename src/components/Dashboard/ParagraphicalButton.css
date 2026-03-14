@@ -1,89 +1,66 @@
-/* Paragraphical Button - Hero CTA */
+/* Paragraphical Button — Layout & typography (base card from DashboardCard.css) */
 
 .paragraphical {
-  position: relative;
-  width: 100%;
-  max-width: 640px;
-  padding: var(--space-10) var(--space-8);
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
   text-align: center;
-  transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
   cursor: pointer;
-}
-
-.paragraphical:hover {
-  transform: translateY(-2px);
-}
-
-.paragraphical:active {
-  transform: translateY(0);
-}
-
-/* Gradient overlay */
-.paragraphical__gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.15) 0%,
-    rgba(249, 115, 22, 0.10) 50%,
-    rgba(37, 99, 235, 0.08) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.paragraphical__content {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+}
+
+.paragraphical:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.paragraphical__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3, 12px);
 }
 
 .paragraphical__icon {
   font-size: 2.5rem;
   line-height: 1;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-2, 8px);
 }
 
 .paragraphical__title {
-  font-size: var(--text-3xl);
+  font-size: var(--text-3xl, 30px);
   font-weight: 800;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, var(--clues-sapphire-light), var(--clues-orange));
+  background: linear-gradient(135deg, var(--clues-sapphire-light, #3b82f6), var(--clues-orange, #f97316));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .paragraphical__subtitle {
-  font-size: var(--text-md);
-  color: var(--text-secondary);
+  font-size: var(--text-md, 16px);
+  color: var(--text-secondary, #9ca3af);
   max-width: 400px;
+  /* #9ca3af on #0a0e1a = 7.6:1 ✓ */
 }
 
 /* CTA pill */
 .paragraphical__cta {
   display: inline-block;
-  margin-top: var(--space-3);
-  padding: var(--space-2) var(--space-6);
-  background: linear-gradient(135deg, var(--clues-sapphire), var(--clues-sapphire-dark));
+  margin-top: var(--space-3, 12px);
+  padding: var(--space-2, 8px) var(--space-6, 24px);
+  background: linear-gradient(135deg, var(--clues-sapphire, #2563eb), var(--clues-sapphire-dark, #1e40af));
   color: white;
-  font-size: var(--text-sm);
+  font-size: var(--text-sm, 14px);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  border-radius: var(--radius-full);
-  transition: background var(--transition-fast);
+  border-radius: var(--radius-full, 9999px);
+  transition: filter 0.2s;
 }
 
 .paragraphical__cta--active {
-  background: linear-gradient(135deg, var(--clues-orange), var(--clues-gold-dark));
+  background: linear-gradient(135deg, var(--clues-orange, #f97316), var(--clues-gold-dark, #b45309));
 }
 
 .paragraphical:hover .paragraphical__cta {
@@ -94,77 +71,49 @@
 .paragraphical__meter {
   width: 200px;
   height: 6px;
-  background: var(--gray-700);
-  border-radius: var(--radius-full);
+  background: var(--gray-700, #374151);
+  border-radius: var(--radius-full, 9999px);
   overflow: hidden;
-  margin-top: var(--space-3);
+  margin-top: var(--space-3, 12px);
 }
 
 .paragraphical__meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--score-green), var(--clues-sapphire-light));
-  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--score-green, #22c55e), var(--clues-sapphire-light, #3b82f6));
+  border-radius: var(--radius-full, 9999px);
   animation: meter-fill 1.5s ease-out;
 }
 
 /* Completion badge */
 .paragraphical__badge {
   position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  padding: var(--space-1) var(--space-3);
+  top: var(--space-4, 16px);
+  right: var(--space-4, 16px);
+  padding: var(--space-1, 4px) var(--space-3, 12px);
   background: rgba(34, 197, 94, 0.2);
-  color: var(--score-green);
-  font-size: var(--text-xs);
+  color: var(--score-green, #22c55e);
+  font-size: var(--text-xs, 12px);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 9999px);
   border: 1px solid rgba(34, 197, 94, 0.3);
+  z-index: 2;
 }
 
-/* Status-specific styles */
-.paragraphical--not-started {
-  border-color: var(--border-glass);
+/* Locked subtitle */
+.paragraphical:disabled .paragraphical__subtitle {
+  color: var(--text-muted, #8b95a5);
 }
 
-.paragraphical--in-progress {
-  animation: pulse-sapphire 2.5s ease-in-out infinite;
-  border-color: rgba(37, 99, 235, 0.4);
-}
-
-.paragraphical--completed {
-  border-color: rgba(34, 197, 94, 0.3);
-  animation: glow-green 3s ease-in-out infinite;
-}
-
-/* Locked — per-property dimming, not whole-element opacity (WCAG 2.1 AA) */
-.paragraphical--locked {
-  cursor: not-allowed;
-  filter: grayscale(0.5);
-}
-
-.paragraphical--locked .paragraphical__subtitle {
-  color: var(--text-muted);
-}
-
-.paragraphical--locked .paragraphical__icon {
+.paragraphical:disabled .paragraphical__icon {
   opacity: 0.6;
-}
-
-.paragraphical:focus-visible {
-  outline: 2px solid var(--text-accent);
-  outline-offset: 2px;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .paragraphical {
-    padding: var(--space-8) var(--space-6);
-  }
-
   .paragraphical__title {
-    font-size: var(--text-2xl);
+    font-size: var(--text-2xl, 24px);
   }
 
   .paragraphical__icon {
@@ -173,11 +122,7 @@
 }
 
 @media (max-width: 480px) {
-  .paragraphical {
-    padding: var(--space-6) var(--space-4);
-  }
-
   .paragraphical__title {
-    font-size: var(--text-xl);
+    font-size: var(--text-xl, 20px);
   }
 }
