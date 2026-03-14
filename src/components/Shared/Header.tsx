@@ -78,7 +78,7 @@ export function Header() {
             <span className="header__logo-icon">{'\u{1F30D}'}</span>
             <div>
               <h1 className="header__title">CLUES Intelligence</h1>
-              <span className="header__tagline">Find Your Place in the World</span>
+              <span className="header__tagline">The World&#39;s First Multi-LLM Predictive Analytics Relocation Ecosystem</span>
             </div>
           </div>
 
