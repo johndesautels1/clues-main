@@ -523,7 +523,39 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-14 — Session 17 (UI Unification + Bayesian Extension + Onboarding)
+### Latest Update: 2026-03-14 — Session 18 (Dashboard Styling + Header Redesign)
+
+**What was done this conversation (7 commits on `claude/review-clues-main-T1fSq`):**
+
+1. **Uniform dash-card sizing** (`DashboardCard.css`) — All 5 dashboard cards (Journey, Paragraphical, Main Module, Coverage, Readiness) now share `width: 100%`, `padding: 28px`, `min-height: 180px`, `box-sizing: border-box`. Removed conflicting padding from ParagraphicalButton, JourneyGuide, MainModuleExpander, ReadinessIndicator, CoverageMeter.
+
+2. **Header redesigned as two-row layout** (`Header.tsx`, `Header.css`) — Row 1: Brand left, statement center, actions right. Row 2: 5D toolbar buttons centered. Removed emoji icons from toolbar buttons (text-only). Buttons have sapphire gradient active state, hover lift, shimmer animation. No horizontal overflow.
+
+3. **Brand statement** — Tagline reads: "The World's Most Advanced AI-Powered Predictive Relocation Intelligence Platform" — uppercase, weight 700, sapphire-to-gold gradient text with shimmer animation.
+
+4. **CoverageMeter moved** — Relocated from between MainModule/Readiness to directly below the Exploration Modules grid in `Dashboard.tsx`.
+
+5. **ModuleButton.css reverted** — Attempted 5D deep-blue treatment on 23 module grid cards but it caused the screen to appear solid blue after test persona injection. Reverted to original 4D glassmorphic treatment with `glass` class.
+
+**CRITICAL BUG — NEXT SESSION MUST FIX:**
+- **When clicking "Inject Test Persona", the screen goes blank/solid blue.** The dashboard is fully visible before injection. After clicking the button, everything goes blue. This is NOT a ModuleButton.css issue (that was reverted). The problem is in the **persona injection process itself** — likely in the `LOAD_SESSION` dispatch cascade or the re-render triggered by `startTransition` in `handleInjectTestPersona` (`Dashboard.tsx:127-137`).
+- Key files to investigate:
+  - `src/components/Dashboard/Dashboard.tsx` lines 127-137 (injection handler)
+  - `src/context/UserContext.tsx` lines 215-231 (`LOAD_SESSION` reducer)
+  - `src/data/testPersona.ts` — `buildTestPersonaSession()` and `injectTestModuleAnswers()`
+  - Check if the massive state update (30 paragraphs + 200 main Qs + 23×100 module Qs) causes React to render an intermediate blank state
+  - Check if `startTransition` is hiding the UI during the heavy update
+
+**What's next (in order):**
+1. **Fix the test persona injection blank screen bug** (above)
+2. Make 23 module grid cards visually match the dash-card 5D treatment WITHOUT causing the blue screen
+3. Wire up Stripe integration (Conv 23-24)
+4. Light mode verification pass
+5. Production hardening
+
+---
+
+### Previous: 2026-03-14 — Session 17 (UI Unification + Bayesian Extension + Onboarding)
 
 **What was done this conversation (10 commits on `claude/review-clues-main-T1fSq`):**
 
