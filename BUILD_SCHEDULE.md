@@ -523,7 +523,55 @@ Target: < 10KB. Everything else lives in specialized docs.
 > **CRITICAL**: Every conversation MUST update this section before ending.
 > This is how the next agent knows exactly where to pick up.
 
-### Latest Update: 2026-03-14 — Session 19 (Blue Screen Fix + Results Navigation Wiring)
+### Latest Update: 2026-03-15 — Session 20 (FAILED — Pipeline Debugging)
+
+**Agent**: Claude Opus 4.6
+**Branch**: `claude/create-build-schedule-docs-3aerk`
+**Commits made**: 4 (listed below)
+**Status**: HANDOFF — agent could not resolve Vercel FUNCTION_INVOCATION_FAILED
+
+**What was done this conversation (4 commits):**
+
+1. **`04d0f4c` — Fix test persona UUID**: `buildTestPersonaSession()` generated IDs like `test-persona-1773528368245` which is not a valid UUID. Supabase `sessions` table requires UUID type. Changed to `crypto.randomUUID()`. File: `src/data/testPersona.ts`.
+
+2. **`3eae445` — Tavily graceful degradation**: (from prior commit, already on branch)
+
+3. **`c4af37b` — Handle empty evaluation results**: When all LLM evaluators fail, `computeSmartScores()` called `determineWinner([])` which threw an Error. That Error object propagated into React rendering causing React Error #300. Fixed in 3 files:
+   - `src/lib/relativeScoring.ts` — `computeSmartScores()` returns empty placeholder when no cities have data
+   - `src/lib/evaluationPipeline.ts` — wrapped `computeSmartScores()` in try/catch
+   - `src/components/Results/ResultsDashboard.tsx` — guard against null/empty smartScores with "Evaluation Incomplete" fallback UI
+
+4. **`df920cd` — Added `/api/health` diagnostic endpoint**: Zero-import, zero-dependency function to test if ANY Vercel serverless function can execute. Reports Node version and which env var keys exist.
+
+**CRITICAL UNSOLVED PROBLEM — ALL Vercel Serverless Functions Return FUNCTION_INVOCATION_FAILED:**
+
+Every single `/api/*` endpoint (all 20+ functions) returns HTTP 500 with Vercel's `FUNCTION_INVOCATION_FAILED` error. This means the functions crash before the handler code executes. The Vercel build itself may also be crashing.
+
+What was investigated:
+- All function code is syntactically correct, `tsc --noEmit` passes
+- No top-level `process.env` access that could crash at import time
+- `import type` used for cross-directory imports (should be erased at compile time)
+- Environment variables ARE set for all environments per the owner
+- No middleware files exist
+- No `.nvmrc` or `engines` constraint in package.json
+
+What was NOT investigated (next agent should check):
+- **The actual Vercel build log** — the owner reported the build crashed but the full log was not shared. GET THE FULL BUILD LOG.
+- **Whether `"type": "module"` in package.json conflicts with Vercel's function runtime** — ESM + TypeScript serverless functions can have issues
+- **Whether `maxDuration: 300` in vercel.json requires Vercel Pro plan** — Hobby plan caps at 60s; this MIGHT cause all functions matching `api/**/*.ts` to fail
+- **Whether the `api/_shared/` directory files are being incorrectly processed** by the `api/**/*.ts` glob in vercel.json functions config
+- **Whether the build script `tsc -b && vite build` is failing** — `tsc -b` uses project references that do NOT include the `api/` directory; if tsc fails the whole build fails
+- **Vercel deployment logs** in the Vercel dashboard (not just build logs — runtime logs)
+- **Whether env var names match what the code expects** — e.g., owner has `SUPABASE_SERVICE_KEY` but code references `SUPABASE_SERVICE_ROLE_KEY`
+
+**The `/api/health` endpoint is deployed and waiting to be tested.** If it also fails, the problem is Vercel platform config. If it works, the problem is in the shared imports.
+
+**What's next:**
+- Diagnose and fix the FUNCTION_INVOCATION_FAILED issue (see investigation list above)
+- Once functions work: end-to-end test with test persona → evaluation pipeline
+- The React Error #300 fix (commit c4af37b) should prevent crashes when evaluations return empty, but hasn't been verified in production
+
+### Previous: Session 19 (Blue Screen Fix + Results Navigation Wiring)
 
 **What was done this conversation:**
 
