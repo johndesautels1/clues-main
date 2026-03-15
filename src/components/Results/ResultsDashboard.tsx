@@ -93,7 +93,25 @@ export function ResultsDashboard({
 }: ResultsDashboardProps) {
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
 
-  const { cityScores, winner } = smartScores;
+  const { cityScores, winner } = smartScores ?? { cityScores: [], winner: null };
+
+  // Guard: if no scores available, show fallback
+  if (!winner || cityScores.length === 0) {
+    return (
+      <>
+        <Header />
+        <main className="results-page" aria-label="Evaluation Results">
+          <section className="no-results-message" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+            <h2 style={{ color: 'var(--text-primary)' }}>Evaluation Incomplete</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>
+              No usable evaluation data was returned. This usually means the evaluation
+              services are temporarily unavailable. Please try again.
+            </p>
+          </section>
+        </main>
+      </>
+    );
+  }
 
   // Separate cities, towns, neighborhoods
   const cities = cityScores.filter(c => c.location_type === 'city');

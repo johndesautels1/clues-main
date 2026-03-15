@@ -235,13 +235,22 @@ export async function runPipeline(
     session.paragraphical.extraction?.module_relevance
   );
 
-  const smartScores = computeSmartScores({
-    orchestrationResult: evaluation,
-    judgeReport: judgeResult?.finalReport ?? null,
-    metrics: allMetrics,
-    cities,
-    categoryWeights,
-  });
+  let smartScores: import('../types/smartScore').SmartScoreOutput;
+  try {
+    smartScores = computeSmartScores({
+      orchestrationResult: evaluation,
+      judgeReport: judgeResult?.finalReport ?? null,
+      metrics: allMetrics,
+      cities,
+      categoryWeights,
+    });
+  } catch (scoreErr) {
+    console.error('[evaluationPipeline] Smart score computation failed:', scoreErr);
+    throw new Error(
+      `Smart score computation failed: ${scoreErr instanceof Error ? scoreErr.message : 'Unknown error'}. ` +
+      `This usually means no LLM evaluators returned usable data.`
+    );
+  }
 
   // ─── Done ────────────────────────────────────────────────────
   const totalDurationMs = Date.now() - startTime;
