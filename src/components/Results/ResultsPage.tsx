@@ -14,6 +14,7 @@
 import { useUser } from '../../context/UserContext';
 import { useEvaluationPipeline } from '../../hooks/useEvaluationPipeline';
 import { ResultsDashboard } from './ResultsDashboard';
+import { PipelineCascadeProgress } from './PipelineCascadeProgress';
 import { Header } from '../Shared/Header';
 import { Footer } from '../Shared/Footer';
 import './Results.css';

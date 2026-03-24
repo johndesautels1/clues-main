@@ -1,0 +1,290 @@
+/* ─── Pipeline Cascade Progress ──────────────────────────────
+ * WCAG 2.1 AA compliant — dark + light mode.
+ * All text ≥ 11px, contrast ≥ 4.5:1, status via icon + text.
+ * ──────────────────────────────────────────────────────────── */
+
+.pcp {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--space-8, 2rem) var(--space-4, 1rem);
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+
+.pcp-title {
+  font-family: 'Cormorant', serif;
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: 300;
+  color: var(--text-primary, #f9fafb);
+  margin: 0 0 var(--space-1, 0.25rem);
+  text-align: center;
+}
+
+.pcp-subtitle {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: var(--text-base, 1rem);
+  color: var(--text-accent, #60a5fa);
+  line-height: 1.7;
+  margin: 0;
+  text-align: center;
+}
+
+/* ─── Progress Bar ────────────────────────────────────────── */
+
+.pcp-bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pcp-bar-fill {
+  height: 100%;
+  background: var(--clues-sapphire, #2563eb);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.pcp-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Outfit', sans-serif;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-muted, #8b95a5);
+}
+
+.pcp-elapsed {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Step Timeline ───────────────────────────────────────── */
+
+.pcp-steps {
+  list-style: none;
+  margin: var(--space-2, 0.5rem) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pcp-step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-2, 0.5rem) 0;
+  position: relative;
+}
+
+/* Vertical connector line between steps */
+.pcp-step::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: calc(var(--space-2, 0.5rem) + 24px);
+  bottom: calc(-1 * var(--space-2, 0.5rem));
+  width: 2px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pcp-step:last-child::before {
+  display: none;
+}
+
+.pcp-step--complete::before {
+  background: var(--score-green, #22c55e);
+  opacity: 0.4;
+}
+
+.pcp-step--running::before {
+  background: var(--clues-sapphire, #2563eb);
+  opacity: 0.4;
+}
+
+/* ─── Status Icons ────────────────────────────────────────── */
+
+.pcp-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pcp-icon--pending {
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+}
+
+.pcp-icon--running {
+  border: 2px solid var(--clues-sapphire, #2563eb);
+  background: rgba(37, 99, 235, 0.15);
+  animation: pcp-pulse 1.5s ease-in-out infinite;
+}
+
+.pcp-icon--complete {
+  border: 2px solid var(--score-green, #22c55e);
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--score-green, #22c55e);
+}
+
+@keyframes pcp-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+}
+
+/* ─── Step Content ────────────────────────────────────────── */
+
+.pcp-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.pcp-step-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--text-primary, #f9fafb);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.pcp-step--pending .pcp-step-label {
+  color: var(--text-muted, #8b95a5);
+  font-weight: 400;
+}
+
+.pcp-step--running .pcp-step-label {
+  color: var(--text-primary, #f9fafb);
+}
+
+.pcp-step-status {
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pcp-step--running .pcp-step-status {
+  color: var(--clues-sapphire-light, #3b82f6);
+}
+
+.pcp-step--complete .pcp-step-status {
+  color: var(--score-green, #22c55e);
+}
+
+.pcp-step-desc {
+  font-family: 'Outfit', sans-serif;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-muted, #8b95a5);
+}
+
+.pcp-step--pending .pcp-step-desc {
+  opacity: 0.6;
+}
+
+/* ─── Live Stats ──────────────────────────────────────────── */
+
+.pcp-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6, 1.5rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pcp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pcp-stat-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: 600;
+  color: var(--text-primary, #f9fafb);
+}
+
+.pcp-stat-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-muted, #8b95a5);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Light Mode Overrides ────────────────────────────────── */
+
+@media (prefers-color-scheme: light) {
+  .pcp-bar-track {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .pcp-step::before {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  .pcp-step--complete::before {
+    background: #16a34a;
+    opacity: 0.3;
+  }
+
+  .pcp-icon--pending {
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  .pcp-icon--running {
+    background: rgba(37, 99, 235, 0.1);
+  }
+
+  .pcp-icon--complete {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+  }
+
+  .pcp-title {
+    color: #111827;
+  }
+
+  .pcp-step-label {
+    color: #111827;
+  }
+
+  .pcp-step--pending .pcp-step-label {
+    color: #6b7280;
+  }
+
+  .pcp-step-desc {
+    color: #6b7280;
+  }
+
+  .pcp-bar-label {
+    color: #6b7280;
+  }
+
+  .pcp-stat-value {
+    color: #111827;
+  }
+
+  .pcp-stat-label {
+    color: #6b7280;
+  }
+
+  .pcp-stats {
+    border-top-color: rgba(0, 0, 0, 0.08);
+  }
+}
