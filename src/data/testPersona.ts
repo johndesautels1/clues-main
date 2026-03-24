@@ -30,6 +30,7 @@ import type {
   GeneralAnswers,
   GlobeSelection,
 } from '../types';
+import { TEST_SMART_SCORES, TEST_JUDGE_REPORT, TEST_JUDGE_ORCHESTRATION } from './testPersonaMockScores';
 
 // ─── Globe Selection ─────────────────────────────────────────
 
@@ -908,6 +909,9 @@ export function buildTestPersonaSession(): UserSession {
     completedModules: [...ALL_MODULE_IDS],
     currentTier: 'precision',
     confidence: 98,
+    smartScoreOutput: TEST_SMART_SCORES,
+    judgeReport: TEST_JUDGE_REPORT,
+    judgeOrchestration: TEST_JUDGE_ORCHESTRATION,
     createdAt: now,
     updatedAt: now,
   };
