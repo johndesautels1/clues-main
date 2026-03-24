@@ -3,9 +3,7 @@
  * Zero imports, zero dependencies. If this fails with FUNCTION_INVOCATION_FAILED,
  * the problem is Vercel deployment config, not code.
  */
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: any, res: any) {
   res.status(200).json({
     ok: true,
     node: process.version,
