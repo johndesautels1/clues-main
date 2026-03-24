@@ -27,12 +27,14 @@ import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { QuestionLibrary } from './components/Admin/QuestionLibrary';
 import { MainQuestionnaire, ModuleLauncher } from './components/Questionnaire';
 import { ResultsPage } from './components/Results/ResultsPage';
+import { ErrorBoundary } from './components/Shared/ErrorBoundary';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <UserProvider>
+          <ErrorBoundary>
           <Routes>
             {/* Public */}
             <Route path="/login" element={<LoginPage />} />
@@ -106,6 +108,7 @@ function App() {
               }
             />
           </Routes>
+          </ErrorBoundary>
         </UserProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -111,6 +111,7 @@ export function useEvaluationPipeline() {
       }
 
       // Fetch Tavily research for each city × metric combination
+      // Gracefully degrades if Tavily API is unavailable (e.g., vite dev without Vercel)
       const tavilyByMetric: Record<string, TavilyResult> = {};
       const metricsForSearch = allMetrics.map(m => ({
         metricId: m.id,
@@ -118,28 +119,34 @@ export function useEvaluationPipeline() {
       }));
 
       for (const { city, country } of cityCandidates) {
-        const results = await searchMetrics(
-          session.id,
-          metricsForSearch,
-          city,
-          country
-        );
-        for (const r of results) {
-          if (!tavilyByMetric[r.metricId]) {
-            tavilyByMetric[r.metricId] = {
-              metric_id: r.metricId,
-              query: r.query,
-              results: [],
-            };
+        try {
+          const results = await searchMetrics(
+            session.id,
+            metricsForSearch,
+            city,
+            country
+          );
+          for (const r of results) {
+            if (!tavilyByMetric[r.metricId]) {
+              tavilyByMetric[r.metricId] = {
+                metric_id: r.metricId,
+                query: r.query,
+                results: [],
+              };
+            }
+            for (const s of r.results) {
+              tavilyByMetric[r.metricId].results.push({
+                title: s.title,
+                url: s.url,
+                content: s.content,
+              });
+            }
           }
-          // Accumulate results across cities — each LLM sees all Tavily data
-          for (const s of r.results) {
-            tavilyByMetric[r.metricId].results.push({
-              title: s.title,
-              url: s.url,
-              content: s.content,
-            });
-          }
+        } catch (tavilyErr) {
+          console.warn(
+            `[useEvaluationPipeline] Tavily search failed for ${city}, ${country} — proceeding without research data:`,
+            tavilyErr instanceof Error ? tavilyErr.message : tavilyErr
+          );
         }
       }
 

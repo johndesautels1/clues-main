@@ -884,7 +884,7 @@ export function buildTestPersonaSession(): UserSession {
   const now = new Date().toISOString();
 
   return {
-    id: `test-persona-${Date.now()}`,
+    id: crypto.randomUUID(),
     globe: TEST_GLOBE,
     paragraphical: {
       status: 'completed',

@@ -232,7 +232,32 @@ export function computeSmartScores(input: SmartScoreInput): SmartScoreOutput {
     cityScores.push(cityScore);
   }
 
-  // Step 4: Determine winner
+  // Step 4: Determine winner (guard against zero usable cities)
+  if (cityScores.length === 0) {
+    return {
+      cityScores: [],
+      winner: {
+        winner: {
+          location: 'No data',
+          country: '',
+          location_type: 'city',
+          overallScore: 0,
+          rank: 1,
+          categoryScores: [],
+          metricScores: [],
+        } as CitySmartScore,
+        rankings: [],
+        isTie: false,
+        scoreDifference: 0,
+        winnerAdvantageCategories: [],
+        runnerUpAdvantageCategories: [],
+        tiedCategories: [],
+      },
+      categoryWeights,
+      computedAt: new Date().toISOString(),
+    };
+  }
+
   const winner = determineWinner(cityScores);
 
   return {
