@@ -1,3 +1,15 @@
+## CRITICAL: WORKING DIRECTORY — D: DRIVE ONLY
+
+**NEVER build, code, or commit from the C: drive.** The C: drive contains stale clones that are NOT the working codebase. ALL code lives on GitHub (`https://github.com/johndesautels1/clues-main`) and the local working copy at `D:\Clues Main`.
+
+- **Working directory**: `D:\Clues Main`
+- **GitHub**: `https://github.com/johndesautels1/clues-main`
+- **NEVER use**: `C:/Users/broke/clues-main-explore/` or any other C: path
+- Clone from GitHub to D: if the directory does not exist
+- All commits must be pushed to GitHub immediately
+
+---
+
 # CLUES Intelligence — Development Rules
 
 ## WCAG 2.1 AA Compliance (MANDATORY — Dark Mode AND Light Mode)
