@@ -11,6 +11,8 @@
  * WCAG 2.1 AA: All text ≥ 11px, contrast verified, focus management.
  */
 
+import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { useEvaluationPipeline } from '../../hooks/useEvaluationPipeline';
 import { ResultsDashboard } from './ResultsDashboard';
@@ -22,6 +24,22 @@ import './Results.css';
 export function ResultsPage() {
   const { session, isLoading } = useUser();
   const pipeline = useEvaluationPipeline();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const autorunTriggered = useRef(false);
+
+  // Auto-run evaluation when navigated with ?autorun=true (e.g. from Dashboard)
+  useEffect(() => {
+    if (autorunTriggered.current) return;
+    if (isLoading) return;
+    if (searchParams.get('autorun') !== 'true') return;
+    if (pipeline.isRunning || pipeline.isComplete || pipeline.hasError) return;
+    if (session.smartScoreOutput) return; // Already have results
+
+    autorunTriggered.current = true;
+    // Clear the query param so refresh doesn't re-trigger
+    setSearchParams({}, { replace: true });
+    pipeline.run();
+  }, [isLoading, searchParams, setSearchParams, pipeline, session.smartScoreOutput]);
 
   // Loading state
   if (isLoading) {

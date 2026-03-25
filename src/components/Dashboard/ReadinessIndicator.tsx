@@ -125,7 +125,7 @@ export function ReadinessIndicator() {
           </p>
           <button
             className="readiness__action-btn"
-            onClick={() => navigate('/results')}
+            onClick={() => navigate(hasExistingResults ? '/results' : '/results?autorun=true')}
             type="button"
           >
             {hasExistingResults ? 'View Results' : 'Generate Report'}
