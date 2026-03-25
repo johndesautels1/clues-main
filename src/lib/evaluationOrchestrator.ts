@@ -410,13 +410,20 @@ function buildConsensus(
       locations.flatMap(l => l.scores.map(s => s.model))
     )];
 
+    // Flag for judge review if:
+    //   1. High LLM disagreement (σ > 15), OR
+    //   2. Metric is a user dealbreaker/requirement (description contains DEALBREAKER or REQUIREMENT)
+    //      — ensures user-critical metrics get judge scrutiny even when LLMs agree
+    const isUserCritical = /\bDEALBREAKER\b/i.test(metric.description) ||
+                           /\bREQUIREMENT\b/i.test(metric.description);
+
     return {
       metric_id: metric.id,
       locations,
       stdDev: Number(stdDev.toFixed(2)),
       confidenceLevel,
       contributingModels,
-      needsJudgeReview: stdDev > JUDGE_REVIEW_STDDEV,
+      needsJudgeReview: stdDev > JUDGE_REVIEW_STDDEV || isUserCritical,
     };
   });
 }

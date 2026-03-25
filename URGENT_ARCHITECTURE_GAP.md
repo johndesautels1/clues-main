@@ -491,3 +491,69 @@ This is an architectural decision that must be made before building.
 - **WCAG 2.1 AA compliance** in both dark and light mode for all UI
 - **Do not label anything "legacy"** to avoid fixing it
 - **Do not claim work is complete without grep verification**
+
+---
+
+## 8. JUDGE PERSONALIZATION GAP (Partially Fixed 2026-03-25)
+
+**Priority**: HIGH — Affects correctness of results for every user
+**Status**: PARTIALLY FIXED — Two changes shipped, three remain
+
+### 8.1 THE PROBLEM
+
+The Opus judge phase was **blind to user-specific priorities**. Two users with opposite
+preferences (e.g., one who rates safety as ABSOLUTE dealbreaker vs one who rates it
+"nice to have") would get **identical judge analysis** if their evaluated cities and
+LLM disagreement patterns were the same. The judge didn't know what mattered to the user.
+
+### 8.2 WHAT WAS FIXED (2026-03-25, session Clues Main-Fix-2)
+
+**Fix 1: User priorities now passed to judge prompt**
+- `src/types/judge.ts` — `JudgeOpusRequest.userContext` expanded with `dealbreakers` and `requirements` arrays
+- `src/lib/judgeOrchestrator.ts` — `runJudge()` signature expanded to accept new fields
+- `src/lib/evaluationPipeline.ts` — DNW answers (severity >= 4) and MH answers (importance >= 4) now extracted and passed through
+- `api/judge-opus.ts` — New `buildUserPrioritiesSection()` function injects a USER PRIORITIES block into the Opus prompt with labeled dealbreakers and requirements, plus instructions to give them extra scrutiny
+
+**Fix 2: Dealbreaker/requirement metrics flagged for judge review regardless of stdDev**
+- `src/lib/evaluationOrchestrator.ts` — `needsJudgeReview` now triggers on EITHER `stdDev > 15` OR metric description containing "DEALBREAKER" / "REQUIREMENT" (from profileSignalBridge.ts labels)
+- This ensures user-critical metrics always get judge scrutiny, even when all 5 LLMs agree
+
+### 8.3 WHAT STILL NEEDS FIXING (FUTURE SPRINT)
+
+**Gap 3: Recommendation engine ignores dealbreaker violations**
+- File: `src/lib/judgeOrchestrator.ts` lines 434-482 (applySafeguards)
+- Problem: The anti-hallucination safeguard force-corrects the winner to the highest-scoring location, regardless of dealbreaker violations
+- Fix needed: Add a constraint check — if the highest-scoring location violates an ABSOLUTE dealbreaker (severity 5, score < 30), the recommendation should either flag the violation prominently or defer to the next-best compliant location
+- Complexity: MEDIUM — requires new logic in applySafeguards + new SafeguardCorrection type
+- Risk: Changing winner determination logic could break Results UI expectations
+
+**Gap 4: Category weights don't reflect user priorities**
+- File: `src/lib/categoryRollup.ts` (deriveCategoryWeights)
+- Problem: All 23 categories currently get equal weight (1/23) unless Gemini's `module_relevance` overrides them. A user who marks safety as severity 5 and entertainment as severity 1 should see safety weighted 3-4x more than entertainment in the final score
+- Fix needed: Incorporate DNW severity and MH importance into category weight derivation
+- Complexity: MEDIUM — deriveCategoryWeights already accepts module_relevance, needs a second input for questionnaire-derived weights
+- Risk: Changes final scores and potentially changes winners — needs regression testing
+
+**Gap 5: Anti-hallucination safeguard needs dealbreaker-aware mode**
+- File: `src/lib/judgeOrchestrator.ts` lines 462-482
+- Problem: If Opus correctly identifies that Location A violates a dealbreaker and recommends Location B (lower score but compliant), the safeguard OVERRIDES Opus and force-corrects to Location A
+- Fix needed: The safeguard should respect Opus's recommendation when it's supported by dealbreaker evidence, not just raw score
+- Complexity: HIGH — requires the safeguard to understand metric-level constraint logic
+- Risk: Could allow Opus hallucinations if not carefully bounded
+
+### 8.4 RECOMMENDED BUILD ORDER
+
+1. **Gap 4 (category weights)** — Highest impact, lowest risk. Changes weighting math only.
+2. **Gap 3 (recommendation constraints)** — Add dealbreaker violation flagging (display-only first, then enforcement).
+3. **Gap 5 (safeguard update)** — Only after Gap 3 is stable. Requires careful anti-hallucination testing.
+
+### 8.5 FILES TOUCHED IN THIS FIX
+
+| File | Change |
+|------|--------|
+| `src/types/judge.ts:68-77` | Added `dealbreakers` and `requirements` to userContext type |
+| `src/lib/judgeOrchestrator.ts:73-80` | Expanded `runJudge` signature |
+| `src/lib/evaluationPipeline.ts:217-237` | Extract DNW/MH priorities, pass to runJudge |
+| `api/judge-opus.ts:85-126` | New `buildUserPrioritiesSection()` — formats priorities for Opus prompt |
+| `api/judge-opus.ts:161-185` | Updated prompt header + flagged metrics section |
+| `src/lib/evaluationOrchestrator.ts:413-427` | Added `isUserCritical` check to `needsJudgeReview` |

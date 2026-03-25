@@ -82,11 +82,61 @@ function calculateOpusCost(inputTokens: number, outputTokens: number): number {
   return Number.isFinite(cost) ? cost : 0;
 }
 
+// ─── Build user priorities section for judge prompt ──────────
+function buildUserPrioritiesSection(
+  dealbreakers?: Array<{ value: string; severity: number }>,
+  requirements?: Array<{ value: string; importance: number }>
+): string {
+  if ((!dealbreakers || dealbreakers.length === 0) && (!requirements || requirements.length === 0)) {
+    return '';
+  }
+
+  const severityLabel = (s: number) => s === 5 ? 'ABSOLUTE' : s === 4 ? 'STRONG' : 'MODERATE';
+  const importanceLabel = (i: number) => i === 5 ? 'ESSENTIAL' : i === 4 ? 'VERY IMPORTANT' : 'IMPORTANT';
+
+  let section = `
+═══════════════════════════════════════════════════════════════
+USER PRIORITIES (unique to this person — weight these in your analysis)
+═══════════════════════════════════════════════════════════════
+`;
+
+  if (dealbreakers && dealbreakers.length > 0) {
+    section += `\nDEALBREAKERS (things this user will NOT accept):\n`;
+    for (const d of dealbreakers) {
+      section += `  [${severityLabel(d.severity)}] ${d.value}\n`;
+    }
+  }
+
+  if (requirements && requirements.length > 0) {
+    section += `\nREQUIREMENTS (things this user MUST have):\n`;
+    for (const r of requirements) {
+      section += `  [${importanceLabel(r.importance)}] ${r.value}\n`;
+    }
+  }
+
+  section += `
+INSTRUCTION: When a disputed metric relates to one of these priorities,
+give it extra scrutiny. If a dealbreaker metric scores below 40 for a
+location, flag it in your categoryAnalysis. If a requirement metric
+scores below 50, note the gap. These priorities are unique to this user
+and should influence which categories you analyze most deeply.
+`;
+
+  return section;
+}
+
 // ─── Build the judge prompt ──────────────────────────────────
 function buildJudgePrompt(
   metrics: JudgeMetric[],
   categoryResults: JudgeCategorySummary[],
-  userContext: { globeRegion?: string; paragraphCount: number; completedModules: string[]; tier: string }
+  userContext: {
+    globeRegion?: string;
+    paragraphCount: number;
+    completedModules: string[];
+    tier: string;
+    dealbreakers?: Array<{ value: string; severity: number }>;
+    requirements?: Array<{ value: string; importance: number }>;
+  }
 ): string {
   // Format metrics evidence
   const metricsEvidence = metrics.map(m => {
@@ -110,7 +160,7 @@ function buildJudgePrompt(
 
   return `You are Cristiano — CLUES Intelligence's Supreme Judge (Claude Opus 4.6).
 
-You are reviewing ${metrics.length} high-disagreement metrics where the 5 evaluating LLMs diverged significantly (σ > 15). Your role is to render final verdicts.
+You are reviewing ${metrics.length} metrics flagged for your review. Metrics are flagged when: (1) the 5 evaluating LLMs diverged significantly (σ > 15), OR (2) the metric is critical to this specific user (marked DEALBREAKER or REQUIREMENT). Your role is to render final verdicts.
 
 You are the most powerful reasoning model available. You do NOT have web search — by design. Like a courtroom judge, you don't investigate. You review what the "attorneys" (the 5 LLMs) brought and render judgment.
 
@@ -121,17 +171,18 @@ Globe Region: ${userContext.globeRegion ?? 'Not specified'}
 Paragraphs Written: ${userContext.paragraphCount}/30
 Completed Modules: ${userContext.completedModules.length}/23
 Evaluation Tier: ${userContext.tier}
-
+${buildUserPrioritiesSection(userContext.dealbreakers, userContext.requirements)}
 ═══════════════════════════════════════════════════════════════
 CATEGORY SUMMARIES
 ═══════════════════════════════════════════════════════════════
 ${categorySummaries}
 
 ═══════════════════════════════════════════════════════════════
-DISPUTED METRICS (${metrics.length} metrics, σ > 15)
+FLAGGED METRICS (${metrics.length} metrics — high disagreement OR user-critical)
 ═══════════════════════════════════════════════════════════════
 For each metric below, you see every LLM's score, justification, source, and reasoning.
 Your job: determine the CORRECT score based on the evidence presented.
+Metrics marked DEALBREAKER or REQUIREMENT are critical to this user — give them extra weight.
 
 ${metricsEvidence}
 

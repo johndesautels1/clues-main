@@ -214,6 +214,14 @@ export async function runPipeline(
 
   let judgeResult: JudgeOrchestrationResult | null = null;
   if (evaluation.metricsForJudge.length > 0) {
+    // Build condensed user priorities for the judge (top dealbreakers + requirements)
+    const dealbreakers = (session.mainModule.dnw ?? [])
+      .filter(d => d.severity >= 4)
+      .map(d => ({ value: d.value, severity: d.severity }));
+    const requirements = (session.mainModule.mh ?? [])
+      .filter(m => m.importance >= 4)
+      .map(m => ({ value: m.value, importance: m.importance }));
+
     judgeResult = await runJudge(
       session.id,
       evaluation,
@@ -223,6 +231,8 @@ export async function runPipeline(
         paragraphCount: session.paragraphical.paragraphs.length,
         completedModules: session.completedModules,
         tier,
+        dealbreakers,
+        requirements,
       }
     );
   }

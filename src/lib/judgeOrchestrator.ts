@@ -75,6 +75,8 @@ export async function runJudge(
     paragraphCount: number;
     completedModules: string[];
     tier: string;
+    dealbreakers?: Array<{ value: string; severity: number }>;
+    requirements?: Array<{ value: string; importance: number }>;
   }
 ): Promise<JudgeOrchestrationResult> {
   const startTime = Date.now();

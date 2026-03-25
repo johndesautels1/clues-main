@@ -70,6 +70,10 @@ export interface JudgeOpusRequest {
     paragraphCount: number;
     completedModules: string[];
     tier: string;
+    /** Top dealbreakers from DNW answers (severity >= 4) */
+    dealbreakers?: Array<{ value: string; severity: number }>;
+    /** Top requirements from MH answers (importance >= 4) */
+    requirements?: Array<{ value: string; importance: number }>;
   };
 }
 
