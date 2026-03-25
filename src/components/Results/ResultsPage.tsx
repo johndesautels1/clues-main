@@ -81,57 +81,9 @@ export function ResultsPage() {
       <>
         <Header />
         <main className="results-page" aria-label="Running Evaluation">
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '60vh',
-            textAlign: 'center',
-            maxWidth: 520,
-            margin: '0 auto',
-          }}>
-            <div style={{
-              width: 56,
-              height: 56,
-              border: '3px solid rgba(255, 255, 255, 0.1)',
-              borderTopColor: 'var(--clues-sapphire, #2563eb)',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              marginBottom: 20,
-            }} />
-            <h2 style={{
-              fontFamily: "'Cormorant', serif",
-              fontSize: 'var(--text-2xl)',
-              fontWeight: 300,
-              color: 'var(--text-primary)',
-              marginBottom: 8,
-            }}>
-              Evaluating Your Ideal Locations
-            </h2>
-            <p style={{
-              fontFamily: "'Crimson Pro', Georgia, serif",
-              fontSize: 'var(--text-base)',
-              color: 'var(--text-accent)',
-              lineHeight: 1.7,
-              marginBottom: 16,
-            }}>
-              {pipeline.progress.phaseLabel}
-            </p>
-            {pipeline.progress.wavesCompleted > 0 && (
-              <p style={{
-                fontFamily: "'Outfit', sans-serif",
-                fontSize: 'var(--text-sm)',
-                color: 'var(--text-muted)',
-              }}>
-                {pipeline.progress.wavesCompleted} evaluation waves completed
-                {pipeline.progress.citiesFound > 0 && ` \u00B7 ${pipeline.progress.citiesFound} cities found`}
-              </p>
-            )}
-          </div>
+          <PipelineCascadeProgress progress={pipeline.progress} />
         </main>
         <Footer />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </>
     );
   }
