@@ -1073,3 +1073,125 @@ Priority order for development:
 ---
 
 *This file should be read by any AI assistant before starting work on the CLUES Main Module. It contains the complete architectural vision, technical decisions, and implementation patterns needed to build correctly.*
+
+---
+
+## SESSION HANDOFF: Clues Main-Fix-2 (2026-03-25)
+
+### RULES FOR THE NEXT AGENT — READ THESE FIRST
+
+1. **DO NOT change, delete, or modify ANY code without explicit user permission.** Ask first. Always.
+2. **DO NOT claim infrastructure doesn't exist.** The LLM cascade, API keys (Vercel env vars), providers, and judge system are ALL built. Read `src/lib/cascade/` and `CLAUDE.md` before saying "we need to build" anything.
+3. **All work happens on the D: drive.** The repo is at `D:\Clues Main\`. Do NOT create files on C: drive.
+4. **All commits MUST be pushed to GitHub immediately.** `git commit && git push` — every time, no exceptions. Vercel deploys from git.
+5. **One task at a time.** Complete one item, report back, wait for the go-ahead.
+6. **Be honest.** If something doesn't work, say so. If you don't know, say so. Do not fabricate success.
+7. **Read `D:\Clues Main\CLAUDE.md` first** — it has absolute priority rules including stop-means-stop.
+8. **Read `D:\Clues Main\URGENT_ARCHITECTURE_GAP.md` Section 8** — it documents the judge personalization gap (partially fixed, 3 gaps remaining).
+
+### WHAT WAS ACCOMPLISHED THIS SESSION (7 commits on main)
+
+| Commit | What |
+|--------|------|
+| `9100c5d` | Task 1: Synthetic evaluation data — 812-line `testPersonaMockScores.ts` + wired into `testPersona.ts` |
+| `5d1c7ea` | Task 2: Vercel serverless fixes — glob removal, maxDuration, health.ts types |
+| `51c47c4` | Task 3: PipelineCascadeProgress component — 200-line tsx + 230-line css, 13-step timeline |
+| `7afc635` | Replaced inline spinner in ResultsPage with PipelineCascadeProgress |
+| `cf5ba02` | Task 4: Wired `?autorun=true` — ResultsPage auto-triggers pipeline on mount, ReadinessIndicator navigates with param |
+| `0980ca3` | Judge personalization — user priorities (DNW/MH) passed to Opus prompt + dealbreaker metrics flagged for judge review regardless of stdDev |
+| `4ccfca0` | Fix `tsc -b` build failure — missing CitySmartScore fields in relativeScoring.ts fallback |
+
+### WHAT IS BROKEN — THE CRITICAL HONESTY
+
+**The test persona shortcuts the entire evaluation pipeline.** `buildTestPersonaSession()` in `src/data/testPersona.ts:912` injects pre-baked `smartScoreOutput`, `judgeReport`, and `judgeOrchestration` directly onto the session. This means:
+
+- The 5-LLM evaluation cascade **never fires**
+- The profileSignalBridge **never converts** Main Module / Mini Module data into metrics
+- The judge **never runs**
+- The smart score engine **never computes**
+- The UI shows pre-fabricated results that only reflect the **10 Gemini extraction metrics**, not the full set of metrics that would come from DNW (33 questions), MH (33 questions), tradeoffs (50 sliders), general (50 questions), and 23 mini modules (2,300 questions)
+
+**The user wants to see EVERY metric from EVERY data source — Paragraphical, Main Module, and Mini Modules — explained in the UI with findings and reports from the test persona.** This is not happening today.
+
+### WHAT NEEDS TO HAPPEN NEXT (MAJOR WORK)
+
+**The core problem:** The test persona needs to produce results that reflect ALL data sources flowing through the REAL pipeline, not just pre-baked Gemini-only scores.
+
+**Option A: Build a comprehensive offline mock** (no API calls needed)
+- Expand `testPersonaMockScores.ts` to generate metrics from ALL sources:
+  - Gemini extraction: 10 metrics (already done)
+  - DNW answers: ~20 DEALBREAKER metrics from 33 questions (severity >= 3)
+  - MH answers: ~20 REQUIREMENT metrics from 33 questions (importance >= 3)
+  - Profile signals from demographics, tradeoffs, general: ~30 more metrics
+  - Mini module signals: ~50+ metrics from 23 modules
+- Build mock evaluation results for each metric × each location × each of the 5 LLMs
+- Build mock judge report that reviews the dealbreaker and high-disagreement metrics
+- Wire all of this into the Results UI so every data source is visible and traceable
+
+**Option B: Run the real pipeline against the test persona** (requires API keys)
+- Remove pre-baked scores from `buildTestPersonaSession()`
+- When user injects test persona and clicks "Generate Report", the real pipeline fires
+- `profileSignalBridge.ts` converts all 200+ Main Module answers + 2,300 mini module answers into metrics
+- 5 LLMs evaluate all metrics across all locations
+- Opus judge reviews disputed + dealbreaker metrics (with the new user priorities we added)
+- Smart score engine computes final rankings
+- Results UI shows everything
+
+**Option B is the correct long-term answer** but requires live API keys working in the Vercel environment and costs real money per evaluation run.
+
+**Option A lets the user see the full UI experience immediately** with no API costs, but the data is synthetic.
+
+**The user should decide which option to pursue.**
+
+### RESULTS UI GAPS
+
+The Results components exist (19 components in `src/components/Results/`) but they currently only show data shaped by the 10 Gemini metrics. To show ALL metrics from ALL data sources, the UI needs:
+
+1. **Metric attribution** — Each metric should show its source: "From your Paragraphical (P6)", "From your DNW answers (Q42)", "From Mini Module: Safety & Security (Q15)"
+2. **Data source coverage** — A section showing "We used X metrics from your paragraphs, Y from your questionnaire, Z from your mini modules"
+3. **Category depth** — Categories with more user data should show richer breakdowns (e.g., Safety has DNW dealbreakers + MH requirements + Paragraphical signals + mini module answers = comprehensive analysis)
+4. **Judge reasoning on user priorities** — The judge now receives dealbreakers/requirements but the UI doesn't highlight which metrics were flagged as user-critical vs statistically disputed
+
+### KEY FILE PATHS FOR THE NEXT AGENT
+
+| Purpose | Path |
+|---------|------|
+| **Project root** | `D:\Clues Main\` |
+| **Agent instructions** | `D:\Clues Main\CLAUDE.md` |
+| **This build reference** | `D:\Clues Main\CLUES_MAIN_BUILD_REFERENCE.md` |
+| **Architecture gaps** | `D:\Clues Main\URGENT_ARCHITECTURE_GAP.md` (Section 8 = judge personalization) |
+| **Test persona** | `D:\Clues Main\src\data\testPersona.ts` |
+| **Mock scores** | `D:\Clues Main\src\data\testPersonaMockScores.ts` |
+| **Pipeline entry point** | `D:\Clues Main\src\lib\evaluationPipeline.ts` |
+| **Profile signal bridge** | `D:\Clues Main\src\lib\profileSignalBridge.ts` |
+| **Evaluation orchestrator** | `D:\Clues Main\src\lib\evaluationOrchestrator.ts` |
+| **Judge orchestrator** | `D:\Clues Main\src\lib\judgeOrchestrator.ts` |
+| **Judge API endpoint** | `D:\Clues Main\api\judge-opus.ts` |
+| **Smart score engine** | `D:\Clues Main\src\lib\relativeScoring.ts` |
+| **Category weight rollup** | `D:\Clues Main\src\lib\categoryRollup.ts` |
+| **Results page** | `D:\Clues Main\src\components\Results\ResultsPage.tsx` |
+| **Results dashboard** | `D:\Clues Main\src\components\Results\ResultsDashboard.tsx` |
+| **All 19 results components** | `D:\Clues Main\src\components\Results/index.ts` (barrel export) |
+| **Pipeline progress UI** | `D:\Clues Main\src\components\Results\PipelineCascadeProgress.tsx` |
+| **Dashboard** | `D:\Clues Main\src\components\Dashboard\Dashboard.tsx` |
+| **Readiness indicator** | `D:\Clues Main\src\components\Dashboard\ReadinessIndicator.tsx` |
+| **useEvaluationPipeline hook** | `D:\Clues Main\src\hooks\useEvaluationPipeline.ts` |
+| **Type definitions** | `D:\Clues Main\src\types/` (index.ts, evaluation.ts, judge.ts, smartScore.ts) |
+| **Answer aggregator** | `D:\Clues Main\src\lib\answerAggregator.ts` |
+| **Tier engine** | `D:\Clues Main\src\lib\tierEngine.ts` |
+
+### REMAINING ARCHITECTURE GAPS (from URGENT_ARCHITECTURE_GAP.md Section 8)
+
+1. **Gap 4: Category weights don't reflect user priorities** — `categoryRollup.ts` treats all 23 categories equally. Safety (severity 5) should weigh more than entertainment (severity 1).
+2. **Gap 3: Recommendation engine ignores dealbreaker violations** — Winner is forced to highest raw score, even if it violates an absolute dealbreaker.
+3. **Gap 5: Anti-hallucination safeguard overrides Opus on dealbreakers** — If Opus correctly flags a dealbreaker violation and picks a different winner, the safeguard force-corrects back to the math winner.
+
+### GIT STATE
+
+```
+Branch: main
+Remote: github.com/johndesautels1/clues-main
+Latest commit: 4ccfca0
+All changes pushed: Yes
+Unstaged: package-lock.json (benign)
+```
